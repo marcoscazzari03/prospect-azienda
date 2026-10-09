@@ -57,10 +57,10 @@ function LeadAnatomy() {
       <div className="ruled px-5 pb-6 pt-5">
         <p className="font-display text-2xl font-semibold">Lucía García Pérez</p>
         <p className="text-ink-2">CEO · Agencia Norte Digital</p>
-        <dl className="mt-5 grid grid-cols-[110px_1fr] gap-x-4 gap-y-3 text-sm">
+        <dl className="mt-5 grid grid-cols-[90px_minmax(0,1fr)] gap-x-4 sm:grid-cols-[110px_minmax(0,1fr)] gap-y-3 text-sm">
           <dt className="text-muted">Email</dt>
           <dd className="flex flex-wrap items-center gap-2">
-            <span className="font-mono">lucia.garcia@nortedigital.es</span>
+            <span className="break-all font-mono">lucia.garcia@nortedigital.es</span>
             <ProvenanceStamp status="found_public" type="personal" />
           </dd>
           <dt className="text-muted">Fonte email</dt>
@@ -71,12 +71,12 @@ function LeadAnatomy() {
           <dd>Madrid · 11-50 dipendenti · sito verificato</dd>
           <dt className="text-muted">Alternativa</dt>
           <dd className="flex flex-wrap items-center gap-2">
-            <span className="font-mono">hola@nortedigital.es</span>
+            <span className="break-all font-mono">hola@nortedigital.es</span>
             <ProvenanceStamp status="found_public" type="generic" />
           </dd>
         </dl>
       </div>
-      <div className="absolute -right-6 bottom-6 rotate-[-8deg] rounded-md border-2 border-stamp px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-stamp-ink opacity-80">
+      <div className="absolute right-5 top-16 hidden rotate-[-8deg] sm:block rounded-md border-2 border-stamp px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest text-stamp-ink opacity-80">
         Con fonte
       </div>
     </Card>

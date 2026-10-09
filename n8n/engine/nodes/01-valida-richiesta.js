@@ -2,11 +2,11 @@
 // Il backend ha già controllato piano e crediti: qui ci limitiamo a
 // rifiutare payload incompleti e a preparare il brief per l'AI.
 // URL di callback ammessi: SOLO il backend della piattaforma (anti-SSRF).
-// >>> Sostituire con il dominio reale della piattaforma prima di attivare. <<<
-const DOMINIO_PIATTAFORMA = 'TUO-DOMINIO.it';
+// Dominio della piattaforma (anche sottodomini, es. leads.weborastudio.it).
+const DOMINIO_PIATTAFORMA = 'weborastudio.it';
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const CALLBACK_AMMESSI = [
-  new RegExp(`^https://(app\\.)?${esc(DOMINIO_PIATTAFORMA)}/api/engine/callback$`, 'i')
+  new RegExp(`^https://([a-z0-9-]+\\.)?${esc(DOMINIO_PIATTAFORMA)}/api/engine/callback$`, 'i')
 ];
 
 const raw = $input.first().json;

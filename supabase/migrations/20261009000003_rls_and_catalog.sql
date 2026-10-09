@@ -87,11 +87,11 @@ values
   ('pack_2000', 'Pacchetto 2.000', 'pack', 69000, 2000, 12, 1, 3, 500, 250,
    '["2.000 crediti validi 12 mesi", "Export CSV"]', false, 12),
   ('starter', 'Starter', 'subscription', 4900, 150, 2, 1, 2, 150, 60,
-   '["150 crediti al mese", "Crediti non usati validi un mese in più", "Ricerche salvate"]', false, 20),
+   '["150 crediti al mese", "Crediti non usati validi un mese in più", "Fino a 150 lead per ricerca", "2 ricerche in parallelo"]', false, 20),
   ('growth', 'Growth', 'subscription', 14900, 600, 2, 3, 5, 500, 200,
-   '["600 crediti al mese", "3 utenti", "Ricerche ricorrenti", "Export Excel"]', true, 21),
+   '["600 crediti al mese", "Fino a 500 lead per ricerca", "5 ricerche in parallelo", "Più verifiche delle email nominative"]', true, 21),
   ('scale', 'Scale', 'subscription', 39900, 2000, 2, 10, 10, 1000, 500,
-   '["2.000 crediti al mese", "10 utenti", "API e integrazioni CRM", "Supporto prioritario"]', false, 22);
+   '["2.000 crediti al mese", "Fino a 1.000 lead per ricerca", "10 ricerche in parallelo", "Supporto prioritario"]', false, 22);
 
 insert into public.cost_rates (provider, unit, unit_cost_eur, description) values
   ('openai_search_lot', 'lotto di ricerca', 0.12, 'Agent OpenAI con web search, ~20 candidati'),

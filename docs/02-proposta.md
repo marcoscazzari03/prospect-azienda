@@ -74,7 +74,7 @@ scelta decide solo cosa è accettabile:
 
 | Modalità scelta | Cosa ricevi | Prezzo indicativo |
 |---|---|---|
-| Email generiche incluse | Nominative quando le troviamo, altrimenti generiche | 1-2 crediti |
+| Email generiche incluse | Nominative quando le troviamo, altrimenti generiche | 1-2 crediti (anche una nominativa verificata costa al massimo 2) |
 | Solo nominative | Solo email riferibili alla persona | 2-3 crediti |
 | Mista | Cerchiamo prima nominative (più insistenza e arricchimento), poi generiche | 1-3 crediti |
 

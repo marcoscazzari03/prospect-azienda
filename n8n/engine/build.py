@@ -350,7 +350,7 @@ add("""const nota = sticky(
   'deduplica (anche contro lo storico del cliente) -> email dal sito ufficiale (homepage, contatti, note legali) -> ' +
   'RocketReach solo se serve e entro il tetto del backend -> classificazione per modalita email -> callback al backend.\\n\\n' +
   '**Non genera mai email ipotizzate come contatti:** i pattern finiscono in `email_patterns` con stato `guessed`.\\n\\n' +
-  '**Prima di attivare:** 1) imposta `DOMINIO_PIATTAFORMA` in *Valida richiesta*; 2) crea le due credenziali ' +
+  '**Prima di attivare:** 1) verifica `DOMINIO_PIATTAFORMA` in *Valida richiesta* (oggi weborastudio.it); 2) crea le due credenziali ' +
   '(*Lead Engine - Webhook in ingresso*: Header Auth; *Lead Engine - Callback verso backend*: header `X-Engine-Secret`) con segreti lunghi casuali, gli stessi del backend.\\n\\n' +
   'Sorgenti, test e contratto API: GitHub `marcoscazzari03/prospect-azienda` (cartella n8n/engine).',
   [],

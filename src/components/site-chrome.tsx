@@ -12,7 +12,7 @@ export function SiteHeader() {
           <Link href="/#come-funziona" className="hidden rounded-md px-3 py-2 text-ink-2 hover:text-ink md:block">Come funziona</Link>
           <Link href="/prezzi" className="rounded-md px-3 py-2 text-ink-2 hover:text-ink">Prezzi</Link>
           <Link href="/accedi" className="rounded-md px-3 py-2 text-ink-2 hover:text-ink">Accedi</Link>
-          <ButtonLink href="/registrati" size="sm" className="hidden sm:inline-flex">Prova gratis</ButtonLink>
+          <span className="hidden sm:block"><ButtonLink href="/registrati" size="sm">Prova gratis</ButtonLink></span>
         </nav>
       </div>
     </header>

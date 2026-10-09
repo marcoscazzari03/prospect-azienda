@@ -16,7 +16,7 @@ export function Logo({ href = "/" }: { href?: string }) {
   return (
     <Link href={href} className="flex items-center gap-2" aria-label={BRAND.name}>
       <LogoMark />
-      <span className="font-display text-lg font-semibold tracking-tight">
+      <span className="whitespace-nowrap font-display text-lg font-semibold tracking-tight">
         {BRAND.short}
         <span className="text-ledger"> Leads</span>
       </span>

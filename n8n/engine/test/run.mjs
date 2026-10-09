@@ -22,7 +22,7 @@ const run = (code, { nodes = {}, input = [], json = {} }) => {
 
 const body = {
   job_id: '0b8e7c1e-1111-4222-8333-944455556666', run_id: 'r1', run_token: 'x'.repeat(32),
-  callback_url: 'https://app.TUO-DOMINIO.it/api/engine/callback',
+  callback_url: 'https://leads.weborastudio.it/api/engine/callback',
   email_mode: 'personal_only', quantity: 20,
   target: { country_names: ['Italia'], industry: 'Software house', roles: ['CEO', 'Founder'] },
   exclusions: { domains: ['venduta.it'], person_keys: [] },
@@ -33,7 +33,7 @@ const body = {
 const [job] = run(src('01-valida-richiesta.js'), { input: [{ body }] }).map(i => i.json);
 assert.equal(job.valida, true, job.errori.join(', '));
 assert.ok(job.lotti_previsti >= 2);
-const [bad] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, callback_url: 'https://evil.com/x' } }] }).map(i => i.json);
+const [bad] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, callback_url: 'https://weborastudio.it.evil.com/api/engine/callback' } }] }).map(i => i.json);
 assert.equal(bad.valida, false);
 console.log('ok  validazione + anti-SSRF');
 
