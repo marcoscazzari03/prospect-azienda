@@ -120,3 +120,13 @@ reset role;
 select pg_temp.check(true, 'magazzino non accessibile agli utenti');
 
 \echo 'Test magazzino superati.'
+
+-- Budget di arricchimento: tetto dei giri in corso contato nel mese.
+select pg_temp.check((select month_budget = 900 from enrichment_usage((select id from sg))), 'budget mensile predefinito 900');
+create temp table rg as select * from start_run((select id from sg), sha256_hex('tok-g'), 5);
+update search_runs set enrichment_cap = 7 where id = (select id from rg);
+select pg_temp.check((select month_used >= 7 and search_used = 0 from enrichment_usage((select id from sg))),
+                     'verifiche dei giri in corso contate nel mese');
+select apply_engine_results((select id from rg), sha256_hex('tok-g'), '{"leads":[],"usage":{"enrichment_lookups":4}}');
+select pg_temp.check((select search_used = 4 from enrichment_usage((select id from sg))), 'verifiche usate dalla ricerca');
+\echo 'Test budget superati.'

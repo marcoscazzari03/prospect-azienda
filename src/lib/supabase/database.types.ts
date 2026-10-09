@@ -5,7 +5,21 @@ export type Database = {
   
   "public": {
           Tables: {
-            "audit_log": {
+            "app_settings": {
+                  Row: {
+                    "key": string,"updated_at": string,"updated_by": string | null,"value": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "key": string,"updated_at"?: string,"updated_by"?: string | null,"value": NonNullable<Json>
+                  }
+                  Update: {
+                    "key"?: string,"updated_at"?: string,"updated_by"?: string | null,"value"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"audit_log": {
                   Row: {
                     "action": string,"actor_id": string | null,"created_at": string,"id": number,"metadata": NonNullable<Json>,"target": string
                   }
@@ -387,14 +401,14 @@ isOneToOne: false
                   ]
                 },"search_runs": {
                   Row: {
-                    "attempt": number,"created_at": string,"error": string | null,"finished_at": string | null,"id": string,"last_event_at": string,"n8n_execution_id": string | null,"requested": number,"run_token_hash": string,"search_id": string,"stats": Json | null,"status": string,"usage": Json | null
+                    "attempt": number,"created_at": string,"enrichment_cap": number,"error": string | null,"finished_at": string | null,"id": string,"last_event_at": string,"n8n_execution_id": string | null,"requested": number,"run_token_hash": string,"search_id": string,"stats": Json | null,"status": string,"usage": Json | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempt": number,"created_at"?: string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"last_event_at"?: string,"n8n_execution_id"?: string | null,"requested": number,"run_token_hash": string,"search_id": string,"stats"?: Json | null,"status"?: string,"usage"?: Json | null
+                    "attempt": number,"created_at"?: string,"enrichment_cap"?: number,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"last_event_at"?: string,"n8n_execution_id"?: string | null,"requested": number,"run_token_hash": string,"search_id": string,"stats"?: Json | null,"status"?: string,"usage"?: Json | null
                   }
                   Update: {
-                    "attempt"?: number,"created_at"?: string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"last_event_at"?: string,"n8n_execution_id"?: string | null,"requested"?: number,"run_token_hash"?: string,"search_id"?: string,"stats"?: Json | null,"status"?: string,"usage"?: Json | null
+                    "attempt"?: number,"created_at"?: string,"enrichment_cap"?: number,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"last_event_at"?: string,"n8n_execution_id"?: string | null,"requested"?: number,"run_token_hash"?: string,"search_id"?: string,"stats"?: Json | null,"status"?: string,"usage"?: Json | null
                   }
                   Relationships: [
                     {
@@ -538,6 +552,7 @@ isOneToOne: false
 { Args: { "p_run": string,"p_token_hash": string }; Returns: {
               "attempt": number,
 "created_at": string,
+"enrichment_cap": number,
 "error": string | null,
 "finished_at": string | null,
 "id": string,
@@ -592,6 +607,11 @@ isOneToOne: false
                            },
 "deliver_leads":
 { Args: { "p_leads": Json,"p_run": string,"p_search": string,"p_source": string }; Returns: Json
+                           },
+"enrichment_usage":
+{ Args: { "p_search": string }; Returns: {
+              "month_budget": number,"month_used": number,"search_used": number
+            }[]
                            },
 "expire_credits":
 { Args: { "p_org"?: string }; Returns: number
@@ -667,6 +687,7 @@ isOneToOne: false
 { Args: { "p_requested": number,"p_search": string,"p_token_hash": string }; Returns: {
               "attempt": number,
 "created_at": string,
+"enrichment_cap": number,
 "error": string | null,
 "finished_at": string | null,
 "id": string,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
-import { buildEnginePayload, enrichmentCap, nextStep } from "@/lib/domain/engine";
+import { buildEnginePayload, enrichmentCap, enrichmentSearchBudget, maxAttemptsFor, nextStep } from "@/lib/domain/engine";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
 import { flattenDelivery } from "@/lib/domain/leads";
@@ -56,6 +56,24 @@ describe("motore", () => {
     expect(enrichmentCap("generic_ok", 50, { enrichment_per_run_max: 100 })).toBe(10);
     expect(enrichmentCap("personal_only", 50, { enrichment_per_run_max: 100 })).toBe(50);
     expect(enrichmentCap("mixed", 50, { enrichment_per_run_max: 0 })).toBe(0);
+  });
+
+  it("arricchimento entro il budget della ricerca e del mese", () => {
+    expect(enrichmentCap("personal_only", 50, { enrichment_per_run_max: 100 }, 12)).toBe(12);
+    expect(enrichmentCap("personal_only", 50, { enrichment_per_run_max: 100 }, -3)).toBe(0);
+    expect(enrichmentSearchBudget("personal_only", 100)).toBe(150);
+    expect(enrichmentSearchBudget("generic_ok", 1000)).toBe(300);
+  });
+
+  it("ricerche grandi a tappe", () => {
+    expect(maxAttemptsFor(10, "mixed")).toBe(3);
+    expect(maxAttemptsFor(150, "mixed")).toBe(3);
+    expect(maxAttemptsFor(500, "mixed")).toBe(7);
+    expect(maxAttemptsFor(1000, "mixed")).toBe(13);
+    expect(maxAttemptsFor(1000, "personal_only")).toBe(15);
+    // Mercato esaurito: un giro che rende meno del 5% chiude la ricerca.
+    expect(nextStep({ ok: true, remaining: 700, attempts: 4, new: 20 }, 13)).toBe("finalize");
+    expect(nextStep({ ok: true, remaining: 700, attempts: 4, new: 60 }, 13)).toBe("topup");
   });
 
   it("decide top-up o chiusura", () => {

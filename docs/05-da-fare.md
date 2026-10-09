@@ -17,6 +17,8 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 ## Prodotto
 - [x] Scadenza automatica dei crediti (si usano prima quelli che scadono prima; migrazione `20261010000004_credit_expiry.sql`)
 - [x] Magazzino dei lead: i contatti già trovati vengono consegnati subito ad altri clienti con lo stesso target (migrazione `20261011000005_lead_warehouse.sql`)
+- [x] Ricerche grandi a tappe (fino a 15 giri, stop a mercato esaurito) e budget mensile RocketReach in *Prezzi e costi* (migrazione `20261012000006_large_searches.sql`)
+- [ ] Costo reale RocketReach per export in *Prezzi e costi* (prezzo del piano / export inclusi)
 - [ ] Verifica SMTP delle email trovate sui siti
 - [ ] Export Excel
 - [ ] Liste e note sui lead

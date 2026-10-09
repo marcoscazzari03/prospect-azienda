@@ -16,14 +16,32 @@ export type EnginePlan = { enrichment_per_run_max: number };
 
 // Tetto di arricchimento a pagamento: dipende da quante nominative servono
 // davvero e dal piano. È la leva che protegge il margine.
-export function enrichmentCap(mode: EmailMode, remaining: number, plan: EnginePlan) {
-  const share = mode === "personal_only" ? 1 : mode === "mixed" ? 0.6 : 0.2;
-  return Math.max(0, Math.min(plan.enrichment_per_run_max, Math.ceil(remaining * share)));
+const ENRICHMENT_SHARE: Record<EmailMode, number> = { personal_only: 1, mixed: 0.6, generic_ok: 0.2 };
+
+// `budget`: verifiche ancora disponibili (per la ricerca e nel mese), se noto.
+export function enrichmentCap(mode: EmailMode, remaining: number, plan: EnginePlan, budget = Infinity) {
+  const cap = Math.min(plan.enrichment_per_run_max, Math.ceil(remaining * ENRICHMENT_SHARE[mode]), budget);
+  return Math.max(0, Math.floor(cap));
 }
 
+// Verifiche totali concesse a una ricerca, su tutti i giri: proporzionali ai
+// lead richiesti (circa metà delle verifiche non trova un'email valida).
+export function enrichmentSearchBudget(mode: EmailMode, quantity: number) {
+  return Math.ceil(quantity * ENRICHMENT_SHARE[mode] * 1.5);
+}
+
+const MAX_LOTS_PER_RUN = 12;
+const leadsPerLot = (mode: EmailMode) => (mode === "personal_only" ? 4 : 7); // lead utili attesi per lotto
+
 export function maxLots(remaining: number, mode: EmailMode) {
-  const perLot = mode === "personal_only" ? 4 : 7; // lead utili attesi per lotto
-  return Math.max(1, Math.min(12, Math.ceil(remaining / perLot)));
+  return Math.max(1, Math.min(MAX_LOTS_PER_RUN, Math.ceil(remaining / leadsPerLot(mode))));
+}
+
+// Giri del motore concessi a una ricerca: le ricerche grandi procedono a tappe
+// (un giro rende al massimo ~80 lead, ~50 con solo nominative).
+export function maxAttemptsFor(quantity: number, mode: EmailMode, base = 3, max = 15) {
+  const perRun = MAX_LOTS_PER_RUN * leadsPerLot(mode);
+  return Math.max(base, Math.min(max, Math.ceil(quantity / perRun) + 1));
 }
 
 export function buildEnginePayload(args: {
@@ -33,6 +51,7 @@ export function buildEnginePayload(args: {
   runToken: string;
   callbackUrl: string;
   exclusions: { domains: string[]; personKeys: string[] };
+  enrichmentBudget?: number;
 }) {
   const { search, plan } = args;
   const remaining = Math.max(0, search.quantity - search.delivered);
@@ -54,7 +73,7 @@ export function buildEnginePayload(args: {
     limits: {
       max_lots: maxLots(remaining, search.email_mode),
       candidates_per_lot: 20,
-      enrichment_cap: enrichmentCap(search.email_mode, remaining, plan),
+      enrichment_cap: enrichmentCap(search.email_mode, remaining, plan, args.enrichmentBudget),
     },
   };
 }
@@ -77,5 +96,9 @@ export function nextStep(result: ApplyResult, maxAttempts: number): "topup" | "f
   if ((result.attempts ?? 0) >= maxAttempts) return "finalize";
   // Un top-up che non trova nulla di nuovo non ne merita un altro.
   if ((result.attempts ?? 0) > 1 && (result.new ?? 0) === 0) return "finalize";
+  // Ricerche lunghe: ci si ferma quando un giro rende meno del 5% di quanto
+  // chiesto (il mercato è esaurito: escono quasi solo doppioni).
+  const requested = (result.remaining ?? 0) + (result.new ?? 0);
+  if ((result.attempts ?? 0) >= 3 && (result.new ?? 0) < Math.ceil(requested * 0.05)) return "finalize";
   return "topup";
 }

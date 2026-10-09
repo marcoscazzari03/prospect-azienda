@@ -2,7 +2,14 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { SEARCH_RULES } from "@/lib/config";
-import { buildEnginePayload, nextStep, type ApplyResult, type EngineSearch } from "@/lib/domain/engine";
+import {
+  buildEnginePayload,
+  enrichmentSearchBudget,
+  maxAttemptsFor,
+  nextStep,
+  type ApplyResult,
+  type EngineSearch,
+} from "@/lib/domain/engine";
 import { roleMatcher } from "@/lib/domain/roles";
 import { randomToken, sha256Hex } from "./crypto";
 import { sendEmail } from "./email";
@@ -46,6 +53,17 @@ async function loadExclusions(orgId: string, contactsPerCompany: number) {
   return { personKeys, domains: [...domains] };
 }
 
+// Verifiche a pagamento ancora disponibili per un giro: il minimo tra quanto
+// resta alla ricerca e quanto resta del budget mensile impostato dall'admin.
+async function loadEnrichmentBudget(search: SearchRow) {
+  const { data, error } = await createAdminClient().rpc("enrichment_usage", { p_search: search.id }).single();
+  if (error || !data) return undefined; // senza dati valgono i soli limiti del piano
+  const usage = data as { search_used: number; month_used: number; month_budget: number | null };
+  const forSearch = enrichmentSearchBudget(search.email_mode, search.quantity) - usage.search_used;
+  const forMonth = usage.month_budget === null ? Infinity : usage.month_budget - usage.month_used;
+  return Math.max(0, Math.min(forSearch, forMonth));
+}
+
 export async function finalizeSearch(searchId: string, error?: string) {
   const db = createAdminClient();
   const { data: before } = await db.from("searches").select("status").eq("id", searchId).maybeSingle();
@@ -84,7 +102,10 @@ export async function dispatchRun(searchId: string) {
   if (error || !run) return finalizeSearch(searchId, "Impossibile avviare il giro di ricerca");
   const runId = (run as { id: string }).id;
 
-  const exclusions = await loadExclusions(search.org_id, search.contacts_per_company);
+  const [exclusions, enrichmentBudget] = await Promise.all([
+    loadExclusions(search.org_id, search.contacts_per_company),
+    loadEnrichmentBudget(search),
+  ]);
   const payload = buildEnginePayload({
     search,
     plan,
@@ -92,7 +113,10 @@ export async function dispatchRun(searchId: string) {
     runToken: token,
     callbackUrl: `${env.appUrl()}/api/engine/callback`,
     exclusions,
+    enrichmentBudget,
   });
+  // Il tetto concesso a questo giro conta subito nel budget del mese.
+  await db.from("search_runs").update({ enrichment_cap: payload.limits.enrichment_cap }).eq("id", runId);
 
   try {
     const res = await fetch(webhook, {
@@ -150,7 +174,15 @@ export async function startSearch(searchId: string) {
 // Dopo i risultati di un giro: top-up o chiusura.
 export async function afterResults(result: ApplyResult) {
   if (!result.search_id) return;
-  const step = nextStep(result, SEARCH_RULES.maxAttempts);
+  const { data: search } = await createAdminClient()
+    .from("searches")
+    .select("quantity, email_mode")
+    .eq("id", result.search_id)
+    .maybeSingle();
+  const maxAttempts = search
+    ? maxAttemptsFor(search.quantity, search.email_mode as EngineSearch["email_mode"], SEARCH_RULES.maxAttempts)
+    : SEARCH_RULES.maxAttempts;
+  const step = nextStep(result, maxAttempts);
   if (step === "topup") await dispatchRun(result.search_id);
   else if (step === "finalize") await finalizeSearch(result.search_id);
 }

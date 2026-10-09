@@ -10,7 +10,7 @@ export const BRAND = {
 
 // Regole operative della ricerca.
 export const SEARCH_RULES = {
-  maxAttempts: 3, // primo giro + 2 top-up
+  maxAttempts: 3, // primo giro + 2 top-up (di più per le ricerche grandi, vedi maxAttemptsFor)
   staleRunMinutes: 45, // un giro senza eventi da più di così è considerato fallito
   autoRefundWindowDays: 14,
   bounceRefundWindowDays: 30,

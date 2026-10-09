@@ -2,17 +2,21 @@ import type { Metadata } from "next";
 import { Button, Card, Input, PageHeader } from "@/components/ui";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatEur } from "@/lib/domain/pricing";
-import { updateCostRate, updateCreditPrice } from "../actions";
+import { updateCostRate, updateCreditPrice, updateEnrichmentBudget } from "../actions";
 
 export const metadata: Metadata = { title: "Prezzi e costi" };
 
 export default async function CostsPage() {
   const db = createAdminClient();
-  const [{ data: rates }, { data: prices }, { data: plans }] = await Promise.all([
+  const [{ data: rates }, { data: prices }, { data: plans }, { data: usage }] = await Promise.all([
     db.from("cost_rates").select("*").order("provider"),
     db.from("credit_prices").select("*").order("email_type"),
     db.from("plans").select("*").order("sort"),
+    // Il consumo del mese non dipende dalla ricerca: basta un id qualsiasi.
+    db.rpc("enrichment_usage", { p_search: "00000000-0000-0000-0000-000000000000" }).maybeSingle(),
   ]);
+  const budget = (usage as { month_budget: number | null } | null)?.month_budget ?? null;
+  const used = (usage as { month_used: number } | null)?.month_used ?? 0;
   return (
     <>
       <PageHeader title="Prezzi e costi" description="Costi unitari dei fornitori (per calcolare i margini) e crediti per tipo di email. I piani si modificano dal database (tabella plans)." />
@@ -42,6 +46,19 @@ export default async function CostsPage() {
           <p className="mt-3 text-xs text-muted">Il massimo per modalità (tabella email_modes) limita comunque l&apos;addebito.</p>
         </Card>
       </div>
+      <Card className="mt-6 p-6">
+        <h2 className="mb-1 font-display text-xl font-semibold">Budget verifiche email (RocketReach)</h2>
+        <p className="mb-4 text-sm text-ink-2">
+          Verifiche usate questo mese: <span className="font-mono font-semibold">{used}</span>
+          {budget !== null && <> su <span className="font-mono">{budget}</span></>} (comprese quelle riservate alle ricerche in corso).
+          Superato il budget, il motore usa solo le email trovate sui siti.
+        </p>
+        <form action={updateEnrichmentBudget} className="flex flex-wrap items-center gap-2">
+          <Input name="budget" type="number" min="0" step="1" defaultValue={budget ?? ""} placeholder="Nessun limite" className="w-40" aria-label="Verifiche al mese" />
+          <Button size="sm" variant="secondary">Salva</Button>
+          <p className="text-xs text-muted">Verifiche al mese. Vuoto = nessun limite, 0 = spente. Tienilo sotto la quota mensile del tuo piano.</p>
+        </form>
+      </Card>
       <h2 className="mb-4 mt-10 font-display text-xl font-semibold">Piani</h2>
       <div className="overflow-x-auto rounded-xl border border-line bg-card">
         <table className="w-full min-w-[720px] text-left text-sm">

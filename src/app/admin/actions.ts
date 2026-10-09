@@ -79,3 +79,16 @@ export async function updateCreditPrice(form: FormData) {
   await audit(admin.user.id, "credit_price.update", `${p.type}/${p.status}`, { credits: p.credits });
   revalidatePath("/admin/costi");
 }
+
+// Budget mensile delle verifiche a pagamento (RocketReach). Vuoto = nessun limite.
+export async function updateEnrichmentBudget(form: FormData) {
+  const admin = await requireAdmin();
+  const raw = String(form.get("budget") ?? "").trim();
+  const budget = raw === "" ? null : z.coerce.number().int().min(0).max(1_000_000).parse(raw);
+  const settings = createAdminClient().from("app_settings");
+  // Senza riga = nessun limite.
+  if (budget === null) await settings.delete().eq("key", "enrichment_monthly_budget");
+  else await settings.upsert({ key: "enrichment_monthly_budget", value: budget, updated_at: new Date().toISOString(), updated_by: admin.user.id });
+  await audit(admin.user.id, "settings.enrichment_budget", "enrichment_monthly_budget", { budget });
+  revalidatePath("/admin/costi");
+}

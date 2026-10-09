@@ -161,6 +161,14 @@ export function SearchWizard({ credits, maxQuantity, defaults = {} }: { credits:
             </label>
             <input id="quantity" name="quantity" type="range" min={1} max={maxQuantity} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="w-full accent-[var(--color-ledger)]" />
             <p className="mt-1 text-xs text-muted">Il tuo piano permette fino a {maxQuantity} lead per ricerca.</p>
+            {quantity > 300 && (
+              <div className="mt-3">
+                <Alert>
+                  Le ricerche molto grandi procedono a tappe e possono richiedere un paio d&apos;ore: i lead compaiono man mano.
+                  Se il mercato scelto è piccolo, la ricerca si chiude prima. Paghi solo i lead consegnati, il resto dei crediti torna disponibile.
+                </Alert>
+              </div>
+            )}
           </div>
           <Field label="Nome della ricerca (facoltativo)" htmlFor="name">
             <Input id="name" name="name" defaultValue={defaults.name} placeholder="Generato automaticamente se vuoto" />
