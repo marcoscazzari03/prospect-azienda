@@ -54,7 +54,7 @@ export default async function CostsPage() {
           Superato il budget, il motore usa solo le email trovate sui siti.
         </p>
         <form action={updateEnrichmentBudget} className="flex flex-wrap items-center gap-2">
-          <Input name="budget" type="number" min="0" step="1" defaultValue={budget ?? ""} placeholder="Nessun limite" className="w-40" aria-label="Verifiche al mese" />
+          <div className="w-40"><Input name="budget" type="number" min="0" step="1" defaultValue={budget ?? ""} placeholder="Nessun limite" aria-label="Verifiche al mese" /></div>
           <Button size="sm" variant="secondary">Salva</Button>
           <p className="text-xs text-muted">Verifiche al mese. Vuoto = nessun limite, 0 = spente. Tienilo sotto la quota mensile del tuo piano.</p>
         </form>
