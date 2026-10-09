@@ -9,9 +9,10 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 - [x] n8n: credenziali "Lead Engine" create e workflow attivato
 - [x] Prima ricerca reale end-to-end (09/10: 3/3 lead, ~2 minuti)
 - [ ] Prove con "Mista" e "Solo nominative", volumi più alti, taratura dei prompt
-- [ ] Email: Resend + SMTP personalizzato in Supabase, testi delle email in italiano
-      (oggi partono in inglese e con limite di poche email all'ora)
-- [ ] Stripe in modalità test (chiavi, webhook, portale clienti)
+- [x] Email: Resend (dominio verificato, record su sottodomini), SMTP in Supabase, testi in italiano, notifiche app
+- [x] Stripe in modalità test (chiavi, webhook, portale clienti): acquisto di prova accreditato
+- [x] Motore: ruoli con alternative e sinonimi (es. «Titolare / CEO»)
+- [ ] Facoltativo: casella Hostinger leads@weborastudio.it per ricevere le risposte
 
 ## Prodotto
 - [ ] Scadenza automatica dei crediti (oggi i crediti non scadono mai)
