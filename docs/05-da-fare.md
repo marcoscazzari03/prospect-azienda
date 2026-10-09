@@ -5,9 +5,10 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 ## Configurazione
 - [x] Supabase: migrazioni eseguite, Site URL e Redirect URL impostati
 - [x] Vercel: progetto creato, variabili d'ambiente, produzione da `main`
-- [ ] Dominio `leads.weborastudio.it` collegato a Vercel (record DNS)
-- [ ] n8n: credenziali "Lead Engine" create e workflow attivato
-- [ ] Prima ricerca reale end-to-end e taratura dei prompt
+- [x] Dominio `leads.weborastudio.it` collegato a Vercel (record DNS)
+- [x] n8n: credenziali "Lead Engine" create e workflow attivato
+- [x] Prima ricerca reale end-to-end (09/10: 3/3 lead, ~2 minuti)
+- [ ] Prove con "Mista" e "Solo nominative", volumi più alti, taratura dei prompt
 - [ ] Email: Resend + SMTP personalizzato in Supabase, testi delle email in italiano
       (oggi partono in inglese e con limite di poche email all'ora)
 - [ ] Stripe in modalità test (chiavi, webhook, portale clienti)
