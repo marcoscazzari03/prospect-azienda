@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient as createSupabase } from "@supabase/supabase-js";
 import type { Plan } from "./dal";
+import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/url";
 
 // Listino di riserva, identico alla migrazione iniziale: usato solo se il
 // database non è raggiungibile (es. anteprima senza variabili d'ambiente).
@@ -15,8 +16,8 @@ const FALLBACK: Plan[] = [
 ];
 
 export async function getPublicPlans(): Promise<Plan[]> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url = supabaseUrl();
+  const key = supabaseAnonKey();
   if (!url || !key) return FALLBACK;
   try {
     const db = createSupabase(url, key, { auth: { persistSession: false } });

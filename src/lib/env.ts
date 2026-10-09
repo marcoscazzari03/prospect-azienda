@@ -1,4 +1,5 @@
 import "server-only";
+import { supabaseUrl } from "@/lib/supabase/url";
 
 // Variabili d'ambiente lette solo sul server, al momento dell'uso
 // (così la build non fallisce se una variabile facoltativa manca).
@@ -10,8 +11,8 @@ function required(name: string): string {
 
 export const env = {
   appUrl: () => (process.env.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""),
-  supabaseUrl: () => required("NEXT_PUBLIC_SUPABASE_URL"),
-  supabaseAnonKey: () => required("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+  supabaseUrl: () => supabaseUrl(required("NEXT_PUBLIC_SUPABASE_URL")),
+  supabaseAnonKey: () => required("NEXT_PUBLIC_SUPABASE_ANON_KEY").trim(),
   supabaseServiceKey: () => required("SUPABASE_SERVICE_ROLE_KEY"),
   engineWebhookUrl: () => process.env.N8N_ENGINE_WEBHOOK_URL ?? "",
   engineHeaderName: () => process.env.N8N_ENGINE_HEADER_NAME ?? "X-Engine-Key",
