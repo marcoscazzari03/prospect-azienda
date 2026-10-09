@@ -58,14 +58,14 @@ const notificaAvvio = node({
       method: 'POST',
       url: expr("{{ $('Valida richiesta').first().json.callback_url }}"),
       authentication: 'genericCredentialType',
-      genericAuthType: 'httpTemplatedCustomAuth',
+      genericAuthType: 'httpHeaderAuth',
       sendBody: true,
       contentType: 'json',
       specifyBody: 'json',
       jsonBody: expr("{{ JSON.stringify({ event: 'progress', contract_version: 1, job_id: $('Valida richiesta').first().json.job_id, run_id: $('Valida richiesta').first().json.run_id, run_token: $('Valida richiesta').first().json.run_token, stage: 'planning', message: 'Pianificazione della ricerca', counters: { lots_planned: $('Valida richiesta').first().json.lotti_previsti } }) }}"),
       options: { timeout: 30000 }
     },
-    credentials: { httpTemplatedCustomAuth: newCredential('Lead Engine - Callback verso backend') }
+    credentials: { httpHeaderAuth: newCredential('Lead Engine - Callback verso backend') }
   },
   output: [{ ok: true }]
 });
@@ -176,14 +176,14 @@ const notificaVerifica = node({
       method: 'POST',
       url: expr("{{ $('Valida richiesta').first().json.callback_url }}"),
       authentication: 'genericCredentialType',
-      genericAuthType: 'httpTemplatedCustomAuth',
+      genericAuthType: 'httpHeaderAuth',
       sendBody: true,
       contentType: 'json',
       specifyBody: 'json',
       jsonBody: expr("{{ JSON.stringify({ event: 'progress', contract_version: 1, job_id: $('Valida richiesta').first().json.job_id, run_id: $('Valida richiesta').first().json.run_id, run_token: $('Valida richiesta').first().json.run_token, stage: 'verifying', message: 'Verifica dei siti e delle email in corso', counters: { candidates: $('Deduplica candidati').all().filter(i => !i.json._vuoto).length } }) }}"),
       options: { timeout: 30000 }
     },
-    credentials: { httpTemplatedCustomAuth: newCredential('Lead Engine - Callback verso backend') }
+    credentials: { httpHeaderAuth: newCredential('Lead Engine - Callback verso backend') }
   },
   output: [{ ok: true }]
 });
@@ -431,14 +431,14 @@ const inviaRisultati = node({
       method: 'POST',
       url: expr("{{ $('Valida richiesta').first().json.callback_url }}"),
       authentication: 'genericCredentialType',
-      genericAuthType: 'httpTemplatedCustomAuth',
+      genericAuthType: 'httpHeaderAuth',
       sendBody: true,
       contentType: 'json',
       specifyBody: 'json',
       jsonBody: expr("{{ JSON.stringify($json) }}"),
       options: { timeout: 30000 }
     },
-    credentials: { httpTemplatedCustomAuth: newCredential('Lead Engine - Callback verso backend') }
+    credentials: { httpHeaderAuth: newCredential('Lead Engine - Callback verso backend') }
   },
   output: [{ ok: true }]
 });

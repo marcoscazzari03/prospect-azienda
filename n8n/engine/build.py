@@ -109,14 +109,14 @@ def callback(var, name, body_expr, execute_once=True, retry=False):
       method: 'POST',
       url: expr("{{{{ $('Valida richiesta').first().json.callback_url }}}}"),
       authentication: 'genericCredentialType',
-      genericAuthType: 'httpTemplatedCustomAuth',
+      genericAuthType: 'httpHeaderAuth',
       sendBody: true,
       contentType: 'json',
       specifyBody: 'json',
       jsonBody: expr({json.dumps(body_expr)}),
       options: {{ timeout: 30000 }}
     }},
-    credentials: {{ httpTemplatedCustomAuth: {CB_AUTH} }}
+    credentials: {{ httpHeaderAuth: {CB_AUTH} }}
   }},
   output: [{{ ok: true }}]
 }});

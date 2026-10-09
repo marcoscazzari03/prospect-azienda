@@ -50,8 +50,8 @@ Workflow: **Lead Engine | Search (v1)** (già creato, inattivo).
    nome header = valore di `N8N_ENGINE_HEADER_NAME` (es. `X-Engine-Key`), valore = `N8N_ENGINE_HEADER_VALUE`.
    Sostituisce la credenziale "Header Auth account" assegnata in automatico.
 2. Nodi *Notifica: ricerca avviata*, *Notifica: verifica email*, *Invia risultati al backend* →
-   credenziale **Custom Auth (templated)** "Lead Engine - Callback verso backend" con header
-   `X-Engine-Secret` = valore di `ENGINE_CALLBACK_SECRET`.
+   credenziale **Header Auth** "Lead Engine - Callback verso backend" con
+   Name `X-Engine-Secret` e Value = valore di `ENGINE_CALLBACK_SECRET`.
 3. Verifica che i nodi OpenAI e RocketReach usino le tue credenziali.
 4. **Attiva** il workflow (Publish) solo dopo il primo test dal punto 6.
 
