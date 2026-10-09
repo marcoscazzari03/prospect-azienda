@@ -1,0 +1,2554 @@
+{
+  "name": "Prospect Avvocati | Search",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6,18 * * *"
+            }
+          ]
+        }
+      },
+      "id": "203eab28-3f1e-4a4e-afa2-8492e918a254",
+      "name": "Ogni 12 ore | 06:00 - 18:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const norm = (v) => String(v ?? '')\n  .normalize('NFKD')\n  .replace(/[̀-ͯ]/g, '')\n  .toLowerCase()\n  .replace(/&/g, ' and ')\n  .replace(/[^a-z0-9]+/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\n// Forme societarie e parole generiche degli studi legali europei.\nconst normCompany = (v) => norm(v)\n  .replace(/\\b(llp|ltd|limited|plc|solicitors?|law firm|law offices?|legal|abogados?|advogados?|advocaten|advocatenkantoor|avocats?|rechtsanwalte|rechtsanwaltskanzlei|kanzlei|kancelaria|adwokacka|adwokat|advokat(ni|ska)?|sl|slp|lda|bv|sprl|srl|gmbh|kg|og|ab|as|oy|sp k|sp j|s r o|and partners|and co|partners)\\b/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\n// Chiave dello studio = dominio del sito (uno studio, un contatto).\n// Sulle piattaforme condivise conta anche il primo pezzo del percorso.\nconst chiaveDominio = (sito) => {\n  const s = String(sito ?? '').trim().toLowerCase()\n    .replace(/^https?:\\/\\//, '').replace(/^www\\./, '');\n  const [host, primo] = s.split(/[?#]/)[0].split('/');\n  if (!host) return '';\n  return ['sites.google.com', 'linktr.ee'].includes(host) && primo ? `${host}/${primo}` : host;\n};\n\nconst chiavi = new Set();\nconst nomi = new Set();\nconst domini = new Set();\nconst tentativi = {};\n\n// Archivio = prospect salvati + scartati definitivi.\n// Gli scartati 'Da riprovare' NON bloccano: vengono ripresi,\n// ma contiamo quante volte sono gia stati rinviati.\nconst scartati = $('Read Scartati').all();\n\nfor (const i of scartati) {\n  if (!String(i.json['Motivo scarto'] ?? '').startsWith('Da riprovare')) continue;\n  const n = norm(i.json.Nome);\n  if (n) tentativi[n] = (tentativi[n] || 0) + 1;\n}\n\nconst righe = [\n  ...$('Read Prospect').all(),\n  ...scartati.filter(i =>\n    !String(i.json['Motivo scarto'] ?? '').startsWith('Da riprovare')\n  )\n];\n\nfor (const item of righe) {\n  const nome = norm(item.json.Nome);\n  const azienda = normCompany(item.json.Azienda);\n  const dominio = chiaveDominio(item.json.Sito);\n  if (dominio) domini.add(dominio);\n  if (!nome) continue;\n  nomi.add(nome);\n  if (azienda) chiavi.add(`${nome}|${azienda}`);\n}\n\nreturn [{\n  json: {\n    chiavi_esistenti: [...chiavi],\n    nomi_esistenti: [...nomi],\n    domini_esistenti: [...domini],\n    tentativi_rr: tentativi,\n    totale_esistenti: nomi.size\n  }\n}];\n"
+      },
+      "id": "d39a06a5-9bf7-43cb-a24a-920adee7a93f",
+      "name": "Prepara archivio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Cerca sul web fino a {{ $json.target_lotto }} AVVOCATI PENALISTI NUOVI in {{ $json.paese }}, come prospect commerciali per Le Fonti Awards.\n\nLOTTO: {{ $json.lotto }}\nFOCUS DEL LOTTO: {{ $json.tema }}\n\nCHI CERCHIAMO\n\nAvvocati che esercitano davvero il diritto penale (difesa penale, penale d'impresa / white-collar, reati economici e tributari, frodi, corruzione, antiriciclaggio, reati informatici, estradizione, reati stradali, compliance penale).\n\nPer ogni studio indica UNA sola persona, il titolare:\n\n* studio individuale: l'avvocato stesso;\n* studio con più avvocati: il fondatore, il socio fondatore, il managing partner, il senior partner o il socio che dà il nome allo studio (name partner).\n\nNON indicare associati, praticanti, collaboratori, of counsel, assistenti o personale amministrativo.\n\nSTUDI DA PRIVILEGIARE\n\n* studi individuali e boutique specializzati in penale;\n* studi piccoli e medi indipendenti in cui il penale è un'area principale;\n* studi con sito ufficiale che mostra i contatti (email, pagina contatti, note legali / Impressum).\n\nDA EVITARE\n\n* grandi studi internazionali e grandi studi nazionali (Magic Circle, AmLaw, top 10 nazionali), Big Four;\n* barrister chambers del Regno Unito come entità (va bene però un singolo barrister con sito proprio);\n* avvocati senza un sito ufficiale proprio o dello studio;\n* pubblici ministeri, giudici, docenti, enti pubblici, ordini forensi, associazioni;\n* persone in pensione o studi chiusi.\n\nSITO UFFICIALE OBBLIGATORIO\n\n\"sito\" deve essere il sito dello studio o dell'avvocato (dominio proprio).\nNON sono siti ufficiali: LinkedIn, Facebook, Instagram, Google Maps, directory di avvocati (Legal 500, Chambers, Doyle's, Best Lawyers, abogados365, avvo, lawyers.com, albi dell'ordine), pagine gialle, articoli, marketplace.\nUsa directory e albi solo per SCOPRIRE i nomi, poi trova il sito ufficiale.\nSe non trovi il sito ufficiale, scarta il candidato e passa al successivo.\n\nPAGINA CONTATTI\n\nSe durante la ricerca vedi la pagina del sito ufficiale con i contatti (contatti / contact / kontakt / contacto / impressum / aviso legal / note legali), mettila in \"pagina_contatti\". Non fare ricerche apposta solo per trovarla e NON cercare email.\n\nMETODO\n\nUsa davvero la ricerca web, in modo ampio e veloce: privilegia la quantità.\nCerca anche nella lingua del paese (es. \"abogado penalista\", \"advogado criminalista\", \"strafrechtadvocaat\", \"Strafverteidiger\", \"adwokat karnista\", \"brottmålsadvokat\").\nFonti utili per scoprire nomi: albi e motori di ricerca degli ordini forensi, directory di avvocati, classifiche, articoli su processi, siti degli studi.\nNon approfondire un candidato quando hai già: persona reale, ruolo da titolare plausibile, studio reale, sito ufficiale, una fonte.\n\nNon inventare mai persone, studi, ruoli, siti o URL.\nNon inserire due persone dello stesso studio.\n\nOUTPUT\n\nRestituisci ESCLUSIVAMENTE JSON valido, senza Markdown e senza testo prima o dopo:\n\n{\n\"candidati\": [\n{\n  \"nome\": \"\",\n  \"nome_proprio\": \"\",\n  \"cognome\": \"\",\n  \"azienda\": \"\",\n  \"ruolo\": \"\",\n  \"tipo_studio\": \"individuale\",\n  \"citta\": \"\",\n  \"settore\": \"Diritto penale\",\n  \"sito\": \"https://...\",\n  \"pagina_contatti\": \"\",\n  \"fonte\": \"https://...\"\n}\n]\n}\n\nREGOLE OUTPUT\n\n* \"nome\": nome completo della persona come appare nelle fonti, senza titoli (Dr., Avv., Lic., Mgr., Me, KC...).\n* \"nome_proprio\" e \"cognome\": nome e cognome reali (per i doppi cognomi spagnoli e portoghesi metti entrambi in \"cognome\").\n* \"azienda\": nome dello studio (per lo studio individuale, il nome con cui l'avvocato si presenta).\n* \"ruolo\": es. Founder, Founding Partner, Managing Partner, Senior Partner, Owner, Sole Practitioner, Abogado titular.\n* \"tipo_studio\": \"individuale\" oppure \"associato\".\n* \"citta\": città dell'ufficio principale.\n* \"settore\": \"Diritto penale\" oppure la specializzazione (es. \"Diritto penale dell'economia\").\n* \"sito\": URL del sito UFFICIALE. Obbligatorio.\n* \"pagina_contatti\": URL della pagina contatti / note legali sul sito ufficiale, oppure \"\".\n* \"fonte\": URL della fonte che conferma persona e ruolo.\n\nCerca di arrivare a {{ $json.target_lotto }} candidati. Se ne trovi meno, restituisci solo quelli reali.\n",
+        "options": {
+          "systemMessage": "=Sei un ricercatore commerciale inserito in un workflow automatico n8n.\n\nDevi trovare molti avvocati penalisti reali in {{ $json.paese }} usando la ricerca web: per ogni studio una sola persona, il titolare (l'avvocato stesso se lo studio è individuale; fondatore o managing partner se lo studio ha più avvocati).\n\nPriorità: persone reali, titolari di studio, diritto penale, sito ufficiale dello studio obbligatorio, una fonte plausibile, velocità e volume.\n\nNon fare due diligence approfondite. Non cercare email. Non fare ricerche inutili su un candidato quando hai già persona, studio, ruolo, sito ufficiale e una fonte.\n\nNon inventare mai persone, studi, ruoli, siti o URL.\n\nRestituisci soltanto il JSON richiesto dal prompt utente."
+        }
+      },
+      "id": "184b541d-b05c-486f-a74b-32b7da67b35b",
+      "name": "Ricerca prospect AI",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1632,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.6-luna",
+          "mode": "list",
+          "cachedResultName": "gpt-5.6-luna"
+        },
+        "builtInTools": {
+          "webSearch": {
+            "searchContextSize": "low"
+          }
+        },
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "id": "367cc261-5855-4455-8cbd-0a9c4586c1fe",
+      "name": "OpenAI + Web Search",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1632,
+        240
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "REDACTED",
+          "name": "OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const norm = (v) => String(v ?? '')\n  .normalize('NFKD')\n  .replace(/[̀-ͯ]/g, '')\n  .toLowerCase()\n  .replace(/&/g, ' and ')\n  .replace(/[^a-z0-9]+/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst normCompany = (v) => norm(v)\n  .replace(/\\b(llp|ltd|limited|plc|solicitors?|law firm|law offices?|legal|abogados?|advogados?|advocaten|advocatenkantoor|avocats?|rechtsanwalte|rechtsanwaltskanzlei|kanzlei|kancelaria|adwokacka|adwokat|advokat(ni|ska)?|sl|slp|lda|bv|sprl|srl|gmbh|kg|og|ab|as|oy|sp k|sp j|s r o|and partners|and co|partners)\\b/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst parse = (raw) => {\n  if (typeof raw !== 'string') return null;\n  let s = raw.trim().replace(/^```(?:json)?\\s*/i, '').replace(/```\\s*$/i, '').trim();\n  const a = s.indexOf('{');\n  const b = s.lastIndexOf('}');\n  if (a >= 0 && b > a) s = s.slice(a, b + 1);\n  try {\n    return JSON.parse(s);\n  } catch {\n    return null;\n  }\n};\n\nconst host = (sito) => String(sito ?? '').trim().toLowerCase()\n  .replace(/^https?:\\/\\//i, '').replace(/^www\\./i, '')\n  .split('/')[0].split('?')[0].split('#')[0].trim();\n\n// Chiave dello studio = dominio del sito (uno studio, un contatto).\nconst chiaveDominio = (sito) => {\n  const s = String(sito ?? '').trim().toLowerCase()\n    .replace(/^https?:\\/\\//, '').replace(/^www\\./, '');\n  const [h, primo] = s.split(/[?#]/)[0].split('/');\n  if (!h) return '';\n  return ['sites.google.com', 'linktr.ee'].includes(h) && primo ? `${h}/${primo}` : h;\n};\n\n// Siti che non sono il sito ufficiale dello studio.\nconst NON_UFFICIALI = /(^|\\.)(linkedin|facebook|instagram|twitter|x|youtube|tiktok|google|goo|yelp|trustpilot|doctolib|abogados365|legal500|chambers|chambersandpartners|lawyers|justia|avvo|solicitors|lawsociety|thelawyer|iclg|martindale|bestlawyers|doyleslegal|leaders?league|wikipedia|kompass|europages|infobel|paginasamarillas|yellowpages|gelbeseiten|pagesjaunes|herold|panoramafirm|firmy|zlatestranky)\\.[a-z.]+$/;\n\nconst cleanNamePart = (v) => String(v ?? '')\n  .normalize('NFKD').replace(/[̀-ͯ]/g, '')\n  .toLowerCase().replace(/[^a-z0-9]/g, '');\n\nconst prefissiDaIgnorare = new Set([\n  'dr', 'doctor', 'mr', 'mrs', 'ms', 'miss', 'prof', 'professor', 'sir', 'madam', 'md',\n  'avv', 'avvocato', 'me', 'maitre', 'mag', 'mgr', 'mec', 'adw', 'adv', 'lic', 'ldo', 'lda',\n  'dra', 'jur', 'kc', 'qc', 'mjur', 'ing', 'judr', 'phdr', 'mudr'\n]);\n\nconst generaEmail = (nomeCompleto, dominio) => {\n  if (!nomeCompleto || !dominio) return [];\n  const parti = String(nomeCompleto).trim().split(/\\s+/).map(cleanNamePart).filter(Boolean);\n  while (parti.length > 1 && prefissiDaIgnorare.has(parti[0])) parti.shift();\n  if (!parti.length) return [];\n  const first = parti[0];\n  if (parti.length === 1) return [`${first}@${dominio}`];\n  const last = parti[parti.length - 1];\n  return [`${first}.${last}@${dominio}`, `${first}@${dominio}`, `${first.charAt(0)}${last}@${dominio}`];\n};\n\nconst archivio = $('Prepara archivio').first().json;\nconst visti = new Set(archivio.chiavi_esistenti || []);\nconst nomiVisti = new Set(archivio.nomi_esistenti || []);\nconst dominiVisti = new Set(archivio.domini_esistenti || []);\n\nconst nuovi = [];\n\nfor (const item of $input.all()) {\n  const dati = parse(item.json.output);\n  if (!dati || !Array.isArray(dati.candidati)) continue;\n\n  for (const c of dati.candidati) {\n    const pulito = (v) => String(v ?? '').trim().replace(/\\s+/g, ' ');\n\n    const nome = pulito(c?.nome);\n    const azienda = pulito(c?.azienda);\n    const nomeN = norm(nome);\n    const aziendaN = normCompany(azienda) || norm(azienda);\n    if (!nomeN || !aziendaN) continue;\n\n    // Persona o nome + studio gia presenti\n    const key = `${nomeN}|${aziendaN}`;\n    if (visti.has(key) || nomiVisti.has(nomeN)) continue;\n\n    const fonte = typeof c?.fonte === 'string' && /^https?:\\/\\//i.test(c.fonte.trim())\n      ? c.fonte.trim()\n      : '';\n    if (!fonte) continue;\n\n    const sito = c?.sito ? String(c.sito).trim() : '';\n    const dominio = host(sito);\n    if (!sito || !dominio || NON_UFFICIALI.test(dominio)) continue;\n\n    // Studio gia contattato (o gia preso in questa esecuzione)\n    const studio = chiaveDominio(sito);\n    if (dominiVisti.has(studio)) continue;\n\n    const paginaContatti = typeof c?.pagina_contatti === 'string' &&\n      /^https?:\\/\\//i.test(c.pagina_contatti.trim()) &&\n      host(c.pagina_contatti) === dominio\n        ? c.pagina_contatti.trim()\n        : '';\n\n    visti.add(key);\n    nomiVisti.add(nomeN);\n    dominiVisti.add(studio);\n\n    nuovi.push({\n      json: {\n        'Nome': nome,\n        'Nome Mailup': pulito(c?.nome_proprio),\n        'Cognome Mailup': pulito(c?.cognome),\n        'Azienda': azienda,\n        'Ruolo proposto': pulito(c?.ruolo),\n        'Tipo studio': pulito(c?.tipo_studio),\n        'Città': pulito(c?.citta),\n        'Paese': pulito(c?.paese),\n        'Settore': pulito(c?.settore) || 'Diritto penale',\n        'Sito': sito,\n        'Email probabile/i': generaEmail(nome, dominio).join(', '),\n        'Fonte analizzata': fonte,\n        'Pagina contatti AI': paginaContatti,\n        'Tentativi precedenti': Number(c?.tentativi) || 0\n      }\n    });\n  }\n}\n\nreturn nuovi;\n"
+      },
+      "id": "c8bc2725-241d-489e-9ac7-2cf3d653d714",
+      "name": "Deduplica e prepara righe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "alwaysOutputData": true,
+      "position": [
+        2384,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Estrae le email dalla pagina scaricata (HOMEPAGE) e sceglie la migliore\n// tra quelle trovate finora. Ordine di preferenza:\n// 5   email del dominio con il nome della persona (es. j.garcia@studio.es)\n// 4.5 email gratuita/ordine (gmail, adv.oa.pt...) in un mailto con il nome\n// 4   email generica del dominio (info@, contact@, kancelaria@...)\n// 3   altra email personale del dominio (es. un collega)\n// 2   email gratuita/ordine in un mailto, senza il nome\n// 1   privacy@ / dpo@ / gdpr@ del dominio\nconst prospect = $('Deduplica e prepara righe').item.json;\nconst FASE = 'HOMEPAGE';\n\nlet html = String($json.html ?? '');\n\nconst cleanHost = (raw) => String(raw ?? '').trim().toLowerCase()\n  .replace(/^https?:\\/\\//i, '').replace(/^\\/\\//, '')\n  .split('/')[0].split('?')[0].split('#')[0]\n  .replace(/^www\\./, '').replace(/:\\d+$/, '');\n\nconst decodeCfEmail = (encoded) => {\n  try {\n    if (!encoded || encoded.length < 4) return '';\n    const key = parseInt(encoded.slice(0, 2), 16);\n    let email = '';\n    for (let i = 2; i < encoded.length; i += 2) {\n      email += String.fromCharCode(parseInt(encoded.slice(i, i + 2), 16) ^ key);\n    }\n    return email;\n  } catch {\n    return '';\n  }\n};\n\nhtml = html\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))\n  .replace(/&commat;/gi, '@')\n  .replace(/&period;/gi, '.')\n  .replace(/\\\\u0040/gi, '@')\n  .replace(/\\\\u002e/gi, '.')\n  .replace(/\\\\x40/gi, '@')\n  .replace(/\\\\x2e/gi, '.')\n  .replace(/%40/gi, '@')\n  .replace(/%2e/gi, '.')\n  .replace(/\\s*\\[\\s*(?:at|chiocciola)\\s*\\]\\s*/gi, '@')\n  .replace(/\\s*\\(\\s*(?:at|chiocciola)\\s*\\)\\s*/gi, '@')\n  .replace(/\\s*\\[\\s*(?:dot|punto)\\s*\\]\\s*/gi, '.')\n  .replace(/\\s*\\(\\s*(?:dot|punto)\\s*\\)\\s*/gi, '.');\n\n// --------------------------------------------------\n// EMAIL NELLA PAGINA (sicure = mailto o Cloudflare)\n// --------------------------------------------------\nconst sicure = new Set();\nconst tutte = [];\n\nlet m;\nconst cfRegex = /data-cfemail=[\"']([0-9a-f]+)[\"']/gi;\nwhile ((m = cfRegex.exec(html)) !== null) {\n  const e = decodeCfEmail(m[1]);\n  if (e) { sicure.add(e.toLowerCase()); tutte.push(e); }\n}\n\nconst mailtoRegex = /mailto:([^\"'?#\\s<>]+)/gi;\nwhile ((m = mailtoRegex.exec(html)) !== null) {\n  let v = m[1];\n  try { v = decodeURIComponent(v); } catch {}\n  sicure.add(v.toLowerCase().trim());\n  tutte.push(v);\n}\n\ntutte.push(...(html.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi) || []));\n\nconst ESTENSIONI = /\\.(png|jpe?g|gif|svg|webp|css|js|ico|woff2?|ttf|pdf)$/i;\nconst SCARTA_LOCALI = /^(no-?reply|do-?not-?reply|donotreply|noreply|mailer-daemon|postmaster|abuse|example|test|user|email|e-mail|name|nome|your|youremail|yourname|you|tuonome|sentry|wordpress|webmaster|hostmaster|jobs?|careers?|recruit(ment|ing)?|cv|hr|bewerbung|praktikum|stage|empleo|trabaja|vacatures|rekrutacja|kariera)$/;\nconst SCARTA_DOMINI = /(^|\\.)(example\\.(com|org)|sentry\\.io|sentry-next\\.wixpress\\.com|wixpress\\.com|domain\\.com|email\\.com|yoursite\\.com|godaddy\\.com|wix\\.com|squarespace\\.com)$/;\n\n// Email gratuite e degli ordini forensi: valide solo se in un mailto del sito.\nconst GRATUITE = /(^|\\.)(gmail\\.com|googlemail\\.com|icloud\\.com|me\\.com|aol\\.com|protonmail\\.(com|ch)|proton\\.me|mail\\.com|zoho\\.(com|eu)|(hotmail|outlook|live|yahoo|gmx|msn)\\.[a-z.]+|seznam\\.cz|centrum\\.(cz|sk)|email\\.cz|post\\.cz|wp\\.pl|o2\\.pl|onet\\.(pl|eu)|interia\\.(pl|eu)|op\\.pl|abv\\.bg|mail\\.bg|otenet\\.gr|hol\\.gr|freemail\\.hu|citromail\\.hu|sapo\\.pt|adv\\.oa\\.pt|icam\\.es|icab\\.(cat|es)|icav\\.es|telenet\\.be|skynet\\.be|ziggo\\.nl|kpnmail\\.nl|planet\\.nl|bluewin\\.ch|hispeed\\.ch|aon\\.at|chello\\.at|eircom\\.net|btinternet\\.com|btconnect\\.com|virginmedia\\.com|sky\\.com|telia\\.com|online\\.no|t-online\\.hu|azet\\.sk|zoznam\\.sk|inbox\\.lv|inbox\\.lt|mail\\.ee|tvnet\\.lv|net\\.hr|t-com\\.hr|siol\\.net|yandex\\.(com|ru)|libero\\.it)$/;\n\nconst GENERICHE = new Set([\n  'info', 'hello', 'contact', 'contacts', 'kontakt', 'kontakty', 'contacto', 'contato', 'contacte',\n  'office', 'mail', 'post', 'postmottak', 'posta', 'email', 'admin', 'secretaria', 'secretariat', 'secretariaat',\n  'sekretariat', 'sekretariaat', 'secretary', 'reception', 'recepcion', 'receptie', 'enquiries', 'enquiry',\n  'inquiries', 'inquiry', 'general', 'geral', 'administracion', 'administracao', 'administration', 'administratie', 'recepcja', 'despacho', 'bufete', 'abogados', 'advogados', 'advocaten',\n  'avocats', 'avocat', 'cabinet', 'kanzlei', 'kancelaria', 'biuro', 'kancelar', 'kancelarija', 'ured', 'pisarna',\n  'iroda', 'ugyved', 'ugyvediiroda', 'web', 'kontor', 'advokatbyra', 'office1', 'law', 'legal', 'lawyers', 'solicitors', 'criminal', 'crime', 'defence', 'defense',\n  'penal', 'strafrecht', 'advokat', 'advokatfirma', 'byra', 'toimisto', 'mailbox', 'studio', 'studiolegale'\n]);\nconst PRIVACY = /^(privacy|dpo|gdpr|rodo|datenschutz|dataprotection|data\\.protection|protecciondedatos|lopd|rgpd|avg)$/;\n\nconst dominio = cleanHost(prospect.Sito);\nconst titoli = new Set(['dr', 'mr', 'mrs', 'ms', 'prof', 'avv', 'me', 'mag', 'mgr', 'adw', 'adv', 'lic', 'ldo', 'dra', 'jur', 'kc', 'qc', 'judr', 'ing']);\nconst parti = String(prospect.Nome ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()\n  .split(/[\\s-]+/).map(p => p.replace(/[^a-z]/g, '')).filter(p => p && !titoli.has(p));\nconst primo = parti[0] || '';\nconst ultimo = parti.length > 1 ? parti[parti.length - 1] : '';\n\n// Segnaposto tipo \"nome.cognome@\" nelle varie lingue.\nconst SEGNAPOSTO = /^(firstname|first\\.?name|name|nome|nombre|prenom|vorname|voornaam|imie|jmeno|etunimi|fornamn|fornavn)[._-]?(lastname|last\\.?name|surname|cognome|apellidos?|nom|nachname|achternaam|nazwisko|prijmeni|sukunimi|efternamn|etternavn)?$/;\n\nconst conNome = (local) => {\n  const l = local.replace(/[^a-z]/g, '');\n  if (ultimo.length >= 3 && l.includes(ultimo)) return true;\n  if (primo.length >= 3 && ultimo && l.startsWith(primo)) return true;\n  if (primo && ultimo && l === primo[0] + ultimo) return true;\n  // Altri cognomi (nomi composti spagnoli / portoghesi)\n  return parti.slice(1, -1).some(p => p.length >= 4 && l.includes(p));\n};\n\nconst punteggio = (email) => {\n  const [local, dom] = email.split('@');\n  if (!local || !dom || SCARTA_LOCALI.test(local) || SCARTA_DOMINI.test(dom) || ESTENSIONI.test(email)) return 0;\n  if (dom.startsWith('www.')) return 0;\n  const delDominio = dominio && (dom === dominio || dom.endsWith('.' + dominio));\n  if (SEGNAPOSTO.test(local)) return 0;\n  if (delDominio) {\n    if (conNome(local)) {\n      // Stesso cognome ma un altro nome (es. un familiare nello studio): non e il titolare.\n      const altroNome = local.split(/[._-]+/).some(t =>\n        /^[a-z]{3,}$/.test(t) && !parti.some(p => p === t || t.includes(p) || p.includes(t)));\n      return altroNome ? 3 : 5;\n    }\n    if (GENERICHE.has(local)) return 4;\n    if (PRIVACY.test(local)) return 1;\n    return 3;\n  }\n  if (GRATUITE.test(dom) && sicure.has(email)) return conNome(local) ? 4.5 : 2;\n  return 0;\n};\n\nconst fonte = prospect.Sito;\n\nconst precedenti = Array.isArray(prospect._emailSito) ? prospect._emailSito : [];\nconst trovate = [...precedenti];\nconst giaViste = new Set(precedenti.map(x => x.email));\n\nfor (const raw of tutte) {\n  const email = String(raw).toLowerCase().trim().replace(/^[^a-z0-9]+/, '').replace(/[),.;:'\"]+$/g, '');\n  if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/.test(email) || giaViste.has(email)) continue;\n  giaViste.add(email);\n  const p = punteggio(email);\n  if (p > 0) trovate.push({ email, p, fonte });\n}\n\ntrovate.sort((a, b) => b.p - a.p);\nconst migliore = trovate[0];\n\nconst tipo = !migliore ? '' :\n  migliore.p >= 4.5 ? 'SITO - NOMINATIVA' :\n  migliore.p >= 4 ? 'SITO - GENERICA' :\n  migliore.p >= 3 ? 'SITO - ALTRA EMAIL' :\n  migliore.p >= 2 ? 'SITO - EMAIL GRATUITA' : 'SITO - PRIVACY';\n\n// Si cerca su un'altra pagina finche non c'e un'email nominativa o generica.\nconst basta = Boolean(migliore && migliore.p >= 4);\n\nconst out = {\n  ...prospect,\n  _emailSito: trovate.slice(0, 8),\n  'Email trovata sito': migliore ? migliore.email : '',\n  'Email trovate sito': trovate.slice(0, 6).map(x => x.email).join(', '),\n  'Tipo email sito': tipo,\n  'Fonte email': migliore ? migliore.fonte : '',\n  'Stato ricerca email': (migliore ? 'TROVATA ' : 'NON TROVATA ') + FASE\n};\n\n// --------------------------------------------------\n// PAGINE DA CONTROLLARE DOPO LA HOMEPAGE (gratis)\n// 1) contatti (o la pagina indicata dall'AI); 2) note legali / Impressum /\n// privacy, dove per legge c'e quasi sempre l'email dello studio.\n// --------------------------------------------------\nconst sitoRaw = String(prospect.Sito ?? '').trim();\nconst sitoConProtocollo = /^https?:\\/\\//i.test(sitoRaw) ? sitoRaw : 'https://' + sitoRaw;\nconst originMatch = sitoConProtocollo.match(/^(https?:\\/\\/[^\\/?#]+)/i);\nconst origin = originMatch ? originMatch[1] : '';\n\nconst normalizeUrl = (raw) => {\n  const s = String(raw ?? '').trim().replace(/^https?:\\/\\//i, '').replace(/^\\/\\//, '');\n  const [h, ...resto] = s.split('/');\n  const path = ('/' + resto.join('/')).split('?')[0].split('#')[0].replace(/\\/+$/, '') || '/';\n  return h.toLowerCase().replace(/^www\\./, '') + path.toLowerCase();\n};\n\nconst rendiAssoluto = (href) => {\n  let link = String(href ?? '').trim().replace(/&amp;/gi, '&');\n  if (!link || /^(#|mailto:|tel:|javascript:|data:|whatsapp:)/i.test(link)) return '';\n  if (/^https?:\\/\\//i.test(link)) return link;\n  if (/^\\/\\//.test(link)) return 'https:' + link;\n  if (!origin) return '';\n  if (link.startsWith('/')) return origin + link;\n  return origin + '/' + link.replace(/^\\.\\//, '');\n};\n\nconst categoria = (url) => {\n  const u = String(url).toLowerCase().split('?')[0].split('#')[0];\n  if (/contact|kontakt|contacto|contato|contatti|contacte|get-in-touch|reach-us|enquir|inquir|epikoinonia|yhteys|kapcsolat|elerhetoseg|hubungi|find-us|location|where-we-are|donde-estamos|onde-estamos|biuro|ufficio|oficina/.test(u)) return ['CONTATTI', 100];\n  if (/impressum|impresszum|aviso-legal|avisolegal|nota-legal|legal-notice|legal-notices|mentions-legales|mentions|colofon|disclaimer|legal|privacy|privacidad|privacidade|polityka|rodo|datenschutz|gdpr|cookies?-policy|terms|terminos|termos|ochrana-osobnich|adatvedelem|integritet|tietosuoja/.test(u)) return ['LEGALE', 80];\n  if (/about|chi-siamo|quienes-somos|quem-somos|over-ons|o-nas|uber-uns|ueber-uns|qui-sommes|despacho|kancelaria|kanzlei|firm|studio/.test(u)) return ['STUDIO', 60];\n  if (/team|equipo|equipa|abogados|advogados|lawyers|people|attorneys|solicitors|advocaten|avocats|anwalte|anwaelte|zespol|nasi|socios|partners|tym/.test(u)) return ['TEAM', 50];\n  return ['', 0];\n};\n\nconst linkTrovati = [];\nconst hrefRegex = /href\\s*=\\s*[\"']([^\"']+)[\"']/gi;\nconst homeNorm = normalizeUrl(prospect.Sito);\nwhile ((m = hrefRegex.exec(html)) !== null) {\n  const url = rendiAssoluto(m[1]);\n  const h = cleanHost(url);\n  if (!url || !h || !dominio || !(h === dominio || h.endsWith('.' + dominio))) continue;\n  const percorso = url.split('?')[0].split('#')[0];\n  if (/\\.(pdf|jpe?g|png|gif|svg|webp|docx?|zip|css|js|xml|json|ico)$/i.test(percorso)) continue;\n  if (/\\/(wp-content|wp-includes|wp-json|feed|news|blog|uutiset|nyheter|noticias|aktualnosci|hirek|insights|articles?|cdn-cgi)(\\/|$)/i.test(percorso)) continue;\n  if (normalizeUrl(url) === homeNorm) continue;\n  linkTrovati.push(url.split('#')[0]);\n}\n\nconst candidate = [...new Set(linkTrovati)]\n  .map(url => { const [cat, score] = categoria(url); return { url, cat, score }; })\n  .filter(x => x.score > 0)\n  .sort((a, b) => b.score - a.score || a.url.length - b.url.length);\n\nconst paginaAI = String(prospect['Pagina contatti AI'] ?? '');\nif (paginaAI && normalizeUrl(paginaAI) !== homeNorm) {\n  candidate.unshift({ url: paginaAI, cat: categoria(paginaAI)[0] || 'AI', score: 110 });\n}\n\n// Siti fatti in JavaScript (nessun link leggibile): proviamo i percorsi tipici.\nif (!candidate.length && origin) {\n  const p = String(prospect.Paese || '');\n  const ipotesi = {\n    'Spagna': ['/contacto', '/aviso-legal'], 'Portogallo': ['/contactos', '/contacto'],\n    'Paesi Bassi': ['/contact', '/colofon'], 'Belgio': ['/contact', '/mentions-legales'],\n    'Austria': ['/kontakt', '/impressum'], 'Svizzera': ['/kontakt', '/impressum'], 'Liechtenstein': ['/kontakt', '/impressum'],\n    'Polonia': ['/kontakt', '/polityka-prywatnosci'], 'Repubblica Ceca': ['/kontakt', '/kontakty'],\n    'Slovacchia': ['/kontakt', '/kontakty'], 'Svezia': ['/kontakt', '/integritetspolicy'], 'Danimarca': ['/kontakt', '/om-os'],\n    'Norvegia': ['/kontakt', '/om-oss'], 'Ungheria': ['/kapcsolat', '/impresszum'], 'Romania': ['/contact', '/despre-noi'],\n    'Finlandia': ['/yhteystiedot', '/tietosuojaseloste'], 'Regno Unito': ['/contact-us', '/privacy-policy'],\n    'Irlanda': ['/contact-us', '/privacy-policy'], 'Grecia': ['/epikoinonia', '/contact'], 'Croazia': ['/kontakt', '/impressum'],\n    'Slovenia': ['/kontakt', '/o-nas'], 'Serbia': ['/kontakt', '/o-nama'],\n    'Lussemburgo': ['/contact', '/mentions-legales'], 'Monaco': ['/contact', '/mentions-legales']\n  }[p] || ['/contact', '/contact-us'];\n  ipotesi.forEach((path, k) => candidate.push({ url: origin + path, cat: 'IPOTESI', score: 1 - k / 10 }));\n}\n\nconst pagina1 = candidate[0];\nconst pagina2 = pagina1\n  ? (candidate.find(x => x !== pagina1 && x.cat !== pagina1.cat && normalizeUrl(x.url) !== normalizeUrl(pagina1.url)) ||\n     candidate.find(x => x !== pagina1 && normalizeUrl(x.url) !== normalizeUrl(pagina1.url)))\n  : null;\n\nout['Pagina da controllare'] = basta || !pagina1 ? '' : pagina1.url;\nout['Pagina da controllare 2'] = basta || !pagina2 ? '' : pagina2.url;\nout['Pagine candidate trovate'] = candidate.slice(0, 5).map(x => x.url).join(', ');\n\nreturn { json: out };\n"
+      },
+      "id": "e2a0f247-60ce-4193-844b-2650ae77f304",
+      "name": "Estrai email homepage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "847cbe33-6018-4ac1-b1bf-e6be4eb66163",
+              "leftValue": "={{ $json[\"Pagina da controllare\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "caefd073-f301-404a-8ac8-56f80bb48e08",
+      "name": "Ha pagina secondaria?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3744,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Estrae le email dalla pagina scaricata (PAGINA 2) e sceglie la migliore\n// tra quelle trovate finora. Ordine di preferenza:\n// 5   email del dominio con il nome della persona (es. j.garcia@studio.es)\n// 4.5 email gratuita/ordine (gmail, adv.oa.pt...) in un mailto con il nome\n// 4   email generica del dominio (info@, contact@, kancelaria@...)\n// 3   altra email personale del dominio (es. un collega)\n// 2   email gratuita/ordine in un mailto, senza il nome\n// 1   privacy@ / dpo@ / gdpr@ del dominio\nconst prospect = $('Ha pagina secondaria?').item.json;\nconst FASE = 'PAGINA 2';\n\nlet html = String($json.html ?? '');\n\nconst cleanHost = (raw) => String(raw ?? '').trim().toLowerCase()\n  .replace(/^https?:\\/\\//i, '').replace(/^\\/\\//, '')\n  .split('/')[0].split('?')[0].split('#')[0]\n  .replace(/^www\\./, '').replace(/:\\d+$/, '');\n\nconst decodeCfEmail = (encoded) => {\n  try {\n    if (!encoded || encoded.length < 4) return '';\n    const key = parseInt(encoded.slice(0, 2), 16);\n    let email = '';\n    for (let i = 2; i < encoded.length; i += 2) {\n      email += String.fromCharCode(parseInt(encoded.slice(i, i + 2), 16) ^ key);\n    }\n    return email;\n  } catch {\n    return '';\n  }\n};\n\nhtml = html\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))\n  .replace(/&commat;/gi, '@')\n  .replace(/&period;/gi, '.')\n  .replace(/\\\\u0040/gi, '@')\n  .replace(/\\\\u002e/gi, '.')\n  .replace(/\\\\x40/gi, '@')\n  .replace(/\\\\x2e/gi, '.')\n  .replace(/%40/gi, '@')\n  .replace(/%2e/gi, '.')\n  .replace(/\\s*\\[\\s*(?:at|chiocciola)\\s*\\]\\s*/gi, '@')\n  .replace(/\\s*\\(\\s*(?:at|chiocciola)\\s*\\)\\s*/gi, '@')\n  .replace(/\\s*\\[\\s*(?:dot|punto)\\s*\\]\\s*/gi, '.')\n  .replace(/\\s*\\(\\s*(?:dot|punto)\\s*\\)\\s*/gi, '.');\n\n// --------------------------------------------------\n// EMAIL NELLA PAGINA (sicure = mailto o Cloudflare)\n// --------------------------------------------------\nconst sicure = new Set();\nconst tutte = [];\n\nlet m;\nconst cfRegex = /data-cfemail=[\"']([0-9a-f]+)[\"']/gi;\nwhile ((m = cfRegex.exec(html)) !== null) {\n  const e = decodeCfEmail(m[1]);\n  if (e) { sicure.add(e.toLowerCase()); tutte.push(e); }\n}\n\nconst mailtoRegex = /mailto:([^\"'?#\\s<>]+)/gi;\nwhile ((m = mailtoRegex.exec(html)) !== null) {\n  let v = m[1];\n  try { v = decodeURIComponent(v); } catch {}\n  sicure.add(v.toLowerCase().trim());\n  tutte.push(v);\n}\n\ntutte.push(...(html.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi) || []));\n\nconst ESTENSIONI = /\\.(png|jpe?g|gif|svg|webp|css|js|ico|woff2?|ttf|pdf)$/i;\nconst SCARTA_LOCALI = /^(no-?reply|do-?not-?reply|donotreply|noreply|mailer-daemon|postmaster|abuse|example|test|user|email|e-mail|name|nome|your|youremail|yourname|you|tuonome|sentry|wordpress|webmaster|hostmaster|jobs?|careers?|recruit(ment|ing)?|cv|hr|bewerbung|praktikum|stage|empleo|trabaja|vacatures|rekrutacja|kariera)$/;\nconst SCARTA_DOMINI = /(^|\\.)(example\\.(com|org)|sentry\\.io|sentry-next\\.wixpress\\.com|wixpress\\.com|domain\\.com|email\\.com|yoursite\\.com|godaddy\\.com|wix\\.com|squarespace\\.com)$/;\n\n// Email gratuite e degli ordini forensi: valide solo se in un mailto del sito.\nconst GRATUITE = /(^|\\.)(gmail\\.com|googlemail\\.com|icloud\\.com|me\\.com|aol\\.com|protonmail\\.(com|ch)|proton\\.me|mail\\.com|zoho\\.(com|eu)|(hotmail|outlook|live|yahoo|gmx|msn)\\.[a-z.]+|seznam\\.cz|centrum\\.(cz|sk)|email\\.cz|post\\.cz|wp\\.pl|o2\\.pl|onet\\.(pl|eu)|interia\\.(pl|eu)|op\\.pl|abv\\.bg|mail\\.bg|otenet\\.gr|hol\\.gr|freemail\\.hu|citromail\\.hu|sapo\\.pt|adv\\.oa\\.pt|icam\\.es|icab\\.(cat|es)|icav\\.es|telenet\\.be|skynet\\.be|ziggo\\.nl|kpnmail\\.nl|planet\\.nl|bluewin\\.ch|hispeed\\.ch|aon\\.at|chello\\.at|eircom\\.net|btinternet\\.com|btconnect\\.com|virginmedia\\.com|sky\\.com|telia\\.com|online\\.no|t-online\\.hu|azet\\.sk|zoznam\\.sk|inbox\\.lv|inbox\\.lt|mail\\.ee|tvnet\\.lv|net\\.hr|t-com\\.hr|siol\\.net|yandex\\.(com|ru)|libero\\.it)$/;\n\nconst GENERICHE = new Set([\n  'info', 'hello', 'contact', 'contacts', 'kontakt', 'kontakty', 'contacto', 'contato', 'contacte',\n  'office', 'mail', 'post', 'postmottak', 'posta', 'email', 'admin', 'secretaria', 'secretariat', 'secretariaat',\n  'sekretariat', 'sekretariaat', 'secretary', 'reception', 'recepcion', 'receptie', 'enquiries', 'enquiry',\n  'inquiries', 'inquiry', 'general', 'geral', 'administracion', 'administracao', 'administration', 'administratie', 'recepcja', 'despacho', 'bufete', 'abogados', 'advogados', 'advocaten',\n  'avocats', 'avocat', 'cabinet', 'kanzlei', 'kancelaria', 'biuro', 'kancelar', 'kancelarija', 'ured', 'pisarna',\n  'iroda', 'ugyved', 'ugyvediiroda', 'web', 'kontor', 'advokatbyra', 'office1', 'law', 'legal', 'lawyers', 'solicitors', 'criminal', 'crime', 'defence', 'defense',\n  'penal', 'strafrecht', 'advokat', 'advokatfirma', 'byra', 'toimisto', 'mailbox', 'studio', 'studiolegale'\n]);\nconst PRIVACY = /^(privacy|dpo|gdpr|rodo|datenschutz|dataprotection|data\\.protection|protecciondedatos|lopd|rgpd|avg)$/;\n\nconst dominio = cleanHost(prospect.Sito);\nconst titoli = new Set(['dr', 'mr', 'mrs', 'ms', 'prof', 'avv', 'me', 'mag', 'mgr', 'adw', 'adv', 'lic', 'ldo', 'dra', 'jur', 'kc', 'qc', 'judr', 'ing']);\nconst parti = String(prospect.Nome ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()\n  .split(/[\\s-]+/).map(p => p.replace(/[^a-z]/g, '')).filter(p => p && !titoli.has(p));\nconst primo = parti[0] || '';\nconst ultimo = parti.length > 1 ? parti[parti.length - 1] : '';\n\n// Segnaposto tipo \"nome.cognome@\" nelle varie lingue.\nconst SEGNAPOSTO = /^(firstname|first\\.?name|name|nome|nombre|prenom|vorname|voornaam|imie|jmeno|etunimi|fornamn|fornavn)[._-]?(lastname|last\\.?name|surname|cognome|apellidos?|nom|nachname|achternaam|nazwisko|prijmeni|sukunimi|efternamn|etternavn)?$/;\n\nconst conNome = (local) => {\n  const l = local.replace(/[^a-z]/g, '');\n  if (ultimo.length >= 3 && l.includes(ultimo)) return true;\n  if (primo.length >= 3 && ultimo && l.startsWith(primo)) return true;\n  if (primo && ultimo && l === primo[0] + ultimo) return true;\n  // Altri cognomi (nomi composti spagnoli / portoghesi)\n  return parti.slice(1, -1).some(p => p.length >= 4 && l.includes(p));\n};\n\nconst punteggio = (email) => {\n  const [local, dom] = email.split('@');\n  if (!local || !dom || SCARTA_LOCALI.test(local) || SCARTA_DOMINI.test(dom) || ESTENSIONI.test(email)) return 0;\n  if (dom.startsWith('www.')) return 0;\n  const delDominio = dominio && (dom === dominio || dom.endsWith('.' + dominio));\n  if (SEGNAPOSTO.test(local)) return 0;\n  if (delDominio) {\n    if (conNome(local)) {\n      // Stesso cognome ma un altro nome (es. un familiare nello studio): non e il titolare.\n      const altroNome = local.split(/[._-]+/).some(t =>\n        /^[a-z]{3,}$/.test(t) && !parti.some(p => p === t || t.includes(p) || p.includes(t)));\n      return altroNome ? 3 : 5;\n    }\n    if (GENERICHE.has(local)) return 4;\n    if (PRIVACY.test(local)) return 1;\n    return 3;\n  }\n  if (GRATUITE.test(dom) && sicure.has(email)) return conNome(local) ? 4.5 : 2;\n  return 0;\n};\n\nconst fonte = prospect['Pagina da controllare'];\n\nconst precedenti = Array.isArray(prospect._emailSito) ? prospect._emailSito : [];\nconst trovate = [...precedenti];\nconst giaViste = new Set(precedenti.map(x => x.email));\n\nfor (const raw of tutte) {\n  const email = String(raw).toLowerCase().trim().replace(/^[^a-z0-9]+/, '').replace(/[),.;:'\"]+$/g, '');\n  if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/.test(email) || giaViste.has(email)) continue;\n  giaViste.add(email);\n  const p = punteggio(email);\n  if (p > 0) trovate.push({ email, p, fonte });\n}\n\ntrovate.sort((a, b) => b.p - a.p);\nconst migliore = trovate[0];\n\nconst tipo = !migliore ? '' :\n  migliore.p >= 4.5 ? 'SITO - NOMINATIVA' :\n  migliore.p >= 4 ? 'SITO - GENERICA' :\n  migliore.p >= 3 ? 'SITO - ALTRA EMAIL' :\n  migliore.p >= 2 ? 'SITO - EMAIL GRATUITA' : 'SITO - PRIVACY';\n\n// Si cerca su un'altra pagina finche non c'e un'email nominativa o generica.\nconst basta = Boolean(migliore && migliore.p >= 4);\n\nconst out = {\n  ...prospect,\n  _emailSito: trovate.slice(0, 8),\n  'Email trovata sito': migliore ? migliore.email : '',\n  'Email trovate sito': trovate.slice(0, 6).map(x => x.email).join(', '),\n  'Tipo email sito': tipo,\n  'Fonte email': migliore ? migliore.fonte : '',\n  'Stato ricerca email': (migliore ? 'TROVATA ' : 'NON TROVATA ') + FASE\n};\n\n// La terza pagina serve solo se manca ancora un'email nominativa o generica.\nif (basta) out['Pagina da controllare 2'] = '';\n\nreturn { json: out };\n"
+      },
+      "id": "0209888c-d21b-4fdc-844c-9b38861ade8e",
+      "name": "Estrai email pagina secondaria",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4192,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "32fa52c5-0de6-45ea-ab87-0be287c4e8f2",
+      "name": "Riunisci risultati email",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5072,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "847cbe33-6018-4ac1-b1bf-e6be4eb66163",
+              "leftValue": "={{ $json[\"Email trovata sito\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6ab677b7-d6e5-4776-ae6f-d8ec65e2863f",
+      "name": "Email certa trovata?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5296,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const prospect = $('Email certa trovata?').item.json;\nconst rr = $json;\n\nconst testoErrore = String(rr.response ?? rr.detail ?? rr.message ?? '');\nconst rateLimit = /rate limit/i.test(testoErrore);\nconst inCorso = ['progress', 'searching', 'waiting', 'queued', 'not queued']\n  .includes(String(rr.status ?? '').toLowerCase());\n\nconst emails = Array.isArray(rr.emails) ? rr.emails : [];\n\n// Prendiamo SOLO email professionali realmente validate\nconst valideProfessionali = emails.filter(e =>\n  e &&\n  e.email &&\n  e.type === 'professional' &&\n  e.smtp_valid === 'valid'\n);\n\n// Preferiamo quella consigliata da RocketReach\nlet emailRocketReach = '';\n\nif (\n  rr.recommended_professional_email &&\n  valideProfessionali.some(e => e.email === rr.recommended_professional_email)\n) {\n  emailRocketReach = rr.recommended_professional_email;\n} else if (valideProfessionali.length) {\n  emailRocketReach = valideProfessionali[0].email;\n}\n\n// RATE LIMIT e RICERCA NON COMPLETATA finiscono negli Scartati\n// come 'Da riprovare' e vengono ripresi all'esecuzione successiva.\nlet stato;\nif (emailRocketReach) stato = 'EMAIL VALIDATA';\nelse if (rateLimit) stato = 'RATE LIMIT';\nelse if (inCorso) stato = 'RICERCA NON COMPLETATA';\nelse if (rr.detail) stato = 'PERSONA NON TROVATA';\nelse stato = 'NESSUNA EMAIL VALIDA';\n\nreturn {\n  json: {\n    ...prospect,\n    'Email RocketReach': emailRocketReach,\n    'Email RocketReach tutte': valideProfessionali.map(e => e.email).join(', '),\n    'LinkedIn RocketReach': rr.linkedin_url || '',\n    'Stato RocketReach': stato\n  }\n};\n"
+      },
+      "id": "145d69fc-e84d-4707-a6f1-c99f14f3e051",
+      "name": "Normalizza RocketReach",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7536,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "aeb1288f-a66f-4bab-a187-1f9c7f2a0491",
+              "leftValue": "={{ $json[\"Email RocketReach\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9cb7c323-7aac-4c98-851a-49531573826f",
+      "name": "Email RocketReach trovata?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        7760,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "id": "200b4554-13c0-4f30-a3c1-0e0eb2c71e12",
+      "name": "Riunisci risultati finali",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        8064,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const emailSito = String($json['Email trovata sito'] || '').trim();\nconst emailRR = String($json['Email RocketReach'] || '').trim();\nconst emailFinale = emailSito || emailRR || '';\n\nlet tipoEmail = '';\nlet fonteEmail = '';\nlet statoEmail = '';\n\nif (emailSito) {\n  tipoEmail = $json['Tipo email sito'] || 'SITO UFFICIALE';\n  fonteEmail = $json['Fonte email'] || $json.Sito || '';\n  statoEmail = 'EMAIL TROVATA';\n} else if (emailRR) {\n  tipoEmail = 'ROCKETREACH VALIDATA';\n  fonteEmail = 'RocketReach';\n  statoEmail = 'EMAIL TROVATA';\n} else {\n  tipoEmail = 'SOLO EMAIL PROBABILI';\n  fonteEmail = '';\n  statoEmail = 'EMAIL NON TROVATA';\n}\n\nreturn {\n  json: {\n    Data: $now.setZone('Europe/Rome').toFormat('yyyy-MM-dd'),\n    Nome: $json.Nome || '',\n    'Nome Mailup': $json['Nome Mailup'] || '',\n    'Cognome Mailup': $json['Cognome Mailup'] || '',\n    Azienda: $json.Azienda || '',\n    Ruolo: $json['Ruolo proposto'] || '',\n    'Tipo studio': $json['Tipo studio'] || '',\n    'Città': $json['Città'] || '',\n    Paese: $json.Paese || '',\n    Settore: $json.Settore || '',\n    Sito: $json.Sito || '',\n    'Email certa': emailFinale,\n    'Tipo email': tipoEmail,\n    'Fonte email': fonteEmail,\n    'Stato email': statoEmail,\n    'Email probabili': $json['Email probabile/i'] || '',\n    LinkedIn: $json['LinkedIn RocketReach'] || '',\n    // Usati solo per decidere il motivo dello scarto\n    'Stato RocketReach': $json['Stato RocketReach'] || '',\n    'Tentativi precedenti': Number($json['Tentativi precedenti']) || 0\n  }\n};\n"
+      },
+      "id": "ddb575a5-9207-4c75-8a93-d8f1655cfedd",
+      "name": "Prepara righe finali",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8272,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6d550d86-126e-4c9a-bf39-ea5510c37e5e",
+              "leftValue": "={{ !!$json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ead099c9-8390-47aa-be26-46dffbd13d04",
+      "name": "RocketReach ha ID?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        6224,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "id": "20ef0958-d068-43d6-a508-bbae16fd6842",
+      "name": "Attendi RocketReach",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        6432,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Nel foglio Mailup vogliamo solo prospect con una email certa.\nconst pulito = (v) => String(v ?? '').trim().replace(/\\s+/g, ' ');\n\nreturn $input.all()\n  .map(i => i.json)\n  .filter(j => pulito(j['Email certa']))\n  .map(j => ({\n    json: {\n      Nome: pulito(j['Nome Mailup']),\n      Cognome: pulito(j['Cognome Mailup']),\n      Azienda: pulito(j.Azienda),\n      Ruolo: pulito(j.Ruolo),\n      Settore: pulito(j.Settore),\n      Email: pulito(j['Email certa']),\n      Paese: pulito(j.Paese)\n    }\n  }));\n"
+      },
+      "id": "e6199d58-6ace-4bfc-ba43-f6def6802999",
+      "name": "Prepara Mailup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8736,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 101,
+          "cachedResultName": "Prospect AI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=101"
+        },
+        "options": {}
+      },
+      "id": "5f0aa587-7846-4611-a9ea-bf1e6555d83e",
+      "name": "Read Prospect",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.rocketreach.co/api/v2/person/lookup",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.Nome }}"
+            },
+            {
+              "name": "current_employer",
+              "value": "={{ $json.Azienda }}"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json[\"Ruolo proposto\"] }}"
+            },
+            {
+              "name": "return_cached_emails",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 5000
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "bf1263d4-31bd-4175-93ba-77804df6aea7",
+      "name": "RocketReach - Lookup persona",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        6000,
+        240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REDACTED",
+          "name": "RocketReach API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json[\"Pagina da controllare\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en,es;q=0.9,pt;q=0.8,nl;q=0.8,pl;q=0.7,de;q=0.7,fr;q=0.6,*;q=0.5"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 200
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "html"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "a84de5e3-a8e8-4701-ae21-667a44f4e838",
+      "name": "HTTP - Pagina secondaria",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3968,
+        -176
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ /^https?:\\/\\//i.test($json.Sito) ? $json.Sito : 'https://' + $json.Sito }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en,es;q=0.9,pt;q=0.8,nl;q=0.8,pl;q=0.7,de;q=0.7,fr;q=0.6,*;q=0.5"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 200
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "html"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "d85f0efd-b3b5-42f4-a1b5-1cc5bea582f2",
+      "name": "HTTP - Homepage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        3312,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://api.rocketreach.co/api/v2/person/checkStatus",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "01a50182-768e-4614-a945-102eb4a5c3ee",
+      "name": "RocketReach - Status check",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        6656,
+        240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REDACTED",
+          "name": "RocketReach API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 101,
+          "cachedResultName": "Prospect AI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=101"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Azienda",
+              "displayName": "Azienda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ruolo",
+              "displayName": "Ruolo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tipo studio",
+              "displayName": "Tipo studio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Città",
+              "displayName": "Città",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paese",
+              "displayName": "Paese",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Settore",
+              "displayName": "Settore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sito",
+              "displayName": "Sito",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email certa",
+              "displayName": "Email certa",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tipo email",
+              "displayName": "Tipo email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fonte email",
+              "displayName": "Fonte email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Stato email",
+              "displayName": "Stato email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email probabili",
+              "displayName": "Email probabili",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn",
+              "displayName": "LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "e8fa3041-bfff-458b-b2d0-2b8103dee623",
+      "name": "Append - Prospect",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        8736,
+        -224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 102,
+          "cachedResultName": "Mailup",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=102"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Cognome",
+              "displayName": "Cognome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Azienda",
+              "displayName": "Azienda",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ruolo",
+              "displayName": "Ruolo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Settore",
+              "displayName": "Settore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paese",
+              "displayName": "Paese",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "5a0eb7a0-aa3b-47ec-8126-590176820c6f",
+      "name": "Append - Mailup",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        8960,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Rotazione dei temi: dalla scheda Temi prendiamo le 5 nicchie\n// attive usate meno di recente (a parita: meno usate, poi a caso),\n// bilanciando i paesi (al massimo 1 lotto per paese se i paesi sono 5+).\n// Cosi l'AI non torna sempre sugli stessi nomi.\nconst NUM_LOTTI = 5;\nconst TARGET_LOTTO = 25;\n\nconst temi = $('Read Temi').all()\n  .map(i => i.json)\n  .filter(t =>\n    t.ID &&\n    t.Tema &&\n    String(t.Attivo ?? 'SI').trim().toUpperCase() !== 'NO'\n  );\n\nlet scelti;\n\nif (temi.length) {\n  scelti = temi\n    .map(t => ({ t, r: Math.random() }))\n    .sort((a, b) =>\n      String(a.t['Ultimo uso'] || '').localeCompare(String(b.t['Ultimo uso'] || '')) ||\n      (Number(a.t.Usi) || 0) - (Number(b.t.Usi) || 0) ||\n      a.r - b.r\n    )\n    .map(x => x.t);\n\n  // Bilanciamento paesi: al massimo ceil(5 / n. paesi) lotti per paese,\n  // poi si completa con i temi rimasti nell'ordine di rotazione.\n  const paesi = [...new Set(scelti.map(t => t.Paese || ''))];\n  const maxPerPaese = Math.ceil(NUM_LOTTI / paesi.length);\n  const perPaese = {};\n  const bilanciati = [];\n  for (const t of scelti) {\n    const p = t.Paese || '';\n    if ((perPaese[p] || 0) >= maxPerPaese) continue;\n    perPaese[p] = (perPaese[p] || 0) + 1;\n    bilanciati.push(t);\n    if (bilanciati.length >= NUM_LOTTI) break;\n  }\n  for (const t of scelti) {\n    if (bilanciati.length >= NUM_LOTTI) break;\n    if (!bilanciati.includes(t)) bilanciati.push(t);\n  }\n  scelti = bilanciati;\n} else {\n  // Fallback se la scheda Temi e vuota o illeggibile\n  scelti = [\n    ['Spagna', 'abogados penalistas y despachos de derecho penal en Madrid'],\n    ['Regno Unito', 'criminal defence solicitors in London (independent firms)'],\n    ['Polonia', 'adwokat karnista i kancelarie prawa karnego w Warszawie'],\n    ['Paesi Bassi', 'strafrechtadvocaten in Amsterdam'],\n    ['Portogallo', 'advogados de direito penal em Lisboa']\n  ].map(([Paese, Tema]) => ({ ID: '', Paese, Settore: 'Diritto penale', Tema }));\n}\n\nreturn scelti.map((t, i) => ({\n  json: {\n    paese: t.Paese || '',\n    lotto: i + 1,\n    tema: t.Tema,\n    settore: t.Settore || 'Diritto penale',\n    tema_id: t.ID || '',\n    target_lotto: TARGET_LOTTO\n  }\n}));\n"
+      },
+      "id": "51855d0c-e202-455a-981d-033ee6117541",
+      "name": "Genera 5 Lotti",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 103,
+          "cachedResultName": "Scartati",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=103"
+        },
+        "options": {}
+      },
+      "id": "2ea74dd9-aa9e-4fc9-bd27-49f8aabc9c79",
+      "name": "Read Scartati",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "position": [
+        464,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// RocketReach non ha restituito un ID: persona non trovata\n// oppure richiesta respinta per rate limit (da riprovare).\nconst prospect = $('Email certa trovata?').item.json;\nconst testo = String($json.response ?? $json.detail ?? $json.message ?? '');\nconst stato = /rate limit/i.test(testo) ? 'RATE LIMIT' : 'PERSONA NON TROVATA';\n\nreturn {\n  json: {\n    ...prospect,\n    'Email RocketReach': '',\n    'Email RocketReach tutte': '',\n    'LinkedIn RocketReach': '',\n    'Stato RocketReach': stato\n  }\n};\n"
+      },
+      "id": "227bbf84-39ff-4d3b-a62b-3ed60f3964e5",
+      "name": "Prospect non trovato RocketReach",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6432,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1a7e0b2-5f3d-4b8e-9a61-2d4f8e7c9b10",
+              "leftValue": "={{ $json[\"Email certa\"] }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      },
+      "id": "2e0adaf4-cddc-4db7-a241-57b23d64ad55",
+      "name": "Ha email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        8496,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "s1",
+              "name": "Data",
+              "type": "string",
+              "value": "={{ $now.setZone('Europe/Rome').toFormat('yyyy-MM-dd') }}"
+            },
+            {
+              "id": "s2",
+              "name": "Nome",
+              "type": "string",
+              "value": "={{ $json.Nome }}"
+            },
+            {
+              "id": "s3",
+              "name": "Azienda",
+              "type": "string",
+              "value": "={{ $json.Azienda }}"
+            },
+            {
+              "id": "s4",
+              "name": "Ruolo",
+              "type": "string",
+              "value": "={{ $json.Ruolo }}"
+            },
+            {
+              "id": "s5",
+              "name": "Settore",
+              "type": "string",
+              "value": "={{ $json.Settore }}"
+            },
+            {
+              "id": "s6",
+              "name": "Sito",
+              "type": "string",
+              "value": "={{ $json.Sito }}"
+            },
+            {
+              "id": "s7",
+              "name": "Email probabili",
+              "type": "string",
+              "value": "={{ $json['Email probabili'] }}"
+            },
+            {
+              "id": "s8",
+              "name": "LinkedIn",
+              "type": "string",
+              "value": "={{ $json.LinkedIn }}"
+            },
+            {
+              "id": "s9",
+              "name": "Motivo scarto",
+              "type": "string",
+              "value": "={{ String($json['Stato RocketReach'] || '').startsWith('ESCLUSA') ? 'Esclusa: grande azienda - ' + String($json['Stato RocketReach']).slice(9) : (['RATE LIMIT', 'RICERCA NON COMPLETATA', 'RINVIATO (TETTO)'].includes($json['Stato RocketReach']) ? ((Number($json['Tentativi precedenti']) || 0) + 1 >= 3 ? 'Abbandonato: RocketReach non raggiunto dopo 3 tentativi' : 'Da riprovare (limite RocketReach)') : 'Nessuna email trovata (sito + RocketReach)') }}"
+            },
+            {
+              "id": "s10",
+              "name": "Nome Mailup",
+              "type": "string",
+              "value": "={{ $json['Nome Mailup'] }}"
+            },
+            {
+              "id": "s11",
+              "name": "Cognome Mailup",
+              "type": "string",
+              "value": "={{ $json['Cognome Mailup'] }}"
+            },
+            {
+              "id": "s12",
+              "name": "Paese",
+              "type": "string",
+              "value": "={{ $json.Paese }}"
+            },
+            {
+              "id": "s13",
+              "name": "Tipo studio",
+              "type": "string",
+              "value": "={{ $json['Tipo studio'] }}"
+            },
+            {
+              "id": "s14",
+              "name": "Città",
+              "type": "string",
+              "value": "={{ $json['Città'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "476f9ee8-0917-4bc1-becb-374f94d14df5",
+      "name": "Prepara scartati",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        8736,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 103,
+          "cachedResultName": "Scartati",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=103"
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [],
+          "value": {}
+        },
+        "options": {
+          "handlingExtraData": "insertInNewColumn"
+        }
+      },
+      "id": "b5886b93-7e1d-423a-9780-a6cbbcff4415",
+      "name": "Append - Scartati",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        8960,
+        224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Rende robusto l'output dell'AI: un lotto con JSON malformato,\n// troncato o in errore non deve far perdere gli altri lotti.\nconst raw = $json.output;\nconst errore = $json.error ? String($json.error.message ?? $json.error) : '';\n\nconst pulisci = (s) => String(s)\n  .trim()\n  .replace(/^```(?:json)?\\s*/i, '')\n  .replace(/```\\s*$/i, '')\n  .trim();\n\nconst tryParse = (s) => {\n  try {\n    return JSON.parse(s);\n  } catch {\n    return null;\n  }\n};\n\nlet candidati = null;\nlet stato = 'OK';\n\nif (errore) {\n  stato = 'ERRORE';\n} else if (raw && typeof raw === 'object') {\n  candidati = Array.isArray(raw.candidati)\n    ? raw.candidati\n    : (Array.isArray(raw) ? raw : null);\n} else if (typeof raw === 'string') {\n  const s = pulisci(raw);\n  const a = s.indexOf('{');\n  const b = s.lastIndexOf('}');\n  const dati = tryParse(s) ?? (a >= 0 && b > a ? tryParse(s.slice(a, b + 1)) : null);\n\n  if (dati && Array.isArray(dati.candidati)) {\n    candidati = dati.candidati;\n  } else {\n    // Recupero: prendiamo i singoli candidati validi\n    // anche se il JSON complessivo e rotto.\n    const oggetti = s.match(/\\{[^{}]*\\}/g) || [];\n    const recuperati = oggetti\n      .map(tryParse)\n      .filter(o => o && o.nome);\n\n    if (recuperati.length) {\n      candidati = recuperati;\n      stato = 'RECUPERATO';\n    }\n  }\n}\n\nif (!candidati) {\n  candidati = [];\n  if (stato === 'OK') stato = 'JSON NON VALIDO';\n}\n\nlet lotto = '';\nlet paese = '';\ntry {\n  const g = $('Genera 5 Lotti').all()[$itemIndex]?.json ?? $('Genera 5 Lotti').item.json;\n  lotto = g.lotto;\n  paese = g.paese || '';\n} catch {}\n\n// Ogni candidato porta con se il paese del lotto.\ncandidati = candidati.map(c => ({ ...c, paese: c?.paese || paese }));\n\nreturn {\n  json: {\n    output: JSON.stringify({ candidati }),\n    lotto,\n    stato_lotto: stato,\n    candidati_lotto: candidati.length,\n    errore\n  }\n};\n"
+      },
+      "id": "36e20c7b-2091-4a12-8b16-e24d793aac94",
+      "name": "Normalizza output AI",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Una riga di statistiche per esecuzione (scheda Log).\n// Parte dopo tutti i salvataggi.\nconst n = (nome, ramo) => {\n  try {\n    return $(nome).all(ramo ?? 0).length;\n  } catch {\n    return 0;\n  }\n};\n\nconst conta = (nome, ramo, f) => {\n  try {\n    return $(nome).all(ramo ?? 0).filter(f).length;\n  } catch {\n    return 0;\n  }\n};\n\nconst tutti = $('Aggiungi da riprovare').all().map(i => i.json);\nconst lotti = tutti.filter(l => l.stato_lotto !== 'RIPROVA');\nconst riprovati = tutti.reduce((s, l) => s + (l.riprovati || 0), 0);\n\nconst candidatiAI = lotti.reduce((s, l) => s + (l.candidati_lotto || 0), 0);\n\n// La deduplica emette un item vuoto quando non ci sono nuovi prospect.\n// I ripresi da 'Da riprovare' hanno 'Tentativi precedenti' > 0.\nlet nuoviAI = 0;\ntry {\n  nuoviAI = $('Deduplica e prepara righe').all()\n    .filter(i => i.json.Nome && !(Number(i.json['Tentativi precedenti']) > 0)).length;\n} catch {}\n\nconst stato = (s) => conta('Prepara righe finali', 0, i => i.json['Stato RocketReach'] === s);\nconst motivo = (prefisso) => conta('Prepara scartati', 0, i =>\n  String(i.json['Motivo scarto'] ?? '').startsWith(prefisso)\n);\nconst daRiprovare = motivo('Da riprovare');\nconst escluse = motivo('Esclusa');\n\nreturn [{\n  json: {\n    'Data ora': $now.setZone('Europe/Rome').toFormat('yyyy-MM-dd HH:mm'),\n    'Execution ID': $execution.id,\n    'Lotti': lotti.length,\n    'Lotti falliti': lotti.filter(l =>\n      l.stato_lotto === 'ERRORE' || l.stato_lotto === 'JSON NON VALIDO'\n    ).length,\n    'Lotti recuperati': lotti.filter(l => l.stato_lotto === 'RECUPERATO').length,\n    'Candidati AI': candidatiAI,\n    'Scartati deduplica': Math.max(candidatiAI - nuoviAI, 0),\n    'Nuovi candidati': nuoviAI,\n    '% nuovi': candidatiAI ? Math.round(nuoviAI / candidatiAI * 100) : 0,\n    'Email da sito': n('Email certa trovata?', 0),\n    'Email sito nominative': conta('Prepara righe finali', 0, i => i.json['Tipo email'] === 'SITO - NOMINATIVA'),\n    'Lookup RocketReach': n('RocketReach - Lookup persona'),\n    'RocketReach non trovati': stato('PERSONA NON TROVATA'),\n    'Email da RocketReach': n('Email RocketReach trovata?', 0),\n    'Salvati Prospect AI': n('Ha email?', 0),\n    'Scartati senza email': n('Ha email?', 1) - daRiprovare - escluse,\n    'Righe Mailup': n('Prepara Mailup'),\n    'Riprovati da Scartati': riprovati,\n    'Ricontrolli RocketReach': n('RocketReach - Status check 2'),\n    'RocketReach rate limit': stato('RATE LIMIT'),\n    'Da riprovare': daRiprovare,\n    'Rinviati tetto RocketReach': stato('RINVIATO (TETTO)'),\n    'Escluse grandi aziende': escluse,\n    'Abbandonati dopo tentativi': motivo('Abbandonato')\n  }\n}];\n"
+      },
+      "id": "96f044c5-370a-41b3-89f5-951aa96fd361",
+      "name": "Calcola statistiche",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "executeOnce": true,
+      "position": [
+        9424,
+        0
+      ],
+      "notes": "Ramo posizionato in basso di proposito: con l'ordine di esecuzione v1 parte solo dopo che il ramo principale (sopra) e terminato."
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 104,
+          "cachedResultName": "Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=104"
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "schema": [],
+          "value": {}
+        },
+        "options": {
+          "handlingExtraData": "insertInNewColumn"
+        }
+      },
+      "id": "2981fadc-c0cb-41c5-b1f5-fe9568b3b7c7",
+      "name": "Append - Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        9632,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "d2b8f1c3-6e4a-4c9f-8b72-3e5a9f8d0c21",
+              "leftValue": "={{ $json.Nome ?? '' }}",
+              "operator": {
+                "operation": "notEmpty",
+                "singleValue": true,
+                "type": "string"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      },
+      "id": "6b5e2ded-9b02-4fac-8521-0cdf70a3b78c",
+      "name": "Nuovo prospect?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2608,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "id": "208d61a2-f755-4060-88af-3b6409f05864",
+      "name": "Fine esecuzione",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        9200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "e3c9a2d4-7f5b-4d0a-9c83-4f6b0a9e1d32",
+              "leftValue": "={{ ['progress','searching','waiting','queued','not queued'].includes(String($json.status ?? '').toLowerCase()) || /rate limit/i.test(String($json.response ?? '')) }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      },
+      "id": "2466b789-a590-48a9-b17c-f18f1728f793",
+      "name": "Ricontrollare RocketReach?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        6880,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "9e3e4aac-a3be-4f7d-91e4-62d477581cfa",
+      "name": "Attendi RocketReach 2",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        7104,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.rocketreach.co/api/v2/person/checkStatus",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "={{ $json.id ?? $('Attendi RocketReach').item.json.id }}"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 2000
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "a5d423a0-efec-4650-aa8d-f39e18ba5688",
+      "name": "RocketReach - Status check 2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        7312,
+        432
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REDACTED",
+          "name": "RocketReach API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Reinserisce (max 40) i prospect scartati 'Da riprovare'\n// (limite RocketReach): ripassano dalla ricerca email\n// senza pagare una nuova ricerca AI. Vanno in testa, cosi hanno\n// la precedenza sia nella deduplica per studio sia nel tetto RocketReach.\nconst items = $input.all();\nconst archivio = $('Prepara archivio').first().json;\nconst bloccati = new Set(archivio.nomi_esistenti || []);\nconst dominiBloccati = new Set(archivio.domini_esistenti || []);\nconst tentativi = archivio.tentativi_rr || {};\n\nconst norm = (v) => String(v ?? '')\n  .normalize('NFKD')\n  .replace(/[̀-ͯ]/g, '')\n  .toLowerCase()\n  .replace(/&/g, ' and ')\n  .replace(/[^a-z0-9]+/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst chiaveDominio = (sito) => {\n  const s = String(sito ?? '').trim().toLowerCase()\n    .replace(/^https?:\\/\\//, '').replace(/^www\\./, '');\n  const [host, primo] = s.split(/[?#]/)[0].split('/');\n  if (!host) return '';\n  return ['sites.google.com', 'linktr.ee'].includes(host) && primo ? `${host}/${primo}` : host;\n};\n\nconst MAX = 40;\nconst visti = new Set();\nconst candidati = [];\n\nfor (const r of $('Read Scartati').all()) {\n  const j = r.json;\n  if (!String(j['Motivo scarto'] ?? '').startsWith('Da riprovare')) continue;\n\n  const n = norm(j.Nome);\n  const sito = String(j.Sito ?? '').trim();\n  if (!n || !sito || bloccati.has(n) || visti.has(n)) continue;\n  // Studio gia in archivio con un'altra persona: niente nuovo tentativo.\n  if (dominiBloccati.has(chiaveDominio(sito))) continue;\n\n  visti.add(n);\n  const parti = String(j.Nome).trim().split(/\\s+/);\n\n  candidati.push({\n    nome: j.Nome,\n    nome_proprio: j['Nome Mailup'] || parti[0],\n    cognome: j['Cognome Mailup'] || parti.slice(1).join(' '),\n    azienda: j.Azienda,\n    paese: j.Paese || '',\n    ruolo: j.Ruolo,\n    tipo_studio: j['Tipo studio'] || '',\n    citta: j['Città'] || '',\n    settore: j.Settore,\n    sito,\n    fonte: /^https?:\\/\\//i.test(sito) ? sito : 'https://' + sito,\n    tentativi: tentativi[n] || 1\n  });\n\n  if (candidati.length >= MAX) break;\n}\n\nif (candidati.length) {\n  items.unshift({\n    json: {\n      output: JSON.stringify({ candidati }),\n      lotto: 'riprova',\n      stato_lotto: 'RIPROVA',\n      candidati_lotto: 0,\n      riprovati: candidati.length\n    }\n  });\n}\n\nreturn items;\n"
+      },
+      "id": "aecee909-fbab-4476-bccf-0eb29572f67d",
+      "name": "Aggiungi da riprovare",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 105,
+          "cachedResultName": "Temi",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=105"
+        },
+        "options": {}
+      },
+      "id": "48a87a5f-73f6-43f3-a8fd-eedb80b8af43",
+      "name": "Read Temi",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "position": [
+        688,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggiorna la scheda Temi: ultimo uso, numero di usi,\n// candidati restituiti e quanti erano nuovi (non in archivio).\nconst norm = (v) => String(v ?? '')\n  .normalize('NFKD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .toLowerCase()\n  .replace(/&/g, ' and ')\n  .replace(/[^a-z0-9]+/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst temi = Object.fromEntries(\n  $('Read Temi').all().map(i => [String(i.json.ID), i.json])\n);\nconst genera = $('Genera 5 Lotti').all().map(i => i.json);\nconst lotti = Object.fromEntries(genera.map(g => [String(g.lotto), g]));\nconst archivio = $('Prepara archivio').first().json;\nconst nomiEsistenti = new Set(archivio.nomi_esistenti || []);\n\nconst ora = $now.setZone('Europe/Rome').toFormat('yyyy-MM-dd HH:mm');\nconst out = [];\n\n$input.all().forEach((it, idx) => {\n  const j = it.json;\n  // Un lotto AI per ogni lotto generato, nello stesso ordine.\n  const g = lotti[String(j.lotto)] || genera[idx];\n  if (!g || !g.tema_id) return;\n\n  const t = temi[String(g.tema_id)] || {};\n\n  let candidati = [];\n  try {\n    candidati = JSON.parse(j.output).candidati || [];\n  } catch {}\n\n  const nuovi = candidati.filter(c => {\n    const n = norm(c?.nome);\n    return n && !nomiEsistenti.has(n);\n  }).length;\n\n  out.push({\n    json: {\n      ID: g.tema_id,\n      'Ultimo uso': ora,\n      'Usi': String((Number(t.Usi) || 0) + 1),\n      'Candidati totali': String((Number(t['Candidati totali']) || 0) + candidati.length),\n      'Nuovi totali': String((Number(t['Nuovi totali']) || 0) + nuovi),\n      'Ultimo esito': `${j.stato_lotto}: ${nuovi}/${candidati.length} nuovi`\n    }\n  });\n});\n\nreturn out;\n"
+      },
+      "id": "6a7d4d89-755c-41b6-8857-30c3b8f7d800",
+      "name": "Prepara aggiornamento temi",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        -304
+      ],
+      "notes": "Ramo posizionato in alto: con l'ordine v1 parte prima del ramo principale, cosi l'uso del tema viene registrato anche se dopo qualcosa fallisce."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 105,
+          "cachedResultName": "Temi",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=105"
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "ID",
+              "id": "ID",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Paese",
+              "id": "Paese",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Settore",
+              "id": "Settore",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Tema",
+              "id": "Tema",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Attivo",
+              "id": "Attivo",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Ultimo uso",
+              "id": "Ultimo uso",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Usi",
+              "id": "Usi",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Candidati totali",
+              "id": "Candidati totali",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Nuovi totali",
+              "id": "Nuovi totali",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "canBeUsedToMatch": true,
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "Ultimo esito",
+              "id": "Ultimo esito",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {}
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "472a1a2a-716f-42a8-b0a2-839a7d7a6c3c",
+      "name": "Update - Temi",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2384,
+        -304
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tetto alle ricerche RocketReach per esecuzione: RocketReach ha un\n// limite orario (~70 ricerche). Precedenza ai prospect ripresi da\n// 'Da riprovare'; chi resta fuori va negli Scartati come 'Da riprovare'.\nconst TETTO = 60;\n\nconst norm = (v) => String(v ?? '').trim().toLowerCase();\n\nconst ripresi = new Set();\ntry {\n  for (const it of $('Aggiungi da riprovare').all()) {\n    if (it.json.stato_lotto !== 'RIPROVA') continue;\n    const candidati = JSON.parse(it.json.output || '{}').candidati || [];\n    for (const c of candidati) ripresi.add(norm(c?.nome));\n  }\n} catch {}\n\nconst ordinati = $input.all()\n  .map((it, i) => ({ it, i, prio: ripresi.has(norm(it.json.Nome)) ? 0 : 1 }))\n  .sort((a, b) => a.prio - b.prio || a.i - b.i);\n\nreturn ordinati.map((x, pos) => ({\n  json: { ...x.it.json, entro_tetto_rr: pos < TETTO },\n  pairedItem: { item: x.i }\n}));\n"
+      },
+      "id": "97d17869-0a4e-4f5f-aecc-0f1686a21774",
+      "name": "Applica tetto RocketReach",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5552,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f4d0b3e5-8a6c-4e1b-9d94-5a7c1b0f2e43",
+              "leftValue": "={{ $json.entro_tetto_rr === true }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      },
+      "id": "4d243f6e-f7fd-480a-aa5c-0f23b4922008",
+      "name": "Entro tetto RocketReach?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5776,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Oltre il tetto: niente ricerca RocketReach in questa esecuzione.\n// Finisce negli Scartati come 'Da riprovare' e viene ripreso dopo.\nreturn {\n  json: {\n    ...$json,\n    'Email RocketReach': '',\n    'Email RocketReach tutte': '',\n    'LinkedIn RocketReach': '',\n    'Stato RocketReach': 'RINVIATO (TETTO)'\n  }\n};\n"
+      },
+      "id": "d2ae5623-cb86-419e-ab4d-7a67d456d0ae",
+      "name": "Rinvia (tetto RocketReach)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6000,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "GOOGLE_SHEET_ID_REDACTED",
+          "cachedResultName": "TEST | Prospect Avvocati | Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 106,
+          "cachedResultName": "Esclusioni",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_ID_REDACTED/edit#gid=106"
+        },
+        "options": {}
+      },
+      "id": "3556b697-7c30-42f5-9ca8-609a73cf0981",
+      "name": "Read Esclusioni",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "position": [
+        912,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REDACTED",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Esclude SOLO i grandi studi e le grandi societa palesi (nessuna stima dell'AI):\n// marchio nella scheda Esclusioni, riconosciuto dal dominio del sito\n// (es. cliffordchance.com) o dal nome, se il marchio e di 2+ parole o il nome\n// coincide esattamente (cosi \"Vinge Law Office\" di un avvocato singolo\n// NON viene escluso per sbaglio da un marchio di una parola).\nconst norm = (v) => String(v ?? '')\n  .normalize('NFKD')\n  .replace(/[̀-ͯ]/g, '')\n  .toLowerCase()\n  .replace(/&/g, ' and ')\n  .replace(/[^a-z0-9]+/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst azienda = norm($json.Azienda);\nconst host = String($json.Sito ?? '')\n  .toLowerCase()\n  .replace(/^https?:\\/\\//, '')\n  .split('/')[0]\n  .replace(/^www\\./, '');\nconst etichette = host.split('.');\n\nlet motivo = '';\n\nfor (const r of $('Read Esclusioni').all()) {\n  const j = r.json;\n  if (String(j.Attivo ?? 'SI').trim().toUpperCase() === 'NO') continue;\n\n  const p = norm(j['Nome o marchio']);\n  if (!p) continue;\n\n  const compatti = [p.replace(/ /g, ''), p.replace(/ and /g, ' ').replace(/ /g, '')];\n  const perDominio = compatti.some(c => etichette.includes(c));\n  const perNome =\n    azienda === p ||\n    (p.includes(' ') && ` ${azienda} `.includes(` ${p} `));\n\n  if (perDominio || perNome) {\n    motivo = `in lista Esclusioni (${j['Nome o marchio']})`;\n    break;\n  }\n}\n\nif (!motivo && /\\bplc\\b/.test(azienda)) {\n  motivo = 'societa quotata (plc)';\n}\n\nreturn {\n  json: {\n    ...$json,\n    esclusa: Boolean(motivo),\n    motivo_esclusione: motivo\n  }\n};\n"
+      },
+      "id": "7afdf01e-ddf2-4650-8672-086b8cb83328",
+      "name": "Controllo grandi aziende",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a7e2c9f1-3b4d-4e6a-8f15-6c2d9b0e1a54",
+              "leftValue": "={{ $json.esclusa === true }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              },
+              "rightValue": ""
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          }
+        },
+        "options": {}
+      },
+      "id": "0149db21-fa39-41b8-a925-6b41dcf36bd9",
+      "name": "Grande azienda?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3040,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Grande azienda palese: niente ricerca email ne RocketReach.\n// Finisce negli Scartati con motivo definitivo.\nreturn {\n  json: {\n    ...$json,\n    'Email trovata sito': '',\n    'Email RocketReach': '',\n    'LinkedIn RocketReach': '',\n    'Stato RocketReach': 'ESCLUSA: ' + $json.motivo_esclusione\n  }\n};\n"
+      },
+      "id": "b7307deb-5f40-4049-bde1-88e17a1d4022",
+      "name": "Prepara esclusa",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3312,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Prospect Avvocati | Search\nCerca **avvocati penalisti** in Europa (esclusi Francia, Germania e Italia) e salva **solo chi ha un'email**. Per ogni studio un solo contatto: il **titolare** (l'avvocato stesso se lo studio è individuale, altrimenti fondatore / managing partner). Gira alle **06:00 e 18:00**.\n\n**Flusso:** archivio e temi → 5 ricerche AI (temi a rotazione, 5 paesi diversi) → deduplica per persona e per studio (dominio) + esclusione grandi studi → email gratis dal sito (homepage, contatti, note legali / Impressum; preferita l'email col nome del titolare) → RocketReach (max 60 ricerche, max 3 tentativi a persona) → salvataggio + Log.\n\n**Si configura dal foglio Google *TEST | Prospect Avvocati | Search*:**\n- **Temi**: nicchie per paese e città (scrivi `NO` in *Attivo* per spegnerne una)\n- **Esclusioni**: grandi studi da non contattare mai\n- **Log**: una riga di statistiche per ogni esecuzione\n\nRoadmap e storico: GitHub `marcoscazzari03/prospect-avvocati`",
+        "height": 420,
+        "width": 1240,
+        "color": 7
+      },
+      "id": "1f8dbaa4-fd02-491f-8670-132e4e49c02b",
+      "name": "Nota: come funziona",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -464
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c2d3e4f5-1b2c-4d3e-8f4a-5b6c7d8e9f01",
+              "leftValue": "={{ $json[\"Pagina da controllare 2\"] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b7c1e2d3-0a4f-4b6e-9c21-7d3e5f6a8b90",
+      "name": "Serve terza pagina?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4400,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json[\"Pagina da controllare 2\"] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en,es;q=0.9,pt;q=0.8,nl;q=0.8,pl;q=0.7,de;q=0.7,fr;q=0.6,*;q=0.5"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10,
+              "batchInterval": 200
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "html"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "d3e4f5a6-2c3d-4e4f-9a5b-6c7d8e9f0a12",
+      "name": "HTTP - Terza pagina",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        4624,
+        -352
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Estrae le email dalla pagina scaricata (PAGINA 3) e sceglie la migliore\n// tra quelle trovate finora. Ordine di preferenza:\n// 5   email del dominio con il nome della persona (es. j.garcia@studio.es)\n// 4.5 email gratuita/ordine (gmail, adv.oa.pt...) in un mailto con il nome\n// 4   email generica del dominio (info@, contact@, kancelaria@...)\n// 3   altra email personale del dominio (es. un collega)\n// 2   email gratuita/ordine in un mailto, senza il nome\n// 1   privacy@ / dpo@ / gdpr@ del dominio\nconst prospect = $('Serve terza pagina?').item.json;\nconst FASE = 'PAGINA 3';\n\nlet html = String($json.html ?? '');\n\nconst cleanHost = (raw) => String(raw ?? '').trim().toLowerCase()\n  .replace(/^https?:\\/\\//i, '').replace(/^\\/\\//, '')\n  .split('/')[0].split('?')[0].split('#')[0]\n  .replace(/^www\\./, '').replace(/:\\d+$/, '');\n\nconst decodeCfEmail = (encoded) => {\n  try {\n    if (!encoded || encoded.length < 4) return '';\n    const key = parseInt(encoded.slice(0, 2), 16);\n    let email = '';\n    for (let i = 2; i < encoded.length; i += 2) {\n      email += String.fromCharCode(parseInt(encoded.slice(i, i + 2), 16) ^ key);\n    }\n    return email;\n  } catch {\n    return '';\n  }\n};\n\nhtml = html\n  .replace(/&#(\\d+);/g, (_, n) => String.fromCharCode(Number(n)))\n  .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))\n  .replace(/&commat;/gi, '@')\n  .replace(/&period;/gi, '.')\n  .replace(/\\\\u0040/gi, '@')\n  .replace(/\\\\u002e/gi, '.')\n  .replace(/\\\\x40/gi, '@')\n  .replace(/\\\\x2e/gi, '.')\n  .replace(/%40/gi, '@')\n  .replace(/%2e/gi, '.')\n  .replace(/\\s*\\[\\s*(?:at|chiocciola)\\s*\\]\\s*/gi, '@')\n  .replace(/\\s*\\(\\s*(?:at|chiocciola)\\s*\\)\\s*/gi, '@')\n  .replace(/\\s*\\[\\s*(?:dot|punto)\\s*\\]\\s*/gi, '.')\n  .replace(/\\s*\\(\\s*(?:dot|punto)\\s*\\)\\s*/gi, '.');\n\n// --------------------------------------------------\n// EMAIL NELLA PAGINA (sicure = mailto o Cloudflare)\n// --------------------------------------------------\nconst sicure = new Set();\nconst tutte = [];\n\nlet m;\nconst cfRegex = /data-cfemail=[\"']([0-9a-f]+)[\"']/gi;\nwhile ((m = cfRegex.exec(html)) !== null) {\n  const e = decodeCfEmail(m[1]);\n  if (e) { sicure.add(e.toLowerCase()); tutte.push(e); }\n}\n\nconst mailtoRegex = /mailto:([^\"'?#\\s<>]+)/gi;\nwhile ((m = mailtoRegex.exec(html)) !== null) {\n  let v = m[1];\n  try { v = decodeURIComponent(v); } catch {}\n  sicure.add(v.toLowerCase().trim());\n  tutte.push(v);\n}\n\ntutte.push(...(html.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi) || []));\n\nconst ESTENSIONI = /\\.(png|jpe?g|gif|svg|webp|css|js|ico|woff2?|ttf|pdf)$/i;\nconst SCARTA_LOCALI = /^(no-?reply|do-?not-?reply|donotreply|noreply|mailer-daemon|postmaster|abuse|example|test|user|email|e-mail|name|nome|your|youremail|yourname|you|tuonome|sentry|wordpress|webmaster|hostmaster|jobs?|careers?|recruit(ment|ing)?|cv|hr|bewerbung|praktikum|stage|empleo|trabaja|vacatures|rekrutacja|kariera)$/;\nconst SCARTA_DOMINI = /(^|\\.)(example\\.(com|org)|sentry\\.io|sentry-next\\.wixpress\\.com|wixpress\\.com|domain\\.com|email\\.com|yoursite\\.com|godaddy\\.com|wix\\.com|squarespace\\.com)$/;\n\n// Email gratuite e degli ordini forensi: valide solo se in un mailto del sito.\nconst GRATUITE = /(^|\\.)(gmail\\.com|googlemail\\.com|icloud\\.com|me\\.com|aol\\.com|protonmail\\.(com|ch)|proton\\.me|mail\\.com|zoho\\.(com|eu)|(hotmail|outlook|live|yahoo|gmx|msn)\\.[a-z.]+|seznam\\.cz|centrum\\.(cz|sk)|email\\.cz|post\\.cz|wp\\.pl|o2\\.pl|onet\\.(pl|eu)|interia\\.(pl|eu)|op\\.pl|abv\\.bg|mail\\.bg|otenet\\.gr|hol\\.gr|freemail\\.hu|citromail\\.hu|sapo\\.pt|adv\\.oa\\.pt|icam\\.es|icab\\.(cat|es)|icav\\.es|telenet\\.be|skynet\\.be|ziggo\\.nl|kpnmail\\.nl|planet\\.nl|bluewin\\.ch|hispeed\\.ch|aon\\.at|chello\\.at|eircom\\.net|btinternet\\.com|btconnect\\.com|virginmedia\\.com|sky\\.com|telia\\.com|online\\.no|t-online\\.hu|azet\\.sk|zoznam\\.sk|inbox\\.lv|inbox\\.lt|mail\\.ee|tvnet\\.lv|net\\.hr|t-com\\.hr|siol\\.net|yandex\\.(com|ru)|libero\\.it)$/;\n\nconst GENERICHE = new Set([\n  'info', 'hello', 'contact', 'contacts', 'kontakt', 'kontakty', 'contacto', 'contato', 'contacte',\n  'office', 'mail', 'post', 'postmottak', 'posta', 'email', 'admin', 'secretaria', 'secretariat', 'secretariaat',\n  'sekretariat', 'sekretariaat', 'secretary', 'reception', 'recepcion', 'receptie', 'enquiries', 'enquiry',\n  'inquiries', 'inquiry', 'general', 'geral', 'administracion', 'administracao', 'administration', 'administratie', 'recepcja', 'despacho', 'bufete', 'abogados', 'advogados', 'advocaten',\n  'avocats', 'avocat', 'cabinet', 'kanzlei', 'kancelaria', 'biuro', 'kancelar', 'kancelarija', 'ured', 'pisarna',\n  'iroda', 'ugyved', 'ugyvediiroda', 'web', 'kontor', 'advokatbyra', 'office1', 'law', 'legal', 'lawyers', 'solicitors', 'criminal', 'crime', 'defence', 'defense',\n  'penal', 'strafrecht', 'advokat', 'advokatfirma', 'byra', 'toimisto', 'mailbox', 'studio', 'studiolegale'\n]);\nconst PRIVACY = /^(privacy|dpo|gdpr|rodo|datenschutz|dataprotection|data\\.protection|protecciondedatos|lopd|rgpd|avg)$/;\n\nconst dominio = cleanHost(prospect.Sito);\nconst titoli = new Set(['dr', 'mr', 'mrs', 'ms', 'prof', 'avv', 'me', 'mag', 'mgr', 'adw', 'adv', 'lic', 'ldo', 'dra', 'jur', 'kc', 'qc', 'judr', 'ing']);\nconst parti = String(prospect.Nome ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()\n  .split(/[\\s-]+/).map(p => p.replace(/[^a-z]/g, '')).filter(p => p && !titoli.has(p));\nconst primo = parti[0] || '';\nconst ultimo = parti.length > 1 ? parti[parti.length - 1] : '';\n\n// Segnaposto tipo \"nome.cognome@\" nelle varie lingue.\nconst SEGNAPOSTO = /^(firstname|first\\.?name|name|nome|nombre|prenom|vorname|voornaam|imie|jmeno|etunimi|fornamn|fornavn)[._-]?(lastname|last\\.?name|surname|cognome|apellidos?|nom|nachname|achternaam|nazwisko|prijmeni|sukunimi|efternamn|etternavn)?$/;\n\nconst conNome = (local) => {\n  const l = local.replace(/[^a-z]/g, '');\n  if (ultimo.length >= 3 && l.includes(ultimo)) return true;\n  if (primo.length >= 3 && ultimo && l.startsWith(primo)) return true;\n  if (primo && ultimo && l === primo[0] + ultimo) return true;\n  // Altri cognomi (nomi composti spagnoli / portoghesi)\n  return parti.slice(1, -1).some(p => p.length >= 4 && l.includes(p));\n};\n\nconst punteggio = (email) => {\n  const [local, dom] = email.split('@');\n  if (!local || !dom || SCARTA_LOCALI.test(local) || SCARTA_DOMINI.test(dom) || ESTENSIONI.test(email)) return 0;\n  if (dom.startsWith('www.')) return 0;\n  const delDominio = dominio && (dom === dominio || dom.endsWith('.' + dominio));\n  if (SEGNAPOSTO.test(local)) return 0;\n  if (delDominio) {\n    if (conNome(local)) {\n      // Stesso cognome ma un altro nome (es. un familiare nello studio): non e il titolare.\n      const altroNome = local.split(/[._-]+/).some(t =>\n        /^[a-z]{3,}$/.test(t) && !parti.some(p => p === t || t.includes(p) || p.includes(t)));\n      return altroNome ? 3 : 5;\n    }\n    if (GENERICHE.has(local)) return 4;\n    if (PRIVACY.test(local)) return 1;\n    return 3;\n  }\n  if (GRATUITE.test(dom) && sicure.has(email)) return conNome(local) ? 4.5 : 2;\n  return 0;\n};\n\nconst fonte = prospect['Pagina da controllare 2'];\n\nconst precedenti = Array.isArray(prospect._emailSito) ? prospect._emailSito : [];\nconst trovate = [...precedenti];\nconst giaViste = new Set(precedenti.map(x => x.email));\n\nfor (const raw of tutte) {\n  const email = String(raw).toLowerCase().trim().replace(/^[^a-z0-9]+/, '').replace(/[),.;:'\"]+$/g, '');\n  if (!/^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$/.test(email) || giaViste.has(email)) continue;\n  giaViste.add(email);\n  const p = punteggio(email);\n  if (p > 0) trovate.push({ email, p, fonte });\n}\n\ntrovate.sort((a, b) => b.p - a.p);\nconst migliore = trovate[0];\n\nconst tipo = !migliore ? '' :\n  migliore.p >= 4.5 ? 'SITO - NOMINATIVA' :\n  migliore.p >= 4 ? 'SITO - GENERICA' :\n  migliore.p >= 3 ? 'SITO - ALTRA EMAIL' :\n  migliore.p >= 2 ? 'SITO - EMAIL GRATUITA' : 'SITO - PRIVACY';\n\n// Si cerca su un'altra pagina finche non c'e un'email nominativa o generica.\nconst basta = Boolean(migliore && migliore.p >= 4);\n\nconst out = {\n  ...prospect,\n  _emailSito: trovate.slice(0, 8),\n  'Email trovata sito': migliore ? migliore.email : '',\n  'Email trovate sito': trovate.slice(0, 6).map(x => x.email).join(', '),\n  'Tipo email sito': tipo,\n  'Fonte email': migliore ? migliore.fonte : '',\n  'Stato ricerca email': (migliore ? 'TROVATA ' : 'NON TROVATA ') + FASE\n};\n\nreturn { json: out };\n"
+      },
+      "id": "e4f5a6b7-3d4e-4f5a-8b6c-7d8e9f0a1b23",
+      "name": "Estrai email terza pagina",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4848,
+        -352
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Prepara archivio": {
+      "main": [
+        [
+          {
+            "node": "Genera 5 Lotti",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI + Web Search": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ricerca prospect AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai email homepage": {
+      "main": [
+        [
+          {
+            "node": "Ha pagina secondaria?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ha pagina secondaria?": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Pagina secondaria",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Riunisci risultati email",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Estrai email pagina secondaria": {
+      "main": [
+        [
+          {
+            "node": "Serve terza pagina?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Riunisci risultati email": {
+      "main": [
+        [
+          {
+            "node": "Email certa trovata?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email certa trovata?": {
+      "main": [
+        [
+          {
+            "node": "Riunisci risultati finali",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Applica tetto RocketReach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizza RocketReach": {
+      "main": [
+        [
+          {
+            "node": "Email RocketReach trovata?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email RocketReach trovata?": {
+      "main": [
+        [
+          {
+            "node": "Riunisci risultati finali",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Riunisci risultati finali",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Riunisci risultati finali": {
+      "main": [
+        [
+          {
+            "node": "Prepara righe finali",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RocketReach ha ID?": {
+      "main": [
+        [
+          {
+            "node": "Attendi RocketReach",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prospect non trovato RocketReach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendi RocketReach": {
+      "main": [
+        [
+          {
+            "node": "RocketReach - Status check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara Mailup": {
+      "main": [
+        [
+          {
+            "node": "Append - Mailup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RocketReach - Lookup persona": {
+      "main": [
+        [
+          {
+            "node": "RocketReach ha ID?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Pagina secondaria": {
+      "main": [
+        [
+          {
+            "node": "Estrai email pagina secondaria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Homepage": {
+      "main": [
+        [
+          {
+            "node": "Estrai email homepage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append - Prospect": {
+      "main": [
+        [
+          {
+            "node": "Fine esecuzione",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append - Mailup": {
+      "main": [
+        [
+          {
+            "node": "Fine esecuzione",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Genera 5 Lotti": {
+      "main": [
+        [
+          {
+            "node": "Ricerca prospect AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Prospect": {
+      "main": [
+        [
+          {
+            "node": "Read Scartati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prospect non trovato RocketReach": {
+      "main": [
+        [
+          {
+            "node": "Riunisci risultati finali",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Prepara righe finali": {
+      "main": [
+        [
+          {
+            "node": "Ha email?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ha email?": {
+      "main": [
+        [
+          {
+            "node": "Append - Prospect",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepara Mailup",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepara scartati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara scartati": {
+      "main": [
+        [
+          {
+            "node": "Append - Scartati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ricerca prospect AI": {
+      "main": [
+        [
+          {
+            "node": "Normalizza output AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcola statistiche": {
+      "main": [
+        [
+          {
+            "node": "Append - Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplica e prepara righe": {
+      "main": [
+        [
+          {
+            "node": "Nuovo prospect?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nuovo prospect?": {
+      "main": [
+        [
+          {
+            "node": "Controllo grandi aziende",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fine esecuzione",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Append - Scartati": {
+      "main": [
+        [
+          {
+            "node": "Fine esecuzione",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Fine esecuzione": {
+      "main": [
+        [
+          {
+            "node": "Calcola statistiche",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RocketReach - Status check": {
+      "main": [
+        [
+          {
+            "node": "Ricontrollare RocketReach?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ricontrollare RocketReach?": {
+      "main": [
+        [
+          {
+            "node": "Attendi RocketReach 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalizza RocketReach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendi RocketReach 2": {
+      "main": [
+        [
+          {
+            "node": "RocketReach - Status check 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RocketReach - Status check 2": {
+      "main": [
+        [
+          {
+            "node": "Normalizza RocketReach",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizza output AI": {
+      "main": [
+        [
+          {
+            "node": "Aggiungi da riprovare",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepara aggiornamento temi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggiungi da riprovare": {
+      "main": [
+        [
+          {
+            "node": "Deduplica e prepara righe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Scartati": {
+      "main": [
+        [
+          {
+            "node": "Read Temi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara aggiornamento temi": {
+      "main": [
+        [
+          {
+            "node": "Update - Temi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Applica tetto RocketReach": {
+      "main": [
+        [
+          {
+            "node": "Entro tetto RocketReach?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entro tetto RocketReach?": {
+      "main": [
+        [
+          {
+            "node": "RocketReach - Lookup persona",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rinvia (tetto RocketReach)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rinvia (tetto RocketReach)": {
+      "main": [
+        [
+          {
+            "node": "Riunisci risultati finali",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Read Temi": {
+      "main": [
+        [
+          {
+            "node": "Read Esclusioni",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Esclusioni": {
+      "main": [
+        [
+          {
+            "node": "Prepara archivio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Controllo grandi aziende": {
+      "main": [
+        [
+          {
+            "node": "Grande azienda?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grande azienda?": {
+      "main": [
+        [
+          {
+            "node": "Prepara esclusa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP - Homepage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepara esclusa": {
+      "main": [
+        [
+          {
+            "node": "Riunisci risultati finali",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Ogni 12 ore | 06:00 - 18:00": {
+      "main": [
+        [
+          {
+            "node": "Read Prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serve terza pagina?": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Terza pagina",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Riunisci risultati email",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "HTTP - Terza pagina": {
+      "main": [
+        [
+          {
+            "node": "Estrai email terza pagina",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estrai email terza pagina": {
+      "main": [
+        [
+          {
+            "node": "Riunisci risultati email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timezone": "Europe/Rome",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp"
+  },
+  "nodeGroups": [
+    {
+      "id": "99f8a6a2-ad15-456d-8f24-e98482c17a93",
+      "name": "1 · Archivio e temi",
+      "nodeIds": [
+        "5f0aa587-7846-4611-a9ea-bf1e6555d83e",
+        "2ea74dd9-aa9e-4fc9-bd27-49f8aabc9c79",
+        "48a87a5f-73f6-43f3-a8fd-eedb80b8af43",
+        "3556b697-7c30-42f5-9ca8-609a73cf0981",
+        "d39a06a5-9bf7-43cb-a24a-920adee7a93f",
+        "51855d0c-e202-455a-981d-033ee6117541"
+      ],
+      "description": "Legge prospect, scartati, temi ed esclusioni dal foglio e sceglie i 5 temi della rotazione."
+    },
+    {
+      "id": "a7ad9d08-eb1f-45ef-bd7f-0f10e1e16bb4",
+      "name": "2 · Ricerca AI",
+      "nodeIds": [
+        "184b541d-b05c-486f-a74b-32b7da67b35b",
+        "367cc261-5855-4455-8cbd-0a9c4586c1fe",
+        "36e20c7b-2091-4a12-8b16-e24d793aac94"
+      ],
+      "description": "5 ricerche OpenAI con web search (una per tema) e recupero dell'output anche se malformato."
+    },
+    {
+      "id": "1c234401-66b1-4ed9-880d-517a911e05b7",
+      "name": "3 · Aggiorna temi",
+      "nodeIds": [
+        "6a7d4d89-755c-41b6-8857-30c3b8f7d800",
+        "472a1a2a-716f-42a8-b0a2-839a7d7a6c3c"
+      ],
+      "description": "Registra nella scheda Temi uso, candidati e nuovi trovati per ogni tema."
+    },
+    {
+      "id": "9b605634-495e-4ab6-81a2-6752b0397a8f",
+      "name": "4 · Riprova e deduplica",
+      "nodeIds": [
+        "aecee909-fbab-4476-bccf-0eb29572f67d",
+        "c8bc2725-241d-489e-9ac7-2cf3d653d714"
+      ],
+      "description": "Riprende i \"Da riprovare\" (max 3 tentativi) e scarta persone e studi (dominio) già in archivio."
+    },
+    {
+      "id": "ed5f8241-a02b-4bb1-9f35-dcdf419227bb",
+      "name": "5 · Filtro grandi aziende",
+      "nodeIds": [
+        "7afdf01e-ddf2-4650-8672-086b8cb83328",
+        "0149db21-fa39-41b8-a925-6b41dcf36bd9"
+      ],
+      "description": "Esclude i grandi studi e le Big Four della scheda Esclusioni, prima di spendere crediti."
+    },
+    {
+      "id": "bf34ab3c-c395-40c1-8977-4821fe644fe5",
+      "name": "6 · Email dal sito (gratis)",
+      "nodeIds": [
+        "d85f0efd-b3b5-42f4-a1b5-1cc5bea582f2",
+        "e2a0f247-60ce-4193-844b-2650ae77f304",
+        "caefd073-f301-404a-8ac8-56f80bb48e08",
+        "a84de5e3-a8e8-4701-ae21-667a44f4e838",
+        "0209888c-d21b-4fdc-844c-9b38861ade8e",
+        "32fa52c5-0de6-45ea-ab87-0be287c4e8f2",
+        "6ab677b7-d6e5-4776-ae6f-d8ec65e2863f",
+        "b7c1e2d3-0a4f-4b6e-9c21-7d3e5f6a8b90",
+        "d3e4f5a6-2c3d-4e4f-9a5b-6c7d8e9f0a12",
+        "e4f5a6b7-3d4e-4f5a-8b6c-7d8e9f0a1b23"
+      ],
+      "description": "Homepage, pagina contatti e note legali / Impressum: email gratis dal sito, preferita quella col nome del titolare."
+    },
+    {
+      "id": "d525e69c-2e0d-496a-bf25-d0c785309d42",
+      "name": "7 · Tetto RocketReach",
+      "nodeIds": [
+        "97d17869-0a4e-4f5f-aecc-0f1686a21774",
+        "4d243f6e-f7fd-480a-aa5c-0f23b4922008"
+      ],
+      "description": "Max 60 ricerche per esecuzione, precedenza ai 'Da riprovare'. Oltre il tetto: rinviati."
+    },
+    {
+      "id": "475dbf1e-0e8f-478c-a743-e6245652bc88",
+      "name": "8 · Ricerca RocketReach",
+      "nodeIds": [
+        "bf1263d4-31bd-4175-93ba-77804df6aea7",
+        "ead099c9-8390-47aa-be26-46dffbd13d04"
+      ],
+      "description": "Cerca la persona su RocketReach (una ricerca ogni 5 secondi)."
+    },
+    {
+      "id": "497fc440-6bd5-4c6f-ba66-0be5977bfd5f",
+      "name": "9 · Esito RocketReach",
+      "nodeIds": [
+        "20ef0958-d068-43d6-a508-bbae16fd6842",
+        "01a50182-768e-4614-a945-102eb4a5c3ee",
+        "2466b789-a590-48a9-b17c-f18f1728f793",
+        "9e3e4aac-a3be-4f7d-91e4-62d477581cfa",
+        "a5d423a0-efec-4650-aa8d-f39e18ba5688",
+        "145d69fc-e84d-4707-a6f1-c99f14f3e051",
+        "9cb7c323-7aac-4c98-851a-49531573826f"
+      ],
+      "description": "Controlla lo stato dopo 20s e, se serve, di nuovo dopo 30s; tiene solo email professionali validate."
+    },
+    {
+      "id": "df050297-88b3-4282-834b-08ab0ac7a9cc",
+      "name": "10 · Righe finali",
+      "nodeIds": [
+        "200b4554-13c0-4f30-a3c1-0e0eb2c71e12",
+        "ddb575a5-9207-4c75-8a93-d8f1655cfedd",
+        "2e0adaf4-cddc-4db7-a241-57b23d64ad55"
+      ],
+      "description": "Unisce tutti i risultati e separa chi ha l'email da chi no."
+    },
+    {
+      "id": "56dbd410-27ab-4195-9111-a5d806b0312d",
+      "name": "11 · Mailup",
+      "nodeIds": [
+        "e6199d58-6ace-4bfc-ba43-f6def6802999",
+        "5a0eb7a0-aa3b-47ec-8126-590176820c6f"
+      ],
+      "description": "Prospect con email nel formato del foglio Mailup."
+    },
+    {
+      "id": "e6527cb8-8ce5-444f-a6af-2f7a1d74c9e5",
+      "name": "12 · Scartati",
+      "nodeIds": [
+        "476f9ee8-0917-4bc1-becb-374f94d14df5",
+        "b5886b93-7e1d-423a-9780-a6cbbcff4415"
+      ],
+      "description": "Senza email o esclusi: scheda Scartati (i 'Da riprovare' vengono ripresi al giro dopo)."
+    },
+    {
+      "id": "664d63a2-9375-434a-825a-b2ee32248699",
+      "name": "13 · Log esecuzione",
+      "nodeIds": [
+        "208d61a2-f755-4060-88af-3b6409f05864",
+        "96f044c5-370a-41b3-89f5-951aa96fd361",
+        "2981fadc-c0cb-41c5-b1f5-fe9568b3b7c7"
+      ],
+      "description": "A fine esecuzione scrive una riga di statistiche nella scheda Log."
+    }
+  ],
+  "tags": []
+}
