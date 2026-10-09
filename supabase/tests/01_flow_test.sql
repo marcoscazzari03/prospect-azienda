@@ -138,9 +138,9 @@ select pg_temp.check((select finalize_search((select id from s))).status = 'part
 -- Rimborso di un lead segnalato
 insert into lead_reports (delivery_id, org_id, reason)
   select id, org_id, 'bounce' from deliveries where person_key = 'mario rossi|acme.it';
-select refund_report((select id from lead_reports limit 1), null, true);
+select refund_report((select id from lead_reports limit 1), true);
 select pg_temp.check(org_available_credits((select org_a from t)) = 12, 'rimborso di 2 crediti');
-select refund_report((select id from lead_reports limit 1), null, true);
+select refund_report((select id from lead_reports limit 1), true);
 select pg_temp.check(org_available_credits((select org_a from t)) = 12, 'rimborso non duplicabile');
 
 -- Accrediti Stripe idempotenti

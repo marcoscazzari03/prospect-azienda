@@ -419,7 +419,7 @@ end;
 $$;
 
 -- Rimborso di un lead segnalato (automatico entro soglia o deciso dall'admin).
-create or replace function public.refund_report(p_report uuid, p_actor uuid, p_approve boolean)
+create or replace function public.refund_report(p_report uuid, p_approve boolean, p_actor uuid default null)
 returns public.lead_reports language plpgsql security definer set search_path = public as $$
 declare
   v_report lead_reports%rowtype;
@@ -459,7 +459,7 @@ revoke execute on function
   public.record_engine_progress(uuid, text, text, text, jsonb),
   public.apply_engine_results(uuid, text, jsonb),
   public.finalize_search(uuid, text),
-  public.refund_report(uuid, uuid, boolean),
+  public.refund_report(uuid, boolean, uuid),
   public.org_available_credits(uuid)
 from public, anon, authenticated;
 
@@ -471,6 +471,6 @@ grant execute on function
   public.record_engine_progress(uuid, text, text, text, jsonb),
   public.apply_engine_results(uuid, text, jsonb),
   public.finalize_search(uuid, text),
-  public.refund_report(uuid, uuid, boolean),
+  public.refund_report(uuid, boolean, uuid),
   public.org_available_credits(uuid)
 to service_role;

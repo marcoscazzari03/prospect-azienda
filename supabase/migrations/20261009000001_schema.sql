@@ -317,6 +317,7 @@ create table public.suppression_list (
 create table public.optout_requests (
   id uuid primary key default gen_random_uuid(),
   email_hash text not null,
+  domain_hash text,                 -- valorizzato solo se si chiede l'esclusione dell'intero dominio
   token_hash text not null unique,
   whole_domain boolean not null default false,
   status text not null default 'pending' check (status in ('pending', 'confirmed')),
