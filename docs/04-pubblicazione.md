@@ -11,8 +11,12 @@ sottodominio `leads.weborastudio.it`.
 3. *Authentication → URL Configuration*:
    - Site URL: `https://leads.weborastudio.it`
    - Redirect URLs: `https://leads.weborastudio.it/auth/conferma`
-4. *Authentication → Emails*: personalizza in italiano i testi di conferma e reset (facoltativo).
-   Per inviare dal tuo dominio, imposta un SMTP (es. Resend, vedi punto 5).
+4. *Authentication → Emails → Templates*: i link nei modelli devono usare il formato `token_hash`
+   (più affidabile del link standard: funziona anche aperto da un altro browser):
+   - Confirm signup: `{{ .SiteURL }}/auth/conferma?token_hash={{ .TokenHash }}&type=email&next=/app`
+   - Reset password: `{{ .SiteURL }}/auth/conferma?token_hash={{ .TokenHash }}&type=recovery&next=/nuova-password`
+   Redirect URLs: aggiungere anche `https://leads.weborastudio.it/**`.
+   Per inviare dal tuo dominio serve l'SMTP personalizzato (Resend, punto 5).
 5. *Project Settings → API*: copia **Project URL**, **anon key** e **service_role key**.
 6. Dopo esserti registrato sulla piattaforma, renditi amministratore (*SQL Editor*):
    ```sql
