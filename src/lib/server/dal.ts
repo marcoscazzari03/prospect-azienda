@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 // Data Access Layer: chi è l'utente e a quale organizzazione appartiene.
@@ -45,6 +46,9 @@ export const getViewer = cache(async () => {
   ]);
   const org = (membership?.organizations ?? null) as unknown as Org | null;
   if (!org) return null;
+  // Registra le scadenze maturate prima di leggere il saldo: così il saldo
+  // mostrato è sempre quello spendibile, anche tra un giro del cron e l'altro.
+  await createAdminClient().rpc("expire_credits", { p_org: org.id });
   const [{ data: balance }, { data: plan }] = await Promise.all([
     supabase.from("org_balances").select("available").eq("org_id", org.id).maybeSingle(),
     supabase.from("plans").select("*").eq("id", org.plan_id).maybeSingle(),

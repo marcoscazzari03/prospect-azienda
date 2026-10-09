@@ -14,7 +14,7 @@ export default function TermsPage() {
       <p>{BRAND.name} cerca su fonti pubbliche aziende e referenti corrispondenti ai criteri indicati dal cliente e li consegna con l&apos;indicazione della fonte e dello stato dell&apos;email. Il servizio è riservato a professionisti e imprese.</p>
 
       <h2>Crediti e pagamenti</h2>
-      <p>All&apos;avvio di una ricerca viene riservato il numero massimo di crediti necessario; al termine vengono addebitati solo i lead consegnati e i crediti restanti tornano disponibili. I crediti dei pacchetti valgono 12 mesi; quelli degli abbonamenti scadono un mese dopo la fine del periodo in cui sono stati accreditati. Gli abbonamenti si rinnovano ogni mese e si possono annullare in qualsiasi momento con effetto a fine periodo.</p>
+      <p>All&apos;avvio di una ricerca viene riservato il numero massimo di crediti necessario; al termine vengono addebitati solo i lead consegnati e i crediti restanti tornano disponibili. I crediti di benvenuto e quelli dei pacchetti valgono 12 mesi; quelli degli abbonamenti scadono un mese dopo la fine del periodo in cui sono stati accreditati. Si usano sempre per primi i crediti più vicini alla scadenza; alla scadenza la parte non usata viene tolta dal saldo e il movimento compare in «Crediti e piano». Gli abbonamenti si rinnovano ogni mese e si possono annullare in qualsiasi momento con effetto a fine periodo.</p>
 
       <h2>Garanzia</h2>
       <p>I lead con email che rimbalza (entro 30 giorni) o non conformi ai filtri della ricerca (entro 14 giorni) possono essere segnalati dalla piattaforma: i crediti vengono restituiti automaticamente entro il 10% dei lead della ricerca e, oltre, dopo una verifica.</p>

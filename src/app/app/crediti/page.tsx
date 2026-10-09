@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PricingTable } from "@/components/pricing-table";
 import { Alert, Button, Card, PageHeader, Stat } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicPlans } from "@/lib/server/catalog";
 import { stripeEnabled } from "@/lib/server/stripe";
@@ -19,13 +20,24 @@ export default async function CreditsPage({ searchParams }: PageProps<"/app/cred
   const viewer = await requireViewer();
   const { pagamento, piano } = await searchParams;
   const supabase = await createClient();
-  const [plans, { data: ledger }, { data: payments }, { data: sub }] = await Promise.all([
+  const [plans, { data: lots }, { data: ledger }, { data: payments }, { data: sub }] = await Promise.all([
     getPublicPlans(),
+    createAdminClient().rpc("credit_lots", { p_org: viewer.org.id }),
     supabase.from("credit_ledger").select("id, delta, kind, description, created_at").order("created_at", { ascending: false }).limit(50),
     supabase.from("payments").select("id, kind, amount_cents, status, invoice_url, created_at").order("created_at", { ascending: false }).limit(20),
     supabase.from("subscriptions").select("plan_id, status, current_period_end, cancel_at_period_end").maybeSingle(),
   ]);
   const billing = stripeEnabled();
+  // Crediti non ancora usati raggruppati per giorno di scadenza (i più vicini prima).
+  const expiring = Object.entries(
+    (lots ?? [])
+      .filter((l) => l.expires_at && l.remaining > 0 && new Date(l.expires_at) > new Date())
+      .reduce<Record<string, number>>((acc, l) => {
+        const day = new Date(l.expires_at).toLocaleDateString("it-IT", { timeZone: "Europe/Rome" });
+        acc[day] = (acc[day] ?? 0) + l.remaining;
+        return acc;
+      }, {}),
+  ).slice(0, 3);
 
   return (
     <>
@@ -35,7 +47,12 @@ export default async function CreditsPage({ searchParams }: PageProps<"/app/cred
       {typeof piano === "string" && piano && <div className="mb-6"><Alert>Hai scelto il piano «{plans.find((p) => p.id === piano)?.name ?? piano}»: completa l&apos;acquisto qui sotto.</Alert></div>}
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Stat label="Crediti disponibili" value={formatNumber(viewer.credits)} tone="ledger" />
+        <Stat
+          label="Crediti disponibili"
+          value={formatNumber(viewer.credits)}
+          tone="ledger"
+          hint={expiring.length ? expiring.map(([day, n]) => `${formatNumber(n)} scadono il ${day}`).join(" · ") : undefined}
+        />
         <Stat label="Piano attuale" value={viewer.plan?.name ?? "—"} hint={sub ? `Abbonamento ${sub.status}${sub.current_period_end ? ` · rinnovo ${new Date(sub.current_period_end).toLocaleDateString("it-IT")}` : ""}${sub.cancel_at_period_end ? " · annullato a fine periodo" : ""}` : undefined} />
         <Card className="flex flex-col justify-between p-5">
           <p className="text-sm text-muted">Fatture, metodo di pagamento, disdetta</p>

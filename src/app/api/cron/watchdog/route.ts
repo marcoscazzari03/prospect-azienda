@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { safeEqual } from "@/lib/server/crypto";
 import { closeStaleRuns } from "@/lib/server/searches";
+import { createAdminClient } from "@/lib/supabase/admin";
 
-// Chiamato da Vercel Cron: chiude i giri senza notizie e restituisce i crediti.
+// Chiamato da Vercel Cron: chiude i giri senza notizie e restituisce i crediti,
+// poi registra le scadenze dei crediti maturate.
 export async function GET(request: Request) {
   const secret = env.cronSecret();
   const auth = request.headers.get("authorization") ?? "";
@@ -11,5 +13,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const closed = await closeStaleRuns();
-  return NextResponse.json({ closed });
+  const { data: expired, error } = await createAdminClient().rpc("expire_credits", {});
+  if (error) console.error("expire_credits", error.message);
+  return NextResponse.json({ closed, expired: expired ?? 0 });
 }

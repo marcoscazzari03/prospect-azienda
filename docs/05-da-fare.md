@@ -15,7 +15,7 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 - [ ] Facoltativo: casella Hostinger leads@weborastudio.it per ricevere le risposte
 
 ## Prodotto
-- [ ] Scadenza automatica dei crediti (oggi i crediti non scadono mai)
+- [x] Scadenza automatica dei crediti (si usano prima quelli che scadono prima; migrazione `20261010000004_credit_expiry.sql`)
 - [ ] Verifica SMTP delle email trovate sui siti
 - [ ] Ricerche ricorrenti, più utenti per account, export Excel, API (fase 2)
 

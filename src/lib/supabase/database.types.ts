@@ -582,6 +582,14 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"credit_lots":
+{ Args: { "p_org": string }; Returns: {
+              "expired": number,"expires_at": string,"granted": number,"kind": string,"lot_id": number,"remaining": number
+            }[]
+                           },
+"expire_credits":
+{ Args: { "p_org"?: string }; Returns: number
+                           },
 "finalize_search":
 { Args: { "p_error"?: string,"p_search": string }; Returns: {
               "attempts": number,
