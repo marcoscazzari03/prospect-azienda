@@ -14,6 +14,7 @@ Destinazione: **https://leads.weborastudio.it**
 | [docs/02-proposta.md](docs/02-proposta.md) | Concept, pricing, UX, architettura, MVP, costi, rischi, GDPR, piano |
 | [docs/03-contratto-motore.md](docs/03-contratto-motore.md) | Contratto API tra backend e motore n8n |
 | [docs/04-pubblicazione.md](docs/04-pubblicazione.md) | Guida passo-passo: Supabase, Vercel, n8n, Stripe, dominio |
+| [docs/05-da-fare.md](docs/05-da-fare.md) | Attività aperte prima del lancio |
 
 ## Architettura
 
