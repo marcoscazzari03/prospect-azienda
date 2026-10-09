@@ -39,15 +39,34 @@ const VERTICE = ['ceo', 'founder', 'co founder', 'cofounder', 'owner', 'titolare
   'president', 'managing director', 'amministratore', 'general manager', 'direttore generale', 'partner',
   'managing partner', 'socio', 'geschaftsfuhrer', 'gerente', 'director general', 'directeur general', 'proprietario',
   'principal', 'head', 'chief'];
-const ruoliRichiesti = job.target.roles.map(norm).filter(Boolean);
+// I ruoli scelti nel wizard possono contenere alternative ("Titolare / CEO"):
+// ognuna conta da sola, con i sinonimi più comuni in italiano e inglese.
+const SINONIMI = {
+  ceo: ['ceo', 'chief executive', 'amministratore delegato', 'ad'],
+  titolare: ['titolare', 'owner', 'proprietario', 'imprenditore'],
+  fondatore: ['fondatore', 'founder', 'co founder', 'cofounder', 'co fondatore', 'cofondatore'],
+  founder: ['founder', 'co founder', 'cofounder', 'fondatore', 'co fondatore'],
+  'managing director': ['managing director', 'direttore generale', 'general manager', 'amministratore unico'],
+  partner: ['partner', 'socio', 'managing partner', 'senior partner'],
+  cto: ['cto', 'chief technology', 'responsabile it', 'it manager', 'head of it'],
+  cfo: ['cfo', 'chief financial', 'direttore finanziario', 'responsabile amministrativo'],
+  cmo: ['cmo', 'chief marketing', 'direttore marketing', 'marketing director', 'head of marketing', 'responsabile marketing'],
+};
+const scelti = job.target.roles
+  .flatMap(r => String(r).split(/\s*(?:\/|,|\||&|\so\s|\sor\s)\s*/i))
+  .map(norm).filter(Boolean);
+const ruoliRichiesti = [...new Set(scelti.flatMap(a => [a, ...(SINONIMI[a] || [])]))];
+// Parole generiche che da sole non dicono nulla sul ruolo.
+const GENERICHE_RUOLO = new Set(['responsabile', 'direttore', 'director', 'manager', 'head', 'chief', 'senior', 'junior', 'ufficio']);
+const parola = (testo, termine) => ` ${testo} `.includes(` ${termine} `);
 const coerenzaRuolo = (titolo) => {
   const t = norm(titolo);
   if (!t) return 'unknown';
-  if (ruoliRichiesti.some(r => t.includes(r) || r.includes(t))) return 'exact';
-  const tok = ruoliRichiesti.flatMap(r => r.split(' ')).filter(w => w.length >= 4);
-  if (tok.some(w => t.includes(w))) return 'plausible';
-  if (!ruoliRichiesti.length && VERTICE.some(v => t.includes(v))) return 'exact';
-  if (VERTICE.some(v => t.includes(v))) return 'plausible';
+  if (ruoliRichiesti.some(r => parola(t, r))) return 'exact';
+  const tok = scelti.flatMap(r => r.split(' ')).filter(w => w.length >= 4 && !GENERICHE_RUOLO.has(w));
+  if (tok.some(w => parola(t, w))) return 'plausible';
+  if (!ruoliRichiesti.length && VERTICE.some(v => parola(t, v))) return 'exact';
+  if (VERTICE.some(v => parola(t, v))) return 'plausible';
   return 'mismatch';
 };
 

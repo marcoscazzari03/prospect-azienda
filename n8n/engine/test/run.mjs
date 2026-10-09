@@ -55,6 +55,17 @@ assert.deepEqual(dedup[0]._stats_deduplica.scarti, {
 const vuoto = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [job] }, input: [{ candidates: [] }] }).map(i => i.json);
 assert.equal(vuoto[0]._vuoto, true);
 console.log('ok  deduplica, esclusioni, limite per azienda, ruolo');
+const conRuoli = (roles, title) => run(src('04-deduplica-candidati.js'), {
+  nodes: { 'Valida richiesta': [{ ...job, target: { ...job.target, roles } }] },
+  input: [{ candidates: [{ company_name: 'Acme', website: 'https://acme.it', full_name: 'Mario Rossi', job_title: title, source_url: 'https://acme.it' }] }]
+})[0].json.role_match;
+assert.equal(conRuoli(['Titolare / CEO'], 'CEO e Founder'), 'exact');
+assert.equal(conRuoli(['Titolare / CEO'], 'Proprietario'), 'exact');
+assert.equal(conRuoli(['Titolare / CEO'], 'Co-Founder'), 'plausible');
+assert.equal(conRuoli(['Fondatore'], 'Co-Founder e Google Ads Expert'), 'exact');
+assert.equal(conRuoli(['Direttore marketing'], 'Head of Marketing'), 'plausible');
+assert.equal(conRuoli(['Responsabile IT / CTO'], 'Office manager'), undefined); // scartato: ruolo non coerente
+console.log('ok  ruoli con alternative e sinonimi (Titolare / CEO)');
 
 // 3. Estrazione email
 const estrai = src('05-estrai-email.template.js', { __SORGENTE__: 'P', __FASE__: 'HOMEPAGE', __FONTE__: "$('P').item.json.website" });
