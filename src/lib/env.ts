@@ -23,5 +23,7 @@ export const env = {
   stripeWebhookSecret: () => process.env.STRIPE_WEBHOOK_SECRET ?? "",
   cronSecret: () => process.env.CRON_SECRET ?? "",
   resendApiKey: () => process.env.RESEND_API_KEY ?? "",
+  // Facoltativo: verifica delle caselle con MillionVerifier (https://www.millionverifier.com).
+  emailVerifierKey: () => (process.env.MILLIONVERIFIER_API_KEY ?? "").trim(),
   emailFrom: () => process.env.EMAIL_FROM ?? "Webora Leads <leads@weborastudio.it>",
 };

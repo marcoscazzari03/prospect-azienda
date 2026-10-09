@@ -5,7 +5,7 @@ import { z } from "zod";
 import { requireViewer, type Plan } from "@/lib/server/dal";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { defaultSearchName, searchInputSchema, toTarget } from "@/lib/domain/search-input";
+import { defaultSearchName, nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { startSearch } from "@/lib/server/searches";
 import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
 import { SEARCH_RULES } from "@/lib/config";
@@ -42,6 +42,7 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
     emailMode: form.get("emailMode"),
     quantity: form.get("quantity"),
     contactsPerCompany: form.get("contactsPerCompany") ?? 1,
+    repeat: form.get("repeat") ?? "none",
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dati non validi" };
   const input = parsed.data;
@@ -67,6 +68,12 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
     return { error: "Non è stato possibile avviare la ricerca. Riprova." };
   }
   const searchId = (data as { id: string }).id;
+  if (input.repeat !== "none") {
+    await db
+      .from("searches")
+      .update({ repeat: input.repeat, next_repeat_at: nextRepeatAt(input.repeat, new Date()).toISOString() })
+      .eq("id", searchId);
+  }
   await startSearch(searchId);
   revalidatePath("/app", "layout");
   redirect(`/app/ricerche/${searchId}`);
@@ -131,4 +138,13 @@ export async function openPortal() {
   if (!stripeEnabled()) redirect("/app/crediti?pagamento=non-attivo");
   const session = await createPortal(viewer);
   redirect(session.url);
+}
+
+// Ferma la ripetizione automatica di una ricerca.
+export async function stopRepeat(form: FormData) {
+  const viewer = await requireViewer();
+  const id = z.string().uuid().safeParse(form.get("searchId"));
+  if (!id.success) return;
+  await createAdminClient().from("searches").update({ repeat: "none", next_repeat_at: null }).eq("id", id.data).eq("org_id", viewer.org.id);
+  revalidatePath(`/app/ricerche/${id.data}`);
 }

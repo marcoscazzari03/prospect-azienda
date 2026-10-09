@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { buildEnginePayload, enrichmentCap, enrichmentSearchBudget, maxAttemptsFor, nextStep } from "@/lib/domain/engine";
-import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
+import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
 import { flattenDelivery } from "@/lib/domain/leads";
 import { roleMatcher } from "@/lib/domain/roles";
+import { applyMailboxChecks } from "@/lib/domain/mailbox";
 
 const baseInput = {
   industry: "Software house",
@@ -112,5 +113,30 @@ describe("ruoli (stesse regole del motore)", () => {
     expect(m("")).toBe("unknown");
     expect(roleMatcher(["Fondatore"])("Co-Founder e Google Ads Expert")).toBe("exact");
     expect(roleMatcher(["Direttore marketing"])("Head of Marketing")).toBe("plausible");
+  });
+});
+
+describe("controllo caselle", () => {
+  it("scarta le caselle non consegnabili e annota le altre", () => {
+    const leads = [
+      { email: { address: "A@x.it" }, quality: { score: 80 } },
+      { email: { address: "b@morto.it" } },
+      { email: { address: "c@y.it" } },
+    ];
+    const checks = new Map([["a@x.it", "ok" as const], ["b@morto.it", "no_mx" as const]]);
+    const out = applyMailboxChecks(leads, checks);
+    expect(out.rejected).toBe(1);
+    expect(out.leads).toHaveLength(2);
+    expect((out.leads[0] as { quality: { score: number; checks: { mailbox: string } } }).quality).toEqual({ score: 80, checks: { mailbox: "ok" } });
+    expect(out.leads[1]).toBe(leads[2]);
+  });
+});
+
+describe("ricerche ricorrenti", () => {
+  it("prossima ripetizione, saltando quelle passate", () => {
+    const now = new Date("2026-10-20T10:00:00Z");
+    expect(nextRepeatAt("weekly", new Date("2026-10-13T03:00:00Z"), now).toISOString()).toBe("2026-10-27T03:00:00.000Z");
+    expect(nextRepeatAt("weekly", new Date("2026-09-01T03:00:00Z"), now).toISOString()).toBe("2026-10-27T03:00:00.000Z");
+    expect(nextRepeatAt("monthly", new Date("2026-10-20T03:00:00Z"), now).toISOString()).toBe("2026-11-20T03:00:00.000Z");
   });
 });

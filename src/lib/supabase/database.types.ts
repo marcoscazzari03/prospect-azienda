@@ -97,14 +97,14 @@ isOneToOne: false
                   ]
                 },"deliveries": {
                   Row: {
-                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at": string,"email_address": string,"email_id": string | null,"email_status": string,"email_type": string,"id": string,"org_id": string,"person_id": string | null,"person_key": string,"quality_score": number,"run_id": string | null,"search_id": string,"source": string
+                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at": string,"email_address": string,"email_id": string | null,"email_status": string,"email_type": string,"id": string,"notes": string,"org_id": string,"person_id": string | null,"person_key": string,"quality_score": number,"run_id": string | null,"search_id": string,"source": string,"stage": string,"stage_changed_at": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at"?: string,"email_address": string,"email_id"?: string | null,"email_status": string,"email_type": string,"id"?: string,"org_id": string,"person_id"?: string | null,"person_key": string,"quality_score"?: number,"run_id"?: string | null,"search_id": string,"source"?: string
+                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at"?: string,"email_address": string,"email_id"?: string | null,"email_status": string,"email_type": string,"id"?: string,"notes"?: string,"org_id": string,"person_id"?: string | null,"person_key": string,"quality_score"?: number,"run_id"?: string | null,"search_id": string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
                   }
                   Update: {
-                    "company_domain"?: string,"credits"?: number,"data"?: NonNullable<Json>,"delivered_at"?: string,"email_address"?: string,"email_id"?: string | null,"email_status"?: string,"email_type"?: string,"id"?: string,"org_id"?: string,"person_id"?: string | null,"person_key"?: string,"quality_score"?: number,"run_id"?: string | null,"search_id"?: string,"source"?: string
+                    "company_domain"?: string,"credits"?: number,"data"?: NonNullable<Json>,"delivered_at"?: string,"email_address"?: string,"email_id"?: string | null,"email_status"?: string,"email_type"?: string,"id"?: string,"notes"?: string,"org_id"?: string,"person_id"?: string | null,"person_key"?: string,"quality_score"?: number,"run_id"?: string | null,"search_id"?: string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
                   }
                   Relationships: [
                     {
@@ -193,6 +193,52 @@ isOneToOne: false
                   Relationships: [
                     {
       foreignKeyName: "exports_org_id_fkey"
+      columns: ["org_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"lead_list_items": {
+                  Row: {
+                    "added_at": string,"delivery_id": string,"list_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "added_at"?: string,"delivery_id": string,"list_id": string
+                  }
+                  Update: {
+                    "added_at"?: string,"delivery_id"?: string,"list_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lead_list_items_delivery_id_fkey"
+      columns: ["delivery_id"]
+isOneToOne: false
+      referencedRelation: "deliveries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lead_list_items_list_id_fkey"
+      columns: ["list_id"]
+isOneToOne: false
+      referencedRelation: "lead_lists"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"lead_lists": {
+                  Row: {
+                    "created_at": string,"id": string,"name": string,"org_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"name": string,"org_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"name"?: string,"org_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lead_lists_org_id_fkey"
       columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
@@ -421,14 +467,14 @@ isOneToOne: false
                   ]
                 },"searches": {
                   Row: {
-                    "attempts": number,"contacts_per_company": number,"created_at": string,"created_by": string | null,"credits_charged": number,"credits_reserved": number,"delivered": number,"email_mode": string,"error": string | null,"finished_at": string | null,"id": string,"name": string,"org_id": string,"quantity": number,"started_at": string | null,"status": string,"target": NonNullable<Json>
+                    "attempts": number,"contacts_per_company": number,"created_at": string,"created_by": string | null,"credits_charged": number,"credits_reserved": number,"delivered": number,"email_mode": string,"error": string | null,"finished_at": string | null,"id": string,"name": string,"next_repeat_at": string | null,"org_id": string,"quantity": number,"repeat": string,"repeat_of": string | null,"started_at": string | null,"status": string,"target": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode": string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name": string,"org_id": string,"quantity": number,"started_at"?: string | null,"status"?: string,"target": NonNullable<Json>
+                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode": string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name": string,"next_repeat_at"?: string | null,"org_id": string,"quantity": number,"repeat"?: string,"repeat_of"?: string | null,"started_at"?: string | null,"status"?: string,"target": NonNullable<Json>
                   }
                   Update: {
-                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode"?: string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name"?: string,"org_id"?: string,"quantity"?: number,"started_at"?: string | null,"status"?: string,"target"?: NonNullable<Json>
+                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode"?: string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name"?: string,"next_repeat_at"?: string | null,"org_id"?: string,"quantity"?: number,"repeat"?: string,"repeat_of"?: string | null,"started_at"?: string | null,"status"?: string,"target"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -442,6 +488,12 @@ isOneToOne: false
       columns: ["org_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "searches_repeat_of_fkey"
+      columns: ["repeat_of"]
+isOneToOne: false
+      referencedRelation: "searches"
       referencedColumns: ["id"]
     }
                   ]
@@ -585,8 +637,11 @@ isOneToOne: false
 "finished_at": string | null,
 "id": string,
 "name": string,
+"next_repeat_at": string | null,
 "org_id": string,
 "quantity": number,
+"repeat": string,
+"repeat_of": string | null,
 "started_at": string | null,
 "status": string,
 "target": NonNullable<Json>
@@ -630,8 +685,11 @@ isOneToOne: false
 "finished_at": string | null,
 "id": string,
 "name": string,
+"next_repeat_at": string | null,
 "org_id": string,
 "quantity": number,
+"repeat": string,
+"repeat_of": string | null,
 "started_at": string | null,
 "status": string,
 "target": NonNullable<Json>

@@ -43,6 +43,7 @@ sottodominio `leads.weborastudio.it`.
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Stripe, punto 4 |
 | `CRON_SECRET` | Una stringa casuale lunga |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Resend, punto 5 (facoltativo) |
+| `MILLIONVERIFIER_API_KEY` | Facoltativo: verifica delle caselle (millionverifier.com → API) |
 
 Per generare i segreti casuali: `openssl rand -hex 32` (oppure un generatore di password, 64 caratteri).
 

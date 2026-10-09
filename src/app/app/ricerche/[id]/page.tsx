@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { LeadsTable } from "@/components/leads-table";
-import { Badge, ButtonLink, Card, EmptyState, PageHeader, Progress, SearchStatus } from "@/components/ui";
+import { Badge, Button, ButtonLink, Card, EmptyState, PageHeader, Progress, SearchStatus } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
 import { createClient } from "@/lib/supabase/server";
 import { closeStaleRuns } from "@/lib/server/searches";
 import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
 import type { DeliveryRow } from "@/lib/domain/leads";
-import type { SearchTarget } from "@/lib/domain/search-input";
+import { REPEAT_LABEL, type Repeat, type SearchTarget } from "@/lib/domain/search-input";
+import { stopRepeat } from "../../actions";
 
 export const metadata: Metadata = { title: "Ricerca" };
 
@@ -17,10 +19,11 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
   const viewer = await requireViewer();
   await closeStaleRuns(viewer.org.id);
   const supabase = await createClient();
-  const [{ data: search }, { data: events }, { data: leads }] = await Promise.all([
+  const [{ data: search }, { data: events }, { data: leads }, { data: lists }] = await Promise.all([
     supabase.from("searches").select("*").eq("id", id).maybeSingle(),
     supabase.from("search_events").select("id, stage, message, created_at").eq("search_id", id).order("created_at", { ascending: false }).limit(30),
-    supabase.from("deliveries").select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at").eq("search_id", id).order("quality_score", { ascending: false }),
+    supabase.from("deliveries").select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, lead_list_items(list_id)").eq("search_id", id).order("quality_score", { ascending: false }),
+    supabase.from("lead_lists").select("id, name").order("name"),
   ]);
   if (!search) notFound();
 
@@ -40,15 +43,32 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
             <SearchStatus status={search.status} />
             <Badge>{MODE_INFO[search.email_mode as EmailMode]?.label}</Badge>
             <span className="text-sm text-muted">avviata il {new Date(search.created_at).toLocaleString("it-IT")}</span>
+            {search.repeat_of && (
+              <Link href={`/app/ricerche/${search.repeat_of}`} className="text-sm text-ledger underline">ripetizione automatica</Link>
+            )}
           </span>
         }
         actions={
           <>
-            {!!leads?.length && <ButtonLink href={`/api/export?search=${id}`} variant="secondary" prefetch={false}>Esporta CSV</ButtonLink>}
+            {!!leads?.length && <ButtonLink href={`/api/export?format=xlsx&search=${id}`} variant="secondary" prefetch={false}>Esporta Excel</ButtonLink>}
+            {!!leads?.length && <ButtonLink href={`/api/export?search=${id}`} variant="ghost" prefetch={false}>CSV</ButtonLink>}
             <ButtonLink href={`/app/ricerche/nuova?da=${id}`} variant={running ? "secondary" : "primary"}>Ripeti con nuovi lead</ButtonLink>
           </>
         }
       />
+
+      {search.repeat !== "none" && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-card px-5 py-4 text-sm">
+          <p>
+            <span className="font-medium">{REPEAT_LABEL[search.repeat as Repeat]}</span> ripetiamo questa ricerca con nuovi lead.
+            {search.next_repeat_at && <> Prossima: <span className="font-mono">{new Date(search.next_repeat_at).toLocaleDateString("it-IT", { timeZone: "Europe/Rome" })}</span>.</>}
+          </p>
+          <form action={stopRepeat}>
+            <input type="hidden" name="searchId" value={search.id} />
+            <Button type="submit" size="sm" variant="secondary">Ferma la ripetizione</Button>
+          </form>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <Card className="p-6">
@@ -101,7 +121,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
 
       <h2 className="mb-4 mt-10 font-display text-2xl font-semibold">Lead</h2>
       {leads?.length ? (
-        <LeadsTable rows={leads as DeliveryRow[]} />
+        <LeadsTable rows={leads as DeliveryRow[]} lists={lists ?? []} />
       ) : (
         <EmptyState title={running ? "Stiamo cercando…" : "Nessun lead in questa ricerca"}>
           {running

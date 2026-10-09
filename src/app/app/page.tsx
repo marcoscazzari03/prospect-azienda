@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   await closeStaleRuns(viewer.org.id);
   const supabase = await createClient();
   const [{ data: searches }, { count: leads }, { count: personal }, { data: reserved }] = await Promise.all([
-    supabase.from("searches").select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at").order("created_at", { ascending: false }).limit(6),
+    supabase.from("searches").select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at, repeat").order("created_at", { ascending: false }).limit(6),
     supabase.from("deliveries").select("id", { count: "exact", head: true }),
     supabase.from("deliveries").select("id", { count: "exact", head: true }).eq("email_type", "personal"),
     supabase.from("searches").select("credits_reserved, credits_charged").in("status", ["queued", "running"]),

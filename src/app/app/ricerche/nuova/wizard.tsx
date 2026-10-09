@@ -1,6 +1,6 @@
 "use client";
 import { useActionState, useState } from "react";
-import { Alert, Button, Card, Field, Input, Textarea, cx } from "@/components/ui";
+import { Alert, Button, Card, Field, Input, Select, Textarea, cx } from "@/components/ui";
 import { COMPANY_SIZES, COUNTRIES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
 import { createSearch, type ActionState } from "../../actions";
 
@@ -170,6 +170,14 @@ export function SearchWizard({ credits, maxQuantity, defaults = {} }: { credits:
               </div>
             )}
           </div>
+          <Field label="Ripeti questa ricerca" htmlFor="repeat">
+            <Select id="repeat" name="repeat" defaultValue="none">
+              <option value="none">No, una volta sola</option>
+              <option value="weekly">Ogni settimana, con nuovi lead</option>
+              <option value="monthly">Ogni mese, con nuovi lead</option>
+            </Select>
+            <p className="mt-1 text-xs text-muted">Ogni ripetizione cerca solo contatti che non hai già e usa i crediti disponibili in quel momento. Puoi fermarla quando vuoi dalla pagina della ricerca.</p>
+          </Field>
           <Field label="Nome della ricerca (facoltativo)" htmlFor="name">
             <Input id="name" name="name" defaultValue={defaults.name} placeholder="Generato automaticamente se vuoto" />
           </Field>

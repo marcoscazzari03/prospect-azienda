@@ -11,7 +11,7 @@ export default async function SearchesPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("searches")
-    .select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at")
+    .select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at, repeat")
     .order("created_at", { ascending: false })
     .limit(200);
   return (

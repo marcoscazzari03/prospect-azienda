@@ -27,6 +27,21 @@ export type DeliveryRow = {
   credits: number;
   quality_score: number;
   delivered_at: string;
+  stage?: LeadStage;
+  notes?: string;
+  lead_list_items?: { list_id: string }[];
+};
+
+// Avanzamento commerciale del contatto, gestito dal cliente.
+export const LEAD_STAGES = ["new", "contacted", "replied", "meeting", "won", "lost"] as const;
+export type LeadStage = (typeof LEAD_STAGES)[number];
+export const LEAD_STAGE_LABEL: Record<LeadStage, string> = {
+  new: "Da contattare",
+  contacted: "Contattato",
+  replied: "Ha risposto",
+  meeting: "Appuntamento",
+  won: "Cliente",
+  lost: "Non interessato",
 };
 
 export const EMAIL_STATUS_LABEL: Record<string, string> = {
@@ -71,6 +86,8 @@ export function flattenDelivery(d: DeliveryRow) {
     qualita: d.quality_score,
     crediti: d.credits,
     consegnato_il: d.delivered_at?.slice(0, 10) ?? "",
+    stato_contatto: d.stage ? LEAD_STAGE_LABEL[d.stage] : "",
+    note: d.notes ?? "",
   };
 }
 
@@ -93,4 +110,6 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "email_ipotizzate", label: "Email ipotizzate (non verificate)" },
   { key: "qualita", label: "Qualità" },
   { key: "consegnato_il", label: "Consegnato il" },
+  { key: "stato_contatto", label: "Stato contatto" },
+  { key: "note", label: "Note" },
 ];

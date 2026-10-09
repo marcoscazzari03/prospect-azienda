@@ -11,6 +11,7 @@ import {
   type EngineSearch,
 } from "@/lib/domain/engine";
 import { roleMatcher } from "@/lib/domain/roles";
+import { nextRepeatAt } from "@/lib/domain/search-input";
 import { randomToken, sha256Hex } from "./crypto";
 import { sendEmail } from "./email";
 
@@ -202,4 +203,76 @@ export async function closeStaleRuns(orgId?: string) {
   const ids = [...new Set((data ?? []).map((r) => r.search_id as string))];
   for (const id of ids) await finalizeSearch(id, "Tempo massimo superato");
   return ids.length;
+}
+
+// Ricerche ricorrenti: avvia le ripetizioni scadute (chiamato dal cron giornaliero).
+// Ogni ripetizione è una ricerca nuova con gli stessi filtri: i contatti già
+// consegnati sono esclusi da soli. Senza crediti la ripetizione salta e il
+// cliente riceve un'email.
+export async function runDueRepeats() {
+  const db = createAdminClient();
+  const now = new Date();
+  const { data: due } = await db
+    .from("searches")
+    .select("id, org_id, created_by, name, target, email_mode, quantity, contacts_per_company, repeat, next_repeat_at")
+    .neq("repeat", "none")
+    .lte("next_repeat_at", now.toISOString())
+    .limit(50);
+  let started = 0;
+  for (const parent of due ?? []) {
+    const repeat = parent.repeat as "weekly" | "monthly";
+    // Prima si sposta la scadenza: un cron ripetuto non avvia due volte.
+    const { data: claimed } = await db
+      .from("searches")
+      .update({ next_repeat_at: nextRepeatAt(repeat, new Date(parent.next_repeat_at!), now).toISOString() })
+      .eq("id", parent.id)
+      .eq("next_repeat_at", parent.next_repeat_at!)
+      .select("id");
+    if (!claimed?.length || !parent.created_by) continue;
+
+    const day = now.toLocaleDateString("it-IT", { timeZone: "Europe/Rome" });
+    const baseName = parent.name.replace(/ · \d{1,2}\/\d{1,2}\/\d{4}$/, "");
+    const { data: child, error } = await db
+      .rpc("create_search", {
+        p_user: parent.created_by,
+        p_org: parent.org_id,
+        p_name: `${baseName} · ${day}`.slice(0, 120),
+        p_target: parent.target,
+        p_mode: parent.email_mode,
+        p_quantity: parent.quantity,
+        p_contacts_per_company: parent.contacts_per_company,
+      })
+      .single();
+    if (error || !child) {
+      const reason = /INSUFFICIENT_CREDITS/.test(error?.message ?? "")
+        ? "crediti insufficienti"
+        : /ACTIVE_LIMIT/.test(error?.message ?? "")
+          ? "troppe ricerche in corso"
+          : /ORG_SUSPENDED/.test(error?.message ?? "")
+            ? "account sospeso"
+            : "errore interno";
+      await db.from("search_events").insert({
+        search_id: parent.id,
+        stage: "repeat_skipped",
+        message: `Ripetizione del ${day} non avviata: ${reason}`,
+      });
+      const { data: profile } = await db.from("profiles").select("email").eq("user_id", parent.created_by).maybeSingle();
+      await sendEmail(
+        profile?.email ?? "",
+        `Ripetizione non avviata: ${parent.name}`,
+        `La ripetizione automatica della ricerca "${parent.name}" non è partita (${reason}).\n\n${env.appUrl()}/app/crediti`,
+      );
+      continue;
+    }
+    const childId = (child as { id: string }).id;
+    await db.from("searches").update({ repeat_of: parent.id }).eq("id", childId);
+    await db.from("search_events").insert({
+      search_id: parent.id,
+      stage: "repeat_started",
+      message: `Ripetizione del ${day} avviata`,
+    });
+    await startSearch(childId);
+    started++;
+  }
+  return started;
 }

@@ -130,3 +130,18 @@ select pg_temp.check((select month_used >= 7 and search_used = 0 from enrichment
 select apply_engine_results((select id from rg), sha256_hex('tok-g'), '{"leads":[],"usage":{"enrichment_lookups":4}}');
 select pg_temp.check((select search_used = 4 from enrichment_usage((select id from sg))), 'verifiche usate dalla ricerca');
 \echo 'Test budget superati.'
+
+-- Fase 2: stato, note e liste visibili solo all'organizzazione.
+update deliveries set stage = 'contacted', notes = 'chiamato' where org_id = (select org_f from w);
+insert into lead_lists (org_id, name) values ((select org_f from w), 'Da richiamare');
+insert into lead_list_items (list_id, delivery_id)
+  select l.id, d.id from lead_lists l, deliveries d where l.org_id = (select org_f from w) and d.org_id = l.org_id;
+grant select on w to authenticated;
+set role authenticated;
+select set_config('request.jwt.claim.sub', '66666666-6666-6666-6666-666666666666', false);
+select pg_temp.check((select count(*) = 2 from lead_list_items) and (select count(*) = 1 from lead_lists), 'liste visibili al proprietario');
+select set_config('request.jwt.claim.sub', '55555555-5555-5555-5555-555555555555', false);
+select pg_temp.check((select count(*) = 0 from lead_list_items) and (select count(*) = 0 from lead_lists), 'liste invisibili agli altri');
+reset role;
+select pg_temp.check((select count(*) = 2 from deliveries where stage = 'contacted' and notes = 'chiamato'), 'stato e note salvati');
+\echo 'Test fase 2 superati.'

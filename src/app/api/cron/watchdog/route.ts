@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { safeEqual } from "@/lib/server/crypto";
-import { closeStaleRuns } from "@/lib/server/searches";
+import { closeStaleRuns, runDueRepeats } from "@/lib/server/searches";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Chiamato da Vercel Cron: chiude i giri senza notizie e restituisce i crediti,
-// poi registra le scadenze dei crediti maturate.
+// registra le scadenze dei crediti maturate e avvia le ricerche ricorrenti.
+export const maxDuration = 300;
+
 export async function GET(request: Request) {
   const secret = env.cronSecret();
   const auth = request.headers.get("authorization") ?? "";
@@ -15,5 +17,6 @@ export async function GET(request: Request) {
   const closed = await closeStaleRuns();
   const { data: expired, error } = await createAdminClient().rpc("expire_credits", {});
   if (error) console.error("expire_credits", error.message);
-  return NextResponse.json({ closed, expired: expired ?? 0 });
+  const repeats = await runDueRepeats();
+  return NextResponse.json({ closed, expired: expired ?? 0, repeats });
 }

@@ -11,6 +11,7 @@ export type SearchListItem = {
   delivered: number;
   credits_charged: number;
   created_at: string;
+  repeat?: string;
 };
 
 export function SearchTable({ searches, href = (id) => `/app/ricerche/${id}` }: { searches: SearchListItem[]; href?: (id: string) => string }) {
@@ -32,6 +33,9 @@ export function SearchTable({ searches, href = (id) => `/app/ricerche/${id}` }: 
             <tr key={s.id} className="hover:bg-paper/60">
               <td className="px-4 py-3">
                 <Link href={href(s.id)} className="font-medium hover:text-ledger">{s.name}</Link>
+                {s.repeat && s.repeat !== "none" && (
+                  <span className="ml-2 text-xs text-ledger" title="Ricerca ricorrente">↻ {s.repeat === "weekly" ? "settimanale" : "mensile"}</span>
+                )}
               </td>
               <td className="px-4 py-3"><SearchStatus status={s.status} /></td>
               <td className="w-48 px-4 py-3">

@@ -19,10 +19,11 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 - [x] Magazzino dei lead: i contatti già trovati vengono consegnati subito ad altri clienti con lo stesso target (migrazione `20261011000005_lead_warehouse.sql`)
 - [x] Ricerche grandi a tappe (fino a 15 giri, stop a mercato esaurito) e budget mensile RocketReach in *Prezzi e costi* (migrazione `20261012000006_large_searches.sql`)
 - [ ] RocketReach in *Prezzi e costi*: costo reale per export (prezzo del piano / export inclusi, oggi stima 0,45 €) e budget mensile coerente con la quota del piano (oggi 900; quota vista: 1.063 export rimasti)
-- [ ] Verifica SMTP delle email trovate sui siti
-- [ ] Export Excel
-- [ ] Liste e note sui lead
-- [ ] Ricerche ricorrenti
+- [x] Controllo delle caselle prima della consegna: dominio che riceve posta (sempre) + verifica della casella con MillionVerifier se c'è `MILLIONVERIFIER_API_KEY` (migrazione `20261013000007_phase2.sql`)
+- [ ] Facoltativo: account MillionVerifier e chiave `MILLIONVERIFIER_API_KEY` su Vercel; aggiornare il costo `email_verifier` in *Prezzi e costi*
+- [x] Export Excel (.xlsx formattato, con filtri)
+- [x] Stato del contatto, note e liste sui lead
+- [x] Ricerche ricorrenti (settimanali o mensili, avviate dal cron giornaliero delle 3:00 UTC)
 - [ ] Più utenti per account, API (fase 2)
 
 ## Legale e fiscale

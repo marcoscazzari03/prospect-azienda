@@ -24,7 +24,21 @@ export const searchInputSchema = z.object({
   emailMode: z.enum(EMAIL_MODES),
   quantity: z.coerce.number().int().min(1).max(1000),
   contactsPerCompany: z.coerce.number().int().min(1).max(3).default(1),
+  repeat: z.enum(["none", "weekly", "monthly"]).default("none"),
 });
+
+export const REPEAT_LABEL = { none: "Una volta", weekly: "Ogni settimana", monthly: "Ogni mese" } as const;
+export type Repeat = keyof typeof REPEAT_LABEL;
+
+// Prossima ripetizione dopo `from`, saltando quelle già passate.
+export function nextRepeatAt(repeat: Exclude<Repeat, "none">, from: Date, now = new Date()) {
+  const d = new Date(from);
+  do {
+    if (repeat === "weekly") d.setUTCDate(d.getUTCDate() + 7);
+    else d.setUTCMonth(d.getUTCMonth() + 1);
+  } while (d <= now);
+  return d;
+}
 
 export type SearchInput = z.infer<typeof searchInputSchema>;
 
