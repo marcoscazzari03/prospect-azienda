@@ -15,4 +15,5 @@ export const SEARCH_RULES = {
   autoRefundWindowDays: 14,
   bounceRefundWindowDays: 30,
   autoRefundMaxShare: 0.1, // rimborsi automatici fino al 10% dei lead di una ricerca
+  warehouseMaxAgeDays: 180, // il magazzino consegna solo contatti verificati negli ultimi N giorni
 } as const;

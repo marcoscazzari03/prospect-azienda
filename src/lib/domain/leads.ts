@@ -14,6 +14,7 @@ export type LeadData = {
   email_patterns?: { address: string; status: "guessed" }[];
   sources?: { discovery_url?: string; contact_page?: string };
   quality?: { score?: number; checks?: Record<string, unknown> };
+  origin?: { source?: "warehouse"; verified_at?: string };
 };
 
 export type DeliveryRow = {

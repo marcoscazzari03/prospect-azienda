@@ -21,14 +21,14 @@ export type Database = {
                   ]
                 },"companies": {
                   Row: {
-                    "city": string,"country": string,"domain": string,"first_seen_at": string,"id": string,"industry": string,"last_verified_at": string,"name": string,"size_hint": string,"website": string
+                    "city": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"last_verified_at": string,"name": string,"places": (string)[],"size_hint": string,"tags": (string)[],"website": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "city"?: string,"country"?: string,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name": string,"size_hint"?: string,"website": string
+                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name": string,"places"?: (string)[],"size_hint"?: string,"tags"?: (string)[],"website": string
                   }
                   Update: {
-                    "city"?: string,"country"?: string,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name"?: string,"size_hint"?: string,"website"?: string
+                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name"?: string,"places"?: (string)[],"size_hint"?: string,"tags"?: (string)[],"website"?: string
                   }
                   Relationships: [
                     
@@ -83,14 +83,14 @@ isOneToOne: false
                   ]
                 },"deliveries": {
                   Row: {
-                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at": string,"email_address": string,"email_id": string | null,"email_status": string,"email_type": string,"id": string,"org_id": string,"person_id": string | null,"person_key": string,"quality_score": number,"run_id": string | null,"search_id": string
+                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at": string,"email_address": string,"email_id": string | null,"email_status": string,"email_type": string,"id": string,"org_id": string,"person_id": string | null,"person_key": string,"quality_score": number,"run_id": string | null,"search_id": string,"source": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at"?: string,"email_address": string,"email_id"?: string | null,"email_status": string,"email_type": string,"id"?: string,"org_id": string,"person_id"?: string | null,"person_key": string,"quality_score"?: number,"run_id"?: string | null,"search_id": string
+                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at"?: string,"email_address": string,"email_id"?: string | null,"email_status": string,"email_type": string,"id"?: string,"org_id": string,"person_id"?: string | null,"person_key": string,"quality_score"?: number,"run_id"?: string | null,"search_id": string,"source"?: string
                   }
                   Update: {
-                    "company_domain"?: string,"credits"?: number,"data"?: NonNullable<Json>,"delivered_at"?: string,"email_address"?: string,"email_id"?: string | null,"email_status"?: string,"email_type"?: string,"id"?: string,"org_id"?: string,"person_id"?: string | null,"person_key"?: string,"quality_score"?: number,"run_id"?: string | null,"search_id"?: string
+                    "company_domain"?: string,"credits"?: number,"data"?: NonNullable<Json>,"delivered_at"?: string,"email_address"?: string,"email_id"?: string | null,"email_status"?: string,"email_type"?: string,"id"?: string,"org_id"?: string,"person_id"?: string | null,"person_key"?: string,"quality_score"?: number,"run_id"?: string | null,"search_id"?: string,"source"?: string
                   }
                   Relationships: [
                     {
@@ -587,6 +587,12 @@ isOneToOne: false
               "expired": number,"expires_at": string,"granted": number,"kind": string,"lot_id": number,"remaining": number
             }[]
                            },
+"deliver_from_warehouse":
+{ Args: { "p_max_age_days"?: number,"p_picks": Json,"p_search": string }; Returns: Json
+                           },
+"deliver_leads":
+{ Args: { "p_leads": Json,"p_run": string,"p_search": string,"p_source": string }; Returns: Json
+                           },
 "expire_credits":
 { Args: { "p_org"?: string }; Returns: number
                            },
@@ -678,7 +684,18 @@ isOneToOne: false
         to: "search_runs"
         isOneToOne: true
         isSetofReturn: false
-      } }
+      } },
+"tag_company":
+{ Args: { "p_company": string,"p_target": Json }; Returns: undefined
+                           },
+"term_stems":
+{ Args: { "p": string }; Returns: (string)[]
+                           },
+"warehouse_candidates":
+{ Args: { "p_limit"?: number,"p_max_age_days"?: number,"p_only"?: (string)[],"p_search": string }; Returns: {
+              "job_title": string,"lead": Json,"person_id": string
+            }[]
+                           }
           }
           Enums: {
             [_ in never]: never

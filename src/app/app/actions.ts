@@ -6,7 +6,7 @@ import { requireViewer, type Plan } from "@/lib/server/dal";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { defaultSearchName, searchInputSchema, toTarget } from "@/lib/domain/search-input";
-import { dispatchRun } from "@/lib/server/searches";
+import { startSearch } from "@/lib/server/searches";
 import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
 import { SEARCH_RULES } from "@/lib/config";
 
@@ -67,7 +67,7 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
     return { error: "Non è stato possibile avviare la ricerca. Riprova." };
   }
   const searchId = (data as { id: string }).id;
-  await dispatchRun(searchId);
+  await startSearch(searchId);
   revalidatePath("/app", "layout");
   redirect(`/app/ricerche/${searchId}`);
 }

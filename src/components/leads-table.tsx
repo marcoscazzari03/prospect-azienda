@@ -97,6 +97,11 @@ export function LeadsTable({ rows }: { rows: DeliveryRow[] }) {
                         <div className="text-xs">
                           <p className="mb-1 font-medium uppercase tracking-wider text-muted">Costo</p>
                           <p><span className="font-mono">{r.credits}</span> crediti · consegnato il {new Date(r.delivered_at).toLocaleDateString("it-IT")}</p>
+                          {d.origin?.source === "warehouse" && (
+                            <p className="mt-1 text-muted">
+                              Consegnato subito dal nostro archivio{d.origin.verified_at ? ` · dati verificati il ${new Date(d.origin.verified_at).toLocaleDateString("it-IT")}` : ""}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="mt-4 border-t border-line pt-4">

@@ -20,7 +20,7 @@ export default function PrivacyPage() {
       <h2>Persone presenti nei lead (art. 14 GDPR)</h2>
       <p>Raccogliamo da fonti pubblicamente accessibili (siti ufficiali delle aziende, pagine team, note legali, registri, articoli) dati professionali di referenti aziendali: nome, ruolo, azienda, sito, email professionale, fonte. La base giuridica è il legittimo interesse (art. 6.1.f) a favorire contatti commerciali tra imprese, bilanciato con i diritti degli interessati. Non trattiamo dati particolari né contatti privati.</p>
       <ul>
-        <li>Destinatari: clienti della piattaforma che acquistano i lead, che ne diventano titolari autonomi.</li>
+        <li>Destinatari: clienti della piattaforma che acquistano i lead, che ne diventano titolari autonomi. Gli stessi dati possono essere forniti a più clienti interessati allo stesso settore e zona: li conserviamo per questo, riverificandoli periodicamente.</li>
         <li>Conservazione: i dati vengono riverificati o cancellati entro 24 mesi dalla raccolta.</li>
         <li>Fornitori: infrastruttura e servizi tecnici (Supabase, Vercel, n8n, OpenAI, servizi di verifica email), con dati ospitati nell&apos;Unione Europea dove possibile.</li>
       </ul>

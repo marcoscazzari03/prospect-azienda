@@ -8,7 +8,7 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 - [x] Dominio `leads.weborastudio.it` collegato a Vercel (record DNS)
 - [x] n8n: credenziali "Lead Engine" create e workflow attivato
 - [x] Prima ricerca reale end-to-end (09/10: 3/3 lead, ~2 minuti)
-- [ ] Prove con "Mista" e "Solo nominative", volumi più alti, taratura dei prompt
+- [ ] Prove con "Mista" e "Solo nominative", volumi più alti, taratura dei prompt (rimandata: prima scegliere il primo mercato)
 - [x] Email: Resend (dominio verificato, record su sottodomini), SMTP in Supabase, testi in italiano, notifiche app
 - [x] Stripe in modalità test (chiavi, webhook, portale clienti): acquisto di prova accreditato
 - [x] Motore: ruoli con alternative e sinonimi (es. «Titolare / CEO»)
@@ -16,8 +16,12 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 
 ## Prodotto
 - [x] Scadenza automatica dei crediti (si usano prima quelli che scadono prima; migrazione `20261010000004_credit_expiry.sql`)
+- [x] Magazzino dei lead: i contatti già trovati vengono consegnati subito ad altri clienti con lo stesso target (migrazione `20261011000005_lead_warehouse.sql`)
 - [ ] Verifica SMTP delle email trovate sui siti
-- [ ] Ricerche ricorrenti, più utenti per account, export Excel, API (fase 2)
+- [ ] Export Excel
+- [ ] Liste e note sui lead
+- [ ] Ricerche ricorrenti
+- [ ] Più utenti per account, API (fase 2)
 
 ## Legale e fiscale
 - [ ] Apertura partita IVA (prima di incassare) e scelta del regime con un commercialista

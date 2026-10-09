@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { SEARCH_RULES } from "@/lib/config";
 import { buildEnginePayload, nextStep, type ApplyResult, type EngineSearch } from "@/lib/domain/engine";
+import { roleMatcher } from "@/lib/domain/roles";
 import { randomToken, sha256Hex } from "./crypto";
 import { sendEmail } from "./email";
 
@@ -106,6 +107,44 @@ export async function dispatchRun(searchId: string) {
     return finalizeSearch(searchId, "Il motore di ricerca non ha risposto");
   }
   return null;
+}
+
+// Magazzino: consegna subito i contatti già trovati per altri clienti con lo
+// stesso target (paese, settore, zona) e un ruolo coerente. Il resto lo cerca il motore.
+export async function fillFromWarehouse(searchId: string) {
+  const db = createAdminClient();
+  const { search } = await loadSearch(searchId);
+  const { data: candidates, error } = await db.rpc("warehouse_candidates", {
+    p_search: searchId,
+    p_max_age_days: SEARCH_RULES.warehouseMaxAgeDays,
+    p_limit: 500,
+  });
+  if (error) {
+    console.error("warehouse_candidates", error.message);
+    return 0;
+  }
+  const match = roleMatcher(search.target.roles ?? []);
+  // Solo ruoli certi: il magazzino deve essere più preciso del motore.
+  const picks = (candidates ?? [])
+    .filter((c) => match(c.job_title) === "exact")
+    .map((c) => ({ person_id: c.person_id, role_match: "exact" }));
+  if (!picks.length) return 0;
+  const { data, error: deliverError } = await db.rpc("deliver_from_warehouse", {
+    p_search: searchId,
+    p_picks: picks,
+    p_max_age_days: SEARCH_RULES.warehouseMaxAgeDays,
+  });
+  if (deliverError) {
+    console.error("deliver_from_warehouse", deliverError.message);
+    return 0;
+  }
+  return Number((data as { new?: number } | null)?.new ?? 0);
+}
+
+// Avvio di una ricerca nuova: prima il magazzino, poi il motore per i lead mancanti.
+export async function startSearch(searchId: string) {
+  await fillFromWarehouse(searchId);
+  return dispatchRun(searchId);
 }
 
 // Dopo i risultati di un giro: top-up o chiusura.

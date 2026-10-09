@@ -4,6 +4,7 @@ import { buildEnginePayload, enrichmentCap, nextStep } from "@/lib/domain/engine
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
 import { flattenDelivery } from "@/lib/domain/leads";
+import { roleMatcher } from "@/lib/domain/roles";
 
 const baseInput = {
   industry: "Software house",
@@ -80,5 +81,18 @@ describe("export", () => {
       data: { company: { name: "Acme" }, person: { first_name: "Mario" }, email: { source: "website", source_url: "https://acme.it/team" } },
     });
     expect(row).toMatchObject({ azienda: "Acme", nome: "Mario", tipo_email: "Nominativa", stato_email: "Trovata sul sito", fonte_email: "https://acme.it/team" });
+  });
+});
+
+describe("ruoli (stesse regole del motore)", () => {
+  it("alternative e sinonimi", () => {
+    const m = roleMatcher(["Titolare / CEO"]);
+    expect(m("CEO e Founder")).toBe("exact");
+    expect(m("Proprietario")).toBe("exact");
+    expect(m("Co-Founder")).toBe("plausible");
+    expect(m("Office manager")).toBe("mismatch");
+    expect(m("")).toBe("unknown");
+    expect(roleMatcher(["Fondatore"])("Co-Founder e Google Ads Expert")).toBe("exact");
+    expect(roleMatcher(["Direttore marketing"])("Head of Marketing")).toBe("plausible");
   });
 });
