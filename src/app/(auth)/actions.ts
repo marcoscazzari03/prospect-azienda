@@ -53,7 +53,15 @@ export async function signUp(_: AuthState, form: FormData): Promise<AuthState> {
       emailRedirectTo: `${env.appUrl()}/auth/conferma?next=${encodeURIComponent(next)}`,
     },
   });
-  if (error) return { error: error.message.includes("registered") ? "Esiste già un account con questa email." : "Registrazione non riuscita. Riprova." };
+  if (error) {
+    console.error("signUp", error.status, error.code, error.message);
+    const m = error.message.toLowerCase();
+    if (m.includes("registered")) return { error: "Esiste già un account con questa email." };
+    if (m.includes("rate limit")) return { error: "Troppe email inviate in poco tempo: riprova tra qualche minuto." };
+    if (m.includes("database error")) return { error: "Errore del database durante la creazione dell'account (codice: DB_SIGNUP)." };
+    if (m.includes("signups not allowed") || m.includes("disabled")) return { error: "Le registrazioni sono disattivate." };
+    return { error: `Registrazione non riuscita (${error.code ?? error.status ?? "errore"}). Riprova.` };
+  }
   if (data.session) redirect(next);
   return { info: `Ti abbiamo inviato un'email a ${email}: apri il link per attivare l'account.` };
 }
