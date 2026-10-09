@@ -10,7 +10,7 @@ const ITEMS: NavItem[] = [
   { href: "/admin/ricerche", label: "Ricerche e motore", icon: "list" },
   { href: "/admin/segnalazioni", label: "Segnalazioni e GDPR", icon: "shield" },
   { href: "/admin/costi", label: "Prezzi e costi", icon: "coin" },
-  { href: "/app", label: "Torna all'app", icon: "plus" },
+  { href: "/app", label: "Torna all'app", icon: "back" },
 ];
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {

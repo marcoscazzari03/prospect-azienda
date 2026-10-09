@@ -16,6 +16,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
     { href: "/app/crediti", label: "Crediti e piano", icon: "coin" },
   ];
   if (viewer.isAdmin) items.push({ href: "/admin", label: "Amministrazione", icon: "shield" });
+  items.push({ href: "/", label: "Torna al sito", icon: "back", exact: true });
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">

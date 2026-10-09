@@ -33,6 +33,13 @@ export async function proxy(request: NextRequest) {
     login.search = `?next=${encodeURIComponent(path)}`;
     return NextResponse.redirect(login);
   }
+  // Chi è già dentro e clicca "Accedi" dal sito torna direttamente all'app.
+  if (user && (path === "/accedi" || path === "/registrati")) {
+    const app = request.nextUrl.clone();
+    app.pathname = "/app";
+    app.search = "";
+    return NextResponse.redirect(app);
+  }
   return response;
 }
 
