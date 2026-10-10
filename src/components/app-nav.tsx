@@ -27,11 +27,11 @@ export function AppNav({ items }: { items: NavItem[] }) {
             href={it.href}
             aria-current={active ? "page" : undefined}
             className={cx(
-              "flex shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-              active ? "bg-ink text-paper" : "text-ink-2 hover:bg-paper-2",
+              "flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-colors",
+              active ? "bg-ledger-soft font-medium text-ledger-2" : "text-ink-2 hover:bg-paper-2 hover:text-ink",
             )}
           >
-            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d={ICONS[it.icon]} />
             </svg>
             {it.label}
