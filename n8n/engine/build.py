@@ -56,6 +56,7 @@ def http_page(var, name, url_expr):
       ] }},
       options: {{
         batching: {{ batch: {{ batchSize: 10, batchInterval: 200 }} }},
+        redirect: {{ redirect: {{ followRedirects: true, maxRedirects: 3 }} }},
         response: {{ response: {{ neverError: true, responseFormat: 'text', outputPropertyName: 'html' }} }},
         timeout: 10000
       }}

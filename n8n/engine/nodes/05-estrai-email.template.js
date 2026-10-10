@@ -192,6 +192,7 @@ while ((m = hrefRegex.exec(html)) !== null) {
   const url = rendiAssoluto(m[1]);
   const h = cleanHost(url);
   if (!url || !h || !dominio || !(h === dominio || h.endsWith('.' + dominio))) continue;
+  if (/^https?:\/\/[^/?#]+:(?!80\b|443\b)\d+/i.test(url)) continue; // porte non standard: no (anti-SSRF)
   const percorso = url.split('?')[0].split('#')[0];
   if (/\.(pdf|jpe?g|png|gif|svg|webp|docx?|zip|css|js|xml|json|ico)$/i.test(percorso)) continue;
   if (/\/(wp-content|wp-includes|wp-json|feed|news|blog|insights|articles?|cdn-cgi|tag|category|product|prodotti?|shop)(\/|$)/i.test(percorso)) continue;

@@ -14,6 +14,14 @@ const norm = (v) => String(v ?? '')
 // Caratteri invisibili che l'AI a volte copia dalle pagine (es. U+FEFF): rompono gli URL.
 const INVISIBILI = /[\u00AD\u200B-\u200F\u2060\uFEFF]/g;
 const pulito = (v, max = 200) => String(v ?? '').replace(INVISIBILI, '').trim().replace(/\s+/g, ' ').slice(0, max);
+// Solo nomi di dominio pubblici: niente IP, localhost o domini interni (anti-SSRF:
+// gli indirizzi arrivano dall'AI, che legge pagine di terzi e le note del cliente).
+const hostPubblico = (h) => {
+  const x = String(h || '').toLowerCase();
+  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,24}$/.test(x)) return false; // richiede un TLD alfabetico: esclude gli IP
+  if (x.split('.').some((p) => !p || p.startsWith('-') || p.endsWith('-'))) return false;
+  return !/(^|\.)(localhost|local|internal|intranet|lan|home|corp|localdomain|invalid|test|example)$/.test(x);
+};
 // URL: niente spazi né invisibili, e deve essere un indirizzo http(s) valido.
 // (Niente `new URL`: nella sandbox dei Code node di n8n non è disponibile.)
 const urlPulito = (v, max = 500) => {
@@ -21,8 +29,8 @@ const urlPulito = (v, max = 500) => {
   if (!s) return '';
   if (!/^https?:\/\//i.test(s)) s = `https://${s}`;
   const m = s.match(/^(https?):\/\/([a-z0-9.-]+)(:\d+)?([/?#].*)?$/i);
-  if (!m || !m[2].includes('.') || /^[.-]|[.-]$/.test(m[2])) return '';
-  return `${m[1].toLowerCase()}://${m[2].toLowerCase()}${m[3] || ''}${m[4] || '/'}`;
+  if (!m || !hostPubblico(m[2]) || (m[3] && !/^:(80|443)$/.test(m[3]))) return '';
+  return `${m[1].toLowerCase()}://${m[2].toLowerCase()}${m[4] || '/'}`;
 };
 
 const host = (u) => String(u ?? '').trim().toLowerCase()

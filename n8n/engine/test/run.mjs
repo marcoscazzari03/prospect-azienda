@@ -64,6 +64,14 @@ assert.equal(sporco.length, 1);
 assert.equal(sporco[0].website, 'https://www.studioavvocatomusso.com/');
 assert.equal(sporco[0].domain, 'studioavvocatomusso.com');
 console.log('ok  URL con caratteri invisibili ripuliti, URL non validi scartati');
+const ssrf = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [job] }, input: [{ candidates: [
+  ['http://169.254.169.254/latest/meta-data', 'Ip Uno'], ['http://127.0.0.1:8080/', 'Ip Due'], ['https://10.0.0.5', 'Ip Tre'],
+  ['http://intranet.corp/', 'Corp Quattro'], ['http://server.local/', 'Local Cinque'], ['https://acme.it:8443/', 'Porta Sei'],
+  ['http://localhost/', 'Host Sette'], ['https://[::1]/', 'Sei Otto'], ['https://buona.it:443/chi-siamo', 'Buona Nove']
+].map(([website, full_name]) => ({ company_name: full_name, website, full_name, job_title: 'CEO', source_url: 'https://fonte.it/x' })) }] }).map(i => i.json);
+assert.equal(ssrf.length, 1);
+assert.equal(ssrf[0].website, 'https://buona.it/chi-siamo');
+console.log('ok  anti-SSRF: IP, localhost, domini interni e porte non standard scartati');
 const conRuoli = (roles, title) => run(src('04-deduplica-candidati.js'), {
   nodes: { 'Valida richiesta': [{ ...job, target: { ...job.target, roles } }] },
   input: [{ candidates: [{ company_name: 'Acme', website: 'https://acme.it', full_name: 'Mario Rossi', job_title: title, source_url: 'https://acme.it' }] }]
