@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, PageHeader } from "@/components/ui";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/server/dal";
 
 export const metadata: Metadata = { title: "Clienti" };
 
 export default async function ClientsPage() {
+  // Controllo qui e non solo nel layout: il layout non impedisce il rendering della pagina.
+  await requireAdmin();
   const db = createAdminClient();
   const [{ data: orgs }, { data: balances }, { data: members }] = await Promise.all([
     db.from("organizations").select("id, name, plan_id, status, created_at").order("created_at", { ascending: false }).limit(500),

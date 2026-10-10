@@ -5,10 +5,13 @@ import { SearchTable, type SearchListItem } from "@/components/search-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatEur } from "@/lib/domain/pricing";
 import { adjustCredits, setOrgPlan, setOrgStatus } from "../../actions";
+import { requireAdmin } from "@/lib/server/dal";
 
 export const metadata: Metadata = { title: "Cliente" };
 
 export default async function ClientPage({ params }: PageProps<"/admin/clienti/[id]">) {
+  // Controllo qui e non solo nel layout: il layout non impedisce il rendering della pagina.
+  await requireAdmin();
   const { id } = await params;
   const db = createAdminClient();
   const [{ data: org }, { data: balance }, { data: searches }, { data: ledger }, { data: payments }, { data: members }, { data: plans }] = await Promise.all([

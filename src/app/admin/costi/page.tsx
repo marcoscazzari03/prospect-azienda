@@ -3,10 +3,13 @@ import { Button, Card, Input, PageHeader } from "@/components/ui";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatEur } from "@/lib/domain/pricing";
 import { updateCostRate, updateCreditPrice, updateEnrichmentBudget } from "../actions";
+import { requireAdmin } from "@/lib/server/dal";
 
 export const metadata: Metadata = { title: "Prezzi e costi" };
 
 export default async function CostsPage() {
+  // Controllo qui e non solo nel layout: il layout non impedisce il rendering della pagina.
+  await requireAdmin();
   const db = createAdminClient();
   const [{ data: rates }, { data: prices }, { data: plans }, { data: usage }] = await Promise.all([
     db.from("cost_rates").select("*").order("provider"),

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Card, PageHeader, SearchStatus, Stat } from "@/components/ui";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatEur, formatNumber } from "@/lib/domain/pricing";
+import { requireAdmin } from "@/lib/server/dal";
 
 export const metadata: Metadata = { title: "Andamento" };
 
@@ -9,6 +10,8 @@ const since = (days: number) => new Date(Date.now() - days * 86_400_000).toISOSt
 const sum = <T,>(rows: T[] | null, f: (r: T) => number) => (rows ?? []).reduce((s, r) => s + (Number(f(r)) || 0), 0);
 
 export default async function AdminHome() {
+  // Controllo qui e non solo nel layout: il layout non impedisce il rendering della pagina.
+  await requireAdmin();
   const db = createAdminClient();
   const d30 = since(30);
   // Volumi da startup: aggregazione in memoria. Oltre ~10k righe/mese spostare in viste SQL.

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Badge, Button, Card, Input, PageHeader } from "@/components/ui";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveReport, suppress } from "../actions";
+import { requireAdmin } from "@/lib/server/dal";
 
 export const metadata: Metadata = { title: "Segnalazioni e GDPR" };
 
@@ -10,6 +11,8 @@ const REASON: Record<string, string> = {
 };
 
 export default async function ReportsPage() {
+  // Controllo qui e non solo nel layout: il layout non impedisce il rendering della pagina.
+  await requireAdmin();
   const db = createAdminClient();
   const [{ data: reports }, { count: suppressed }, { data: optouts }] = await Promise.all([
     db.from("lead_reports").select("id, reason, note, status, refund_credits, created_at, organizations(name), deliveries(email_address, data)").order("created_at", { ascending: false }).limit(100),

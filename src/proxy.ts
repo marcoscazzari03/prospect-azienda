@@ -33,6 +33,17 @@ export async function proxy(request: NextRequest) {
     login.search = `?next=${encodeURIComponent(path)}`;
     return NextResponse.redirect(login);
   }
+  // Area admin: secondo controllo prima di qualsiasi rendering (le pagine
+  // verificano comunque da sole con requireAdmin).
+  if (user && path.startsWith("/admin")) {
+    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("user_id", user.id).maybeSingle();
+    if (!profile?.is_admin) {
+      const app = request.nextUrl.clone();
+      app.pathname = "/app";
+      app.search = "";
+      return NextResponse.redirect(app);
+    }
+  }
   // Chi è già dentro e clicca "Accedi" dal sito torna direttamente all'app.
   if (user && (path === "/accedi" || path === "/registrati")) {
     const app = request.nextUrl.clone();

@@ -4,10 +4,13 @@ import { Badge, Button, Card, PageHeader, SearchStatus } from "@/components/ui";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { closeSearch } from "../actions";
+import { requireAdmin } from "@/lib/server/dal";
 
 export const metadata: Metadata = { title: "Ricerche e motore" };
 
 export default async function AdminSearches({ searchParams }: PageProps<"/admin/ricerche">) {
+  // Controllo qui e non solo nel layout: il layout non impedisce il rendering della pagina.
+  await requireAdmin();
   const { id } = await searchParams;
   const db = createAdminClient();
   const n8n = env.n8nBaseUrl();
