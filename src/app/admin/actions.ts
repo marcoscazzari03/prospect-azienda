@@ -80,7 +80,7 @@ export async function updateCreditPrice(form: FormData) {
   revalidatePath("/admin/costi");
 }
 
-// Budget mensile delle verifiche a pagamento (RocketReach). Vuoto = nessun limite.
+// Budget mensile delle email trovate a pagamento (Icypeas). Vuoto = nessun limite.
 export async function updateEnrichmentBudget(form: FormData) {
   const admin = await requireAdmin();
   const raw = String(form.get("budget") ?? "").trim();

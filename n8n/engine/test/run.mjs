@@ -102,4 +102,18 @@ const nessuna = out('generic_ok', { _vuoto: true, stats: { candidati_ai: 0 } });
 assert.equal(nessuna.leads.length, 0);
 assert.equal(nessuna.event, 'results');
 console.log('ok  classificazione: personal_only / mixed / validated / ricerca vuota');
+// 5. Icypeas: solo email del dominio con certezza alta
+const icy = (results, status = 'DEBITED') => run(src('07-normalizza-icypeas.js'), {
+  nodes: { 'Arricchimento necessario?': [{ ...dedup[0], domain: 'acme.it' }] },
+  json: { items: [{ status, results: { emails: results } }] }
+}).json;
+assert.equal(icy([{ email: 'Mario.Rossi@acme.it', certainty: 'ultra_sure' }]).email_enrichment, 'mario.rossi@acme.it');
+assert.equal(icy([{ email: 'mario.rossi@acme.it', certainty: 'ultra_sure' }]).enrichment_lookups, 1);
+assert.equal(icy([{ email: 'mario@acme.it', certainty: 'probable' }]).email_enrichment_status, 'LOW_CERTAINTY');
+assert.equal(icy([{ email: 'mario@altro.it', certainty: 'ultra_sure' }]).email_enrichment, '');
+const nf = icy([], 'DEBITED_NOT_FOUND');
+assert.equal(nf.email_enrichment_status, 'NOT_FOUND');
+assert.equal(nf.enrichment_lookups, 0);
+assert.equal(icy([], 'SCHEDULED').email_enrichment_status, 'PENDING');
+console.log('ok  Icypeas: certezza, dominio, crediti solo se trovata');
 console.log('\nTutti i test superati.');

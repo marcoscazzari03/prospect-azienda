@@ -57,7 +57,7 @@ Workflow: **Lead Engine | Search (v1)** (già creato, inattivo).
 2. Nodi *Notifica: ricerca avviata*, *Notifica: verifica email*, *Invia risultati al backend* →
    credenziale **Header Auth** "Lead Engine - Callback verso backend" con
    Name `X-Engine-Secret` e Value = valore di `ENGINE_CALLBACK_SECRET`.
-3. Verifica che i nodi OpenAI e RocketReach usino le tue credenziali.
+3. Verifica che i nodi OpenAI e Icypeas usino le tue credenziali (Icypeas: Header Auth `Authorization` = chiave API, il secret non serve).
 4. **Attiva** il workflow (Publish) solo dopo il primo test dal punto 6.
 
 ## 4. Stripe (pagamenti) — in modalità test finché non apri la partita IVA

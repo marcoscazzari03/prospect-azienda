@@ -23,7 +23,7 @@ Browser ── Next.js 16 (Vercel, fra1) ── Supabase (Postgres + Auth + RLS,
                  │        ▲
      webhook ────┘        └──── callback (progress / results)
                  ▼
-          n8n "Lead Engine | Search (v1)" ── OpenAI web search, siti aziendali, RocketReach
+          n8n "Lead Engine | Search (v1)" ── OpenAI web search, siti aziendali, Icypeas
 Stripe ── webhook ──► crediti, abbonamenti, ricevute
 ```
 

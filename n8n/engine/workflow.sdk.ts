@@ -329,82 +329,113 @@ const serveArricchimento = ifElse({
   }
 });
 
-const rrLookup = node({
+const icyCerca = node({
   type: 'n8n-nodes-base.httpRequest',
   version: 4.5,
   config: {
-    name: 'RocketReach - Lookup persona',
+    name: 'Icypeas - Avvia ricerca',
     parameters: {
-      url: 'https://api.rocketreach.co/api/v2/person/lookup',
+      method: 'POST',
+      url: 'https://app.icypeas.com/api/email-search',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
-      sendQuery: true,
-      queryParameters: { parameters: [
-        { name: 'name', value: expr('{{ $json.full_name }}') },
-        { name: 'current_employer', value: expr('{{ $json.company_name }}') },
-        { name: 'title', value: expr('{{ $json.job_title }}') },
-        { name: 'return_cached_emails', value: 'true' }
-      ] },
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr("{{ JSON.stringify({ firstname: $json.first_name, lastname: $json.last_name, domainOrCompany: $json.domain }) }}"),
       options: {
-        batching: { batch: { batchSize: 1, batchInterval: 5000 } },
-        response: { response: { neverError: true } }
+        batching: { batch: { batchSize: 1, batchInterval: 300 } },
+        response: { response: { neverError: true } },
+        timeout: 20000
       }
     },
-    credentials: { httpHeaderAuth: { id: 'f7ay2fNfuGE4VrTP', name: 'RocketReach API' } }
+    credentials: { httpHeaderAuth: { id: 'sdOCb0GxGnanvIRo', name: 'Icypeas API' } }
   },
-  output: [{ id: 123, status: 'complete', emails: [] }]
+  output: [{ success: true, items: [] }]
 });
 
-const rrInCorso = ifElse({
+const icyAttendi = node({
+  type: 'n8n-nodes-base.wait',
+  version: 1.1,
+  config: { name: 'Attendi Icypeas', parameters: { resume: 'timeInterval', amount: 20, unit: 'seconds' } }
+});
+
+const icyLeggi = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Icypeas - Leggi risultato',
+    parameters: {
+      method: 'POST',
+      url: 'https://app.icypeas.com/api/bulk-single-searchs/read',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr("{{ JSON.stringify({ mode: 'single', id: $json.item?._id ?? $json.items?.[0]?._id ?? '' }) }}"),
+      options: {
+        batching: { batch: { batchSize: 1, batchInterval: 300 } },
+        response: { response: { neverError: true } },
+        timeout: 20000
+      }
+    },
+    credentials: { httpHeaderAuth: { id: 'sdOCb0GxGnanvIRo', name: 'Icypeas API' } }
+  },
+  output: [{ success: true, items: [] }]
+});
+
+const icyInCorso = ifElse({
   version: 2.2,
   config: {
-    name: 'RocketReach in corso?',
+    name: 'Icypeas in corso?',
     parameters: {
       conditions: {
         options: { caseSensitive: true, leftValue: '', typeValidation: 'loose' },
-        conditions: [{ leftValue: expr("{{ !!$json.id && ['progress','searching','waiting','queued','not queued'].includes(String($json.status ?? '').toLowerCase()) }}"), operator: { type: 'boolean', operation: 'true', singleValue: true } }],
+        conditions: [{ leftValue: expr("{{ ['NONE','SCHEDULED','IN_PROGRESS'].includes(String($json.items?.[0]?.status ?? '').toUpperCase()) }}"), operator: { type: 'boolean', operation: 'true', singleValue: true } }],
         combinator: 'and'
       }
     }
   }
 });
 
-const rrAttendi = node({
+const icyAttendi2 = node({
   type: 'n8n-nodes-base.wait',
   version: 1.1,
-  config: { name: 'Attendi RocketReach', parameters: { resume: 'timeInterval', amount: 25, unit: 'seconds' } }
+  config: { name: 'Attendi ancora Icypeas', parameters: { resume: 'timeInterval', amount: 30, unit: 'seconds' } }
 });
 
-const rrStato = node({
+const icyRileggi = node({
   type: 'n8n-nodes-base.httpRequest',
   version: 4.5,
   config: {
-    name: 'RocketReach - Stato',
+    name: 'Icypeas - Rileggi risultato',
     parameters: {
-      url: 'https://api.rocketreach.co/api/v2/person/checkStatus',
+      method: 'POST',
+      url: 'https://app.icypeas.com/api/bulk-single-searchs/read',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
-      sendQuery: true,
-      queryParameters: { parameters: [{ name: 'ids', value: expr('{{ $json.id }}') }] },
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr("{{ JSON.stringify({ mode: 'single', id: $json.item?._id ?? $json.items?.[0]?._id ?? '' }) }}"),
       options: {
-        batching: { batch: { batchSize: 1, batchInterval: 2000 } },
-        response: { response: { neverError: true } }
+        batching: { batch: { batchSize: 1, batchInterval: 300 } },
+        response: { response: { neverError: true } },
+        timeout: 20000
       }
     },
-    credentials: { httpHeaderAuth: { id: 'f7ay2fNfuGE4VrTP', name: 'RocketReach API' } }
+    credentials: { httpHeaderAuth: { id: 'sdOCb0GxGnanvIRo', name: 'Icypeas API' } }
   },
-  output: [{ id: 123, status: 'complete', emails: [] }]
+  output: [{ success: true, items: [] }]
 });
 
-const riunisciRR = merge({
+const riunisciIcy = merge({
   version: 3.2,
-  config: { name: 'Riunisci RocketReach', parameters: { mode: 'append', numberInputs: 2 } }
+  config: { name: 'Riunisci Icypeas', parameters: { mode: 'append', numberInputs: 2 } }
 });
 
-const normalizzaRR = node({
+const normalizzaIcy = node({
   type: 'n8n-nodes-base.code',
   version: 2,
-  config: { name: 'Normalizza RocketReach', parameters: { mode: 'runOnceForEachItem', jsCode: "// Risultato RocketReach -> campi email_enrichment_*.\n// Teniamo SOLO email professionali con verifica SMTP \"valid\": le altre non\n// vengono mai presentate come verificate.\nconst prospect = $('Arricchimento necessario?').item.json;\nconst rr = $json;\n\nconst testoErrore = String(rr.response ?? rr.detail ?? rr.message ?? '');\nconst rateLimit = /rate limit|too many/i.test(testoErrore);\nconst inCorso = ['progress', 'searching', 'waiting', 'queued', 'not queued']\n  .includes(String(rr.status ?? '').toLowerCase());\n\nconst emails = Array.isArray(rr.emails) ? rr.emails : [];\nconst valide = emails.filter(e => e && e.email && e.type === 'professional' && e.smtp_valid === 'valid');\n\nlet email = '';\nif (rr.recommended_professional_email && valide.some(e => e.email === rr.recommended_professional_email)) {\n  email = rr.recommended_professional_email;\n} else if (valide.length) {\n  email = valide[0].email;\n}\n\n// L'email deve appartenere al dominio dell'azienda (evita omonimi altrove).\nconst dominio = String(prospect.domain || '').toLowerCase();\nconst delDominio = email && dominio && (email.toLowerCase().endsWith('@' + dominio) || email.toLowerCase().endsWith('.' + dominio));\n\nlet stato;\nif (email && delDominio) stato = 'VALIDATED';\nelse if (email) stato = 'OTHER_DOMAIN';\nelse if (rateLimit) stato = 'RATE_LIMIT';\nelse if (inCorso) stato = 'PENDING';\nelse if (rr.detail || !rr.id) stato = 'NOT_FOUND';\nelse stato = 'NO_VALID_EMAIL';\n\nreturn {\n  json: {\n    ...prospect,\n    email_enrichment: stato === 'VALIDATED' ? email : '',\n    email_enrichment_status: stato,\n    linkedin_url: prospect.linkedin_url || (/linkedin\\.com\\/in\\//i.test(String(rr.linkedin_url ?? '')) ? rr.linkedin_url : ''),\n    enrichment_lookups: 1\n  }\n};\n" } },
+  config: { name: 'Normalizza Icypeas', parameters: { mode: 'runOnceForEachItem', jsCode: "// Risultato Icypeas -> campi email_enrichment_*.\n// Teniamo SOLO email del dominio aziendale con certezza alta (ultra_sure,\n// very_sure): le altre non vengono mai presentate come verificate.\n// Icypeas scala un credito solo quando trova (stato DEBITED).\nconst prospect = $('Arricchimento necessario?').item.json;\nconst r = $json.items?.[0] ?? {};\nconst statoIcy = String(r.status ?? '').toUpperCase();\n\nconst CERTE = ['ultra_sure', 'very_sure'];\nconst emails = Array.isArray(r.results?.emails) ? r.results.emails : [];\nconst dominio = String(prospect.domain || '').toLowerCase();\nconst delDominio = (e) => {\n  const x = String(e || '').toLowerCase();\n  return dominio && (x.endsWith('@' + dominio) || x.endsWith('.' + dominio));\n};\nconst certa = emails.find(e => e?.email && CERTE.includes(String(e.certainty)) && delDominio(e.email));\n\nlet stato;\nif (certa) stato = 'VALIDATED';\nelse if (emails.some(e => e?.email && delDominio(e.email))) stato = 'LOW_CERTAINTY';\nelse if (emails.length) stato = 'OTHER_DOMAIN';\nelse if (['NONE', 'SCHEDULED', 'IN_PROGRESS'].includes(statoIcy)) stato = 'PENDING';\nelse if (statoIcy === 'INSUFFICIENT_FUNDS' || $json.statusCode === 429) stato = 'RATE_LIMIT';\nelse stato = 'NOT_FOUND';\n\nreturn {\n  json: {\n    ...prospect,\n    email_enrichment: certa ? String(certa.email).toLowerCase() : '',\n    email_enrichment_status: stato,\n    email_enrichment_certainty: certa ? certa.certainty : '',\n    enrichment_lookups: statoIcy === 'DEBITED' ? 1 : 0\n  }\n};\n" } },
   output: [{ email_enrichment: '', email_enrichment_status: 'NOT_FOUND' }]
 });
 
@@ -448,7 +479,7 @@ const nota = sticky(
   'Motore di ricerca prospect **generalista** chiamato dalla piattaforma SaaS via webhook autenticato.\n\n' +
   '**Flusso:** richiesta validata (anti-SSRF) -> piano AI in lotti -> ricerca AI con web search -> ' +
   'deduplica (anche contro lo storico del cliente) -> email dal sito ufficiale (homepage, contatti, note legali) -> ' +
-  'RocketReach solo se serve e entro il tetto del backend -> classificazione per modalita email -> callback al backend.\n\n' +
+  'Icypeas solo se serve e entro il tetto del backend -> classificazione per modalita email -> callback al backend.\n\n' +
   '**Non genera mai email ipotizzate come contatti:** i pattern finiscono in `email_patterns` con stato `guessed`.\n\n' +
   '**Prima di attivare:** 1) verifica `DOMINIO_PIATTAFORMA` in *Valida richiesta* (oggi weborastudio.it); 2) crea le due credenziali ' +
   '(*Lead Engine - Webhook in ingresso*: Header Auth; *Lead Engine - Callback verso backend*: header `X-Engine-Secret`) con segreti lunghi casuali, gli stessi del backend.\n\n' +
@@ -486,14 +517,16 @@ export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v1)')
   .add(riunisciEmail)
   .to(decidi)
   .to(serveArricchimento
-    .onTrue(rrLookup)
+    .onTrue(icyCerca)
     .onFalse(riunisciEsiti.input(0)))
-  .add(rrLookup)
-  .to(rrInCorso
-    .onTrue(rrAttendi.to(rrStato).to(riunisciRR.input(1)))
-    .onFalse(riunisciRR.input(0)))
-  .add(riunisciRR)
-  .to(normalizzaRR)
+  .add(icyCerca)
+  .to(icyAttendi)
+  .to(icyLeggi)
+  .to(icyInCorso
+    .onTrue(icyAttendi2.to(icyRileggi).to(riunisciIcy.input(1)))
+    .onFalse(riunisciIcy.input(0)))
+  .add(riunisciIcy)
+  .to(normalizzaIcy)
   .to(riunisciEsiti.input(1))
   .add(riunisciEsiti)
   .to(classifica)
@@ -502,5 +535,5 @@ export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v1)')
   .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
   .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, ricerca, modelloRicerca, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
   .group('3 - Email dal sito', [homepage, estraiHome, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
-  .group('4 - Arricchimento', [rrLookup, rrInCorso, rrAttendi, rrStato, riunisciRR, normalizzaRR], { description: 'RocketReach solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email SMTP valid.' })
+  .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })
   .group('5 - Consegna', [classifica, inviaRisultati], { description: 'Classifica per modalita email, calcola qualita e invia i risultati al backend con retry.' });

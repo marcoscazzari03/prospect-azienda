@@ -15,7 +15,7 @@ NODES = ROOT / "nodes"
 
 # Credenziali già presenti sull'istanza n8n (solo id e nome, nessun segreto).
 OPENAI = "{ id: 'ZQVz3FqwCrCMFcB9', name: 'OpenAi account' }"
-ROCKETREACH = "{ id: 'f7ay2fNfuGE4VrTP', name: 'RocketReach API' }"
+ICYPEAS = "{ id: 'sdOCb0GxGnanvIRo', name: 'Icypeas API' }"
 # Credenziali nuove da creare in n8n (Header Auth con segreti casuali lunghi).
 IN_AUTH = "newCredential('Lead Engine - Webhook in ingresso')"
 CB_AUTH = "newCredential('Lead Engine - Callback verso backend')"
@@ -269,68 +269,58 @@ add("""const riunisciEmail = merge({
 add(code("decidi", "Decidi arricchimento", js("06-decidi-arricchimento.js"),
          output="{ full_name: 'Mario Rossi', company_name: 'Acme Srl', job_title: 'CEO', needs_enrichment: true }"))
 add(if_node("serveArricchimento", "Arricchimento necessario?", "{{ $json.needs_enrichment }}", "boolean", "true"))
-add(f"""const rrLookup = node({{
+def icy_http(var, name, url, body_expr, batch_ms):
+    return f"""const {var} = node({{
   type: 'n8n-nodes-base.httpRequest',
   version: 4.5,
   config: {{
-    name: 'RocketReach - Lookup persona',
+    name: '{name}',
     parameters: {{
-      url: 'https://api.rocketreach.co/api/v2/person/lookup',
+      method: 'POST',
+      url: '{url}',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
-      sendQuery: true,
-      queryParameters: {{ parameters: [
-        {{ name: 'name', value: expr('{{{{ $json.full_name }}}}') }},
-        {{ name: 'current_employer', value: expr('{{{{ $json.company_name }}}}') }},
-        {{ name: 'title', value: expr('{{{{ $json.job_title }}}}') }},
-        {{ name: 'return_cached_emails', value: 'true' }}
-      ] }},
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr({json.dumps(body_expr)}),
       options: {{
-        batching: {{ batch: {{ batchSize: 1, batchInterval: 5000 }} }},
-        response: {{ response: {{ neverError: true }} }}
+        batching: {{ batch: {{ batchSize: 1, batchInterval: {batch_ms} }} }},
+        response: {{ response: {{ neverError: true }} }},
+        timeout: 20000
       }}
     }},
-    credentials: {{ httpHeaderAuth: {ROCKETREACH} }}
+    credentials: {{ httpHeaderAuth: {ICYPEAS} }}
   }},
-  output: [{{ id: 123, status: 'complete', emails: [] }}]
+  output: [{{ success: true, items: [] }}]
 }});
-""")
-add(if_node("rrInCorso", "RocketReach in corso?",
-            "{{ !!$json.id && ['progress','searching','waiting','queued','not queued'].includes(String($json.status ?? '').toLowerCase()) }}",
-            "boolean", "true"))
-add("""const rrAttendi = node({
+"""
+
+
+def icy_wait(var, name, seconds):
+    return f"""const {var} = node({{
   type: 'n8n-nodes-base.wait',
   version: 1.1,
-  config: { name: 'Attendi RocketReach', parameters: { resume: 'timeInterval', amount: 25, unit: 'seconds' } }
-});
-""")
-add(f"""const rrStato = node({{
-  type: 'n8n-nodes-base.httpRequest',
-  version: 4.5,
-  config: {{
-    name: 'RocketReach - Stato',
-    parameters: {{
-      url: 'https://api.rocketreach.co/api/v2/person/checkStatus',
-      authentication: 'genericCredentialType',
-      genericAuthType: 'httpHeaderAuth',
-      sendQuery: true,
-      queryParameters: {{ parameters: [{{ name: 'ids', value: expr('{{{{ $json.id }}}}') }}] }},
-      options: {{
-        batching: {{ batch: {{ batchSize: 1, batchInterval: 2000 }} }},
-        response: {{ response: {{ neverError: true }} }}
-      }}
-    }},
-    credentials: {{ httpHeaderAuth: {ROCKETREACH} }}
-  }},
-  output: [{{ id: 123, status: 'complete', emails: [] }}]
+  config: {{ name: '{name}', parameters: {{ resume: 'timeInterval', amount: {seconds}, unit: 'seconds' }} }}
 }});
-""")
-add("""const riunisciRR = merge({
+"""
+
+
+LEGGI = "{{ JSON.stringify({ mode: 'single', id: $json.item?._id ?? $json.items?.[0]?._id ?? '' }) }}"
+add(icy_http("icyCerca", "Icypeas - Avvia ricerca", "https://app.icypeas.com/api/email-search",
+             "{{ JSON.stringify({ firstname: $json.first_name, lastname: $json.last_name, domainOrCompany: $json.domain }) }}", 300))
+add(icy_wait("icyAttendi", "Attendi Icypeas", 20))
+add(icy_http("icyLeggi", "Icypeas - Leggi risultato", "https://app.icypeas.com/api/bulk-single-searchs/read", LEGGI, 300))
+add(if_node("icyInCorso", "Icypeas in corso?",
+            "{{ ['NONE','SCHEDULED','IN_PROGRESS'].includes(String($json.items?.[0]?.status ?? '').toUpperCase()) }}",
+            "boolean", "true"))
+add(icy_wait("icyAttendi2", "Attendi ancora Icypeas", 30))
+add(icy_http("icyRileggi", "Icypeas - Rileggi risultato", "https://app.icypeas.com/api/bulk-single-searchs/read", LEGGI, 300))
+add("""const riunisciIcy = merge({
   version: 3.2,
-  config: { name: 'Riunisci RocketReach', parameters: { mode: 'append', numberInputs: 2 } }
+  config: { name: 'Riunisci Icypeas', parameters: { mode: 'append', numberInputs: 2 } }
 });
 """)
-add(code("normalizzaRR", "Normalizza RocketReach", js("07-normalizza-rocketreach.js"), mode="runOnceForEachItem",
+add(code("normalizzaIcy", "Normalizza Icypeas", js("07-normalizza-icypeas.js"), mode="runOnceForEachItem",
          output="{ email_enrichment: '', email_enrichment_status: 'NOT_FOUND' }"))
 
 add("""const riunisciEsiti = merge({
@@ -348,7 +338,7 @@ add("""const nota = sticky(
   'Motore di ricerca prospect **generalista** chiamato dalla piattaforma SaaS via webhook autenticato.\\n\\n' +
   '**Flusso:** richiesta validata (anti-SSRF) -> piano AI in lotti -> ricerca AI con web search -> ' +
   'deduplica (anche contro lo storico del cliente) -> email dal sito ufficiale (homepage, contatti, note legali) -> ' +
-  'RocketReach solo se serve e entro il tetto del backend -> classificazione per modalita email -> callback al backend.\\n\\n' +
+  'Icypeas solo se serve e entro il tetto del backend -> classificazione per modalita email -> callback al backend.\\n\\n' +
   '**Non genera mai email ipotizzate come contatti:** i pattern finiscono in `email_patterns` con stato `guessed`.\\n\\n' +
   '**Prima di attivare:** 1) verifica `DOMINIO_PIATTAFORMA` in *Valida richiesta* (oggi weborastudio.it); 2) crea le due credenziali ' +
   '(*Lead Engine - Webhook in ingresso*: Header Auth; *Lead Engine - Callback verso backend*: header `X-Engine-Secret`) con segreti lunghi casuali, gli stessi del backend.\\n\\n' +
@@ -387,14 +377,16 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .add(riunisciEmail)
   .to(decidi)
   .to(serveArricchimento
-    .onTrue(rrLookup)
+    .onTrue(icyCerca)
     .onFalse(riunisciEsiti.input(0)))
-  .add(rrLookup)
-  .to(rrInCorso
-    .onTrue(rrAttendi.to(rrStato).to(riunisciRR.input(1)))
-    .onFalse(riunisciRR.input(0)))
-  .add(riunisciRR)
-  .to(normalizzaRR)
+  .add(icyCerca)
+  .to(icyAttendi)
+  .to(icyLeggi)
+  .to(icyInCorso
+    .onTrue(icyAttendi2.to(icyRileggi).to(riunisciIcy.input(1)))
+    .onFalse(riunisciIcy.input(0)))
+  .add(riunisciIcy)
+  .to(normalizzaIcy)
   .to(riunisciEsiti.input(1))
   .add(riunisciEsiti)
   .to(classifica)
@@ -403,7 +395,7 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
   .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, ricerca, modelloRicerca, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
   .group('3 - Email dal sito', [homepage, estraiHome, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
-  .group('4 - Arricchimento', [rrLookup, rrInCorso, rrAttendi, rrStato, riunisciRR, normalizzaRR], { description: 'RocketReach solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email SMTP valid.' })
+  .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })
   .group('5 - Consegna', [classifica, inviaRisultati], { description: 'Classifica per modalita email, calcola qualita e invia i risultati al backend con retry.' });
 """)
 

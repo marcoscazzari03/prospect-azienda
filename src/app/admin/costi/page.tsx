@@ -47,16 +47,16 @@ export default async function CostsPage() {
         </Card>
       </div>
       <Card className="mt-6 p-6">
-        <h2 className="mb-1 font-display text-xl font-semibold">Budget verifiche email (RocketReach)</h2>
+        <h2 className="mb-1 font-display text-xl font-semibold">Budget ricerche email a pagamento (Icypeas)</h2>
         <p className="mb-4 text-sm text-ink-2">
-          Verifiche usate questo mese: <span className="font-mono font-semibold">{used}</span>
-          {budget !== null && <> su <span className="font-mono">{budget}</span></>} (comprese quelle riservate alle ricerche in corso).
+          Email trovate questo mese: <span className="font-mono font-semibold">{used}</span>
+          {budget !== null && <> su <span className="font-mono">{budget}</span></>} (compreso il tetto riservato alle ricerche in corso).
           Superato il budget, il motore usa solo le email trovate sui siti.
         </p>
         <form action={updateEnrichmentBudget} className="flex flex-wrap items-center gap-2">
-          <div className="w-40"><Input name="budget" type="number" min="0" step="1" defaultValue={budget ?? ""} placeholder="Nessun limite" aria-label="Verifiche al mese" /></div>
+          <div className="w-40"><Input name="budget" type="number" min="0" step="1" defaultValue={budget ?? ""} placeholder="Nessun limite" aria-label="Email al mese" /></div>
           <Button size="sm" variant="secondary">Salva</Button>
-          <p className="text-xs text-muted">Verifiche al mese. Vuoto = nessun limite, 0 = spente. Tienilo sotto la quota mensile del tuo piano.</p>
+          <p className="text-xs text-muted">Email al mese. Vuoto = nessun limite, 0 = spento. Tienilo sotto i crediti mensili del tuo piano Icypeas.</p>
         </form>
       </Card>
       <h2 className="mb-4 mt-10 font-display text-xl font-semibold">Piani</h2>

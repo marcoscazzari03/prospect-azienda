@@ -52,7 +52,7 @@ Cliente ──► Backend (Next.js) ──POST webhook──► n8n "Lead Engine
   "limits": {
     "max_lots": 6,                     // tetto alle ricerche AI (costo)
     "candidates_per_lot": 20,
-    "enrichment_cap": 30               // tetto ai lookup RocketReach (costo), 0 = disattivato
+    "enrichment_cap": 30               // tetto alle ricerche Icypeas (costo), 0 = disattivato
   }
 }
 ```
