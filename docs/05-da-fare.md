@@ -19,8 +19,6 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 - [x] Magazzino dei lead: i contatti già trovati vengono consegnati subito ad altri clienti con lo stesso target (migrazione `20261011000005_lead_warehouse.sql`)
 - [x] Ricerche grandi a tappe (fino a 15 giri, stop a mercato esaurito) e budget mensile RocketReach in *Prezzi e costi* (migrazione `20261012000006_large_searches.sql`)
 - [x] RocketReach: piano Essentials (229 $/anno, 1.200 export/anno; 1 ricerca API = 1 export, anche se non trova) -> costo ~0,18 €/export, budget piattaforma ~80/mese
-- [ ] RocketReach: la quota è condivisa con i workflow "Prospect | Search" e "Prospect Avvocati | Search" (~30 export/giorno a inizio ottobre): decidere se spegnerli o passare a un account dedicato alla piattaforma
-- [ ] RocketReach: con i primi clienti "solo nominative" la quota annuale non basta (una ricerca da 100 lead può usarne ~150): valutare un piano superiore
 - [x] Controllo delle caselle prima della consegna: dominio che riceve posta (sempre) + verifica della casella con MillionVerifier se c'è `MILLIONVERIFIER_API_KEY` (migrazione `20261013000007_phase2.sql`)
 - [ ] Facoltativo: account MillionVerifier e chiave `MILLIONVERIFIER_API_KEY` su Vercel; aggiornare il costo `email_verifier` in *Prezzi e costi*
 - [x] Export Excel (.xlsx formattato, con filtri)
@@ -34,10 +32,11 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Account Icypeas + credenziale n8n "Icypeas API" (Header Auth `Authorization` = chiave; il secret non serve)
 - [x] Test Icypeas (10/10): 1/1 email nota corretta; 7/18 trovate dove avevamo solo generica o niente (RocketReach 0/4 sugli stessi); tutte "ultra_sure"; credito scalato solo se trova
 - [x] Icypeas nel motore al posto di RocketReach (migrazione `20261014000008_icypeas.sql`, costo `email_finder`)
-- [ ] Pubblicare il workflow su n8n e comprare un piano Icypeas (la prova ha 42 crediti)
-- [ ] Cancellare il workflow "TEST | Icypeas email finder"
+- [x] Workflow pubblicato e piano Icypeas acquistato (budget mensile ~900 in Prezzi e costi)
+- [x] Workflow "TEST | Icypeas email finder" archiviato
 - [ ] Motore: workflow di errore n8n che avvisa il backend se un'esecuzione si interrompe (oggi la ricerca si chiude dopo 45 minuti senza notizie)
 - [x] Prova completa "solo nominative" (4/5, 3 da Icypeas) e "mista" (10/10)
+- [ ] Ritocchi grafici del sito (prima della beta)
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
 - [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale
 
