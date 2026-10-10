@@ -30,14 +30,14 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 
 ## Piano di lancio (deciso il 10/10)
 Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto di RocketReach, si paga solo se trova)  3) MillionVerifier controlla ogni casella prima della consegna. Le email ricostruite (indirizzi probabili) NON si vendono: restano "ipotizzate".
-- [ ] Account MillionVerifier + `MILLIONVERIFIER_API_KEY` su Vercel (codice già pronto) e prova
+- [x] Account MillionVerifier (2.000 verifiche) + `MILLIONVERIFIER_API_KEY` su Vercel: prova ok il 10/10 ("Casella verificata: esiste")
 - [x] Account Icypeas + credenziale n8n "Icypeas API" (Header Auth `Authorization` = chiave; il secret non serve)
 - [x] Test Icypeas (10/10): 1/1 email nota corretta; 7/18 trovate dove avevamo solo generica o niente (RocketReach 0/4 sugli stessi); tutte "ultra_sure"; credito scalato solo se trova
 - [x] Icypeas nel motore al posto di RocketReach (migrazione `20261014000008_icypeas.sql`, costo `email_finder`)
 - [ ] Pubblicare il workflow su n8n e comprare un piano Icypeas (la prova ha 42 crediti)
 - [ ] Cancellare il workflow "TEST | Icypeas email finder"
 - [ ] Motore: workflow di errore n8n che avvisa il backend se un'esecuzione si interrompe (oggi la ricerca si chiude dopo 45 minuti senza notizie)
-- [ ] Prova completa "solo nominative" e "mista"
+- [x] Prova completa "solo nominative" (4/5, 3 da Icypeas) e "mista" (10/10)
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
 - [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale
 
