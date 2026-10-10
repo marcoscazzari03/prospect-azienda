@@ -5,6 +5,8 @@ import { requireViewer } from "@/lib/server/dal";
 import { createClient } from "@/lib/supabase/server";
 import { closeStaleRuns } from "@/lib/server/searches";
 import { formatNumber } from "@/lib/domain/pricing";
+import { activitySince, activitySummary } from "@/lib/server/activity";
+import { ActivitySummary } from "@/components/activity-summary";
 
 export const metadata: Metadata = { title: "Panoramica" };
 
@@ -12,7 +14,9 @@ export default async function DashboardPage() {
   const viewer = await requireViewer();
   await closeStaleRuns(viewer.org.id);
   const supabase = await createClient();
-  const [{ data: searches }, { count: leads }, { count: personal }, { data: reserved }] = await Promise.all([
+  const since = await activitySince(viewer.user.id);
+  const [activity, { data: searches }, { count: leads }, { count: personal }, { data: reserved }] = await Promise.all([
+    activitySummary(since),
     supabase.from("searches").select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at, repeat").order("created_at", { ascending: false }).limit(6),
     supabase.from("deliveries").select("id", { count: "exact", head: true }),
     supabase.from("deliveries").select("id", { count: "exact", head: true }).eq("email_type", "personal"),
@@ -35,6 +39,10 @@ export default async function DashboardPage() {
         <Stat label="Lead acquistati" value={formatNumber(leads ?? 0)} hint={`${personal ?? 0} con email nominativa`} />
         <Stat label="Ricerche in corso" value={active} tone={active ? "stamp" : "ink"} />
         <Stat label="Quota nominative" value={leads ? `${Math.round(((personal ?? 0) / leads) * 100)}%` : "—"} hint="Sul totale dei lead" />
+      </div>
+
+      <div className="mt-6">
+        <ActivitySummary since={since} summary={activity.summary} items={activity.items} />
       </div>
 
       <h2 className="mb-4 mt-12 font-display text-2xl font-semibold">Ultime ricerche</h2>

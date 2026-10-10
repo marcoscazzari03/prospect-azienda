@@ -59,7 +59,7 @@ export function Stat({ label, value, hint, tone = "ink" }: { label: string; valu
 
 const BADGE = {
   neutral: "bg-paper-2 text-ink-2 border-line",
-  ledger: "bg-ledger-soft text-ledger border-ledger/20",
+  ledger: "bg-ledger-soft text-ledger-2 border-ledger/20",
   stamp: "bg-stamp-soft text-stamp-ink border-stamp/30",
   brick: "bg-brick-soft text-brick border-brick/20",
 } as const;
@@ -113,7 +113,7 @@ export function Progress({ value, max }: { value: number; max: number }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
   return (
     <div className="h-2 w-full overflow-hidden rounded-full bg-paper-2" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={max}>
-      <div className="h-full rounded-full bg-ledger transition-all duration-700" style={{ width: `${pct}%` }} />
+      <div className="h-full rounded-full bg-ledger-bright transition-all duration-700" style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -154,7 +154,7 @@ export function Select({ className, ...props }: ComponentProps<"select">) {
 
 export function Alert({ tone = "stamp", children }: { tone?: "stamp" | "brick" | "ledger"; children: ReactNode }) {
   return (
-    <div className={cx("rounded-lg border px-4 py-3 text-sm", tone === "stamp" && "border-stamp/40 bg-stamp-soft text-stamp-ink", tone === "brick" && "border-brick/30 bg-brick-soft text-brick", tone === "ledger" && "border-ledger/25 bg-ledger-soft text-ledger")}>
+    <div className={cx("rounded-lg border px-4 py-3 text-sm", tone === "stamp" && "border-stamp/40 bg-stamp-soft text-stamp-ink", tone === "brick" && "border-brick/30 bg-brick-soft text-brick", tone === "ledger" && "border-ledger/25 bg-ledger-soft text-ledger-2")}>
       {children}
     </div>
   );

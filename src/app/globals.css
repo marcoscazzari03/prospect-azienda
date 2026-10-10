@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
-/* Identità "Il registro": carta, inchiostro, verde registro, ambra timbro. */
+/* Identità: bianco e grigi freddi, verde smeraldo, ambra per gli stati in corso. */
 @theme {
-  --color-paper: #f6f3ec;
-  --color-paper-2: #efeadf;
-  --color-card: #fffdf8;
-  --color-ink: #141a1f;
-  --color-ink-2: #39424a;
-  --color-muted: #646a71;
-  --color-line: #ddd5c6;
-  --color-ledger: #0f5c4d;
-  --color-ledger-2: #0b4a3e;
-  --color-ledger-soft: #e2eee9;
+  --color-paper: #f4f5f7;
+  --color-paper-2: #eceef1;
+  --color-card: #ffffff;
+  --color-ink: #111827;
+  --color-ink-2: #374151;
+  --color-muted: #6b7280;
+  --color-line: #e3e6ea;
+  --color-ledger: #148057;
+  --color-ledger-2: #0f6845;
+  --color-ledger-soft: #e8f6ee;
+  --color-ledger-bright: #22a06b;
   --color-stamp: #e0a526;
   --color-stamp-ink: #7a5508;
-  --color-stamp-soft: #fbf0d6;
+  --color-stamp-soft: #fdf4dc;
   --color-brick: #b4472c;
-  --color-brick-soft: #f6e2db;
+  --color-brick-soft: #f9e5df;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-fraunces), Georgia, serif;
@@ -37,9 +38,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Righe del registro: la carta a righe come texture discreta. */
+/* Superfici in evidenza (riepiloghi, crediti): un leggero stacco dal bianco. */
 .ruled {
-  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, color-mix(in oklab, var(--color-line) 55%, transparent) 31px, color-mix(in oklab, var(--color-line) 55%, transparent) 32px);
+  background-image: linear-gradient(to bottom, color-mix(in oklab, var(--color-paper) 60%, white), white);
 }
 
 :focus-visible { outline: 2px solid var(--color-ledger); outline-offset: 2px; border-radius: 4px; }
