@@ -28,6 +28,16 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 - [x] Ricerche ricorrenti (settimanali o mensili, avviate dal cron giornaliero delle 3:00 UTC)
 - [ ] Più utenti per account, API (fase 2)
 
+## Piano di lancio (deciso il 10/10)
+Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto di RocketReach, si paga solo se trova)  3) MillionVerifier controlla ogni casella prima della consegna. Le email ricostruite (indirizzi probabili) NON si vendono: restano "ipotizzate".
+- [ ] Account MillionVerifier + `MILLIONVERIFIER_API_KEY` su Vercel (codice già pronto) e prova
+- [ ] Account Icypeas + chiave come credenziale n8n
+- [ ] Test Icypeas su 30-50 contatti già noti (quanti ne trova, quanti coincidono)
+- [ ] Icypeas nel motore al posto di RocketReach (nodi arricchimento, costo `icypeas_lookup`, budget mensile), ripubblicare il workflow
+- [ ] Prova completa "solo nominative" e "mista"
+- [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
+- [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale
+
 ## Legale e fiscale
 - [ ] Apertura partita IVA (prima di incassare) e scelta del regime con un commercialista
 - [ ] Validazione di informativa privacy, termini, LIA/DPIA con un consulente
