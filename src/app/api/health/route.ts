@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/url";
+import { env } from "@/lib/env";
+import { safeEqual } from "@/lib/server/crypto";
+import { getViewer } from "@/lib/server/dal";
 
 export const dynamic = "force-dynamic";
 
 // Diagnosi della configurazione: nessun segreto, solo presenza e raggiungibilità.
-export async function GET() {
+// Visibile solo agli amministratori connessi o con "Authorization: Bearer CRON_SECRET" (audit V8).
+export async function GET(request: Request) {
+  const secret = env.cronSecret();
+  const bearer = request.headers.get("authorization") ?? "";
+  const allowed = (secret && safeEqual(bearer, `Bearer ${secret}`)) || (await getViewer())?.isAdmin;
+  if (!allowed) return NextResponse.json({ error: "not found" }, { status: 404 });
+
   const raw = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const url = supabaseUrl();
   const key = supabaseAnonKey();
