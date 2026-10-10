@@ -3,6 +3,9 @@ import "server-only";
 // Cloudflare Turnstile (gratuito). Attivo solo se configurato:
 // NEXT_PUBLIC_TURNSTILE_SITE_KEY (pubblica) e TURNSTILE_SECRET_KEY (segreta).
 export const captchaEnabled = () => Boolean(process.env.TURNSTILE_SECRET_KEY && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+// Letta a runtime sul server e passata al widget: pagina e verifica usano
+// sempre la stessa configurazione (niente chiave "congelata" al momento della build).
+export const captchaSiteKey = () => (captchaEnabled() ? process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!.trim() : "");
 
 export async function verifyCaptcha(token: FormDataEntryValue | null, ip: string): Promise<boolean> {
   if (!captchaEnabled()) return true;

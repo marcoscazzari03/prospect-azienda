@@ -4,7 +4,7 @@ import { Alert, Button, Field, Input } from "@/components/ui";
 import { Captcha } from "@/components/captcha";
 import { requestOptout, type OptoutState } from "./actions";
 
-export function OptoutForm() {
+export function OptoutForm({ captchaKey }: { captchaKey: string }) {
   const [state, action, pending] = useActionState<OptoutState, FormData>(requestOptout, {});
   if (state.ok) return <Alert tone="ledger">Richiesta registrata. Se l&apos;indirizzo è valido riceverai un&apos;email: apri il link per confermare. Il link vale finché non lo usi.</Alert>;
   return (
@@ -17,7 +17,7 @@ export function OptoutForm() {
         Escludi anche tutte le altre email della mia azienda (stesso dominio)
       </label>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
-      <Captcha />
+      <Captcha siteKey={captchaKey} />
       <Button type="submit" disabled={pending} className="self-start">{pending ? "Invio…" : "Rimuovi i miei dati"}</Button>
     </form>
   );
