@@ -1,12 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { safeNextPath } from "@/lib/domain/safe-next";
 
 // Link delle email di Supabase (conferma account, reset password).
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
-  const nextParam = url.searchParams.get("next") ?? "/app";
-  const next = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/app";
+  const next = safeNextPath(url.searchParams.get("next"));
   const supabase = await createClient();
 
   const code = url.searchParams.get("code");

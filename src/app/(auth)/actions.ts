@@ -3,13 +3,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { env } from "@/lib/env";
+import { safeNextPath } from "@/lib/domain/safe-next";
 
 export type AuthState = { error?: string; info?: string };
 
-const safeNext = (v: FormDataEntryValue | null) => {
-  const s = typeof v === "string" ? v : "";
-  return s.startsWith("/") && !s.startsWith("//") ? s : "/app";
-};
+const safeNext = (v: FormDataEntryValue | null) => safeNextPath(v);
 
 const DISPOSABLE = /@(mailinator|guerrillamail|10minutemail|tempmail|temp-mail|yopmail|trashmail|getnada|sharklasers|dispostable)\./i;
 
