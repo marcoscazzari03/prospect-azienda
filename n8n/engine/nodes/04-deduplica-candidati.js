@@ -15,13 +15,14 @@ const norm = (v) => String(v ?? '')
 const INVISIBILI = /[\u00AD\u200B-\u200F\u2060\uFEFF]/g;
 const pulito = (v, max = 200) => String(v ?? '').replace(INVISIBILI, '').trim().replace(/\s+/g, ' ').slice(0, max);
 // URL: niente spazi né invisibili, e deve essere un indirizzo http(s) valido.
+// (Niente `new URL`: nella sandbox dei Code node di n8n non è disponibile.)
 const urlPulito = (v, max = 500) => {
-  const s = String(v ?? '').replace(INVISIBILI, '').replace(/\s+/g, '').slice(0, max);
+  let s = String(v ?? '').replace(INVISIBILI, '').replace(/\s+/g, '').slice(0, max);
   if (!s) return '';
-  try {
-    const u = new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
-    return /^https?:$/.test(u.protocol) && u.hostname.includes('.') ? u.href : '';
-  } catch { return ''; }
+  if (!/^https?:\/\//i.test(s)) s = `https://${s}`;
+  const m = s.match(/^(https?):\/\/([a-z0-9.-]+)(:\d+)?([/?#].*)?$/i);
+  if (!m || !m[2].includes('.') || /^[.-]|[.-]$/.test(m[2])) return '';
+  return `${m[1].toLowerCase()}://${m[2].toLowerCase()}${m[3] || ''}${m[4] || '/'}`;
 };
 
 const host = (u) => String(u ?? '').trim().toLowerCase()

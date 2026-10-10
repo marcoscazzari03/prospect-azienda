@@ -17,7 +17,8 @@ const run = (code, { nodes = {}, input = [], json = {} }) => {
     return { first: () => ({ json: n[0] }), all: () => n.map(j => ({ json: j })), item: { json: n[0] } };
   };
   const $input = { first: () => ({ json: input[0] }), all: () => input.map(j => ({ json: j })) };
-  return new Function('$', '$json', '$input', '$execution', code)($, json, $input, { id: 'test' });
+  // URL non esiste nella sandbox dei Code node di n8n: lo togliamo anche qui.
+  return new Function('$', '$json', '$input', '$execution', 'URL', code)($, json, $input, { id: 'test' }, undefined);
 };
 
 const body = {
