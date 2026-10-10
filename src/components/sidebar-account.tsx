@@ -4,9 +4,10 @@ import { formatNumber } from "@/lib/domain/pricing";
 // Piede della barra laterale: crediti con barra di utilizzo, account e uscita.
 const FREE_MAIL = /^(gmail|googlemail|outlook|hotmail|live|yahoo|icloud|me|libero|virgilio|tiscali|alice|tim|aol|proton|protonmail)\.[a-z.]+$/i;
 
-export function SidebarAccount({ credits, total, planName, email, orgName }: { credits: number; total: number; planName: string; email: string; orgName: string }) {
+export function SidebarAccount({ credits, total, planName, email, orgName, fullName }: { credits: number; total: number; planName: string; email: string; orgName: string; fullName?: string }) {
   const pct = total > 0 ? Math.min(100, Math.round((credits / total) * 100)) : 0;
-  const initials = (email.split("@")[0].match(/[a-z]/gi) ?? ["?"]).slice(0, 2).join("").toUpperCase();
+  const name = (fullName ?? "").trim();
+  const initials = (name ? name.split(/\s+/).map((w) => w[0]) : email.split("@")[0].match(/[a-z]/gi) ?? ["?"]).slice(0, 2).join("").toUpperCase();
   const account = FREE_MAIL.test(orgName) ? "Account personale" : orgName;
   return (
     <div className="flex flex-col gap-3 border-t border-line p-4">
@@ -39,8 +40,8 @@ export function SidebarAccount({ credits, total, planName, email, orgName }: { c
         <summary className="flex cursor-pointer list-none items-center gap-3 rounded-lg px-2 py-2 hover:bg-paper-2 [&::-webkit-details-marker]:hidden">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper-2 text-xs font-semibold text-ink-2">{initials}</span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-xs font-medium" title={email}>{email}</span>
-            <span className="block truncate text-xs text-muted">{account}</span>
+            <span className="block truncate text-sm font-medium" title={name || email}>{name || account}</span>
+            <span className="block truncate text-xs text-muted" title={email}>{email}</span>
           </span>
           <svg viewBox="0 0 20 20" className="h-4 w-4 text-ink-2 transition-transform group-open/acc:rotate-180" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
             <path d="M5 8l5 5 5-5" />

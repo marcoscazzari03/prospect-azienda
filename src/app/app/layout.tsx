@@ -36,7 +36,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           <AppNav items={items} />
         </div>
         <div className="hidden md:block">
-          <SidebarAccount credits={viewer.credits} total={Math.max(total, viewer.credits)} planName={viewer.plan?.name ?? "—"} email={viewer.email} orgName={viewer.org.name} />
+          <SidebarAccount credits={viewer.credits} total={Math.max(total, viewer.credits)} planName={viewer.plan?.name ?? "—"} email={viewer.email} orgName={viewer.org.name} fullName={viewer.fullName} />
         </div>
       </aside>
       <main className="min-w-0 flex-1 px-4 py-8 sm:px-8 md:py-10">

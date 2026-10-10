@@ -18,7 +18,26 @@ export async function activitySince(userId: string): Promise<string> {
   return since;
 }
 
-export type ActivityItem = { at: string; kind: "search" | "credits" | "expire"; text: string; tone: "ledger" | "stamp" | "brick" | "ink"; href?: string };
+export type ActivityItem = {
+  at: string;
+  kind: "search" | "credits" | "expire";
+  title: string;
+  detail: string;
+  tone: "ledger" | "stamp" | "brick" | "ink";
+  href?: string;
+  when?: string;
+};
+
+// "oggi, 13:05" · "ieri, 17:43" · "8 ott"
+function whenLabel(iso: string, now: Date) {
+  const tz = "Europe/Rome";
+  const day = (d: Date) => d.toLocaleDateString("sv-SE", { timeZone: tz });
+  const d = new Date(iso);
+  const time = d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: tz });
+  if (day(d) === day(now)) return `oggi, ${time}`;
+  if (day(d) === day(new Date(now.getTime() - 86_400_000))) return `ieri, ${time}`;
+  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: tz });
+}
 
 const MOVIMENTI = ["grant", "purchase", "subscription", "refund", "adjust", "expire"];
 
@@ -47,20 +66,20 @@ export async function activitySummary(since: string) {
       kind: "search",
       href: `/app/ricerche/${s.id}`,
       tone: s.status === "failed" ? "brick" : s.status === "completed" ? "ledger" : "stamp",
-      text:
-        s.status === "failed"
-          ? `Ricerca non riuscita: «${s.name}» (crediti restituiti)`
-          : `Ricerca ${s.status === "completed" ? "completata" : "conclusa"}: «${s.name}», ${s.delivered} lead su ${s.quantity}`,
+      title: s.status === "failed" ? "Ricerca non riuscita" : s.status === "completed" ? "Ricerca completata" : "Ricerca conclusa",
+      detail: s.status === "failed" ? `«${s.name}» · crediti restituiti` : `«${s.name}» · ${s.delivered} lead su ${s.quantity}`,
     })),
     ...(recentLedger ?? []).map((l): ActivityItem => ({
       at: l.created_at,
       kind: l.kind === "expire" ? "expire" : "credits",
       tone: l.delta > 0 ? "ledger" : "brick",
-      text: `${l.delta > 0 ? "+" : ""}${l.delta} crediti · ${l.description}`,
+      title: l.kind === "expire" ? `${l.delta} crediti scaduti` : `${l.delta > 0 ? "+" : ""}${l.delta} crediti`,
+      detail: l.description,
     })),
   ]
     .sort((a, b) => b.at.localeCompare(a.at))
-    .slice(0, 6);
+    .slice(0, 5)
+    .map((it) => ({ ...it, when: whenLabel(it.at, new Date()) }));
 
   return { summary, items };
 }
