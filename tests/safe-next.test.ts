@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { safeNextPath } from "@/lib/domain/safe-next";
+import { normalizeEmail } from "@/lib/domain/email-norm";
 
 describe("destinazione dopo login (audit V2)", () => {
   it("accetta solo pagine interne note", () => {
@@ -20,5 +21,14 @@ describe("destinazione dopo login (audit V2)", () => {
     }
     expect(safeNextPath(undefined)).toBe("/app");
     expect(safeNextPath(42)).toBe("/app");
+  });
+});
+
+describe("email normalizzata (audit V4, come normalize_email in SQL)", () => {
+  it("riconosce alias e punti di Gmail", () => {
+    expect(normalizeEmail("Mario.Rossi+promo@GoogleMail.com")).toBe("mariorossi@gmail.com");
+    expect(normalizeEmail("m.a.r.i.o.rossi@gmail.com")).toBe("mariorossi@gmail.com");
+    expect(normalizeEmail("anna+x@azienda.it")).toBe("anna@azienda.it");
+    expect(normalizeEmail("a.b@azienda.it")).toBe("a.b@azienda.it");
   });
 });

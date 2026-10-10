@@ -387,14 +387,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"email": string,"full_name": string,"is_admin": boolean,"seen_at": string | null,"since_at": string | null,"user_id": string
+                    "created_at": string,"email": string,"email_norm": string | null,"full_name": string,"is_admin": boolean,"seen_at": string | null,"signup_ip_hash": string | null,"since_at": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"email": string,"full_name"?: string,"is_admin"?: boolean,"seen_at"?: string | null,"since_at"?: string | null,"user_id": string
+                    "created_at"?: string,"email": string,"email_norm"?: string | null,"full_name"?: string,"is_admin"?: boolean,"seen_at"?: string | null,"signup_ip_hash"?: string | null,"since_at"?: string | null,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"email"?: string,"full_name"?: string,"is_admin"?: boolean,"seen_at"?: string | null,"since_at"?: string | null,"user_id"?: string
+                    "created_at"?: string,"email"?: string,"email_norm"?: string | null,"full_name"?: string,"is_admin"?: boolean,"seen_at"?: string | null,"signup_ip_hash"?: string | null,"since_at"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -711,6 +711,9 @@ isOneToOne: false
                            },
 "lead_credits":
 { Args: { "p_mode": string,"p_status": string,"p_type": string }; Returns: number
+                           },
+"normalize_email":
+{ Args: { "p": string }; Returns: string
                            },
 "org_available_credits":
 { Args: { "p_org": string }; Returns: number

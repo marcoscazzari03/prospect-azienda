@@ -145,3 +145,20 @@ select pg_temp.check((select count(*) = 0 from lead_list_items) and (select coun
 reset role;
 select pg_temp.check((select count(*) = 2 from deliveries where stage = 'contacted' and notes = 'chiamato'), 'stato e note salvati');
 \echo 'Test fase 2 superati.'
+
+-- Crediti di benvenuto: una sola volta per persona (alias e punti Gmail).
+select pg_temp.check(normalize_email('Mario.Rossi+promo@GoogleMail.com') = 'mariorossi@gmail.com'
+                     and normalize_email('anna+x@azienda.it') = 'anna@azienda.it'
+                     and normalize_email('a.b@azienda.it') = 'a.b@azienda.it', 'email normalizzata');
+insert into auth.users (id, email) values ('88888888-8888-8888-8888-888888888888', 'furbo@gmail.com');
+insert into auth.users (id, email) values ('99999999-9999-9999-9999-999999999999', 'f.u.r.b.o+2@gmail.com');
+select pg_temp.check(org_available_credits((select org_id from memberships where user_id = '88888888-8888-8888-8888-888888888888')) = 15,
+                     'primo account: 15 crediti di benvenuto');
+select pg_temp.check(org_available_credits((select org_id from memberships where user_id = '99999999-9999-9999-9999-999999999999')) = 0,
+                     'alias dello stesso indirizzo: nessun credito gratis');
+update app_settings set value = '0' where key = 'welcome_credits_daily_cap';
+insert into auth.users (id, email) values ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'nuovo@altro.it');
+select pg_temp.check(org_available_credits((select org_id from memberships where user_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')) = 0
+                     and exists (select 1 from profiles where user_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
+                     'tetto giornaliero raggiunto: account creato ma senza crediti');
+\echo 'Test registrazioni superati.'

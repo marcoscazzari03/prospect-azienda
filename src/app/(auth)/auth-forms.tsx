@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { Alert, Button, Field, Input } from "@/components/ui";
+import { Captcha } from "@/components/captcha";
 import { requestReset, signIn, signUp, updatePassword, type AuthState } from "./actions";
 
 export function SignInForm({ next }: { next?: string }) {
@@ -18,7 +19,7 @@ export function SignInForm({ next }: { next?: string }) {
   );
 }
 
-export function SignUpForm({ plan }: { plan?: string }) {
+export function SignUpForm({ plan, captchaKey = "" }: { plan?: string; captchaKey?: string }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(signUp, {});
   if (state.info) return <Alert tone="ledger">{state.info}</Alert>;
   return (
@@ -35,6 +36,7 @@ export function SignUpForm({ plan }: { plan?: string }) {
         <input type="checkbox" name="terms" required className="mt-1 accent-[var(--color-ledger)]" />
         <span>Accetto i <Link href="/termini" className="text-ledger underline" target="_blank">termini di servizio</Link> e ho letto l&apos;<Link href="/privacy" className="text-ledger underline" target="_blank">informativa privacy</Link>.</span>
       </label>
+      <Captcha siteKey={captchaKey} resetSignal={state} />
       <Button type="submit" size="lg" disabled={pending}>{pending ? "Creazione…" : "Crea l'account gratuito"}</Button>
     </form>
   );

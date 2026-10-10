@@ -17,7 +17,7 @@ export function OptoutForm({ captchaKey }: { captchaKey: string }) {
         Escludi anche tutte le altre email della mia azienda (stesso dominio)
       </label>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
-      <Captcha siteKey={captchaKey} />
+      <Captcha siteKey={captchaKey} resetSignal={state} />
       <Button type="submit" disabled={pending} className="self-start">{pending ? "Invio…" : "Rimuovi i miei dati"}</Button>
     </form>
   );
