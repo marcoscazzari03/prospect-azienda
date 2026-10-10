@@ -29,15 +29,18 @@ async function domainReceivesMail(domain: string): Promise<boolean | null> {
   }
 }
 
-async function verifyMailbox(address: string, key: string): Promise<MailboxCheck> {
+// null = verifica non eseguita (errore, crediti finiti): non costa e non scarta.
+async function verifyMailbox(address: string, key: string): Promise<MailboxCheck | null> {
   try {
     const url = `https://api.millionverifier.com/api/v3/?api=${encodeURIComponent(key)}&email=${encodeURIComponent(address)}&timeout=5`;
     const res = await fetch(url, { signal: AbortSignal.timeout(7_000) });
-    if (!res.ok) return "unknown";
-    const result = String(((await res.json()) as { result?: string }).result ?? "").toLowerCase();
-    return (["ok", "catch_all", "invalid", "disposable"] as const).find((r) => r === result) ?? "unknown";
+    if (!res.ok) return null;
+    const body = (await res.json()) as { result?: string; error?: string };
+    if (body.error) return null;
+    const result = String(body.result ?? "").toLowerCase();
+    return (["ok", "catch_all", "invalid", "disposable", "unknown"] as const).find((r) => r === result) ?? null;
   } catch {
-    return "unknown";
+    return null;
   }
 }
 
@@ -73,8 +76,11 @@ export async function checkMailboxes(addresses: string[], budgetMs = 60_000) {
   let apiCalls = 0;
   if (key) {
     await pool(toVerify, async (a) => {
-      apiCalls++;
-      results.set(a, await verifyMailbox(a, key));
+      const check = await verifyMailbox(a, key);
+      if (check) {
+        apiCalls++;
+        results.set(a, check);
+      }
     }, deadline);
   }
   for (const a of toVerify) if (!results.has(a)) results.set(a, "unknown");
