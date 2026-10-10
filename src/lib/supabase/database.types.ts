@@ -293,14 +293,14 @@ isOneToOne: false
                   ]
                 },"optout_requests": {
                   Row: {
-                    "confirmed_at": string | null,"created_at": string,"domain_hash": string | null,"email_hash": string,"id": string,"status": string,"token_hash": string,"whole_domain": boolean
+                    "confirmed_at": string | null,"created_at": string,"domain_hash": string | null,"email_hash": string,"id": string,"ip_hash": string | null,"status": string,"token_hash": string,"whole_domain": boolean
                   }
                   ComputedFields: never
                   Insert: {
-                    "confirmed_at"?: string | null,"created_at"?: string,"domain_hash"?: string | null,"email_hash": string,"id"?: string,"status"?: string,"token_hash": string,"whole_domain"?: boolean
+                    "confirmed_at"?: string | null,"created_at"?: string,"domain_hash"?: string | null,"email_hash": string,"id"?: string,"ip_hash"?: string | null,"status"?: string,"token_hash": string,"whole_domain"?: boolean
                   }
                   Update: {
-                    "confirmed_at"?: string | null,"created_at"?: string,"domain_hash"?: string | null,"email_hash"?: string,"id"?: string,"status"?: string,"token_hash"?: string,"whole_domain"?: boolean
+                    "confirmed_at"?: string | null,"created_at"?: string,"domain_hash"?: string | null,"email_hash"?: string,"id"?: string,"ip_hash"?: string | null,"status"?: string,"token_hash"?: string,"whole_domain"?: boolean
                   }
                   Relationships: [
                     
