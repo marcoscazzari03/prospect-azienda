@@ -36,6 +36,7 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Icypeas nel motore al posto di RocketReach (migrazione `20261014000008_icypeas.sql`, costo `email_finder`)
 - [ ] Pubblicare il workflow su n8n e comprare un piano Icypeas (la prova ha 42 crediti)
 - [ ] Cancellare il workflow "TEST | Icypeas email finder"
+- [ ] Motore: workflow di errore n8n che avvisa il backend se un'esecuzione si interrompe (oggi la ricerca si chiude dopo 45 minuti senza notizie)
 - [ ] Prova completa "solo nominative" e "mista"
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
 - [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale

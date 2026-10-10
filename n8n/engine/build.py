@@ -59,7 +59,9 @@ def http_page(var, name, url_expr):
         response: {{ response: {{ neverError: true, responseFormat: 'text', outputPropertyName: 'html' }} }},
         timeout: 10000
       }}
-    }}
+    }},
+    // Un sito irraggiungibile o un URL rotto non deve mai fermare la ricerca.
+    onError: 'continueRegularOutput'
   }},
   output: [{{ html: '<html></html>' }}]
 }});

@@ -11,7 +11,18 @@ const norm = (v) => String(v ?? '')
   .toLowerCase().replace(/&/g, ' and ')
   .replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 
-const pulito = (v, max = 200) => String(v ?? '').trim().replace(/\s+/g, ' ').slice(0, max);
+// Caratteri invisibili che l'AI a volte copia dalle pagine (es. U+FEFF): rompono gli URL.
+const INVISIBILI = /[\u00AD\u200B-\u200F\u2060\uFEFF]/g;
+const pulito = (v, max = 200) => String(v ?? '').replace(INVISIBILI, '').trim().replace(/\s+/g, ' ').slice(0, max);
+// URL: niente spazi né invisibili, e deve essere un indirizzo http(s) valido.
+const urlPulito = (v, max = 500) => {
+  const s = String(v ?? '').replace(INVISIBILI, '').replace(/\s+/g, '').slice(0, max);
+  if (!s) return '';
+  try {
+    const u = new URL(/^https?:\/\//i.test(s) ? s : `https://${s}`);
+    return /^https?:$/.test(u.protocol) && u.hostname.includes('.') ? u.href : '';
+  } catch { return ''; }
+};
 
 const host = (u) => String(u ?? '').trim().toLowerCase()
   .replace(/^https?:\/\//i, '').replace(/^\/\//, '').replace(/^www\./i, '')
@@ -80,10 +91,10 @@ for (const item of $input.all()) {
   for (const c of item.json.candidates || []) {
     const azienda = pulito(c?.company_name);
     const nome = pulito(c?.full_name, 120);
-    const sito = pulito(c?.website, 300);
+    const sito = urlPulito(c?.website, 300);
     const dominio = host(sito);
     const chiave = chiaveAzienda(sito);
-    const fonte = /^https?:\/\//i.test(String(c?.source_url ?? '').trim()) ? pulito(c.source_url, 500) : '';
+    const fonte = /^https?:\/\//i.test(String(c?.source_url ?? '').trim()) ? urlPulito(c.source_url) : '';
 
     if (!azienda || !nome || parti(nome).length < 2) { scarta('dati_persona_incompleti'); continue; }
     if (!fonte) { scarta('senza_fonte'); continue; }
@@ -99,7 +110,7 @@ for (const item of $input.all()) {
     const ruolo = coerenzaRuolo(c?.job_title);
     if (ruolo === 'mismatch') { scarta('ruolo_non_coerente'); continue; }
 
-    const contatti = String(c?.contact_page ?? '').trim();
+    const contatti = /^https?:\/\//i.test(String(c?.contact_page ?? '').trim()) ? urlPulito(c.contact_page) : '';
     visti.add(kp);
     perAzienda[chiave] = (perAzienda[chiave] || 0) + 1;
 
@@ -107,7 +118,7 @@ for (const item of $input.all()) {
     out.push({
       json: {
         company_name: azienda,
-        website: /^https?:\/\//i.test(sito) ? sito : `https://${sito}`,
+        website: sito,
         domain: dominio,
         company_key: chiave,
         country: pulito(c?.country, 80),

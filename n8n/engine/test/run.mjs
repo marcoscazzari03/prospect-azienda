@@ -55,6 +55,14 @@ assert.deepEqual(dedup[0]._stats_deduplica.scarti, {
 const vuoto = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [job] }, input: [{ candidates: [] }] }).map(i => i.json);
 assert.equal(vuoto[0]._vuoto, true);
 console.log('ok  deduplica, esclusioni, limite per azienda, ruolo');
+const sporco = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [job] }, input: [{ candidates: [
+  { company_name: 'Musso', website: 'https://www.studioavvocat\uFEFFomusso.com/', full_name: 'Luca Musso', job_title: 'CEO', source_url: 'https://www.studioavvocatomusso.com/' },
+  { company_name: 'Rotto', website: 'https://ex ample', full_name: 'Gino Rotti', job_title: 'CEO', source_url: 'https://x.it' }
+] }] }).map(i => i.json);
+assert.equal(sporco.length, 1);
+assert.equal(sporco[0].website, 'https://www.studioavvocatomusso.com/');
+assert.equal(sporco[0].domain, 'studioavvocatomusso.com');
+console.log('ok  URL con caratteri invisibili ripuliti, URL non validi scartati');
 const conRuoli = (roles, title) => run(src('04-deduplica-candidati.js'), {
   nodes: { 'Valida richiesta': [{ ...job, target: { ...job.target, roles } }] },
   input: [{ candidates: [{ company_name: 'Acme', website: 'https://acme.it', full_name: 'Mario Rossi', job_title: title, source_url: 'https://acme.it' }] }]
