@@ -12,7 +12,7 @@ const plural = (n: number, one: string, many: string) => `${n.toLocaleString("it
 export function ActivitySummary({ since, summary, items }: { since: string; summary: Summary; items: ActivityItem[] }) {
   const chips = [
     summary.leads > 0 && { text: plural(summary.leads, "lead consegnato", "lead consegnati"), tone: "ledger" },
-    summary.completed > 0 && { text: plural(summary.completed, "ricerca completata", "ricerche completate"), tone: "ledger" },
+    summary.completed > 0 && { text: plural(summary.completed, "ricerca conclusa", "ricerche concluse"), tone: "ledger" },
     summary.failed > 0 && { text: plural(summary.failed, "ricerca non riuscita", "ricerche non riuscite"), tone: "brick" },
     summary.creditsUsed > 0 && { text: plural(summary.creditsUsed, "credito utilizzato", "crediti utilizzati"), tone: "ink" },
     summary.creditsAdded > 0 && { text: `+${plural(summary.creditsAdded, "credito aggiunto", "crediti aggiunti")}`, tone: "ledger" },
