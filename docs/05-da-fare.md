@@ -34,11 +34,29 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Icypeas nel motore al posto di RocketReach (migrazione `20261014000008_icypeas.sql`, costo `email_finder`)
 - [x] Workflow pubblicato e piano Icypeas acquistato (budget mensile ~900 in Prezzi e costi)
 - [x] Workflow "TEST | Icypeas email finder" archiviato
+- [ ] Motore: classificazione di email tipo segreteria.cognome@gmail.com come generiche
+- [ ] Budget mensile di arricchimento da rivedere
+- [ ] Testo dell'invito per la beta
 - [ ] Motore: workflow di errore n8n che avvisa il backend se un'esecuzione si interrompe (oggi la ricerca si chiude dopo 45 minuti senza notizie)
 - [x] Prova completa "solo nominative" (4/5, 3 da Icypeas) e "mista" (10/10)
 - [x] Ritocchi grafici: bianco e grigi al posto del crema, verde smeraldo più chiaro, riepilogo "Dall'ultimo accesso" in panoramica (migrazione `20261015000009_activity.sql`)
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
 - [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale
+
+## Sicurezza (audit dell'11/10, report non pubblicato)
+- [x] Fase 1: V1, V2, V3 (captcha Turnstile), V4, V5 (motore), V8
+- [ ] 2FA su tutti gli account (Supabase, Vercel, GitHub, n8n, Stripe, Cloudflare, Resend, Icypeas, MillionVerifier, OpenAI)
+- [x] V7: tetto dei rimborsi automatici in SQL (migrazione `20261018000012_auto_refund_lock.sql`)
+- [ ] V12: limiti su export e avvio ricerche
+- [ ] V9 + V11: CSP, controllo dei link mostrati, `/app` e `/admin` esclusi dai motori di ricerca
+- [ ] V6: cancellazione dei lead dopo 24 mesi e rimozione dal magazzino dopo un'opposizione
+- [ ] Facoltativo: captcha anche su accesso e recupero password (captcha di Supabase)
+- [ ] Fase 3: backup (Supabase Pro), conservazione esecuzioni n8n, Sentry, V13, V14, repository privato
+
+## Nuova funzione: segnali di bisogno (dopo la sicurezza)
+- [ ] Catalogo segnali dal sito, calibrato sulle 10 ricerche di prova
+- [ ] Annunci di lavoro (promemoria martedì 13/10)
+- [ ] Dopo il lancio: nuove sedi, espansione all'estero
 
 ## Legale e fiscale
 - [ ] Apertura partita IVA (prima di incassare) e scelta del regime con un commercialista
