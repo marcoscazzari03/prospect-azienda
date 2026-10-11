@@ -143,6 +143,17 @@ select pg_temp.check(org_available_credits((select org_a from t)) = 12, 'rimbors
 select refund_report((select id from lead_reports limit 1), true);
 select pg_temp.check(org_available_credits((select org_a from t)) = 12, 'rimborso non duplicabile');
 
+-- V7: tetto dei rimborsi automatici applicato in SQL (3 lead, tetto 10% = 1, già usato)
+insert into lead_reports (delivery_id, org_id, reason)
+  select id, org_id, 'bounce' from deliveries where person_key <> 'mario rossi|acme.it' and search_id = (select id from s);
+select pg_temp.check((select bool_and(not auto_refund_report(id, 0.1)) from lead_reports where status = 'open'),
+                     'auto-rimborso negato oltre il tetto');
+select pg_temp.check((select count(*) = 2 from lead_reports where status = 'open'), 'segnalazioni restano da verificare');
+select pg_temp.check(auto_refund_report((select id from lead_reports where status = 'open' limit 1), 1.0), 'auto-rimborso entro il tetto');
+select pg_temp.check(org_available_credits((select org_a from t)) > 12, 'auto-rimborso accreditato');
+select pg_temp.check(not auto_refund_report((select id from lead_reports where status = 'refunded' limit 1), 1.0),
+                     'auto-rimborso non ripetibile');
+
 -- Accrediti Stripe idempotenti
 select grant_credits((select org_b from t), 100, 'purchase', 'Pacchetto 100', 'cs_test_1', now() + interval '12 months');
 select grant_credits((select org_b from t), 100, 'purchase', 'Pacchetto 100', 'cs_test_1', now() + interval '12 months');

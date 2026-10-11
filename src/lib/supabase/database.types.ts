@@ -600,6 +600,9 @@ isOneToOne: false
             "apply_engine_results":
 { Args: { "p_payload": Json,"p_run": string,"p_token_hash": string }; Returns: Json
                            },
+"auto_refund_report":
+{ Args: { "p_max_share": number,"p_report": string }; Returns: boolean
+                           },
 "check_run":
 { Args: { "p_run": string,"p_token_hash": string }; Returns: {
               "attempt": number,

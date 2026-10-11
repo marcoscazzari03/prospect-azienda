@@ -109,14 +109,9 @@ export async function reportLead(_: ActionState, form: FormData): Promise<Action
     .single();
   if (error || !report) return { error: "Hai già segnalato questo lead." };
 
-  const [{ count: delivered }, { count: refunded }] = await Promise.all([
-    db.from("deliveries").select("id", { count: "exact", head: true }).eq("search_id", delivery.search_id),
-    db.from("lead_reports").select("id, deliveries!inner(search_id)", { count: "exact", head: true })
-      .eq("status", "refunded").eq("deliveries.search_id", delivery.search_id),
-  ]);
-  const cap = Math.max(1, Math.floor((delivered ?? 0) * SEARCH_RULES.autoRefundMaxShare));
-  if ((refunded ?? 0) < cap) {
-    await db.rpc("refund_report", { p_report: report.id, p_approve: true });
+  // Controllo del tetto e rimborso nella stessa transazione SQL (V7).
+  const { data: refunded } = await db.rpc("auto_refund_report", { p_report: report.id, p_max_share: SEARCH_RULES.autoRefundMaxShare });
+  if (refunded) {
     revalidatePath("/app", "layout");
     return { info: "Segnalazione accettata: i crediti del lead sono stati restituiti." };
   }
