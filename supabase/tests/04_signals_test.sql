@@ -71,8 +71,8 @@ select pg_temp.check((select credits = 3 and jsonb_array_length(data -> 'signals
                         and not (data -> 'signals') @> '[{"code":"outdated_cms"}]'
                         from deliveries where person_key = 'anna alfa|alfa.it'),
                      'prova salvata sul lead, solo per i segnali richiesti');
-select pg_temp.check((select count(*) = 2 from company_signals cs join companies c on c.id = cs.company_id where c.domain = 'alfa.it'),
-                     'prove salvate per azienda');
+select pg_temp.check((select count(*) = 3 from company_signals cs join companies c on c.id = cs.company_id where c.domain = 'alfa.it'),
+                     'prove salvate per azienda (tutte quelle superate, anche se non richieste)');
 select pg_temp.check((select technologies = '{wordpress}' from companies where domain = 'alfa.it'), 'tecnologie salvate');
 
 -- Ricerca senza segnali: prezzo invariato e nessun filtro.

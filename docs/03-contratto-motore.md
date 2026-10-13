@@ -118,7 +118,12 @@ Errori di consegna degli eventi `progress` sono ignorati (non bloccano la ricerc
 1. Verifica header, `run_token`, stato del run (`running`), idempotenza.
 2. Ri-deduplica contro `deliveries` del cliente (vincolo `UNIQUE(org_id, person_key)`) e contro la
    **lista di opposizione globale** (`suppression_list`).
-3. Inserisce/aggiorna i lead nel magazzino (`companies`, `people`, `emails`) con fonte e stato.
+3. Salva nel magazzino (`companies`, `people` con la scheda `lead` ed `email_id`, `emails`,
+   `company_signals`) **ogni lead valido**, anche quelli che non consegna (oltre la quantità, già
+   avuti dal cliente, oltre il limite per azienda, senza il segnale richiesto). Anche le generiche
+   scartate da una ricerca «solo nominative» (in `rejected`, motivo `solo_email_generica`, con
+   `email`) finiscono nel magazzino. Mai salvati: email ipotizzate o non valide, contatti in
+   opposizione, caselle inesistenti.
 4. Crea le `deliveries` fino alla quantità ordinata e **addebita i crediti solo per i lead
    consegnati**, in base al tipo reale di email (vedi pricing). Con segnali verificati richiesti:
    consegna solo i lead che li hanno («basta uno» / «servono tutti»), +1 credito per lead, prove

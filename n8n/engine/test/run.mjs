@@ -108,6 +108,8 @@ const out = (mode, p) => run(classifica, {
 const soloGenerica = { ...r2 };
 assert.equal(out('personal_only', soloGenerica).leads.length, 0);
 assert.equal(out('personal_only', soloGenerica).rejected[0].reason, 'solo_email_generica');
+assert.equal(out('personal_only', soloGenerica).rejected[0].email.type, 'generic', 'la generica scartata va al backend per il magazzino');
+assert.ok(out('personal_only', soloGenerica).rejected[0].quality.score > 0);
 const mista = out('mixed', soloGenerica);
 assert.equal(mista.leads.length, 1);
 assert.equal(mista.leads[0].email.status, 'found_public');

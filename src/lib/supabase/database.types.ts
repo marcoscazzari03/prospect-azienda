@@ -387,14 +387,14 @@ isOneToOne: false
                   ]
                 },"people": {
                   Row: {
-                    "company_id": string,"discovery_url": string,"first_name": string,"first_seen_at": string,"full_name": string,"id": string,"job_title": string,"last_name": string,"last_verified_at": string,"linkedin_url": string,"person_key": string
+                    "company_id": string,"discovery_url": string,"email_id": string | null,"first_name": string,"first_seen_at": string,"full_name": string,"id": string,"job_title": string,"last_name": string,"last_verified_at": string,"lead": Json | null,"linkedin_url": string,"person_key": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "company_id": string,"discovery_url"?: string,"first_name"?: string,"first_seen_at"?: string,"full_name": string,"id"?: string,"job_title"?: string,"last_name"?: string,"last_verified_at"?: string,"linkedin_url"?: string,"person_key": string
+                    "company_id": string,"discovery_url"?: string,"email_id"?: string | null,"first_name"?: string,"first_seen_at"?: string,"full_name": string,"id"?: string,"job_title"?: string,"last_name"?: string,"last_verified_at"?: string,"lead"?: Json | null,"linkedin_url"?: string,"person_key": string
                   }
                   Update: {
-                    "company_id"?: string,"discovery_url"?: string,"first_name"?: string,"first_seen_at"?: string,"full_name"?: string,"id"?: string,"job_title"?: string,"last_name"?: string,"last_verified_at"?: string,"linkedin_url"?: string,"person_key"?: string
+                    "company_id"?: string,"discovery_url"?: string,"email_id"?: string | null,"first_name"?: string,"first_seen_at"?: string,"full_name"?: string,"id"?: string,"job_title"?: string,"last_name"?: string,"last_verified_at"?: string,"lead"?: Json | null,"linkedin_url"?: string,"person_key"?: string
                   }
                   Relationships: [
                     {
@@ -402,6 +402,12 @@ isOneToOne: false
       columns: ["company_id"]
 isOneToOne: false
       referencedRelation: "companies"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "people_email_id_fkey"
+      columns: ["email_id"]
+isOneToOne: false
+      referencedRelation: "emails"
       referencedColumns: ["id"]
     }
                   ]
@@ -830,6 +836,11 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"stock_lead":
+{ Args: { "p_lead": Json,"p_target": Json }; Returns: {
+              "company_id": string,"email_id": string,"person_id": string
+            }[]
+                           },
 "tag_company":
 { Args: { "p_company": string,"p_target": Json }; Returns: undefined
                            },

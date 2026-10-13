@@ -60,7 +60,14 @@ export async function POST(request: Request) {
 
   // Prima della consegna: le email trovate sui siti devono avere una casella
   // raggiungibile (le verificate dall'arricchimento sono già controllate).
-  const payload = body as { leads?: unknown[]; stats?: Record<string, unknown> };
+  const payload = body as { leads?: unknown[]; rejected?: unknown[]; stats?: Record<string, unknown> };
+  // Lead validi non consegnabili a questo cliente (es. generica in «solo nominative»):
+  // passano gli stessi controlli e finiscono solo nel magazzino.
+  const stockOnly = (payload.rejected ?? [])
+    .map((r) => r as { reason?: string; email?: { address?: string } })
+    .filter((r) => r?.reason === "solo_email_generica" && r.email?.address)
+    .map((r) => ({ ...r, _stock_only: true }));
+  if (stockOnly.length) payload.leads = [...(payload.leads ?? []), ...stockOnly].slice(0, 2000);
   let apiCalls = 0;
   const { data: run } = await db.rpc("check_run", { p_run: evt.run_id, p_token_hash: tokenHash }).maybeSingle();
   const open = run && ["dispatched", "running"].includes((run as { status: string }).status);

@@ -91,8 +91,34 @@ for (const p of prospects) {
     continue;
   }
 
+  // Punteggio qualità 0-100: trasparente e ricalcolabile dal backend.
+  const qualita = (em) => {
+    const checks = {
+      official_site: true,
+      discovery_source: Boolean(p.source_url),
+      role_match: p.role_match,
+      email_on_company_domain: !em.free_provider,
+      email_personal: em.type === 'personal',
+      email_verified: em.status === 'validated' || em.status === 'found_public'
+    };
+    const score = Math.min(100,
+      30 +
+      (checks.discovery_source ? 10 : 0) +
+      (p.role_match === 'exact' ? 20 : p.role_match === 'plausible' ? 10 : 0) +
+      (checks.email_on_company_domain ? 10 : 0) +
+      (checks.email_personal ? 20 : 5) +
+      (em.status === 'validated' ? 10 : em.status === 'found_public' ? 8 : 0));
+    return { score, checks };
+  };
+  const ipotesi = (em) => em.type === 'personal' ? [] : pattern(p).map(a => ({ address: a, status: 'guessed' }));
+
   if (!email) {
-    rejected.push({ ...base, reason: motivo, enrichment_status: p.email_enrichment_status || '' });
+    // Generica in una ricerca «solo nominative»: non si consegna, ma il backend
+    // la salva nel magazzino per gli altri clienti.
+    const extra = motivo === 'solo_email_generica' && generica
+      ? { email: { ...generica, alternatives: [] }, email_patterns: ipotesi(generica), quality: qualita(generica) }
+      : {};
+    rejected.push({ ...base, ...extra, reason: motivo, enrichment_status: p.email_enrichment_status || '' });
     continue;
   }
 
@@ -101,28 +127,11 @@ for (const p of prospects) {
     .slice(0, 3)
     .map(e => ({ address: e.email, type: e.type, status: 'found_public', source_url: e.source_url }));
 
-  // Punteggio qualità 0-100: trasparente e ricalcolabile dal backend.
-  const checks = {
-    official_site: true,
-    discovery_source: Boolean(p.source_url),
-    role_match: p.role_match,
-    email_on_company_domain: !email.free_provider,
-    email_personal: email.type === 'personal',
-    email_verified: email.status === 'validated' || email.status === 'found_public'
-  };
-  const score = Math.min(100,
-    30 +
-    (checks.discovery_source ? 10 : 0) +
-    (p.role_match === 'exact' ? 20 : p.role_match === 'plausible' ? 10 : 0) +
-    (checks.email_on_company_domain ? 10 : 0) +
-    (checks.email_personal ? 20 : 5) +
-    (email.status === 'validated' ? 10 : email.status === 'found_public' ? 8 : 0));
-
   leads.push({
     ...base,
     email: { ...email, alternatives: altre },
-    email_patterns: email.type === 'personal' ? [] : pattern(p).map(a => ({ address: a, status: 'guessed' })),
-    quality: { score, checks }
+    email_patterns: ipotesi(email),
+    quality: qualita(email)
   });
 }
 
