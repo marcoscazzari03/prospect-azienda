@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
-import { SERVICES, VERIFIED_SIGNAL_CODES, describeOpportunity, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
+import { SERVICES, VERIFIED_SIGNAL_CODES, describeOpportunity, extraCreditsLabel, signalExtraRange, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
 import { flattenDelivery } from "@/lib/domain/leads";
 
 const base = {
@@ -56,9 +56,15 @@ describe("segnali nella ricerca (fase 3)", () => {
     expect(toSignalsTarget({ codes: ["no_mobile"], match: "all", jobFamilies: ["hr"] }).job_families).toEqual([]);
   });
 
-  it("prezzo: +1 credito per lead con segnale", () => {
-    expect(estimateCredits("mixed", 10, true)).toEqual({ min: 20, max: 40, reserve: 40 });
-    expect(estimateCredits("generic_ok", 10, false)).toEqual({ min: 10, max: 20, reserve: 20 });
+  it("prezzo: crediti in più per lead con segnale, il più alto tra quelli scelti", () => {
+    expect(estimateCredits("mixed", 10, 1)).toEqual({ min: 20, max: 40, reserve: 40 });
+    expect(estimateCredits("generic_ok", 10)).toEqual({ min: 10, max: 20, reserve: 20 });
+    const prices = { website: 1, job_ad: 3 };
+    expect(signalExtraRange(prices, ["no_mobile", "job_ad", "stale_copyright"])).toEqual({ min: 1, max: 3 });
+    expect(signalExtraRange(prices, ["stale_copyright"])).toEqual({ min: 0, max: 0 });
+    expect(estimateCredits("generic_ok", 10, signalExtraRange(prices, ["no_mobile", "job_ad"]))).toEqual({ min: 20, max: 50, reserve: 50 });
+    expect(extraCreditsLabel({ website: 1, job_ad: 1 })).toBe("+1 credito");
+    expect(extraCreditsLabel(prices)).toBe("+1 credito con segnali dal sito, +3 crediti con annunci di lavoro");
   });
 
   it("frasi sul lead: il fatto osservato con la data", () => {

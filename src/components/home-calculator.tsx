@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
 import { estimateCredits } from "@/lib/domain/pricing";
-import { SIGNAL_RULES } from "@/lib/domain/signals";
+import { extraCreditsLabel, type SignalPrices } from "@/lib/domain/signals";
 import { cx } from "./ui";
 
 // Prezzo per credito del Pacchetto 100 (il più caro): stima prudente.
@@ -18,12 +18,15 @@ const MODES: { mode: EmailMode; label: string }[] = [
 const eur = (n: number) => n.toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 const range = (a: number, b: number) => (a === b ? `${a}` : `${a}–${b}`);
 
-export function HomeCalculator() {
+export function HomeCalculator({ signalPrices }: { signalPrices: SignalPrices }) {
   const [mode, setMode] = useState<EmailMode>("generic_ok");
   const [qty, setQty] = useState(50);
-  const target = estimateCredits(mode, qty, false);
-  const withSignal = estimateCredits(mode, qty, true);
-  const perLead = estimateCredits(mode, 1, false);
+  const target = estimateCredits(mode, qty);
+  const withSignal = estimateCredits(mode, qty, {
+    min: Math.min(signalPrices.website, signalPrices.job_ad),
+    max: Math.max(signalPrices.website, signalPrices.job_ad),
+  });
+  const perLead = estimateCredits(mode, 1);
 
   return (
     <div className="grid gap-4 md:grid-cols-[1.45fr_1fr]">
@@ -78,7 +81,7 @@ export function HomeCalculator() {
           </li>
           <li className="flex items-center gap-2 text-stamp-ink">
             <span className="h-3 w-3 shrink-0 rounded-sm bg-stamp" aria-hidden />
-            Ricerca con opportunità: +{SIGNAL_RULES.extraCredits} credito per lead consegnato ({range(withSignal.min, withSignal.max)} crediti)
+            Ricerca con opportunità: {extraCreditsLabel(signalPrices)} per lead consegnato ({range(withSignal.min, withSignal.max)} crediti)
           </li>
         </ul>
         <p className="mt-4 font-mono text-3xl font-semibold tabular-nums">

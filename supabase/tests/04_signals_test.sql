@@ -135,3 +135,37 @@ reset role;
 select pg_temp.check(true, 'prove non accessibili agli utenti');
 
 \echo 'Test segnali superati.'
+
+-- Prezzo dei segnali modificabile dall'admin.
+select pg_temp.check(signal_extra('{"website":1,"job_ad":3}', '{no_mobile,job_ad}') = 3
+                     and signal_extra('{"website":1,"job_ad":3}', '{no_mobile,stale_copyright}') = 1
+                     and signal_extra('{"website":1,"job_ad":3}', '{stale_copyright}') = 0
+                     and signal_extra(null, '{job_ad}') = 0,
+                     'crediti in più: il più alto tra i segnali verificati');
+update app_settings set value = '{"website": 2, "job_ad": 4}' where key = 'signal_extra_credits';
+create temp table sp as
+  select * from create_search('c1c1c1c1-0000-4000-8000-000000000002', (select org_l from o), 'Prezzi',
+    '{"industry":"Studi dentistici","countries":["IT"],"roles":["Titolare"],
+      "signals":{"codes":["no_mobile","job_ad"],"job_families":[{"code":"hr","label":"HR","titles":["recruiter"]}]}}', 'generic_ok', 2, 1);
+select pg_temp.check((select credits_reserved = 12 and signal_prices = '{"website": 2, "job_ad": 4}' from sp),
+                     'riserva con il prezzo più alto (2 + 4) x 2 e prezzi salvati sulla ricerca');
+update app_settings set value = '{"website": 9, "job_ad": 9}' where key = 'signal_extra_credits';
+create temp table rp as select * from start_run((select id from sp), sha256_hex('tok-p'), 2);
+select apply_engine_results((select id from rp), sha256_hex('tok-p'), $json$
+{"leads": [
+  {"company":{"name":"Zeta","domain":"zeta-p.it","website":"https://zeta-p.it","country":"Italia"},
+   "person":{"full_name":"Zoe Zeta","job_title":"Titolare"},
+   "email":{"address":"info@zeta-p.it","type":"generic","status":"found_public","source":"website"},
+   "keys":{"person_key":"zoe zeta|zeta-p.it"}, "signals":[{"code":"no_mobile","evidence":{}}]},
+  {"company":{"name":"Eta","domain":"eta-p.it","website":"https://eta-p.it","country":"Italia"},
+   "person":{"full_name":"Ezio Eta","job_title":"Titolare"},
+   "email":{"address":"info@eta-p.it","type":"generic","status":"found_public","source":"website"},
+   "keys":{"person_key":"ezio eta|eta-p.it"}, "signals":[{"code":"job_ad","evidence":{"date":"2026-10-01"}}]}
+]}
+$json$::jsonb);
+select pg_temp.check((select credits from deliveries where person_key = 'zoe zeta|zeta-p.it') = 3
+                     and (select credits from deliveries where person_key = 'ezio eta|eta-p.it') = 5,
+                     'addebito con i prezzi della ricerca (sito 1 + 2, annuncio 1 + 4), non quelli nuovi');
+update app_settings set value = '{"website": 1, "job_ad": 1}' where key = 'signal_extra_credits';
+
+\echo 'Test prezzi dei segnali superati.'

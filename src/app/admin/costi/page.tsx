@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Button, Card, Input, PageHeader } from "@/components/ui";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatEur } from "@/lib/domain/pricing";
-import { updateCostRate, updateCreditPrice, updateEnrichmentBudget } from "../actions";
+import { updateCostRate, updateCreditPrice, updateEnrichmentBudget, updateSignalPrices } from "../actions";
+import { getSignalPrices } from "@/lib/server/signal-prices";
 import { requireAdmin } from "@/lib/server/dal";
 
 export const metadata: Metadata = { title: "Prezzi e costi" };
@@ -18,6 +19,7 @@ export default async function CostsPage() {
     // Il consumo del mese non dipende dalla ricerca: basta un id qualsiasi.
     db.rpc("enrichment_usage", { p_search: "00000000-0000-0000-0000-000000000000" }).maybeSingle(),
   ]);
+  const signalPrices = await getSignalPrices();
   const budget = (usage as { month_budget: number | null } | null)?.month_budget ?? null;
   const used = (usage as { month_used: number } | null)?.month_used ?? 0;
   return (
@@ -60,6 +62,26 @@ export default async function CostsPage() {
           <div className="w-40"><Input name="budget" type="number" min="0" step="1" defaultValue={budget ?? ""} placeholder="Nessun limite" aria-label="Email al mese" /></div>
           <Button size="sm" variant="secondary">Salva</Button>
           <p className="text-xs text-muted">Email al mese. Vuoto = nessun limite, 0 = spento. Tienilo sotto i crediti mensili del tuo piano Icypeas.</p>
+        </form>
+      </Card>
+      <Card className="mt-6 p-6">
+        <h2 className="mb-1 font-display text-xl font-semibold">Crediti in più per le ricerche opportunità</h2>
+        <p className="mb-4 text-sm text-ink-2">
+          Si aggiungono ai crediti dell&apos;email per ogni lead consegnato con un segnale verificato. Se un lead ha entrambi i tipi di segnale
+          paga il prezzo più alto. Valgono per le ricerche create da ora in poi: quelle già avviate tengono i prezzi con cui sono partite.
+          Homepage e termini si aggiornano entro 5 minuti.
+        </p>
+        <form action={updateSignalPrices} className="flex flex-wrap items-end gap-4">
+          <label className="text-sm">
+            <span className="mb-1 block text-ink-2">Segnali dal sito</span>
+            <Input name="website" type="number" min="0" max="10" step="1" defaultValue={signalPrices.website} className="w-24" />
+          </label>
+          <label className="text-sm">
+            <span className="mb-1 block text-ink-2">Annunci di lavoro</span>
+            <Input name="job_ad" type="number" min="0" max="10" step="1" defaultValue={signalPrices.job_ad} className="w-24" />
+          </label>
+          <Button size="sm" variant="secondary">Salva</Button>
+          <p className="text-xs text-muted">Crediti per lead, da 0 a 10.</p>
         </form>
       </Card>
       <h2 className="mb-4 mt-10 font-display text-xl font-semibold">Piani</h2>

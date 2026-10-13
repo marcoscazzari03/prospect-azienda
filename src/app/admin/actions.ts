@@ -92,3 +92,18 @@ export async function updateEnrichmentBudget(form: FormData) {
   await audit(admin.user.id, "settings.enrichment_budget", "enrichment_monthly_budget", { budget });
   revalidatePath("/admin/costi");
 }
+
+// Crediti in più per i lead con segnale (ricerca opportunità). Valgono per le
+// ricerche create da ora in poi: quelle già avviate tengono i prezzi di partenza.
+export async function updateSignalPrices(form: FormData) {
+  const admin = await requireAdmin();
+  const n = z.coerce.number().int().min(0).max(10);
+  const prices = { website: n.parse(form.get("website")), job_ad: n.parse(form.get("job_ad")) };
+  await createAdminClient()
+    .from("app_settings")
+    .upsert({ key: "signal_extra_credits", value: prices, updated_at: new Date().toISOString(), updated_by: admin.user.id });
+  await audit(admin.user.id, "settings.signal_prices", "signal_extra_credits", prices);
+  revalidatePath("/admin/costi");
+  revalidatePath("/");
+  revalidatePath("/termini");
+}

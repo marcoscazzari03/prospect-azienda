@@ -293,8 +293,29 @@ export function toSignalsTarget(choice: SignalsChoice) {
   };
 }
 
-// Il lead con questi segnali costa 1 credito in più? (solo segnali verificati)
+// Il lead con questi segnali costa crediti in più? (solo segnali verificati)
 export const chargesSignal = (codes: string[]) => codes.some((c) => VERIFIED_SIGNAL_CODES.includes(c));
+
+// Crediti in più per lead con segnale, modificabili dall'admin (app_settings
+// "signal_extra_credits"; il database usa gli stessi valori, vedi signal_extra).
+export type SignalPrices = { website: number; job_ad: number };
+export const DEFAULT_SIGNAL_PRICES: SignalPrices = { website: SIGNAL_RULES.extraCredits, job_ad: SIGNAL_RULES.extraCredits };
+
+// Crediti in più per i segnali scelti: il lead paga il prezzo più alto tra i
+// segnali verificati che ha davvero (con «basta uno» può averne solo alcuni).
+export function signalExtraRange(prices: SignalPrices, codes: string[]) {
+  const values = codes.filter((c) => VERIFIED_SIGNAL_CODES.includes(c)).map((c) => (c === "job_ad" ? prices.job_ad : prices.website));
+  return values.length ? { min: Math.min(...values), max: Math.max(...values) } : { min: 0, max: 0 };
+}
+
+const credits = (n: number) => `${n} ${n === 1 ? "credito" : "crediti"}`;
+
+// «+1 credito» oppure «+1 credito con segnali dal sito, +2 crediti con annunci di lavoro».
+export function extraCreditsLabel(prices: SignalPrices) {
+  return prices.website === prices.job_ad
+    ? `+${credits(prices.website)}`
+    : `+${credits(prices.website)} con segnali dal sito, +${credits(prices.job_ad)} con annunci di lavoro`;
+}
 
 // Frase mostrata sul lead: il fatto osservato con la data, mai il bisogno dedotto.
 export type LeadSignal = { code: string; evidence?: { detail?: string; title?: string; date?: string; url?: string; checked_at?: string } };

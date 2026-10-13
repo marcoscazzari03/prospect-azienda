@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ProvenanceStamp, cx } from "./ui";
-import { SERVICES, SIGNALS, SIGNAL_RULES, SIGNAL_SHORT, VERIFIED_SIGNAL_CODES, describeOpportunity } from "@/lib/domain/signals";
+import { SERVICES, SIGNALS, SIGNAL_RULES, SIGNAL_SHORT, VERIFIED_SIGNAL_CODES, describeOpportunity, extraCreditsLabel, type SignalPrices } from "@/lib/domain/signals";
 
 // Demo interattiva della homepage: simula una ricerca interamente nel browser.
 // Nessuna chiamata al server, al database o al motore: i "risultati" sono
@@ -139,7 +139,7 @@ const TICK = (
   </svg>
 );
 
-export function LeadDemo() {
+export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
   const [cfg, setCfg] = useState<Config>({
     kind: "opportunity",
     service: "websites",
@@ -357,7 +357,7 @@ export function LeadDemo() {
             <p className="text-sm font-semibold">La tua ricerca</p>
             <p className="mt-1 text-xs leading-relaxed text-ink-2">{preview}</p>
             <p className={cx("mt-3 inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium", opportunity ? "bg-stamp-soft text-stamp-ink" : "bg-ledger-soft text-ledger")}>
-              {opportunity ? "◆ +1 credito per lead con opportunità" : "Paghi solo i lead consegnati"}
+              {opportunity ? `◆ ${extraCreditsLabel(signalPrices)} per lead con opportunità` : "Paghi solo i lead consegnati"}
             </p>
           </div>
         </div>

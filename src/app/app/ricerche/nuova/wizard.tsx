@@ -11,6 +11,9 @@ import {
   SIGNAL_RULES,
   chargesSignal,
   describeOpportunity,
+  extraCreditsLabel,
+  signalExtraRange,
+  type SignalPrices,
 } from "@/lib/domain/signals";
 import { createSearch, type ActionState } from "../../actions";
 
@@ -59,11 +62,13 @@ export function SearchWizard({
   maxQuantity,
   defaults = {},
   initialKind = "standard",
+  signalPrices,
 }: {
   credits: number;
   maxQuantity: number;
   defaults?: WizardDefaults;
   initialKind?: SearchKind;
+  signalPrices: SignalPrices;
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(createSearch, {});
   const [kind, setKind] = useState<SearchKind>(initialKind);
@@ -83,7 +88,8 @@ export function SearchWizard({
   const info = MODE_INFO[mode];
   const opportunity = kind === "opportunity";
   const withSignal = opportunity && chargesSignal(codes);
-  const estimate = estimateCredits(mode, quantity, withSignal);
+  const extra = withSignal ? signalExtraRange(signalPrices, codes) : 0;
+  const estimate = estimateCredits(mode, quantity, extra);
   const reserve = estimate.reserve;
   const enough = credits >= reserve;
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
@@ -336,7 +342,7 @@ export function SearchWizard({
               <span className="font-mono text-xs text-muted">{MODE_INFO[m].example}</span>
               <span className="mt-auto font-mono text-sm text-ledger">
                 {(() => {
-                  const e = estimateCredits(m, 1, withSignal);
+                  const e = estimateCredits(m, 1, extra);
                   return e.min === e.max ? e.min : `${e.min}–${e.max}`;
                 })()} crediti per lead{withSignal ? " (segnale compreso)" : ""}
               </span>
@@ -403,7 +409,7 @@ export function SearchWizard({
             <p className="text-sm text-muted">Crediti stimati</p>
             <p className="font-mono text-2xl font-semibold">{estimate.min}–{reserve}</p>
             <p className="mt-1 text-xs text-muted">
-              {withSignal && <>Ogni lead con segnale costa {SIGNAL_RULES.extraCredits} credito in più. </>}
+              {withSignal && <>Lead con segnale: {extraCreditsLabel(signalPrices)} ciascuno. </>}
               Riserviamo {reserve} crediti e addebitiamo solo i lead consegnati. Disponibili: {credits}.
             </p>
             {withSignal && (

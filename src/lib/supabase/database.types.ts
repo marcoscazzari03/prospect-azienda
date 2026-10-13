@@ -501,14 +501,14 @@ isOneToOne: false
                   ]
                 },"searches": {
                   Row: {
-                    "attempts": number,"contacts_per_company": number,"created_at": string,"created_by": string | null,"credits_charged": number,"credits_reserved": number,"delivered": number,"email_mode": string,"error": string | null,"finished_at": string | null,"id": string,"name": string,"next_repeat_at": string | null,"org_id": string,"quantity": number,"repeat": string,"repeat_of": string | null,"started_at": string | null,"status": string,"target": NonNullable<Json>
+                    "attempts": number,"contacts_per_company": number,"created_at": string,"created_by": string | null,"credits_charged": number,"credits_reserved": number,"delivered": number,"email_mode": string,"error": string | null,"finished_at": string | null,"id": string,"name": string,"next_repeat_at": string | null,"org_id": string,"quantity": number,"repeat": string,"repeat_of": string | null,"signal_prices": Json | null,"started_at": string | null,"status": string,"target": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode": string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name": string,"next_repeat_at"?: string | null,"org_id": string,"quantity": number,"repeat"?: string,"repeat_of"?: string | null,"started_at"?: string | null,"status"?: string,"target": NonNullable<Json>
+                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode": string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name": string,"next_repeat_at"?: string | null,"org_id": string,"quantity": number,"repeat"?: string,"repeat_of"?: string | null,"signal_prices"?: Json | null,"started_at"?: string | null,"status"?: string,"target": NonNullable<Json>
                   }
                   Update: {
-                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode"?: string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name"?: string,"next_repeat_at"?: string | null,"org_id"?: string,"quantity"?: number,"repeat"?: string,"repeat_of"?: string | null,"started_at"?: string | null,"status"?: string,"target"?: NonNullable<Json>
+                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode"?: string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name"?: string,"next_repeat_at"?: string | null,"org_id"?: string,"quantity"?: number,"repeat"?: string,"repeat_of"?: string | null,"signal_prices"?: Json | null,"started_at"?: string | null,"status"?: string,"target"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -679,6 +679,7 @@ isOneToOne: false
 "quantity": number,
 "repeat": string,
 "repeat_of": string | null,
+"signal_prices": Json | null,
 "started_at": string | null,
 "status": string,
 "target": NonNullable<Json>
@@ -727,6 +728,7 @@ isOneToOne: false
 "quantity": number,
 "repeat": string,
 "repeat_of": string | null,
+"signal_prices": Json | null,
 "started_at": string | null,
 "status": string,
 "target": NonNullable<Json>
@@ -793,8 +795,14 @@ isOneToOne: false
 "sha256_hex":
 { Args: { "p": string }; Returns: string
                            },
+"signal_extra":
+{ Args: { "p_codes": (string)[],"p_prices": Json }; Returns: number
+                           },
 "signal_is_fresh":
 { Args: { "p_checked_at": string,"p_code": string,"p_evidence": Json }; Returns: boolean
+                           },
+"signal_prices":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "signals_satisfy":
 { Args: { "p_passed": (string)[],"p_target": Json }; Returns: boolean

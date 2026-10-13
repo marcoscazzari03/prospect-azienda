@@ -148,7 +148,12 @@ manifatturiere in Lombardia con annunci per ruoli IT negli ultimi 60 giorni»).
 - `searches.target.signals`: codici, «basta uno»/«servono tutti», famiglie con i titoli in tutte le
   lingue (costruito da `toSignalsTarget`). Il form della fase 4 invia `signalCodes`, `signalMatch`,
   `jobFamilies`; lo schema rifiuta indicativi da soli, annunci senza famiglia o in paesi non coperti.
-- `create_search` riserva `(massimo modalità + 1) × lead` se c'è almeno un segnale verificato.
+- Prezzo dei segnali modificabile dall'admin in «Prezzi e costi» (`app_settings.signal_extra_credits`:
+  crediti in più per i segnali dal sito e per gli annunci, da 0 a 10, predefinito 1 e 1). Ogni ricerca
+  salva i prezzi validi alla creazione in `searches.signal_prices`; il lead paga il prezzo più alto tra
+  i segnali verificati che ha davvero (`signal_extra`). Homepage e termini mostrano i prezzi correnti.
+- `create_search` riserva `(massimo modalità + prezzo più alto dei segnali scelti) × lead` se c'è almeno
+  un segnale verificato.
 - `deliver_leads` consegna solo i lead che soddisfano i segnali richiesti (difesa in profondità:
   il motore li ha già scartati), addebita +1, copia le prove in `deliveries.data.signals` e le salva
   in `company_signals` (una riga per azienda e segnale) con le tecnologie in `companies.technologies`.

@@ -4,6 +4,8 @@ import { HomeCalculator } from "@/components/home-calculator";
 import { LeadDemo } from "@/components/lead-demo";
 import { BRAND } from "@/lib/config";
 import { LogoMark } from "@/components/logo";
+import { extraCreditsLabel, type SignalPrices } from "@/lib/domain/signals";
+import { getSignalPrices } from "@/lib/server/signal-prices";
 
 // Icone della homepage (tratto 1.6, 20x20).
 const PATHS = {
@@ -67,7 +69,7 @@ function Pill({ tone, children, small }: { tone: Tone; children: ReactNode; smal
   );
 }
 
-const FAQ = [
+const faq = (prices: SignalPrices) => [
   {
     q: "Da dove arrivano i dati?",
     a: "Da fonti pubbliche: siti ufficiali delle aziende, pagine team, note legali, registri e articoli. Ogni lead riporta la pagina in cui abbiamo trovato la persona e quella in cui abbiamo trovato l'email. Le email che deduciamo dal nome sono marcate come «Ipotizzate» e non vengono mai vendute.",
@@ -82,7 +84,7 @@ const FAQ = [
   },
   {
     q: "Come funzionano le opportunità?",
-    a: "Scegli il servizio che vendi e i segnali da cercare: annunci di lavoro recenti per una figura (es. sistemista) o caratteristiche del sito (non adatto ai cellulari, senza HTTPS, software non aggiornato, in una sola lingua). Controlliamo ogni segnale prima di cercare i contatti e lo consegniamo con la prova: link e data. Le aziende senza prova vengono escluse. Ogni lead con segnale costa 1 credito in più e, se il segnale non è corretto, puoi segnalarlo entro 14 giorni.",
+    a: `Scegli il servizio che vendi e i segnali da cercare: annunci di lavoro recenti per una figura (es. sistemista) o caratteristiche del sito (non adatto ai cellulari, senza HTTPS, software non aggiornato, in una sola lingua). Controlliamo ogni segnale prima di cercare i contatti e lo consegniamo con la prova: link e data. Le aziende senza prova vengono escluse. Ogni lead con segnale costa ${extraCreditsLabel(prices)} e, se il segnale non è corretto, puoi segnalarlo entro 14 giorni.`,
   },
   {
     q: "Cosa significa «servono tutti»?",
@@ -324,7 +326,11 @@ function AppPreview() {
   );
 }
 
-export default function HomePage() {
+// Prezzi dei segnali letti dal database, aggiornati ogni 5 minuti.
+export const revalidate = 300;
+
+export default async function HomePage() {
+  const prices = await getSignalPrices();
   return (
     <>
       <section className="ruled">
@@ -427,7 +433,7 @@ export default function HomePage() {
           title="Prova una ricerca, standard o con opportunità."
           text="Imposta i tuoi filtri e prova subito. Vedrai un'anteprima dei risultati con le stesse informazioni che riceverai, inclusa la prova per ogni opportunità. È una simulazione con dati dimostrativi."
         />
-        <div className="mt-10"><LeadDemo /></div>
+        <div className="mt-10"><LeadDemo signalPrices={prices} /></div>
       </Section>
 
       <Section tone="paper">
@@ -472,9 +478,9 @@ export default function HomePage() {
       <Section tone="paper">
         <Heading
           title="Quanto costa? Lo scegli prima di iniziare."
-          text="Da 1 a 3 crediti per lead in base al tipo di email, con costi chiari e senza sorprese. Se cerchi aziende con opportunità, viene aggiunto 1 credito per ogni lead consegnato."
+          text={`Da 1 a 3 crediti per lead in base al tipo di email, con costi chiari e senza sorprese. Se cerchi aziende con opportunità, ogni lead consegnato costa ${extraCreditsLabel(prices)}.`}
         />
-        <div className="mt-10"><HomeCalculator /></div>
+        <div className="mt-10"><HomeCalculator signalPrices={prices} /></div>
       </Section>
 
       <Section>
@@ -530,7 +536,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="divide-y divide-line rounded-xl border border-line bg-card px-5">
-            {FAQ.map((f) => (
+            {faq(prices).map((f) => (
               <details key={f.q} className="group py-4">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium">
                   {f.q}
