@@ -249,9 +249,21 @@ add(callback("notificaVerifica", "Notifica: verifica email",
              progress("verifying", "'Verifica dei siti e delle email in corso'",
                       "{ candidates: $('Deduplica candidati').all().filter(i => !i.json._vuoto).length }")))
 
+# Segnale "annuncio di lavoro": verifica prima di qualsiasi ricerca email.
+add(if_node("serveAnnuncio", "Serve verifica annuncio?", "{{ $json.job_ad_url }}", "string", "notEmpty"))
+add(http_page("annuncio", "HTTP - Annuncio", "{{ $json.job_ad_url }}"))
+add(code("verificaAnnuncio", "Verifica annuncio", js("09-verifica-annuncio.js"), mode="runOnceForEachItem",
+         output="{ company_name: 'Acme Srl', signals: [{ code: 'job_ad', status: 'pass' }] }"))
+add("""const riunisciAnnunci = merge({
+  version: 3.2,
+  config: { name: 'Riunisci annunci', parameters: { mode: 'append', numberInputs: 2 } }
+});
+""")
+add(if_node("segnaleOk", "Segnale ok?", "{{ $json._scarto_segnale ?? '' }}", "string", "empty"))
+
 add(http_page("homepage", "HTTP - Homepage", "{{ $json.website }}"))
 add(code("estraiHome", "Estrai email homepage",
-         estrai("HOMEPAGE", "Deduplica candidati", "$('Deduplica candidati').item.json.website"),
+         estrai("HOMEPAGE", "Segnale ok?", "$('Segnale ok?').item.json.website"),
          mode="runOnceForEachItem", output="{ email_site: 'info@acme.it', email_site_type: 'generic', page_1: 'https://acme.it/contatti', page_2: '' }"))
 add(if_node("servePagina2", "Serve pagina 2?", "{{ $json.page_1 }}", "string", "notEmpty"))
 add(http_page("pagina2", "HTTP - Pagina 2", "{{ $json.page_1 }}"))
@@ -328,7 +340,7 @@ add(code("normalizzaIcy", "Normalizza Icypeas", js("07-normalizza-icypeas.js"), 
 
 add("""const riunisciEsiti = merge({
   version: 3.2,
-  config: { name: 'Riunisci esiti', parameters: { mode: 'append', numberInputs: 3 } }
+  config: { name: 'Riunisci esiti', parameters: { mode: 'append', numberInputs: 4 } }
 });
 """)
 add(code("classifica", "Classifica e prepara risultati", js("08-classifica-e-prepara-risultati.js"),
@@ -363,10 +375,16 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .to(normalizzaAI)
   .to(deduplica)
   .to(ciSonoCandidati
-    .onTrue(homepage)
+    .onTrue(serveAnnuncio
+      .onTrue(annuncio.to(verificaAnnuncio).to(riunisciAnnunci.input(1)))
+      .onFalse(riunisciAnnunci.input(0)))
     .onFalse(riunisciEsiti.input(2)))
   .add(deduplica)
   .to(notificaVerifica)
+  .add(riunisciAnnunci)
+  .to(segnaleOk
+    .onTrue(homepage)
+    .onFalse(riunisciEsiti.input(3)))
   .add(homepage)
   .to(estraiHome)
   .to(servePagina2
@@ -397,6 +415,7 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .add(nota)
   .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
   .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, ricerca, modelloRicerca, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
+  .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk], { description: 'Annuncio di lavoro riaperto e verificato (titolo, azienda, data) prima di cercare le email.' })
   .group('3 - Email dal sito', [homepage, estraiHome, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
   .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })
   .group('5 - Consegna', [classifica, inviaRisultati], { description: 'Classifica per modalita email, calcola qualita e invia i risultati al backend con retry.' });

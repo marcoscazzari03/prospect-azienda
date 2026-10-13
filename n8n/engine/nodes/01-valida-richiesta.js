@@ -23,6 +23,23 @@ const clamp = (n, min, max, def) => {
 const errori = [];
 const t = b.target || {};
 
+// Segnali (opzionali): oggi il motore gestisce "job_ad". I titoli degli annunci
+// arrivano dal backend (catalogo in src/lib/domain/signals.ts), già normalizzati.
+const sg = t.signals && typeof t.signals === 'object' ? t.signals : {};
+const CODICI_SEGNALI = ['job_ad', 'no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
+const famiglie = (Array.isArray(sg.job_families) ? sg.job_families : []).slice(0, 3).map(f => ({
+  code: str(f?.code, 40),
+  label: str(f?.label, 80),
+  titles: list(f?.titles, 80).map(x => x.toLowerCase())
+})).filter(f => f.code && f.titles.length);
+const signals = {
+  codes: list(sg.codes, 3).filter(c => CODICI_SEGNALI.includes(c)),
+  match: sg.match === 'all' ? 'all' : 'any',
+  job_families: famiglie,
+  max_age_days: clamp(sg.max_age_days, 7, 120, 60)
+};
+if (signals.codes.includes('job_ad') && !famiglie.length) signals.codes = signals.codes.filter(c => c !== 'job_ad');
+
 const job = {
   contract_version: Number(b.contract_version) || 1,
   job_id: str(b.job_id, 64),
@@ -33,6 +50,8 @@ const job = {
   quantity: clamp(b.quantity, 1, 500, 25),
   contacts_per_company: clamp(b.contacts_per_company, 1, 3, 1),
   language: str(b.language, 5) || 'it',
+  // Data di riferimento per gli annunci (il backend può fissarla; utile nei test).
+  today: /^\d{4}-\d{2}-\d{2}$/.test(String(b.today ?? '')) ? String(b.today) : new Date().toISOString().slice(0, 10),
   target: {
     countries: list(t.countries),
     country_names: list(t.country_names),
@@ -44,7 +63,8 @@ const job = {
     roles: list(t.roles, 12),
     keywords: list(t.keywords, 15),
     exclude_keywords: list(t.exclude_keywords, 15),
-    notes: str(t.notes, 600)
+    notes: str(t.notes, 600),
+    signals
   },
   exclusions: {
     domains: list((b.exclusions || {}).domains, 20000),
@@ -66,7 +86,10 @@ if (!job.target.countries.length && !job.target.country_names.length) errori.pus
 
 // Lotti: sovracampioniamo (deduplica, siti senza email, ruoli non coerenti
 // fanno perdere in media 40-60% dei candidati), entro il limite del backend.
-const SOVRACAMPIONAMENTO = job.email_mode === 'personal_only' ? 2.6 : 1.8;
+// Con gli annunci si parte da chi assume: una parte degli annunci viene
+// scartata in verifica (agenzie, scaduti, pagine illeggibili).
+const conAnnunci = job.target.signals.codes.includes('job_ad');
+const SOVRACAMPIONAMENTO = (job.email_mode === 'personal_only' ? 2.6 : 1.8) * (conAnnunci ? 1.4 : 1);
 const lotti = Math.min(
   job.limits.max_lots,
   Math.max(1, Math.ceil(job.quantity * SOVRACAMPIONAMENTO / job.limits.candidates_per_lot))
@@ -83,7 +106,8 @@ const brief = [
   `Ruoli da contattare: ${job.target.roles.length ? job.target.roles.join(', ') : 'titolare / CEO / fondatore'}`,
   job.target.keywords.length ? `Parole chiave aggiuntive: ${job.target.keywords.join(', ')}` : '',
   job.target.exclude_keywords.length ? `Da escludere: ${job.target.exclude_keywords.join(', ')}` : '',
-  job.target.notes ? `Note del cliente: ${job.target.notes}` : ''
+  job.target.notes ? `Note del cliente: ${job.target.notes}` : '',
+  conAnnunci ? `Segnale richiesto: aziende che hanno pubblicato negli ultimi ${job.target.signals.max_age_days} giorni un annuncio di lavoro per: ${job.target.signals.job_families.map(f => f.label).join('; ')}` : ''
 ].filter(Boolean).join('\n');
 
 const planner_prompt = [
@@ -97,6 +121,11 @@ const planner_prompt = [
   '',
   'Per ogni lotto indica il paese, il focus (in italiano) e 3-5 query di ricerca',
   'nella LINGUA LOCALE del paese, come le scriverebbe una persona del posto.',
+  ...(conAnnunci ? [
+    'Le query devono cercare ANNUNCI DI LAVORO recenti per le figure indicate (es. «offerta lavoro',
+    'sistemista Brescia», «se busca administrador de sistemas Madrid»), anche sulle pagine',
+    '«Lavora con noi» dei siti aziendali. Evita le agenzie per il lavoro.'
+  ] : []),
   '',
   'Restituisci ESCLUSIVAMENTE JSON valido:',
   '{"lotti":[{"paese":"","focus":"","query":["",""]}]}'

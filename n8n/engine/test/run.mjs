@@ -133,4 +133,81 @@ assert.equal(nf.email_enrichment_status, 'NOT_FOUND');
 assert.equal(nf.enrichment_lookups, 0);
 assert.equal(icy([], 'SCHEDULED').email_enrichment_status, 'PENDING');
 console.log('ok  Icypeas: certezza, dominio, crediti solo se trovata');
+
+// 6. Segnale "annuncio di lavoro" (fase 1): validazione, lotti, deduplica, verifica
+const fx = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'signals');
+const attesi = JSON.parse(readFileSync(join(fx, 'expected.json'), 'utf8')).fixtures;
+const famiglie = {
+  it_systems: { code: 'it_systems', label: 'Sistemista / tecnico IT', titles: ['sistemista', 'tecnico informatico', 'tecnico it', 'help desk', 'system administrator'] },
+  software_dev: { code: 'software_dev', label: 'Programmatore / sviluppatore', titles: ['programmatore', 'sviluppatore', 'developer'] }
+};
+const bodyAnnunci = (fam, extra = {}) => ({ ...body, today: '2026-10-13', target: { ...body.target, signals: { codes: ['job_ad'], job_families: [famiglie[fam]], ...extra } } });
+const [jobA] = run(src('01-valida-richiesta.js'), { input: [{ body: bodyAnnunci('it_systems') }] }).map(i => i.json);
+assert.deepEqual(jobA.target.signals.codes, ['job_ad']);
+assert.equal(jobA.today, '2026-10-13');
+assert.ok(jobA.lotti_previsti > job.lotti_previsti, 'più lotti: una parte degli annunci verrà scartata');
+assert.match(jobA.planner_prompt, /ANNUNCI DI LAVORO/);
+const [senzaFam] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, target: { ...body.target, signals: { codes: ['job_ad', 'inventato'] } } } }] }).map(i => i.json);
+assert.deepEqual(senzaFam.target.signals.codes, [], 'job_ad senza figure e codici sconosciuti ignorati');
+const [lotto1] = run(src('02-prepara-lotti.js'), { nodes: { 'Valida richiesta': [jobA] }, input: [{ output: '{"lotti":[{"paese":"Italia","focus":"Brescia","query":["offerta lavoro sistemista Brescia"]}]}' }] }).map(i => i.json);
+assert.match(lotto1.prompt, /job_ad_url/);
+assert.match(lotto1.prompt, /Sistemista \/ tecnico IT/);
+console.log('ok  segnali nella richiesta e nei lotti (annunci di lavoro)');
+
+const candA = [
+  { company_name: 'Rossi Meccanica Srl', website: 'https://www.rossimeccanica.it', full_name: 'Mario Rossi', job_title: 'CEO', source_url: 'https://rossimeccanica.it/chi-siamo', job_ad_url: 'https://lavoro.example-board.it/annuncio/123', job_ad_title: 'Sistemista', job_ad_date: '2026-09-28' },
+  { company_name: 'Senza Annuncio', website: 'https://senzaannuncio.it', full_name: 'Gino Neri', job_title: 'CEO', source_url: 'https://senzaannuncio.it' },
+  { company_name: 'Solo Linkedin', website: 'https://sololinkedin.it', full_name: 'Anna Blu', job_title: 'CEO', source_url: 'https://sololinkedin.it', job_ad_url: 'https://www.linkedin.com/jobs/view/1' },
+  { company_name: 'Ip Interno', website: 'https://ipinterno.it', full_name: 'Paolo Viola', job_title: 'CEO', source_url: 'https://ipinterno.it', job_ad_url: 'http://10.0.0.1/annuncio' }
+];
+const dedA = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [jobA] }, input: [{ candidates: candA, lotto: 1 }] }).map(i => i.json);
+assert.equal(dedA.length, 1);
+assert.equal(dedA[0].job_ad_url, 'https://lavoro.example-board.it/annuncio/123');
+assert.deepEqual(dedA[0]._stats_deduplica.scarti, { annuncio_mancante: 2, annuncio_non_verificabile: 1 });
+console.log('ok  deduplica: annuncio obbligatorio, LinkedIn e indirizzi interni scartati');
+
+const verifica = src('09-verifica-annuncio.js');
+const prospetto = (extra) => ({ ...dedA[0], company_name: 'Rossi Meccanica Srl', domain: 'rossimeccanica.it', ...extra });
+const casi = {
+  'job-ad-jsonld.html': ['it_systems', {}],
+  'job-ad-agency.html': ['it_systems', {}],
+  'job-ad-expired.html': ['it_systems', { company_name: 'Bianchi Logistica S.p.A.', domain: 'bianchilogistica.it' }],
+  'job-ad-nodate.html': ['software_dev', { company_name: 'Verdi Software S.r.l.', domain: 'verdisoftware.it' }],
+  'job-ad-wrong-family.html': ['it_systems', {}],
+  'careers-page.html': ['it_systems', { company_name: 'Neri Impianti Srl', domain: 'neriimpianti.it', job_ad_url: 'https://www.neriimpianti.it/lavora-con-noi' }]
+};
+const MAPPA = { pass: 'pass', reject: 'reject', undetermined: 'undetermined' };
+for (const [file, [fam, extra]] of Object.entries(casi)) {
+  const [jobF] = run(src('01-valida-richiesta.js'), { input: [{ body: bodyAnnunci(fam) }] }).map(i => i.json);
+  const r = run(verifica, { nodes: { 'Valida richiesta': [jobF], 'Serve verifica annuncio?': [prospetto(extra)] }, json: { html: readFileSync(join(fx, file), 'utf8') } }).json;
+  const s = r.signals.at(-1);
+  assert.equal(s.status, MAPPA[attesi[file].expect], `${file}: ${s.status} (${s.reason}) invece di ${attesi[file].expect}`);
+  if (s.status === 'pass') {
+    assert.equal(s.evidence.date, attesi[file].date, `${file}: data`);
+    assert.equal(r._scarto_segnale, undefined);
+  } else {
+    assert.ok(r._scarto_segnale?.startsWith('annuncio_'), `${file}: scarto`);
+  }
+}
+const vuota = run(verifica, { nodes: { 'Valida richiesta': [jobA], 'Serve verifica annuncio?': [prospetto({})] }, json: { html: '' } }).json;
+assert.equal(vuota.signals[0].status, 'undetermined');
+assert.equal(vuota._scarto_segnale, 'annuncio_pagina_non_leggibile');
+const [jobAny] = run(src('01-valida-richiesta.js'), { input: [{ body: bodyAnnunci('it_systems', { codes: ['job_ad', 'no_mobile'], match: 'any' }) }] }).map(i => i.json);
+const nonObblig = run(verifica, { nodes: { 'Valida richiesta': [jobAny], 'Serve verifica annuncio?': [prospetto({})] }, json: { html: '' } }).json;
+assert.equal(nonObblig._scarto_segnale, undefined, 'con "basta uno" decide anche il sito');
+console.log('ok  verifica annunci: JSON-LD, agenzie, scaduti, senza data, fuori famiglia, Lavora con noi');
+
+const conSegnale = run(verifica, { nodes: { 'Valida richiesta': [jobA], 'Serve verifica annuncio?': [prospetto({})] }, json: { html: readFileSync(join(fx, 'job-ad-jsonld.html'), 'utf8') } }).json;
+const scartato = { ...conSegnale, _scarto_segnale: 'annuncio_agenzia_per_il_lavoro' };
+const ris = run(classifica, {
+  nodes: { 'Valida richiesta': [{ ...jobA, email_mode: 'mixed' }], 'Normalizza output AI': lotti },
+  input: [{ ...conSegnale, email_site: 'info@rossimeccanica.it', email_site_type: 'generic', email_site_source: 'https://rossimeccanica.it' }, scartato]
+})[0].json;
+assert.equal(ris.leads.length, 1);
+assert.equal(ris.leads[0].signals[0].code, 'job_ad');
+assert.equal(ris.leads[0].signals[0].evidence.date, '2026-09-28');
+assert.equal(ris.rejected[0].reason, 'annuncio_agenzia_per_il_lavoro');
+assert.deepEqual(ris.stats.signal_discards, { annuncio_agenzia_per_il_lavoro: 1 });
+assert.equal(ris.stats.leads_with_signals, 1);
+console.log('ok  risultati: prova dell annuncio sul lead, scarti per segnale nelle statistiche');
 console.log('\nTutti i test superati.');

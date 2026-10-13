@@ -33,6 +33,9 @@ if (!lotti.length) {
   lotti = lotti.slice(0, job.lotti_previsti);
 }
 
+const annunci = job.target.signals.codes.includes('job_ad');
+const figure = job.target.signals.job_families.map(f => f.label).join('; ');
+
 const ruoli = job.target.roles.length ? job.target.roles.join(', ') : 'titolare, fondatore, CEO, amministratore delegato';
 const perAzienda = job.contacts_per_company;
 
@@ -60,6 +63,19 @@ const prompt = (l, i) => [
   'Usa directory e registri solo per SCOPRIRE i nomi, poi trova il sito ufficiale.',
   'Se non trovi il sito ufficiale, scarta il candidato e passa al successivo.',
   '',
+  ...(annunci ? [
+    'PARTI DAGLI ANNUNCI DI LAVORO (obbligatorio)',
+    `Cerca aziende che hanno pubblicato negli ultimi ${job.target.signals.max_age_days} giorni (oggi è il ${job.today})`,
+    `un annuncio di lavoro per: ${figure}.`,
+    'Per ogni azienda indica la pagina dell\'annuncio in "job_ad_url": preferisci la pagina',
+    '«Lavora con noi / Careers» del sito aziendale, altrimenti la pagina pubblica dell\'annuncio',
+    '(non LinkedIn). Riporta il titolo esatto in "job_ad_title" e la data di pubblicazione in',
+    '"job_ad_date" (AAAA-MM-GG, vuota se non indicata).',
+    'Scarta gli annunci di agenzie per il lavoro che non dicono il nome dell\'azienda («per',
+    'azienda cliente»). Il referente da indicare resta quello con i ruoli richiesti sopra,',
+    'non la persona dell\'annuncio.',
+    ''
+  ] : []),
   'PAGINA CONTATTI',
   'Se durante la ricerca vedi la pagina contatti / note legali / impressum del sito ufficiale,',
   'mettila in "contact_page". NON cercare email e NON scriverne: le email le troviamo noi.',
@@ -82,7 +98,7 @@ const prompt = (l, i) => [
   'Restituisci ESCLUSIVAMENTE JSON valido, senza testo prima o dopo:',
   '{"candidates":[{"company_name":"","website":"","country":"","city":"","industry":"",',
   '"size_hint":"","full_name":"","first_name":"","last_name":"","job_title":"",',
-  '"source_url":"","contact_page":"","linkedin_url":""}]}'
+  '"source_url":"","contact_page":"","linkedin_url":""' + (annunci ? ',"job_ad_url":"","job_ad_title":"","job_ad_date":""' : '') + '}]}'
 ].filter(x => x !== null).join('\n');
 
 return lotti.map((l, i) => ({

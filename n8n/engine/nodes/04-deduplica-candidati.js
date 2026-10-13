@@ -12,7 +12,8 @@ const norm = (v) => String(v ?? '')
   .replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 // Caratteri invisibili che l'AI a volte copia dalle pagine (es. U+FEFF): rompono gli URL.
-const INVISIBILI = /[\u00AD\u200B-\u200F\u2060\uFEFF]/g;
+// (Costruita dai codici: nel caricamento su n8n gli escape unicode verrebbero convertiti.)
+const INVISIBILI = new RegExp(`[${[0xAD, 0x200B, 0x200C, 0x200D, 0x200E, 0x200F, 0x2060, 0xFEFF].map(c => String.fromCharCode(c)).join('')}]`, 'g');
 const pulito = (v, max = 200) => String(v ?? '').replace(INVISIBILI, '').trim().replace(/\s+/g, ' ').slice(0, max);
 // Solo nomi di dominio pubblici: niente IP, localhost o domini interni (anti-SSRF:
 // gli indirizzi arrivano dall'AI, che legge pagine di terzi e le note del cliente).
@@ -90,6 +91,10 @@ const coerenzaRuolo = (titolo) => {
   return 'mismatch';
 };
 
+// Annuncio di lavoro (segnale job_ad): l'URL passa dagli stessi controlli anti-SSRF.
+const annunciRichiesti = job.target.signals.codes.includes('job_ad');
+const annuncioObbligatorio = annunciRichiesti && (job.target.signals.codes.length === 1 || job.target.signals.match === 'all');
+
 const visti = new Set();
 const perAzienda = {};
 const scarti = {};
@@ -119,6 +124,10 @@ for (const item of $input.all()) {
     const ruolo = coerenzaRuolo(c?.job_title);
     if (ruolo === 'mismatch') { scarta('ruolo_non_coerente'); continue; }
 
+    const annuncio = annunciRichiesti && /^https?:\/\//i.test(String(c?.job_ad_url ?? '').trim()) ? urlPulito(c.job_ad_url) : '';
+    if (annuncioObbligatorio && !annuncio) { scarta('annuncio_mancante'); continue; }
+    if (annuncio && /(^|\.)linkedin\.[a-z.]+$/.test(host(annuncio))) { scarta('annuncio_non_verificabile'); continue; }
+
     const contatti = /^https?:\/\//i.test(String(c?.contact_page ?? '').trim()) ? urlPulito(c.contact_page) : '';
     visti.add(kp);
     perAzienda[chiave] = (perAzienda[chiave] || 0) + 1;
@@ -143,6 +152,9 @@ for (const item of $input.all()) {
         linkedin_url: /linkedin\.com\/in\//i.test(String(c?.linkedin_url ?? '')) ? pulito(c.linkedin_url, 300) : '',
         source_url: fonte,
         contact_page: /^https?:\/\//i.test(contatti) && host(contatti) === dominio ? contatti : '',
+        job_ad_url: annuncio,
+        job_ad_title: annuncio ? pulito(c?.job_ad_title, 160) : '',
+        job_ad_date: annuncio && /^\d{4}-\d{2}-\d{2}$/.test(pulito(c?.job_ad_date, 10)) ? pulito(c.job_ad_date, 10) : '',
         lotto: item.json.lotto
       }
     });

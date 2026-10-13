@@ -79,8 +79,16 @@ for (const p of prospects) {
       job_title: p.job_title, role_match: p.role_match, linkedin_url: p.linkedin_url || ''
     },
     sources: { discovery_url: p.source_url, contact_page: p.contact_page || '' },
-    keys: { person_key: p.person_key, company_key: p.company_key }
+    keys: { person_key: p.person_key, company_key: p.company_key },
+    // Segnali verificati con la loro prova (solo se la ricerca li ha richiesti).
+    signals: (Array.isArray(p.signals) ? p.signals : []).filter(s => s.status === 'pass').map(s => ({ code: s.code, evidence: s.evidence }))
   };
+
+  // Scartato per segnale mancante: nessuna ricerca email è stata fatta.
+  if (p._scarto_segnale) {
+    rejected.push({ ...base, reason: p._scarto_segnale, enrichment_status: '' });
+    continue;
+  }
 
   if (!email) {
     rejected.push({ ...base, reason: motivo, enrichment_status: p.email_enrichment_status || '' });
@@ -121,7 +129,7 @@ for (const p of prospects) {
 leads.sort((a, b) => b.quality.score - a.quality.score);
 
 const lotti = $('Normalizza output AI').all().map(i => i.json);
-const dedup = vuoto ? items[0].stats : (prospects[0]?._stats_deduplica || {});
+const dedup = vuoto ? items[0].stats : (prospects.find(j => j._stats_deduplica)?._stats_deduplica || {});
 const motivi = rejected.reduce((m, r) => ({ ...m, [r.reason]: (m[r.reason] || 0) + 1 }), {});
 
 return [{
@@ -145,7 +153,9 @@ return [{
       leads_personal: leads.filter(l => l.email.type === 'personal').length,
       leads_generic: leads.filter(l => l.email.type === 'generic').length,
       rejected: rejected.length,
-      rejected_reasons: motivi
+      rejected_reasons: motivi,
+      signal_discards: Object.fromEntries(Object.entries(motivi).filter(([k]) => k.startsWith('annuncio_'))),
+      leads_with_signals: leads.filter(l => l.signals.length).length
     },
     usage: {
       ai_search_calls: lotti.length,
