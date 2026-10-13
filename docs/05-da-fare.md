@@ -65,7 +65,13 @@ Piano e regole in `docs/07-segnali.md`. Fasi: 0 regole · 1 motore annunci · 2 
 - [x] Fase 2: motore, segnali dal sito (nodo «Valuta segnali sito», pubblicato)
 - [x] Fase 3: database e crediti (migrazione `20261022000016_signals.sql`: +1 credito, segnale obbligatorio, prove per azienda, magazzino con prove fresche, rimborso «segnale non corretto»)
 - [x] Fase 4: app (due modalità: «aziende in target» e «aziende con opportunità», anteprima e costo, «Perché è in target» sui lead, etichetta «Opportunità», termini e privacy)
+- [x] Homepage con le due modalità (in target / opportunità) e demo
+- [x] Prezzo dei segnali modificabile dall'admin (sito e annunci)
+- [x] Magazzino completo: si salva ogni lead valido trovato, anche non consegnato
+- [ ] Prova reale dall'app: una ricerca normale e una opportunità (crediti, consegna, prove, export)
 - [ ] Fase 5: collaudo sulle 10 ricerche di prova
+- [ ] Annunci di lavoro: prova di Adzuna al collaudo (con la sola ricerca web si trovano pochi candidati)
+- [ ] Prezzo finale: costo reale per lead (in target, segnali dal sito, annunci) dal collaudo, poi crediti dei segnali e pacchetti
 - [ ] Dopo il lancio: nuove sedi, espansione all'estero, appalti pubblici (ANAC)
 
 ## Legale e fiscale
