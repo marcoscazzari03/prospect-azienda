@@ -3,7 +3,7 @@ import { Alert, PageHeader } from "@/components/ui";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sha256Hex } from "@/lib/server/crypto";
 
-export const metadata: Metadata = { title: "Conferma rimozione" };
+export const metadata: Metadata = { title: "Conferma rimozione", robots: { index: false, follow: false } };
 
 export default async function ConfirmOptoutPage({ searchParams }: PageProps<"/opposizione/conferma">) {
   const { token } = await searchParams;

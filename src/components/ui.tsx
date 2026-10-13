@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
+import { safeHttpUrl } from "@/lib/domain/safe-url";
 
 export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -82,8 +83,9 @@ export function ProvenanceStamp({ status, type, href }: { status: string; type?:
       {type && <span className="opacity-70">· {type === "personal" ? "nominativa" : "generica"}</span>}
     </Badge>
   );
-  return href ? (
-    <a href={href} target="_blank" rel="noopener noreferrer nofollow" className="hover:opacity-80">
+  const link = safeHttpUrl(href);
+  return link ? (
+    <a href={link} target="_blank" rel="noopener noreferrer nofollow" className="hover:opacity-80">
       {inner}
     </a>
   ) : (

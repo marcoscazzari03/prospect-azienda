@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+
+// Dinamico: la CSP con nonce richiede il rendering a ogni richiesta.
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (

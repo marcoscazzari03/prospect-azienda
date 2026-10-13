@@ -5,6 +5,7 @@ import { saveLeadNotes, setLeadStage, setListMembership, type LeadActionState } 
 import { LEAD_STAGES, LEAD_STAGE_LABEL, ROLE_MATCH_LABEL, type DeliveryRow, type LeadStage } from "@/lib/domain/leads";
 import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
 import { Alert, Badge, Button, ProvenanceStamp, Select, cx } from "./ui";
+import { safeHttpUrl } from "@/lib/domain/safe-url";
 
 function ReportForm({ deliveryId }: { deliveryId: string }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(reportLead, {});
@@ -178,12 +179,12 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                     <p className="text-xs text-ink-2">{d.person?.job_title || "—"}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <a href={d.company?.website} target="_blank" rel="noopener noreferrer nofollow" className="font-medium hover:text-ledger">{d.company?.name}</a>
+                    <a href={safeHttpUrl(d.company?.website)} target="_blank" rel="noopener noreferrer nofollow" className="font-medium hover:text-ledger">{d.company?.name}</a>
                     <p className="text-xs text-ink-2">{[d.company?.city, d.company?.country].filter(Boolean).join(", ")}</p>
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-mono text-[13px]">{r.email_address}</p>
-                    <div className="mt-1"><ProvenanceStamp status={r.email_status} type={r.email_type} href={d.email?.source_url || undefined} /></div>
+                    <div className="mt-1"><ProvenanceStamp status={r.email_status} type={r.email_type} href={safeHttpUrl(d.email?.source_url)} /></div>
                   </td>
                   <td className="px-4 py-3 text-right font-mono">{r.quality_score}</td>
                   {manage && (
@@ -203,9 +204,9 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                       <div className="grid gap-4 md:grid-cols-3">
                         <div className="text-xs">
                           <p className="mb-1 font-medium uppercase tracking-wider text-muted">Fonti</p>
-                          {d.sources?.discovery_url && <p>Contatto: <a className="text-ledger underline" href={d.sources.discovery_url} target="_blank" rel="noopener noreferrer nofollow">{host(d.sources.discovery_url)}</a></p>}
-                          {d.email?.source === "enrichment" ? <p>Email: verificata tecnicamente</p> : d.email?.source_url && <p>Email: <a className="text-ledger underline" href={d.email.source_url} target="_blank" rel="noopener noreferrer nofollow">{host(d.email.source_url)}</a></p>}
-                          {d.person?.linkedin_url && <p>LinkedIn: <a className="text-ledger underline" href={d.person.linkedin_url} target="_blank" rel="noopener noreferrer nofollow">profilo</a></p>}
+                          {safeHttpUrl(d.sources?.discovery_url) && <p>Contatto: <a className="text-ledger underline" href={safeHttpUrl(d.sources?.discovery_url)} target="_blank" rel="noopener noreferrer nofollow">{host(d.sources?.discovery_url ?? "")}</a></p>}
+                          {d.email?.source === "enrichment" ? <p>Email: verificata tecnicamente</p> : safeHttpUrl(d.email?.source_url) && <p>Email: <a className="text-ledger underline" href={safeHttpUrl(d.email?.source_url)} target="_blank" rel="noopener noreferrer nofollow">{host(d.email?.source_url ?? "")}</a></p>}
+                          {safeHttpUrl(d.person?.linkedin_url) && <p>LinkedIn: <a className="text-ledger underline" href={safeHttpUrl(d.person?.linkedin_url)} target="_blank" rel="noopener noreferrer nofollow">profilo</a></p>}
                           {typeof d.quality?.checks?.mailbox === "string" && MAILBOX_LABEL[d.quality.checks.mailbox as MailboxCheck] && (
                             <p className="mt-2">{MAILBOX_LABEL[d.quality.checks.mailbox as MailboxCheck]}</p>
                           )}

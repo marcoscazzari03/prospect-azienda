@@ -1,10 +1,22 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/url";
+import { buildCsp } from "@/lib/csp";
 
-// Rinnova la sessione Supabase e protegge le aree riservate.
+// Rinnova la sessione Supabase, protegge le aree riservate e applica la CSP
+// con nonce (nuovo a ogni richiesta) alle pagine dinamiche.
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const nonce = btoa(crypto.randomUUID());
+  const csp = buildCsp(nonce, process.env.NODE_ENV === "development");
+  const next = () => {
+    const headers = new Headers(request.headers);
+    headers.set("x-nonce", nonce);
+    headers.set("Content-Security-Policy", csp);
+    const res = NextResponse.next({ request: { headers } });
+    res.headers.set("Content-Security-Policy", csp);
+    return res;
+  };
+  let response = next();
   const url = supabaseUrl();
   const key = supabaseAnonKey();
   if (!url || !key) return response;
@@ -16,7 +28,7 @@ export async function proxy(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
-        response = NextResponse.next({ request });
+        response = next();
         for (const { name, value, options } of cookiesToSet) response.cookies.set(name, value, options);
       },
     },
@@ -54,6 +66,7 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 
+// Allineato a NONCE_PREFIXES in src/lib/csp.ts.
 export const config = {
-  matcher: ["/app/:path*", "/admin/:path*", "/accedi", "/registrati"],
+  matcher: ["/(app|admin|accedi|registrati|recupera-password|nuova-password|opposizione)/:path*"],
 };

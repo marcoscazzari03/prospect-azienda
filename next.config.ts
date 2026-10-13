@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { buildCsp } from "./src/lib/csp";
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -20,7 +21,23 @@ const nextConfig: NextConfig = {
     },
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Pagine statiche: CSP senza nonce. Le pagine con nonce la ricevono dal proxy.
+      {
+        source: "/((?!app|admin|accedi|registrati|recupera-password|nuova-password|opposizione).*)",
+        headers: [{ key: "Content-Security-Policy", value: buildCsp(undefined, process.env.NODE_ENV === "development") }],
+      },
+      // V11: le aree private non vanno nei motori di ricerca.
+      {
+        source: "/(app|admin|api|auth|accedi|registrati|recupera-password|nuova-password|opposizione/conferma)/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        source: "/(app|admin|accedi|registrati|recupera-password|nuova-password|opposizione/conferma)",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
   },
 };
 
