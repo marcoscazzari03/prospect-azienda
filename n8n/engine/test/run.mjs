@@ -210,4 +210,37 @@ assert.equal(ris.rejected[0].reason, 'annuncio_agenzia_per_il_lavoro');
 assert.deepEqual(ris.stats.signal_discards, { annuncio_agenzia_per_il_lavoro: 1 });
 assert.equal(ris.stats.leads_with_signals, 1);
 console.log('ok  risultati: prova dell annuncio sul lead, scarti per segnale nelle statistiche');
+
+// 7. Claude come motore di ricerca: richiesta, risposta, ripresa dopo pause_turn, errori
+assert.equal(job.ai.model, 'claude-sonnet-5-5');
+const lottoC = { lotto: 1, paese: 'Italia', focus: 'Milano', prompt: 'Cerca...' };
+const req = run(src('10-richiesta-claude.js'), { nodes: { 'Valida richiesta': [job] }, json: lottoC }).json._claude;
+assert.equal(req.model, 'claude-sonnet-5-5');
+assert.equal(req.tools[0].type, 'web_search_20260209');
+assert.equal(req.messages[0].content, 'Cerca...');
+assert.equal(req.temperature, undefined, 'niente parametri di campionamento: i modelli recenti li rifiutano');
+const esito = (fase, json, prima) => run(src('11-esito-claude.template.js', { __FASE__: fase }), {
+  nodes: { 'Prepara richiesta Claude': [{ _claude: req }], 'Esito ricerca Claude': [prima || {}] }, json
+}).json;
+const ok = esito('PRIMA', { stop_reason: 'end_turn', content: [
+  { type: 'server_tool_use', name: 'web_search' }, { type: 'web_search_tool_result', content: [] },
+  { type: 'text', text: '{"candidates":' }, { type: 'text', text: '[]}' }
+], usage: { input_tokens: 1000, output_tokens: 200, server_tool_use: { web_search_requests: 3 } } });
+assert.equal(ok.output, '{"candidates":[]}');
+assert.equal(ok._continua, false);
+assert.equal(ok.usage.web_search_requests, 3);
+const pausa = esito('PRIMA', { stop_reason: 'pause_turn', content: [{ type: 'text', text: '{"candidates":[' }, { type: 'server_tool_use', name: 'web_search' }] });
+assert.equal(pausa._continua, true);
+assert.equal(pausa._claude_seguito.messages.length, 2);
+assert.equal(pausa._claude_seguito.messages[1].role, 'assistant');
+const seguito = esito('SEGUITO', { stop_reason: 'end_turn', content: [{ type: 'text', text: ']}' }] }, pausa);
+assert.equal(seguito.output, '{"candidates":[]}');
+assert.equal(seguito._continua, false, 'una sola ripresa');
+const errApi = esito('PRIMA', { type: 'error', error: { type: 'overloaded_error', message: 'Overloaded' } });
+assert.equal(errApi.error.message, 'Overloaded');
+const norm = run(src('03-normalizza-output-ai.js'), { nodes: { 'Prepara lotti': [lottoC] }, json: errApi }).json;
+assert.equal(norm.stato_lotto, 'ERRORE');
+const normOk = run(src('03-normalizza-output-ai.js'), { nodes: { 'Prepara lotti': [lottoC] }, json: { output: '{"candidates":[{"company_name":"Acme"}]}' } }).json;
+assert.equal(normOk.candidates.length, 1);
+console.log('ok  Claude: richiesta con ricerca web, testo finale, ripresa dopo pause_turn, errori API');
 console.log('\nTutti i test superati.');

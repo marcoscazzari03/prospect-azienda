@@ -34,6 +34,9 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Icypeas nel motore al posto di RocketReach (migrazione `20261014000008_icypeas.sql`, costo `email_finder`)
 - [x] Workflow pubblicato e piano Icypeas acquistato (budget mensile ~900 in Prezzi e costi)
 - [x] Workflow "TEST | Icypeas email finder" archiviato
+- [x] Motore AI: Claude Sonnet 5.5 (pianificazione + ricerca web lato server) al posto di OpenAI; modello in `01-valida-richiesta.js`, nodi OpenAI disattivati nel workflow per tornare indietro
+- [ ] Costo del lotto di ricerca in *Prezzi e costi* da aggiornare dopo il test con Claude
+- [ ] Chiave Anthropic dedicata a Webora Leads (oggi si usa la credenziale «US VIRAL - Anthropic»)
 - [ ] Motore: classificazione di email tipo segreteria.cognome@gmail.com come generiche
 - [ ] Budget mensile di arricchimento da rivedere
 - [ ] Testo dell'invito per la beta

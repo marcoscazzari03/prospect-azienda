@@ -20,7 +20,7 @@ const webhook = trigger({
 const valida = node({
   type: 'n8n-nodes-base.code',
   version: 2,
-  config: { name: 'Valida richiesta', parameters: { mode: 'runOnceForAllItems', jsCode: "// Valida e normalizza la richiesta arrivata dal backend (contratto v1).\n// Il backend ha gi\u00e0 controllato piano e crediti: qui ci limitiamo a\n// rifiutare payload incompleti e a preparare il brief per l'AI.\n// URL di callback ammessi: SOLO il backend della piattaforma (anti-SSRF).\n// Dominio della piattaforma (anche sottodomini, es. leads.weborastudio.it).\nconst DOMINIO_PIATTAFORMA = 'weborastudio.it';\nconst esc = (s) => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\nconst CALLBACK_AMMESSI = [\n  new RegExp(`^https://([a-z0-9-]+\\\\.)?${esc(DOMINIO_PIATTAFORMA)}/api/engine/callback$`, 'i')\n];\n\nconst raw = $input.first().json;\nconst b = raw.body && typeof raw.body === 'object' ? raw.body : raw;\n\nconst str = (v, max = 300) => String(v ?? '').trim().replace(/\\s+/g, ' ').slice(0, max);\nconst list = (v, max = 30) => (Array.isArray(v) ? v : (v ? [v] : []))\n  .map(x => str(x, 120)).filter(Boolean).slice(0, max);\nconst clamp = (n, min, max, def) => {\n  const x = Number(n);\n  return Number.isFinite(x) ? Math.min(max, Math.max(min, Math.round(x))) : def;\n};\n\nconst errori = [];\nconst t = b.target || {};\n\n// Segnali (opzionali): oggi il motore gestisce \"job_ad\". I titoli degli annunci\n// arrivano dal backend (catalogo in src/lib/domain/signals.ts), gi\u00e0 normalizzati.\nconst sg = t.signals && typeof t.signals === 'object' ? t.signals : {};\nconst CODICI_SEGNALI = ['job_ad', 'no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];\nconst famiglie = (Array.isArray(sg.job_families) ? sg.job_families : []).slice(0, 3).map(f => ({\n  code: str(f?.code, 40),\n  label: str(f?.label, 80),\n  titles: list(f?.titles, 80).map(x => x.toLowerCase())\n})).filter(f => f.code && f.titles.length);\nconst signals = {\n  codes: list(sg.codes, 3).filter(c => CODICI_SEGNALI.includes(c)),\n  match: sg.match === 'all' ? 'all' : 'any',\n  job_families: famiglie,\n  max_age_days: clamp(sg.max_age_days, 7, 120, 60)\n};\nif (signals.codes.includes('job_ad') && !famiglie.length) signals.codes = signals.codes.filter(c => c !== 'job_ad');\n\nconst job = {\n  contract_version: Number(b.contract_version) || 1,\n  job_id: str(b.job_id, 64),\n  run_id: str(b.run_id, 64),\n  run_token: str(b.run_token, 128),\n  callback_url: str(b.callback_url, 300),\n  email_mode: ['generic_ok', 'personal_only', 'mixed'].includes(b.email_mode) ? b.email_mode : 'mixed',\n  quantity: clamp(b.quantity, 1, 500, 25),\n  contacts_per_company: clamp(b.contacts_per_company, 1, 3, 1),\n  language: str(b.language, 5) || 'it',\n  // Data di riferimento per gli annunci (il backend pu\u00f2 fissarla; utile nei test).\n  today: /^\\d{4}-\\d{2}-\\d{2}$/.test(String(b.today ?? '')) ? String(b.today) : new Date().toISOString().slice(0, 10),\n  target: {\n    countries: list(t.countries),\n    country_names: list(t.country_names),\n    regions: list(t.regions),\n    industry: str(t.industry, 200),\n    industry_keywords: list(t.industry_keywords),\n    company_size: list(t.company_size, 6),\n    revenue_range: str(t.revenue_range, 60),\n    roles: list(t.roles, 12),\n    keywords: list(t.keywords, 15),\n    exclude_keywords: list(t.exclude_keywords, 15),\n    notes: str(t.notes, 600),\n    signals\n  },\n  exclusions: {\n    domains: list((b.exclusions || {}).domains, 20000),\n    person_keys: list((b.exclusions || {}).person_keys, 20000)\n  },\n  limits: {\n    max_lots: clamp((b.limits || {}).max_lots, 1, 20, 6),\n    candidates_per_lot: clamp((b.limits || {}).candidates_per_lot, 5, 30, 20),\n    enrichment_cap: clamp((b.limits || {}).enrichment_cap, 0, 500, 0)\n  }\n};\n\nif (!/^[0-9a-f-]{8,64}$/i.test(job.job_id)) errori.push('job_id mancante o non valido');\nif (!job.run_id) errori.push('run_id mancante');\nif (job.run_token.length < 24) errori.push('run_token mancante');\nif (!CALLBACK_AMMESSI.some(r => r.test(job.callback_url))) errori.push('callback_url non ammesso');\nif (!job.target.industry && !job.target.industry_keywords.length) errori.push('settore mancante');\nif (!job.target.countries.length && !job.target.country_names.length) errori.push('paese mancante');\n\n// Lotti: sovracampioniamo (deduplica, siti senza email, ruoli non coerenti\n// fanno perdere in media 40-60% dei candidati), entro il limite del backend.\n// Con gli annunci si parte da chi assume: una parte degli annunci viene\n// scartata in verifica (agenzie, scaduti, pagine illeggibili).\nconst conAnnunci = job.target.signals.codes.includes('job_ad');\nconst SOVRACAMPIONAMENTO = (job.email_mode === 'personal_only' ? 2.6 : 1.8) * (conAnnunci ? 1.4 : 1);\nconst lotti = Math.min(\n  job.limits.max_lots,\n  Math.max(1, Math.ceil(job.quantity * SOVRACAMPIONAMENTO / job.limits.candidates_per_lot))\n);\n\nconst paesi = job.target.country_names.length ? job.target.country_names : job.target.countries;\nconst brief = [\n  `Settore: ${job.target.industry || job.target.industry_keywords.join(', ')}`,\n  job.target.industry_keywords.length ? `Parole chiave del settore: ${job.target.industry_keywords.join(', ')}` : '',\n  `Paesi: ${paesi.join(', ')}`,\n  job.target.regions.length ? `Aree / citt\u00e0: ${job.target.regions.join(', ')}` : '',\n  job.target.company_size.length ? `Dimensione azienda (dipendenti): ${job.target.company_size.join(', ')}` : '',\n  job.target.revenue_range ? `Fatturato indicativo: ${job.target.revenue_range}` : '',\n  `Ruoli da contattare: ${job.target.roles.length ? job.target.roles.join(', ') : 'titolare / CEO / fondatore'}`,\n  job.target.keywords.length ? `Parole chiave aggiuntive: ${job.target.keywords.join(', ')}` : '',\n  job.target.exclude_keywords.length ? `Da escludere: ${job.target.exclude_keywords.join(', ')}` : '',\n  job.target.notes ? `Note del cliente: ${job.target.notes}` : '',\n  conAnnunci ? `Segnale richiesto: aziende che hanno pubblicato negli ultimi ${job.target.signals.max_age_days} giorni un annuncio di lavoro per: ${job.target.signals.job_families.map(f => f.label).join('; ')}` : ''\n].filter(Boolean).join('\\n');\n\nconst planner_prompt = [\n  'Sei un analista di lead generation B2B. Dividi la ricerca qui sotto in',\n  `${lotti} LOTTI DI RICERCA DIVERSI, che non si sovrappongano (aree geografiche,`,\n  'citt\u00e0, sotto-nicchie o tipologie di azienda diverse), in modo che ricerche web',\n  'separate trovino aziende diverse.',\n  '',\n  'RICERCA',\n  brief,\n  '',\n  'Per ogni lotto indica il paese, il focus (in italiano) e 3-5 query di ricerca',\n  'nella LINGUA LOCALE del paese, come le scriverebbe una persona del posto.',\n  ...(conAnnunci ? [\n    'Le query devono cercare ANNUNCI DI LAVORO recenti per le figure indicate (es. \u00abofferta lavoro',\n    'sistemista Brescia\u00bb, \u00abse busca administrador de sistemas Madrid\u00bb), anche sulle pagine',\n    '\u00abLavora con noi\u00bb dei siti aziendali. Evita le agenzie per il lavoro.'\n  ] : []),\n  '',\n  'Restituisci ESCLUSIVAMENTE JSON valido:',\n  '{\"lotti\":[{\"paese\":\"\",\"focus\":\"\",\"query\":[\"\",\"\"]}]}'\n].join('\\n');\n\nreturn [{\n  json: {\n    ...job,\n    valida: errori.length === 0,\n    errori,\n    lotti_previsti: lotti,\n    brief,\n    planner_prompt\n  }\n}];\n" } },
+  config: { name: 'Valida richiesta', parameters: { mode: 'runOnceForAllItems', jsCode: "// Valida e normalizza la richiesta arrivata dal backend (contratto v1).\n// Il backend ha gi\u00e0 controllato piano e crediti: qui ci limitiamo a\n// rifiutare payload incompleti e a preparare il brief per l'AI.\n// URL di callback ammessi: SOLO il backend della piattaforma (anti-SSRF).\n// Dominio della piattaforma (anche sottodomini, es. leads.weborastudio.it).\nconst DOMINIO_PIATTAFORMA = 'weborastudio.it';\nconst esc = (s) => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\nconst CALLBACK_AMMESSI = [\n  new RegExp(`^https://([a-z0-9-]+\\\\.)?${esc(DOMINIO_PIATTAFORMA)}/api/engine/callback$`, 'i')\n];\n\n// Modello AI del motore: per cambiare basta questa riga (es. 'claude-opus-5-5').\n// Il ritorno a OpenAI si fa ricollegando i nodi OpenAI rimasti nel workflow.\nconst AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', effort: 'medium', max_searches: 8 };\n\nconst raw = $input.first().json;\nconst b = raw.body && typeof raw.body === 'object' ? raw.body : raw;\n\nconst str = (v, max = 300) => String(v ?? '').trim().replace(/\\s+/g, ' ').slice(0, max);\nconst list = (v, max = 30) => (Array.isArray(v) ? v : (v ? [v] : []))\n  .map(x => str(x, 120)).filter(Boolean).slice(0, max);\nconst clamp = (n, min, max, def) => {\n  const x = Number(n);\n  return Number.isFinite(x) ? Math.min(max, Math.max(min, Math.round(x))) : def;\n};\n\nconst errori = [];\nconst t = b.target || {};\n\n// Segnali (opzionali): oggi il motore gestisce \"job_ad\". I titoli degli annunci\n// arrivano dal backend (catalogo in src/lib/domain/signals.ts), gi\u00e0 normalizzati.\nconst sg = t.signals && typeof t.signals === 'object' ? t.signals : {};\nconst CODICI_SEGNALI = ['job_ad', 'no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];\nconst famiglie = (Array.isArray(sg.job_families) ? sg.job_families : []).slice(0, 3).map(f => ({\n  code: str(f?.code, 40),\n  label: str(f?.label, 80),\n  titles: list(f?.titles, 80).map(x => x.toLowerCase())\n})).filter(f => f.code && f.titles.length);\nconst signals = {\n  codes: list(sg.codes, 3).filter(c => CODICI_SEGNALI.includes(c)),\n  match: sg.match === 'all' ? 'all' : 'any',\n  job_families: famiglie,\n  max_age_days: clamp(sg.max_age_days, 7, 120, 60)\n};\nif (signals.codes.includes('job_ad') && !famiglie.length) signals.codes = signals.codes.filter(c => c !== 'job_ad');\n\nconst job = {\n  contract_version: Number(b.contract_version) || 1,\n  job_id: str(b.job_id, 64),\n  run_id: str(b.run_id, 64),\n  run_token: str(b.run_token, 128),\n  callback_url: str(b.callback_url, 300),\n  email_mode: ['generic_ok', 'personal_only', 'mixed'].includes(b.email_mode) ? b.email_mode : 'mixed',\n  quantity: clamp(b.quantity, 1, 500, 25),\n  contacts_per_company: clamp(b.contacts_per_company, 1, 3, 1),\n  language: str(b.language, 5) || 'it',\n  ai: AI,\n  // Data di riferimento per gli annunci (il backend pu\u00f2 fissarla; utile nei test).\n  today: /^\\d{4}-\\d{2}-\\d{2}$/.test(String(b.today ?? '')) ? String(b.today) : new Date().toISOString().slice(0, 10),\n  target: {\n    countries: list(t.countries),\n    country_names: list(t.country_names),\n    regions: list(t.regions),\n    industry: str(t.industry, 200),\n    industry_keywords: list(t.industry_keywords),\n    company_size: list(t.company_size, 6),\n    revenue_range: str(t.revenue_range, 60),\n    roles: list(t.roles, 12),\n    keywords: list(t.keywords, 15),\n    exclude_keywords: list(t.exclude_keywords, 15),\n    notes: str(t.notes, 600),\n    signals\n  },\n  exclusions: {\n    domains: list((b.exclusions || {}).domains, 20000),\n    person_keys: list((b.exclusions || {}).person_keys, 20000)\n  },\n  limits: {\n    max_lots: clamp((b.limits || {}).max_lots, 1, 20, 6),\n    candidates_per_lot: clamp((b.limits || {}).candidates_per_lot, 5, 30, 20),\n    enrichment_cap: clamp((b.limits || {}).enrichment_cap, 0, 500, 0)\n  }\n};\n\nif (!/^[0-9a-f-]{8,64}$/i.test(job.job_id)) errori.push('job_id mancante o non valido');\nif (!job.run_id) errori.push('run_id mancante');\nif (job.run_token.length < 24) errori.push('run_token mancante');\nif (!CALLBACK_AMMESSI.some(r => r.test(job.callback_url))) errori.push('callback_url non ammesso');\nif (!job.target.industry && !job.target.industry_keywords.length) errori.push('settore mancante');\nif (!job.target.countries.length && !job.target.country_names.length) errori.push('paese mancante');\n\n// Lotti: sovracampioniamo (deduplica, siti senza email, ruoli non coerenti\n// fanno perdere in media 40-60% dei candidati), entro il limite del backend.\n// Con gli annunci si parte da chi assume: una parte degli annunci viene\n// scartata in verifica (agenzie, scaduti, pagine illeggibili).\nconst conAnnunci = job.target.signals.codes.includes('job_ad');\nconst SOVRACAMPIONAMENTO = (job.email_mode === 'personal_only' ? 2.6 : 1.8) * (conAnnunci ? 1.4 : 1);\nconst lotti = Math.min(\n  job.limits.max_lots,\n  Math.max(1, Math.ceil(job.quantity * SOVRACAMPIONAMENTO / job.limits.candidates_per_lot))\n);\n\nconst paesi = job.target.country_names.length ? job.target.country_names : job.target.countries;\nconst brief = [\n  `Settore: ${job.target.industry || job.target.industry_keywords.join(', ')}`,\n  job.target.industry_keywords.length ? `Parole chiave del settore: ${job.target.industry_keywords.join(', ')}` : '',\n  `Paesi: ${paesi.join(', ')}`,\n  job.target.regions.length ? `Aree / citt\u00e0: ${job.target.regions.join(', ')}` : '',\n  job.target.company_size.length ? `Dimensione azienda (dipendenti): ${job.target.company_size.join(', ')}` : '',\n  job.target.revenue_range ? `Fatturato indicativo: ${job.target.revenue_range}` : '',\n  `Ruoli da contattare: ${job.target.roles.length ? job.target.roles.join(', ') : 'titolare / CEO / fondatore'}`,\n  job.target.keywords.length ? `Parole chiave aggiuntive: ${job.target.keywords.join(', ')}` : '',\n  job.target.exclude_keywords.length ? `Da escludere: ${job.target.exclude_keywords.join(', ')}` : '',\n  job.target.notes ? `Note del cliente: ${job.target.notes}` : '',\n  conAnnunci ? `Segnale richiesto: aziende che hanno pubblicato negli ultimi ${job.target.signals.max_age_days} giorni un annuncio di lavoro per: ${job.target.signals.job_families.map(f => f.label).join('; ')}` : ''\n].filter(Boolean).join('\\n');\n\nconst planner_prompt = [\n  'Sei un analista di lead generation B2B. Dividi la ricerca qui sotto in',\n  `${lotti} LOTTI DI RICERCA DIVERSI, che non si sovrappongano (aree geografiche,`,\n  'citt\u00e0, sotto-nicchie o tipologie di azienda diverse), in modo che ricerche web',\n  'separate trovino aziende diverse.',\n  '',\n  'RICERCA',\n  brief,\n  '',\n  'Per ogni lotto indica il paese, il focus (in italiano) e 3-5 query di ricerca',\n  'nella LINGUA LOCALE del paese, come le scriverebbe una persona del posto.',\n  ...(conAnnunci ? [\n    'Le query devono cercare ANNUNCI DI LAVORO recenti per le figure indicate (es. \u00abofferta lavoro',\n    'sistemista Brescia\u00bb, \u00abse busca administrador de sistemas Madrid\u00bb), anche sulle pagine',\n    '\u00abLavora con noi\u00bb dei siti aziendali. Evita le agenzie per il lavoro.'\n  ] : []),\n  '',\n  'Restituisci ESCLUSIVAMENTE JSON valido:',\n  '{\"lotti\":[{\"paese\":\"\",\"focus\":\"\",\"query\":[\"\",\"\"]}]}'\n].join('\\n');\n\nreturn [{\n  json: {\n    ...job,\n    valida: errori.length === 0,\n    errori,\n    lotti_previsti: lotti,\n    brief,\n    planner_prompt\n  }\n}];\n" } },
   output: [{ job_id: '0b8e7c1e-1111-4222-8333-944455556666', valida: true, errori: [], callback_url: 'https://app.example.it/api/engine/callback', planner_prompt: '...', lotti_previsti: 3 }]
 });
 
@@ -71,12 +71,15 @@ const notificaAvvio = node({
 });
 
 const modelloPlanner = languageModel({
-  type: '@n8n/n8n-nodes-langchain.lmChatOpenAi',
-  version: 1.3,
+  type: '@n8n/n8n-nodes-langchain.lmChatAnthropic',
+  version: 1.6,
   config: {
-    name: 'OpenAI (pianificazione)',
-    parameters: { model: { __rl: true, mode: 'id', value: 'gpt-5.6-luna' }, options: { timeout: 120000 } },
-    credentials: { openAiApi: { id: 'ZQVz3FqwCrCMFcB9', name: 'OpenAi account' } }
+    name: 'Claude (pianificazione)',
+    parameters: {
+      model: { __rl: true, mode: 'id', value: "={{ $('Valida richiesta').first().json.ai.model }}" },
+      options: { maxTokensToSample: 4000, thinkingMode: 'adaptive', effort: 'low' }
+    },
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
   }
 });
 
@@ -102,39 +105,98 @@ const prepara = node({
   output: [{ job_id: 'x', lotto: 1, paese: 'Italia', focus: 'Software house a Milano', prompt: '...' }]
 });
 
-const modelloRicerca = languageModel({
-  type: '@n8n/n8n-nodes-langchain.lmChatOpenAi',
-  version: 1.3,
+const preparaClaude = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: { name: 'Prepara richiesta Claude', parameters: { mode: 'runOnceForEachItem', jsCode: "// Richiesta all'API di Claude per un lotto: il prompt del lotto + lo strumento\n// di ricerca web lato server (web_search). Modello, impegno e numero massimo di\n// ricerche arrivano da \"Valida richiesta\" (job.ai): si cambiano in un punto solo.\nconst job = $('Valida richiesta').first().json;\nconst ai = job.ai;\n\nreturn {\n  json: {\n    ...$json,\n    _claude: {\n      model: ai.model,\n      max_tokens: 16000,\n      output_config: { effort: ai.effort },\n      system: 'Sei un ricercatore di prospect B2B. Usi la ricerca web, citi sempre la fonte e non inventi mai dati. Rispondi solo con JSON valido.',\n      messages: [{ role: 'user', content: $json.prompt }],\n      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: ai.max_searches }]\n    }\n  }\n};\n" } },
+  output: [{ lotto: 1, prompt: '...', _claude: {} }]
+});
+
+const claudeRicerca = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
   config: {
-    name: 'OpenAI + Web Search',
+    name: 'HTTP - Claude ricerca',
+    onError: 'continueRegularOutput',
     parameters: {
-      model: { __rl: true, mode: 'id', value: 'gpt-5.6-luna' },
-      responsesApiEnabled: true,
-      builtInTools: { webSearch: { searchContextSize: 'low' } },
-      options: { timeout: 240000 }
+      method: 'POST',
+      url: 'https://api.anthropic.com/v1/messages',
+      authentication: 'predefinedCredentialType',
+      nodeCredentialType: 'anthropicApi',
+      sendHeaders: true,
+      headerParameters: { parameters: [{ name: 'anthropic-version', value: '2023-06-01' }] },
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr("{{ JSON.stringify($json._claude) }}"),
+      options: {
+        batching: { batch: { batchSize: 3, batchInterval: 1000 } },
+        response: { response: { neverError: true } },
+        timeout: 300000
+      }
     },
-    credentials: { openAiApi: { id: 'ZQVz3FqwCrCMFcB9', name: 'OpenAi account' } }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
+  },
+  output: [{ content: [], stop_reason: 'end_turn' }]
+});
+
+const esitoClaude = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: { name: 'Esito ricerca Claude', parameters: { mode: 'runOnceForEachItem', jsCode: "// Legge la risposta di Claude (PRIMA) e la porta nel formato del motore:\n// { output: testo, error }. Se Claude si ferma a met\u00e0 della ricerca web\n// (stop_reason \"pause_turn\"), prepara la richiesta per riprendere dal punto\n// in cui era: una sola ripresa, poi si usa quello che c'\u00e8.\nconst FASE = 'PRIMA';\nconst r = $json;\nconst richiesta = FASE === 'PRIMA'\n  ? $('Prepara richiesta Claude').item.json._claude\n  : $('Esito ricerca Claude').item.json._claude_seguito;\nconst precedente = FASE === 'PRIMA' ? '' : String($('Esito ricerca Claude').item.json._testo_parziale ?? '');\n\nconst blocchi = Array.isArray(r.content) ? r.content : [];\nconst testo = precedente + blocchi.filter(b => b?.type === 'text').map(b => b.text).join('');\nconst errore = r.type === 'error' || r.error\n  ? String(r.error?.message ?? r.error?.type ?? r.error ?? 'errore API')\n  : (r.stop_reason === 'refusal' ? 'richiesta rifiutata dal modello' : '');\n\nconst usage = r.usage || {};\nconst out = {\n  output: testo,\n  stop_reason: String(r.stop_reason ?? ''),\n  usage: {\n    input_tokens: Number(usage.input_tokens) || 0,\n    output_tokens: Number(usage.output_tokens) || 0,\n    web_search_requests: Number(usage.server_tool_use?.web_search_requests) || 0\n  }\n};\nif (errore) out.error = { message: errore };\n\nif (FASE === 'PRIMA' && r.stop_reason === 'pause_turn' && !errore) {\n  out._continua = true;\n  out._testo_parziale = testo;\n  out._claude_seguito = { ...richiesta, messages: [...richiesta.messages, { role: 'assistant', content: blocchi }] };\n} else {\n  out._continua = false;\n}\nreturn { json: out };\n" } },
+  output: [{ output: '', _continua: false }]
+});
+
+const claudeInPausa = ifElse({
+  version: 2.2,
+  config: {
+    name: 'Claude in pausa?',
+    parameters: {
+      conditions: {
+        options: { caseSensitive: true, leftValue: '', typeValidation: 'loose' },
+        conditions: [{ leftValue: expr("{{ $json._continua }}"), operator: { type: 'boolean', operation: 'true', singleValue: true } }],
+        combinator: 'and'
+      }
+    }
   }
 });
 
-const ricerca = node({
-  type: '@n8n/n8n-nodes-langchain.agent',
-  version: 3.1,
+const claudeSeguito = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
   config: {
-    name: 'Ricerca prospect AI',
+    name: 'HTTP - Claude seguito',
     onError: 'continueRegularOutput',
     parameters: {
-      promptType: 'define',
-      text: expr('{{ $json.prompt }}'),
+      method: 'POST',
+      url: 'https://api.anthropic.com/v1/messages',
+      authentication: 'predefinedCredentialType',
+      nodeCredentialType: 'anthropicApi',
+      sendHeaders: true,
+      headerParameters: { parameters: [{ name: 'anthropic-version', value: '2023-06-01' }] },
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr("{{ JSON.stringify($json._claude_seguito) }}"),
       options: {
-        systemMessage: 'Sei un ricercatore di prospect B2B. Usi la ricerca web, citi sempre la fonte e non inventi mai dati. Rispondi solo con JSON valido.',
-        maxIterations: 8,
-        batching: { batchSize: 3, delayBetweenBatches: 1000 }
+        batching: { batch: { batchSize: 3, batchInterval: 1000 } },
+        response: { response: { neverError: true } },
+        timeout: 300000
       }
     },
-    subnodes: { model: modelloRicerca }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
   },
-  output: [{ output: '{"candidates":[]}' }]
+  output: [{ content: [], stop_reason: 'end_turn' }]
+});
+
+const esitoClaude2 = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: { name: 'Esito ricerca Claude (seguito)', parameters: { mode: 'runOnceForEachItem', jsCode: "// Legge la risposta di Claude (SEGUITO) e la porta nel formato del motore:\n// { output: testo, error }. Se Claude si ferma a met\u00e0 della ricerca web\n// (stop_reason \"pause_turn\"), prepara la richiesta per riprendere dal punto\n// in cui era: una sola ripresa, poi si usa quello che c'\u00e8.\nconst FASE = 'SEGUITO';\nconst r = $json;\nconst richiesta = FASE === 'PRIMA'\n  ? $('Prepara richiesta Claude').item.json._claude\n  : $('Esito ricerca Claude').item.json._claude_seguito;\nconst precedente = FASE === 'PRIMA' ? '' : String($('Esito ricerca Claude').item.json._testo_parziale ?? '');\n\nconst blocchi = Array.isArray(r.content) ? r.content : [];\nconst testo = precedente + blocchi.filter(b => b?.type === 'text').map(b => b.text).join('');\nconst errore = r.type === 'error' || r.error\n  ? String(r.error?.message ?? r.error?.type ?? r.error ?? 'errore API')\n  : (r.stop_reason === 'refusal' ? 'richiesta rifiutata dal modello' : '');\n\nconst usage = r.usage || {};\nconst out = {\n  output: testo,\n  stop_reason: String(r.stop_reason ?? ''),\n  usage: {\n    input_tokens: Number(usage.input_tokens) || 0,\n    output_tokens: Number(usage.output_tokens) || 0,\n    web_search_requests: Number(usage.server_tool_use?.web_search_requests) || 0\n  }\n};\nif (errore) out.error = { message: errore };\n\nif (FASE === 'PRIMA' && r.stop_reason === 'pause_turn' && !errore) {\n  out._continua = true;\n  out._testo_parziale = testo;\n  out._claude_seguito = { ...richiesta, messages: [...richiesta.messages, { role: 'assistant', content: blocchi }] };\n} else {\n  out._continua = false;\n}\nreturn { json: out };\n" } },
+  output: [{ output: '', _continua: false }]
+});
+
+const riunisciRicerca = merge({
+  version: 3.2,
+  config: { name: 'Riunisci ricerca', parameters: { mode: 'append', numberInputs: 2 } }
 });
 
 const normalizzaAI = node({
@@ -570,7 +632,13 @@ export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v1)')
     .onFalse(rifiuta))
   .add(planner)
   .to(prepara)
-  .to(ricerca)
+  .to(preparaClaude)
+  .to(claudeRicerca)
+  .to(esitoClaude)
+  .to(claudeInPausa
+    .onTrue(claudeSeguito.to(esitoClaude2).to(riunisciRicerca.input(1)))
+    .onFalse(riunisciRicerca.input(0)))
+  .add(riunisciRicerca)
   .to(normalizzaAI)
   .to(deduplica)
   .to(ciSonoCandidati
@@ -613,7 +681,7 @@ export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v1)')
   .to(inviaRisultati)
   .add(nota)
   .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
-  .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, ricerca, modelloRicerca, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
+  .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, preparaClaude, claudeRicerca, esitoClaude, claudeInPausa, claudeSeguito, esitoClaude2, riunisciRicerca, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
   .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk], { description: 'Annuncio di lavoro riaperto e verificato (titolo, azienda, data) prima di cercare le email.' })
   .group('3 - Email dal sito', [homepage, estraiHome, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
   .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })

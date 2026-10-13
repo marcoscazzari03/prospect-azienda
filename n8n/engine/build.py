@@ -20,6 +20,9 @@ ICYPEAS = "{ id: 'sdOCb0GxGnanvIRo', name: 'Icypeas API' }"
 IN_AUTH = "newCredential('Lead Engine - Webhook in ingresso')"
 CB_AUTH = "newCredential('Lead Engine - Callback verso backend')"
 MODEL = "gpt-5.6-luna"
+ANTHROPIC = "{ id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' }"
+# Motore AI: "anthropic" (Claude, modello scelto in 01-valida-richiesta.js) o "openai".
+AI_PROVIDER = "anthropic"
 
 
 def js(name, **subs):
@@ -136,6 +139,40 @@ def progress(stage, message_expr, counters_expr="{}"):
     )
 
 
+def esito_claude(fase):
+    return json.dumps((NODES / "11-esito-claude.template.js").read_text(encoding="utf-8").replace("__FASE__", fase), ensure_ascii=True)
+
+
+def claude_http(var, name, body_expr):
+    return f"""const {var} = node({{
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {{
+    name: '{name}',
+    onError: 'continueRegularOutput',
+    parameters: {{
+      method: 'POST',
+      url: 'https://api.anthropic.com/v1/messages',
+      authentication: 'predefinedCredentialType',
+      nodeCredentialType: 'anthropicApi',
+      sendHeaders: true,
+      headerParameters: {{ parameters: [{{ name: 'anthropic-version', value: '2023-06-01' }}] }},
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr({json.dumps(body_expr)}),
+      options: {{
+        batching: {{ batch: {{ batchSize: 3, batchInterval: 1000 }} }},
+        response: {{ response: {{ neverError: true }} }},
+        timeout: 300000
+      }}
+    }},
+    credentials: {{ anthropicApi: {ANTHROPIC} }}
+  }},
+  output: [{{ content: [], stop_reason: 'end_turn' }}]
+}});
+"""
+
+
 parts = []
 add = parts.append
 
@@ -176,16 +213,32 @@ add("""const rifiuta = node({
 add(callback("notificaAvvio", "Notifica: ricerca avviata",
              progress("planning", "'Pianificazione della ricerca'", "{ lots_planned: $('Valida richiesta').first().json.lotti_previsti }")))
 
-add(f"""const modelloPlanner = languageModel({{
-  type: '@n8n/n8n-nodes-langchain.lmChatOpenAi',
-  version: 1.3,
+if AI_PROVIDER == "openai":
+    add(f"""const modelloPlanner = languageModel({{
+      type: '@n8n/n8n-nodes-langchain.lmChatOpenAi',
+      version: 1.3,
+      config: {{
+        name: 'OpenAI (pianificazione)',
+        parameters: {{ model: {{ __rl: true, mode: 'id', value: '{MODEL}' }}, options: {{ timeout: 120000 }} }},
+        credentials: {{ openAiApi: {OPENAI} }}
+      }}
+    }});
+    """)
+else:
+    add(f"""const modelloPlanner = languageModel({{
+  type: '@n8n/n8n-nodes-langchain.lmChatAnthropic',
+  version: 1.6,
   config: {{
-    name: 'OpenAI (pianificazione)',
-    parameters: {{ model: {{ __rl: true, mode: 'id', value: '{MODEL}' }}, options: {{ timeout: 120000 }} }},
-    credentials: {{ openAiApi: {OPENAI} }}
+    name: 'Claude (pianificazione)',
+    parameters: {{
+      model: {{ __rl: true, mode: 'id', value: "={{{{ $('Valida richiesta').first().json.ai.model }}}}" }},
+      options: {{ maxTokensToSample: 4000, thinkingMode: 'adaptive', effort: 'low' }}
+    }},
+    credentials: {{ anthropicApi: {ANTHROPIC} }}
   }}
 }});
 """)
+
 add("""const planner = node({
   type: '@n8n/n8n-nodes-langchain.agent',
   version: 3.1,
@@ -204,41 +257,58 @@ add("""const planner = node({
 add(code("prepara", "Prepara lotti", js("02-prepara-lotti.js"),
          output="{ job_id: 'x', lotto: 1, paese: 'Italia', focus: 'Software house a Milano', prompt: '...' }"))
 
-add(f"""const modelloRicerca = languageModel({{
-  type: '@n8n/n8n-nodes-langchain.lmChatOpenAi',
-  version: 1.3,
-  config: {{
-    name: 'OpenAI + Web Search',
-    parameters: {{
-      model: {{ __rl: true, mode: 'id', value: '{MODEL}' }},
-      responsesApiEnabled: true,
-      builtInTools: {{ webSearch: {{ searchContextSize: 'low' }} }},
-      options: {{ timeout: 240000 }}
-    }},
-    credentials: {{ openAiApi: {OPENAI} }}
-  }}
-}});
-""")
-add("""const ricerca = node({
-  type: '@n8n/n8n-nodes-langchain.agent',
-  version: 3.1,
-  config: {
-    name: 'Ricerca prospect AI',
-    onError: 'continueRegularOutput',
-    parameters: {
-      promptType: 'define',
-      text: expr('{{ $json.prompt }}'),
-      options: {
-        systemMessage: 'Sei un ricercatore di prospect B2B. Usi la ricerca web, citi sempre la fonte e non inventi mai dati. Rispondi solo con JSON valido.',
-        maxIterations: 8,
-        batching: { batchSize: 3, delayBetweenBatches: 1000 }
-      }
-    },
-    subnodes: { model: modelloRicerca }
-  },
-  output: [{ output: '{"candidates":[]}' }]
+if AI_PROVIDER == "openai":
+    add(f"""const modelloRicerca = languageModel({{
+      type: '@n8n/n8n-nodes-langchain.lmChatOpenAi',
+      version: 1.3,
+      config: {{
+        name: 'OpenAI + Web Search',
+        parameters: {{
+          model: {{ __rl: true, mode: 'id', value: '{MODEL}' }},
+          responsesApiEnabled: true,
+          builtInTools: {{ webSearch: {{ searchContextSize: 'low' }} }},
+          options: {{ timeout: 240000 }}
+        }},
+        credentials: {{ openAiApi: {OPENAI} }}
+      }}
+    }});
+    """)
+    add("""const ricerca = node({
+      type: '@n8n/n8n-nodes-langchain.agent',
+      version: 3.1,
+      config: {
+        name: 'Ricerca prospect AI',
+        onError: 'continueRegularOutput',
+        parameters: {
+          promptType: 'define',
+          text: expr('{{ $json.prompt }}'),
+          options: {
+            systemMessage: 'Sei un ricercatore di prospect B2B. Usi la ricerca web, citi sempre la fonte e non inventi mai dati. Rispondi solo con JSON valido.',
+            maxIterations: 8,
+            batching: { batchSize: 3, delayBetweenBatches: 1000 }
+          }
+        },
+        subnodes: { model: modelloRicerca }
+      },
+      output: [{ output: '{"candidates":[]}' }]
+    });
+    """)
+else:
+    add(code("preparaClaude", "Prepara richiesta Claude", js("10-richiesta-claude.js"), mode="runOnceForEachItem",
+             output="{ lotto: 1, prompt: '...', _claude: {} }"))
+    add(claude_http("claudeRicerca", "HTTP - Claude ricerca", "{{ JSON.stringify($json._claude) }}"))
+    add(code("esitoClaude", "Esito ricerca Claude", esito_claude("PRIMA"), mode="runOnceForEachItem",
+             output="{ output: '', _continua: false }"))
+    add(if_node("claudeInPausa", "Claude in pausa?", "{{ $json._continua }}", "boolean", "true"))
+    add(claude_http("claudeSeguito", "HTTP - Claude seguito", "{{ JSON.stringify($json._claude_seguito) }}"))
+    add(code("esitoClaude2", "Esito ricerca Claude (seguito)", esito_claude("SEGUITO"), mode="runOnceForEachItem",
+             output="{ output: '', _continua: false }"))
+    add("""const riunisciRicerca = merge({
+  version: 3.2,
+  config: { name: 'Riunisci ricerca', parameters: { mode: 'append', numberInputs: 2 } }
 });
 """)
+
 add(code("normalizzaAI", "Normalizza output AI", js("03-normalizza-output-ai.js"), mode="runOnceForEachItem",
          output="{ lotto: 1, stato_lotto: 'OK', candidates: [] }"))
 add(code("deduplica", "Deduplica candidati", js("04-deduplica-candidati.js"),
@@ -363,6 +433,18 @@ add("""const nota = sticky(
 );
 """)
 
+RICERCA_WIRING = """  .to(ricerca)
+""" if AI_PROVIDER == "openai" else """  .to(preparaClaude)
+  .to(claudeRicerca)
+  .to(esitoClaude)
+  .to(claudeInPausa
+    .onTrue(claudeSeguito.to(esitoClaude2).to(riunisciRicerca.input(1)))
+    .onFalse(riunisciRicerca.input(0)))
+  .add(riunisciRicerca)
+"""
+RICERCA_GROUP = "ricerca, modelloRicerca" if AI_PROVIDER == "openai" else \
+    "preparaClaude, claudeRicerca, esitoClaude, claudeInPausa, claudeSeguito, esitoClaude2, riunisciRicerca"
+
 add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v1)')
   .add(webhook)
   .to(valida)
@@ -371,8 +453,7 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
     .onFalse(rifiuta))
   .add(planner)
   .to(prepara)
-  .to(ricerca)
-  .to(normalizzaAI)
+""" + RICERCA_WIRING + """  .to(normalizzaAI)
   .to(deduplica)
   .to(ciSonoCandidati
     .onTrue(serveAnnuncio
@@ -414,7 +495,7 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .to(inviaRisultati)
   .add(nota)
   .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
-  .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, ricerca, modelloRicerca, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
+  .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, """ + RICERCA_GROUP + """, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
   .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk], { description: 'Annuncio di lavoro riaperto e verificato (titolo, azienda, data) prima di cercare le email.' })
   .group('3 - Email dal sito', [homepage, estraiHome, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
   .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })

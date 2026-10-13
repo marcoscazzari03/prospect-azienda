@@ -9,6 +9,10 @@ const CALLBACK_AMMESSI = [
   new RegExp(`^https://([a-z0-9-]+\\.)?${esc(DOMINIO_PIATTAFORMA)}/api/engine/callback$`, 'i')
 ];
 
+// Modello AI del motore: per cambiare basta questa riga (es. 'claude-opus-5-5').
+// Il ritorno a OpenAI si fa ricollegando i nodi OpenAI rimasti nel workflow.
+const AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', effort: 'medium', max_searches: 8 };
+
 const raw = $input.first().json;
 const b = raw.body && typeof raw.body === 'object' ? raw.body : raw;
 
@@ -50,6 +54,7 @@ const job = {
   quantity: clamp(b.quantity, 1, 500, 25),
   contacts_per_company: clamp(b.contacts_per_company, 1, 3, 1),
   language: str(b.language, 5) || 'it',
+  ai: AI,
   // Data di riferimento per gli annunci (il backend può fissarla; utile nei test).
   today: /^\d{4}-\d{2}-\d{2}$/.test(String(b.today ?? '')) ? String(b.today) : new Date().toISOString().slice(0, 10),
   target: {
