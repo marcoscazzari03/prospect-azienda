@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
 import { cx } from "./ui";
 
-// Prezzo per credito del Pacchetto 100 (il più caro): la stima è un massimo.
+// Prezzo per credito del Pacchetto 100 (il più caro): stima prudente.
 const RATE_PACK = 0.49;
 
 const MODES: { mode: EmailMode; label: string }[] = [
@@ -18,6 +18,7 @@ const eur = (n: number) => n.toLocaleString("it-IT", { style: "currency", curren
 export function HomeCalculator() {
   const [mode, setMode] = useState<EmailMode>("generic_ok");
   const [qty, setQty] = useState(50);
+  const min = MODE_INFO[mode].minCredits * qty;
   const max = MODE_INFO[mode].maxCredits * qty;
 
   return (
@@ -65,13 +66,18 @@ export function HomeCalculator() {
         </div>
       </div>
       <div className="flex flex-col justify-center gap-1 border-t border-line bg-paper/60 p-6 md:border-l md:border-t-0 md:p-8">
-        <p className="text-sm text-muted">Crediti massimi da riservare</p>
-        <p className="font-mono text-4xl font-semibold tabular-nums">{max}</p>
-        <p className="mt-4 text-sm text-muted">Costo massimo stimato</p>
-        <p className="font-mono text-3xl font-semibold tabular-nums">{eur(max * RATE_PACK)}</p>
+        <p className="text-sm text-muted">Crediti addebitati</p>
+        <p className="font-mono text-4xl font-semibold tabular-nums">
+          {min}–{max}
+        </p>
+        <p className="text-xs text-muted">Ne riserviamo {max} all&apos;avvio, il resto torna a te.</p>
+        <p className="mt-4 text-sm text-muted">Costo stimato</p>
+        <p className="font-mono text-3xl font-semibold tabular-nums">
+          {eur(min * RATE_PACK)}–{eur(max * RATE_PACK)}
+        </p>
         <p className="mt-3 text-xs text-muted">
-          Addebitiamo solo i lead consegnati.
-          <br />I crediti non utilizzati tornano al tuo account. Con un abbonamento il credito costa meno.
+          Dipende da quante email nominative e verificate troviamo. Addebitiamo solo i lead consegnati.
+          <br />Prezzi del Pacchetto 100: con un abbonamento il credito costa meno.
         </p>
         <Link
           href="/registrati"
