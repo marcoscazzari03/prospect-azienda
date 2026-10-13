@@ -29,6 +29,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           <Logo href="/app" />
           <div className="flex items-center gap-3 md:hidden">
             <Link href="/app/crediti" className="font-mono text-sm font-semibold text-ledger">{formatNumber(viewer.credits)} cr.</Link>
+            <Link href="/app/account" className="text-xs text-ink-2">Account</Link>
             <form action="/auth/esci" method="post"><button className="text-xs text-ink-2">Esci</button></form>
           </div>
         </div>

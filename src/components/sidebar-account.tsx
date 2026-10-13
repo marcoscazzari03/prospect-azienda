@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatNumber } from "@/lib/domain/pricing";
 
-// Piede della barra laterale: crediti con barra di utilizzo, account e uscita.
+// Piede della barra laterale: crediti con barra di utilizzo, link al proprio account e uscita.
 const FREE_MAIL = /^(gmail|googlemail|outlook|hotmail|live|yahoo|icloud|me|libero|virgilio|tiscali|alice|tim|aol|proton|protonmail)\.[a-z.]+$/i;
 
 export function SidebarAccount({ credits, total, planName, email, orgName, fullName }: { credits: number; total: number; planName: string; email: string; orgName: string; fullName?: string }) {
@@ -36,23 +36,16 @@ export function SidebarAccount({ credits, total, planName, email, orgName, fullN
         <span className="mt-0.5 block text-xs text-muted">Piano {planName}</span>
       </Link>
 
-      <details className="group/acc relative">
-        <summary className="flex cursor-pointer list-none items-center gap-3 rounded-lg px-2 py-2 hover:bg-paper-2 [&::-webkit-details-marker]:hidden">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper-2 text-xs font-semibold text-ink-2">{initials}</span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-medium" title={name || email}>{name || account}</span>
-            <span className="block truncate text-xs text-muted" title={email}>{email}</span>
-          </span>
-          <svg viewBox="0 0 20 20" className="h-4 w-4 text-ink-2 transition-transform group-open/acc:rotate-180" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
-            <path d="M5 8l5 5 5-5" />
-          </svg>
-        </summary>
-        <div className="mt-1 flex flex-col rounded-lg border border-line bg-white p-1 text-sm">
-          <Link href="/app/crediti" className="rounded-md px-3 py-2 hover:bg-paper-2">Crediti, piano e fatture</Link>
-          <Link href="/nuova-password" className="rounded-md px-3 py-2 hover:bg-paper-2">Cambia password</Link>
-          <a href="mailto:leads@weborastudio.it" className="rounded-md px-3 py-2 hover:bg-paper-2">Assistenza</a>
-        </div>
-      </details>
+      <Link href="/app/account" className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-paper-2" title="Il mio account">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper-2 text-xs font-semibold text-ink-2">{initials}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium" title={name || email}>{name || account}</span>
+          <span className="block truncate text-xs text-muted" title={email}>{email}</span>
+        </span>
+        <svg viewBox="0 0 20 20" className="h-4 w-4 text-ink-2 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
+          <path d="M8 5l5 5-5 5" />
+        </svg>
+      </Link>
 
       <form action="/auth/esci" method="post">
         <button className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm text-ink-2 hover:bg-paper-2 hover:text-ink">
