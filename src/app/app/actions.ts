@@ -9,6 +9,7 @@ import { defaultSearchName, nextRepeatAt, searchInputSchema, toTarget } from "@/
 import { startSearch } from "@/lib/server/searches";
 import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
 import { RATE_LIMITS, SEARCH_RULES } from "@/lib/config";
+import { SIGNAL_RULES } from "@/lib/domain/signals";
 
 export type ActionState = { error?: string; info?: string };
 
@@ -43,6 +44,11 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
     quantity: form.get("quantity"),
     contactsPerCompany: form.get("contactsPerCompany") ?? 1,
     repeat: form.get("repeat") ?? "none",
+    signals: {
+      codes: form.getAll("signalCodes").map(String),
+      match: form.get("signalMatch") === "all" ? "all" : "any",
+      jobFamilies: form.getAll("jobFamilies").map(String),
+    },
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dati non validi" };
   const input = parsed.data;
@@ -90,7 +96,7 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
 
 const reportSchema = z.object({
   deliveryId: z.string().uuid(),
-  reason: z.enum(["bounce", "wrong_role", "company_closed", "out_of_target", "duplicate", "other"]),
+  reason: z.enum(["bounce", "wrong_role", "company_closed", "out_of_target", "duplicate", "wrong_signal", "other"]),
   note: z.string().trim().max(500).optional().default(""),
 });
 
@@ -103,11 +109,19 @@ export async function reportLead(_: ActionState, form: FormData): Promise<Action
 
   // Lettura con la RLS dell'utente: verifica che il lead sia suo.
   const supabase = await createClient();
-  const { data: delivery } = await supabase.from("deliveries").select("id, search_id, delivered_at").eq("id", deliveryId).maybeSingle();
+  const { data: delivery } = await supabase.from("deliveries").select("id, search_id, delivered_at, signals:data->signals").eq("id", deliveryId).maybeSingle();
   if (!delivery) return { error: "Lead non trovato." };
+  if (reason === "wrong_signal" && !(Array.isArray(delivery.signals) && delivery.signals.length)) {
+    return { error: "Questo lead non è stato consegnato con un segnale." };
+  }
 
   const ageDays = (Date.now() - new Date(delivery.delivered_at).getTime()) / 86_400_000;
-  const window = reason === "bounce" ? SEARCH_RULES.bounceRefundWindowDays : SEARCH_RULES.autoRefundWindowDays;
+  const window =
+    reason === "bounce"
+      ? SEARCH_RULES.bounceRefundWindowDays
+      : reason === "wrong_signal"
+        ? SIGNAL_RULES.refundWindowDays
+        : SEARCH_RULES.autoRefundWindowDays;
   if (ageDays > window) return { error: `Le segnalazioni per questo motivo sono possibili entro ${window} giorni dalla consegna.` };
 
   const db = createAdminClient();

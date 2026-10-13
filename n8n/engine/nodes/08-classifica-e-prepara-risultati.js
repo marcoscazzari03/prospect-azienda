@@ -72,7 +72,8 @@ for (const p of prospects) {
   const base = {
     company: {
       name: p.company_name, domain: p.domain, website: p.website, country: p.country,
-      city: p.city, industry: p.industry, size_hint: p.size_hint
+      city: p.city, industry: p.industry, size_hint: p.size_hint,
+      technologies: Array.isArray(p.technologies) ? p.technologies : []
     },
     person: {
       full_name: p.full_name, first_name: p.first_name, last_name: p.last_name,

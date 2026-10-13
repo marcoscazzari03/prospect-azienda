@@ -43,7 +43,14 @@ Cliente ──► Backend (Next.js) ──POST webhook──► n8n "Lead Engine
     "roles": ["CEO", "Founder", "Managing Director"],
     "keywords": ["e-commerce"],
     "exclude_keywords": ["franchising"],
-    "notes": "testo libero del cliente"
+    "notes": "testo libero del cliente",
+    "signals": {                       // facoltativo (docs/07-segnali.md)
+      "codes": ["job_ad", "no_mobile"], // massimo 3
+      "match": "any",                   // any = basta uno, all = servono tutti
+      "job_families": [{ "code": "it_systems", "label": "Sistemista / tecnico IT",
+                         "titles": ["sistemista", "system administrator", "…"] }],
+      "max_age_days": 60
+    }
   },
   "exclusions": {
     "domains": ["agenzia-gia-venduta.es"],          // aziende già consegnate a QUESTO cliente
@@ -76,7 +83,8 @@ Errori di consegna degli eventi `progress` sono ignorati (non bloccano la ricerc
   "email_mode": "mixed", "requested": 50,
   "leads": [{
     "company": { "name": "Acme S.L.", "domain": "acme.es", "website": "https://acme.es",
-                 "country": "Spagna", "city": "Madrid", "industry": "…", "size_hint": "11-50" },
+                 "country": "Spagna", "city": "Madrid", "industry": "…", "size_hint": "11-50",
+                 "technologies": ["wordpress"] },   // solo se la ricerca ha segnali dal sito
     "person":  { "full_name": "Lucía García Pérez", "first_name": "Lucía", "last_name": "García Pérez",
                  "job_title": "CEO", "role_match": "exact", "linkedin_url": "" },
     "email": {
@@ -92,7 +100,9 @@ Errori di consegna degli eventi `progress` sono ignorati (non bloccano la ricerc
     "sources": { "discovery_url": "https://…", "contact_page": "https://acme.es/contacto" },
     "keys": { "person_key": "lucia garcia perez|acme.es", "company_key": "acme.es" },
     "quality": { "score": 88, "checks": { "official_site": true, "discovery_source": true, "role_match": "exact",
-                 "email_on_company_domain": true, "email_personal": true, "email_verified": true } }
+                 "email_on_company_domain": true, "email_personal": true, "email_verified": true } },
+    "signals": [{ "code": "job_ad", "evidence": { "url": "https://…", "title": "Sistemista IT", "date": "2026-09-28",
+                  "family": "it_systems", "source": "company_site", "checked_at": "2026-10-13" } }]
   }],
   "rejected": [{ "company": {…}, "person": {…}, "reason": "solo_email_generica | nessuna_email | arricchimento_da_riprovare" }],
   "stats": { "lots": 4, "lots_failed": 0, "ai_candidates": 80, "valid_candidates": 46,
@@ -110,7 +120,9 @@ Errori di consegna degli eventi `progress` sono ignorati (non bloccano la ricerc
    **lista di opposizione globale** (`suppression_list`).
 3. Inserisce/aggiorna i lead nel magazzino (`companies`, `people`, `emails`) con fonte e stato.
 4. Crea le `deliveries` fino alla quantità ordinata e **addebita i crediti solo per i lead
-   consegnati**, in base al tipo reale di email (vedi pricing).
+   consegnati**, in base al tipo reale di email (vedi pricing). Con segnali verificati richiesti:
+   consegna solo i lead che li hanno («basta uno» / «servono tutti»), +1 credito per lead, prove
+   copiate sul lead e salvate per azienda in `company_signals` (riusabili dal magazzino finché fresche).
 5. Registra i costi del giro (`usage` × costi unitari) in `run_costs` per i margini.
 6. Se mancano lead e i giri sono < 3 e il budget del giro lo consente → nuovo giro (top-up) con
    esclusioni aggiornate. Altrimenti chiude la ricerca come `completed` o `partial` e **rilascia i

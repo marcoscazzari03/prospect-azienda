@@ -257,3 +257,48 @@ export const CMS_RELEASES: Record<"wordpress" | "joomla" | "woocommerce", [strin
 
 export const signalByCode = (code: string) => SIGNALS.find((s) => s.code === code);
 export const jobFamilyByCode = (code: string) => JOB_FAMILIES.find((f) => f.code === code);
+
+export const VERIFIED_SIGNAL_CODES = SIGNALS.filter((s) => s.level === "verified").map((s) => s.code);
+
+// Segnali scelti dal cliente -> target per motore e database (target.signals).
+// I titoli degli annunci vanno al motore in tutte le lingue: confronta per parole.
+export type SignalsChoice = { codes: string[]; match: "any" | "all"; jobFamilies: string[] };
+
+export function toSignalsTarget(choice: SignalsChoice) {
+  const codes = [...new Set(choice.codes)].filter((c) => signalByCode(c)).slice(0, SIGNAL_RULES.maxSignalsPerSearch);
+  const families = codes.includes("job_ad")
+    ? [...new Set(choice.jobFamilies)].map(jobFamilyByCode).filter((f): f is JobFamily => Boolean(f)).slice(0, 3)
+    : [];
+  return {
+    codes,
+    match: choice.match,
+    job_families: families.map((f) => ({
+      code: f.code,
+      label: f.label,
+      titles: [...new Set(JOB_AD_LANGUAGES.flatMap((l) => f.titles[l]))],
+    })),
+    max_age_days: SIGNAL_RULES.jobAdMaxAgeDays,
+  };
+}
+
+// Il lead con questi segnali costa 1 credito in più? (solo segnali verificati)
+export const chargesSignal = (codes: string[]) => codes.some((c) => VERIFIED_SIGNAL_CODES.includes(c));
+
+// Frase mostrata sul lead: il fatto osservato con la data, mai il bisogno dedotto.
+export type LeadSignal = { code: string; evidence?: { detail?: string; title?: string; date?: string; url?: string; checked_at?: string } };
+
+const itDate = (d?: string) => {
+  const m = String(d ?? "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : "";
+};
+
+export function signalPhrase(s: LeadSignal) {
+  const def = signalByCode(s.code);
+  const e = s.evidence ?? {};
+  if (s.code === "job_ad") {
+    const title = e.title ? `«${e.title}»` : "una figura richiesta";
+    return `Annuncio per ${title}${e.date ? ` pubblicato il ${itDate(e.date)}` : ""}`;
+  }
+  const checked = itDate(e.checked_at);
+  return `${e.detail || def?.label || s.code}${checked ? ` (controllato il ${checked})` : ""}`;
+}

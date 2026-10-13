@@ -61,9 +61,9 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 ## Nuova funzione: segnali di bisogno (dopo la sicurezza)
 Piano e regole in `docs/07-segnali.md`. Fasi: 0 regole · 1 motore annunci · 2 motore segnali dal sito · 3 database e crediti · 4 app · 5 collaudo · 6 beta.
 - [x] Fase 0: catalogo (`src/lib/domain/signals.ts`), schede, pagine di prova con esiti attesi
-- [x] Fase 1: motore, annunci di lavoro (nodo «Verifica annuncio»; in bozza su n8n, da pubblicare)
-- [ ] Fase 2: motore, segnali dal sito
-- [ ] Fase 3: database e crediti (+1 credito, rimborso «segnale non corretto»)
+- [x] Fase 1: motore, annunci di lavoro (nodo «Verifica annuncio», pubblicato; annunci in due passaggi da provare con Adzuna al collaudo)
+- [x] Fase 2: motore, segnali dal sito (nodo «Valuta segnali sito», pubblicato)
+- [x] Fase 3: database e crediti (migrazione `20261022000016_signals.sql`: +1 credito, segnale obbligatorio, prove per azienda, magazzino con prove fresche, rimborso «segnale non corretto»)
 - [ ] Fase 4: app («Cosa offri?», «Perché è in target», testi legali)
 - [ ] Fase 5: collaudo sulle 10 ricerche di prova
 - [ ] Dopo il lancio: nuove sedi, espansione all'estero, appalti pubblici (ANAC)

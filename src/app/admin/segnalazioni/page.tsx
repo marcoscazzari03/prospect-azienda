@@ -7,7 +7,7 @@ import { requireAdmin } from "@/lib/server/dal";
 export const metadata: Metadata = { title: "Segnalazioni e GDPR" };
 
 const REASON: Record<string, string> = {
-  bounce: "Email rimbalza", wrong_role: "Ruolo sbagliato", company_closed: "Azienda chiusa", out_of_target: "Fuori target", duplicate: "Duplicato", other: "Altro",
+  bounce: "Email rimbalza", wrong_role: "Ruolo sbagliato", company_closed: "Azienda chiusa", out_of_target: "Fuori target", duplicate: "Duplicato", wrong_signal: "Segnale non corretto", other: "Altro",
 };
 
 export default async function ReportsPage() {

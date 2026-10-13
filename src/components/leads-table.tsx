@@ -7,7 +7,7 @@ import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
 import { Alert, Badge, Button, ProvenanceStamp, Select, cx } from "./ui";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
 
-function ReportForm({ deliveryId }: { deliveryId: string }) {
+function ReportForm({ deliveryId, hasSignals }: { deliveryId: string; hasSignals: boolean }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(reportLead, {});
   if (state.info) return <Alert tone="ledger">{state.info}</Alert>;
   return (
@@ -19,6 +19,7 @@ function ReportForm({ deliveryId }: { deliveryId: string }) {
         <option value="company_closed">Azienda chiusa o inesistente</option>
         <option value="out_of_target">Fuori dai filtri della ricerca</option>
         <option value="duplicate">Duplicato</option>
+        {hasSignals && <option value="wrong_signal">Segnale non corretto</option>}
         <option value="other">Altro</option>
       </Select>
       <input name="note" placeholder="Nota (facoltativa)" maxLength={500} className="h-10 flex-1 rounded-lg border border-line bg-white px-3 text-sm" />
@@ -247,7 +248,7 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                       )}
                       <div className="mt-4 border-t border-line pt-4">
                         <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">Qualcosa non va?</p>
-                        <ReportForm deliveryId={r.id} />
+                        <ReportForm deliveryId={r.id} hasSignals={Boolean(r.data?.signals?.length)} />
                       </div>
                     </td>
                   </tr>

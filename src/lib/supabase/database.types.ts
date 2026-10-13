@@ -35,17 +35,37 @@ export type Database = {
                   ]
                 },"companies": {
                   Row: {
-                    "city": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"last_verified_at": string,"name": string,"places": (string)[],"size_hint": string,"tags": (string)[],"website": string
+                    "city": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"last_verified_at": string,"name": string,"places": (string)[],"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name": string,"places"?: (string)[],"size_hint"?: string,"tags"?: (string)[],"website": string
+                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name": string,"places"?: (string)[],"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
                   }
                   Update: {
-                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name"?: string,"places"?: (string)[],"size_hint"?: string,"tags"?: (string)[],"website"?: string
+                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name"?: string,"places"?: (string)[],"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
                   }
                   Relationships: [
                     
+                  ]
+                },"company_signals": {
+                  Row: {
+                    "checked_at": string,"code": string,"company_id": string,"evidence": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "checked_at"?: string,"code": string,"company_id": string,"evidence"?: NonNullable<Json>
+                  }
+                  Update: {
+                    "checked_at"?: string,"code"?: string,"company_id"?: string,"evidence"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "company_signals_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"cost_rates": {
                   Row: {
@@ -764,8 +784,20 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"search_required_signals":
+{ Args: { "p_target": Json }; Returns: (string)[]
+                           },
+"search_signal_codes":
+{ Args: { "p_target": Json }; Returns: (string)[]
+                           },
 "sha256_hex":
 { Args: { "p": string }; Returns: string
+                           },
+"signal_is_fresh":
+{ Args: { "p_checked_at": string,"p_code": string,"p_evidence": Json }; Returns: boolean
+                           },
+"signals_satisfy":
+{ Args: { "p_passed": (string)[],"p_target": Json }; Returns: boolean
                            },
 "start_run":
 { Args: { "p_requested": number,"p_search": string,"p_token_hash": string }; Returns: {
@@ -795,6 +827,9 @@ isOneToOne: false
                            },
 "term_stems":
 { Args: { "p": string }; Returns: (string)[]
+                           },
+"verified_signal_codes":
+{ Args: Record<PropertyKey, never>; Returns: (string)[]
                            },
 "warehouse_candidates":
 { Args: { "p_limit"?: number,"p_max_age_days"?: number,"p_only"?: (string)[],"p_search": string }; Returns: {

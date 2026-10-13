@@ -144,6 +144,20 @@ manifatturiere in Lombardia con annunci per ruoli IT negli ultimi 60 giorni»).
 | Traduzioni ed export | Sito in una sola lingua |
 | Prenotazioni online per hotel | Nessun booking engine · non adatto ai cellulari |
 
+## Database e crediti (fase 3)
+- `searches.target.signals`: codici, «basta uno»/«servono tutti», famiglie con i titoli in tutte le
+  lingue (costruito da `toSignalsTarget`). Il form della fase 4 invia `signalCodes`, `signalMatch`,
+  `jobFamilies`; lo schema rifiuta indicativi da soli, annunci senza famiglia o in paesi non coperti.
+- `create_search` riserva `(massimo modalità + 1) × lead` se c'è almeno un segnale verificato.
+- `deliver_leads` consegna solo i lead che soddisfano i segnali richiesti (difesa in profondità:
+  il motore li ha già scartati), addebita +1, copia le prove in `deliveries.data.signals` e le salva
+  in `company_signals` (una riga per azienda e segnale) con le tecnologie in `companies.technologies`.
+- Magazzino: con segnali richiesti, solo aziende con prove **fresche** (`signal_is_fresh`: annuncio
+  pubblicato da ≤ 60 giorni e della famiglia scelta; sito controllato da ≤ 30 giorni).
+- Segnalazione `wrong_signal` («Segnale non corretto», solo sui lead con segnale, entro 14 giorni):
+  rimborso automatico entro il tetto del 10%; se approvato, la prova contestata viene cancellata.
+- Export: colonne «Perché è in target» e «Prova del segnale».
+
 ## Obiettivi del collaudo (fase 5)
 - ≥ **95%** di prove corrette su un controllo manuale di ~50 lead.
 - < **20%** di casi «non determinabile» per segnale (sopra, la regola va rivista).

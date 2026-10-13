@@ -1,3 +1,5 @@
+import { signalByCode, signalPhrase, type LeadSignal } from "./signals";
+
 // Forma dei lead consegnati (deliveries.data) e conversione per tabelle ed export.
 
 export type LeadData = {
@@ -15,6 +17,7 @@ export type LeadData = {
   sources?: { discovery_url?: string; contact_page?: string };
   quality?: { score?: number; checks?: Record<string, unknown> };
   origin?: { source?: "warehouse"; verified_at?: string };
+  signals?: LeadSignal[];
 };
 
 export type DeliveryRow = {
@@ -83,6 +86,8 @@ export function flattenDelivery(d: DeliveryRow) {
     fonte_email: x.email?.source === "enrichment" ? "Verifica tecnica (arricchimento)" : x.email?.source_url ?? "",
     fonte_contatto: x.sources?.discovery_url ?? "",
     email_ipotizzate: (x.email_patterns ?? []).map((p) => p.address).join(", "),
+    segnali: (x.signals ?? []).map((sg) => `${signalByCode(sg.code)?.label ?? sg.code}: ${signalPhrase(sg)}`).join(" | "),
+    prove_segnali: (x.signals ?? []).map((sg) => sg.evidence?.url ?? "").filter(Boolean).join(" "),
     qualita: d.quality_score,
     crediti: d.credits,
     consegnato_il: d.delivered_at?.slice(0, 10) ?? "",
@@ -108,6 +113,8 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "fonte_contatto", label: "Fonte contatto" },
   { key: "linkedin", label: "LinkedIn" },
   { key: "email_ipotizzate", label: "Email ipotizzate (non verificate)" },
+  { key: "segnali", label: "Perché è in target" },
+  { key: "prove_segnali", label: "Prova del segnale" },
   { key: "qualita", label: "Qualità" },
   { key: "consegnato_il", label: "Consegnato il" },
   { key: "stato_contatto", label: "Stato contatto" },
