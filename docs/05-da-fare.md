@@ -56,9 +56,14 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [ ] Più avanti: backup (Supabase Pro), repository privato
 
 ## Nuova funzione: segnali di bisogno (dopo la sicurezza)
-- [ ] Catalogo segnali dal sito, calibrato sulle 10 ricerche di prova
-- [ ] Annunci di lavoro (promemoria martedì 13/10)
-- [ ] Dopo il lancio: nuove sedi, espansione all'estero
+Piano e regole in `docs/07-segnali.md`. Fasi: 0 regole · 1 motore annunci · 2 motore segnali dal sito · 3 database e crediti · 4 app · 5 collaudo · 6 beta.
+- [x] Fase 0: catalogo (`src/lib/domain/signals.ts`), schede, pagine di prova con esiti attesi
+- [ ] Fase 1: motore, annunci di lavoro
+- [ ] Fase 2: motore, segnali dal sito
+- [ ] Fase 3: database e crediti (+1 credito, rimborso «segnale non corretto»)
+- [ ] Fase 4: app («Cosa offri?», «Perché è in target», testi legali)
+- [ ] Fase 5: collaudo sulle 10 ricerche di prova
+- [ ] Dopo il lancio: nuove sedi, espansione all'estero, appalti pubblici (ANAC)
 
 ## Legale e fiscale
 - [ ] Apertura partita IVA (prima di incassare) e scelta del regime con un commercialista

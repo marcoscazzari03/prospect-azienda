@@ -1,0 +1,124 @@
+{
+  "_today": "2026-10-13",
+  "_note": "Esiti attesi dei controlli (contratto delle fasi 1 e 2). pass = segnale presente, fail = assente, reject = annuncio scartato, undetermined = non determinabile.",
+  "fixtures": {
+    "job-ad-jsonld.html": {
+      "signal": "job_ad",
+      "family": "it_systems",
+      "expect": "pass",
+      "company": "Rossi Meccanica S.r.l.",
+      "website": "rossimeccanica.it",
+      "date": "2026-09-28",
+      "why": "JobPosting strutturato, titolo nella famiglia, data recente"
+    },
+    "job-ad-agency.html": {
+      "signal": "job_ad",
+      "family": "it_systems",
+      "expect": "reject",
+      "why": "agenzia per il lavoro: l'azienda vera non è indicata"
+    },
+    "job-ad-expired.html": {
+      "signal": "job_ad",
+      "family": "it_systems",
+      "expect": "reject",
+      "why": "pubblicato da oltre 60 giorni e scaduto"
+    },
+    "job-ad-nodate.html": {
+      "signal": "job_ad",
+      "family": "software_dev",
+      "expect": "undetermined",
+      "why": "nessuna data: non si può dire se è recente"
+    },
+    "job-ad-wrong-family.html": {
+      "signal": "job_ad",
+      "family": "it_systems",
+      "expect": "reject",
+      "why": "il titolo non appartiene alla famiglia richiesta"
+    },
+    "careers-page.html": {
+      "signal": "job_ad",
+      "family": "it_systems",
+      "expect": "pass",
+      "date": "2026-09-15",
+      "why": "pagina Lavora con noi del sito aziendale, titolo e data presenti"
+    },
+    "site-old-wp.html": {
+      "expect": {
+        "no_mobile": "pass",
+        "outdated_cms": "pass",
+        "single_language": "pass",
+        "stale_copyright": "pass",
+        "technology": [
+          "wordpress"
+        ]
+      },
+      "cms": "wordpress",
+      "version": "5.4.2",
+      "why": "WordPress del 2020, nessun viewport, copyright 2019, solo italiano"
+    },
+    "site-modern.html": {
+      "expect": {
+        "no_mobile": "fail",
+        "outdated_cms": "fail",
+        "single_language": "fail",
+        "stale_copyright": "fail",
+        "technology": [
+          "wordpress"
+        ]
+      },
+      "why": "sito aggiornato: nessun segnale"
+    },
+    "site-js-only.html": {
+      "expect": {
+        "no_mobile": "fail",
+        "outdated_cms": "undetermined",
+        "single_language": "undetermined",
+        "stale_copyright": "undetermined"
+      },
+      "why": "pagina vuota costruita in JavaScript: i segnali sul contenuto non sono determinabili"
+    },
+    "site-mobile-alt.html": {
+      "expect": {
+        "no_mobile": "fail"
+      },
+      "why": "niente viewport ma rimando a una versione mobile separata"
+    },
+    "site-construction.html": {
+      "expect": {
+        "under_construction": "pass"
+      },
+      "why": "homepage provvisoria"
+    },
+    "hotel-booking.html": {
+      "expect": {
+        "no_booking_engine": "fail"
+      },
+      "why": "booking engine noto presente"
+    },
+    "hotel-no-booking.html": {
+      "expect": {
+        "no_booking_engine": "pass"
+      },
+      "why": "solo email e telefono per prenotare (segnale indicativo)"
+    },
+    "shop-woo-old.html": {
+      "expect": {
+        "outdated_cms": "pass",
+        "technology": [
+          "wordpress",
+          "woocommerce"
+        ]
+      },
+      "why": "WooCommerce 7.4 (prima della 8.0 del 2023) e WordPress 6.2"
+    },
+    "shop-woo-recent-minor.html": {
+      "expect": {
+        "outdated_cms": "fail",
+        "technology": [
+          "woocommerce"
+        ]
+      },
+      "why": "versione più recente di tutte quelle in tabella: mai segnalata"
+    }
+  }
+}
