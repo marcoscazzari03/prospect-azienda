@@ -11,7 +11,7 @@ const CALLBACK_AMMESSI = [
 
 // Modello AI del motore: per cambiare basta questa riga (es. 'claude-opus-5-5').
 // Il ritorno a OpenAI si fa ricollegando i nodi OpenAI rimasti nel workflow.
-const AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', effort: 'medium', max_searches: 8 };
+const AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', effort: 'medium', max_searches: 12, max_fetches: 15 };
 
 const raw = $input.first().json;
 const b = raw.body && typeof raw.body === 'object' ? raw.body : raw;
