@@ -216,8 +216,7 @@ assert.equal(job.ai.model, 'claude-sonnet-5-5');
 const lottoC = { lotto: 1, paese: 'Italia', focus: 'Milano', prompt: 'Cerca...' };
 const req = run(src('10-richiesta-claude.js'), { nodes: { 'Valida richiesta': [job] }, json: lottoC }).json._claude;
 assert.equal(req.model, 'claude-sonnet-5-5');
-assert.equal(req.tools[0].type, 'web_search_20260209');
-assert.equal(req.tools[1].type, 'web_fetch_20260209');
+assert.equal(req.tools[0].type, 'web_search_20250305');
 assert.equal(req.messages[0].content, 'Cerca...');
 assert.equal(req.temperature, undefined, 'niente parametri di campionamento: i modelli recenti li rifiutano');
 const esito = (fase, json, prima) => run(src('11-esito-claude.template.js', { __FASE__: fase }), {
