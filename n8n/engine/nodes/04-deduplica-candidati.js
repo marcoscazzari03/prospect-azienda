@@ -110,21 +110,24 @@ for (const item of $input.all()) {
     const chiave = chiaveAzienda(sito);
     const fonte = /^https?:\/\//i.test(String(c?.source_url ?? '').trim()) ? urlPulito(c.source_url) : '';
 
-    if (!azienda || !nome || parti(nome).length < 2) { scarta('dati_persona_incompleti'); continue; }
-    if (!fonte) { scarta('senza_fonte'); continue; }
+    // Con gli annunci il referente arriva in un secondo passaggio, solo per gli annunci verificati.
+    const senzaReferente = annunciRichiesti && (!nome || parti(nome).length < 2);
+    const annuncio = annunciRichiesti && /^https?:\/\//i.test(String(c?.job_ad_url ?? '').trim()) ? urlPulito(c.job_ad_url) : '';
+
+    if (!azienda || (!senzaReferente && (!nome || parti(nome).length < 2))) { scarta('dati_persona_incompleti'); continue; }
+    if (!fonte && !annuncio) { scarta('senza_fonte'); continue; }
     if (!dominio || !dominio.includes('.') || NON_UFFICIALI.test(dominio)) { scarta('sito_non_ufficiale'); continue; }
     if (escludiDomini.has(chiave)) { scarta('azienda_gia_acquistata'); continue; }
-    if (escludiPersone.has(chiavePersona(nome, chiave))) { scarta('persona_gia_acquistata'); continue; }
+    if (!senzaReferente && escludiPersone.has(chiavePersona(nome, chiave))) { scarta('persona_gia_acquistata'); continue; }
     if (escludiParole.some(p => norm(`${azienda} ${c?.industry ?? ''}`).includes(p))) { scarta('parola_esclusa'); continue; }
 
-    const kp = chiavePersona(nome, chiave);
+    const kp = senzaReferente ? `|${chiave}` : chiavePersona(nome, chiave);
     if (visti.has(kp)) { scarta('duplicato_ricerca'); continue; }
     if ((perAzienda[chiave] || 0) >= job.contacts_per_company) { scarta('limite_contatti_azienda'); continue; }
 
-    const ruolo = coerenzaRuolo(c?.job_title);
+    const ruolo = senzaReferente ? 'unknown' : coerenzaRuolo(c?.job_title);
     if (ruolo === 'mismatch') { scarta('ruolo_non_coerente'); continue; }
 
-    const annuncio = annunciRichiesti && /^https?:\/\//i.test(String(c?.job_ad_url ?? '').trim()) ? urlPulito(c.job_ad_url) : '';
     if (annuncioObbligatorio && !annuncio) { scarta('annuncio_mancante'); continue; }
     if (annuncio && /(^|\.)linkedin\.[a-z.]+$/.test(host(annuncio))) { scarta('annuncio_non_verificabile'); continue; }
 
@@ -150,12 +153,13 @@ for (const item of $input.all()) {
         role_match: ruolo,
         person_key: kp,
         linkedin_url: /linkedin\.com\/in\//i.test(String(c?.linkedin_url ?? '')) ? pulito(c.linkedin_url, 300) : '',
-        source_url: fonte,
+        source_url: fonte || annuncio,
         contact_page: /^https?:\/\//i.test(contatti) && host(contatti) === dominio ? contatti : '',
         job_ad_url: annuncio,
         job_ad_title: annuncio ? pulito(c?.job_ad_title, 160) : '',
         job_ad_date: annuncio && /^\d{4}-\d{2}-\d{2}$/.test(pulito(c?.job_ad_date, 10)) ? pulito(c.job_ad_date, 10) : '',
-        lotto: item.json.lotto
+        lotto: item.json.lotto,
+        _serve_referente: senzaReferente
       }
     });
   }

@@ -243,4 +243,34 @@ assert.equal(norm.stato_lotto, 'ERRORE');
 const normOk = run(src('03-normalizza-output-ai.js'), { nodes: { 'Prepara lotti': [lottoC] }, json: { output: '{"candidates":[{"company_name":"Acme"}]}' } }).json;
 assert.equal(normOk.candidates.length, 1);
 console.log('ok  Claude: richiesta con ricerca web, testo finale, ripresa dopo pause_turn, errori API');
+
+// 8. Annunci in due passaggi: aziende senza referente, poi ricerca mirata del referente
+const senzaPersona = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [jobA] }, input: [{ candidates: [
+  { company_name: 'Brugola Spa', website: 'https://brugola.com', city: 'Lissone', job_ad_url: 'https://brugola.com/posizione-aperta-it-system-administrator/', job_ad_title: 'IT System Administrator' },
+  { company_name: 'Senza Annuncio', website: 'https://senza.it' }
+], lotto: 1 }] }).map(i => i.json);
+assert.equal(senzaPersona.length, 1);
+assert.equal(senzaPersona[0]._serve_referente, true);
+assert.equal(senzaPersona[0].source_url, 'https://brugola.com/posizione-aperta-it-system-administrator/');
+assert.equal(senzaPersona[0].person_key, '|brugola.com');
+const reqRef = run(src('12-prepara-referente.js'), { nodes: { 'Valida richiesta': [jobA] }, json: senzaPersona[0] }).json._claude_ref;
+assert.match(reqRef.messages[0].content, /Brugola Spa/);
+assert.equal(reqRef.tools[0].max_uses, 3);
+const esitoRef = (testoRisposta, extra = {}) => run(src('13-esito-referente.js'), {
+  nodes: { 'Valida richiesta': [jobA], 'Serve referente?': [senzaPersona[0]] },
+  json: { content: [{ type: 'text', text: testoRisposta }], ...extra }
+}).json;
+const trovato = esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"CEO e titolare","source_url":"https://brugola.com/chi-siamo","contact_page":"https://brugola.com/contatti","linkedin_url":""}}');
+assert.equal(trovato._scarto_segnale, undefined);
+assert.equal(trovato.person_key, 'marco brugola|brugola.com');
+assert.equal(trovato.role_match, 'exact');
+assert.equal(trovato.contact_page, 'https://brugola.com/contatti');
+assert.equal(trovato.first_name, 'Marco');
+assert.equal(esitoRef('{"person":null}')._scarto_segnale, 'referente_non_trovato');
+assert.equal(esitoRef('nessun JSON')._scarto_segnale, 'referente_non_trovato');
+assert.equal(esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"CEO","source_url":"http://10.0.0.1/x"}}')._scarto_segnale, 'referente_non_trovato', 'fonte su IP interno');
+const altroSito = esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"CEO","source_url":"https://registro.it/x","contact_page":"https://evil.example.org/c"}}');
+assert.equal(altroSito.contact_page, '', 'pagina contatti di un altro dominio ignorata (verrebbe scaricata)');
+assert.equal(esitoRef('', { type: 'error', error: { message: 'x' } })._scarto_segnale, 'referente_errore_ricerca');
+console.log('ok  annunci in due passaggi: aziende senza referente, referente mirato, controlli');
 console.log('\nTutti i test superati.');
