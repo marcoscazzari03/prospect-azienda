@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ButtonLink, cx } from "@/components/ui";
 import { HomeCalculator } from "@/components/home-calculator";
+import { LeadDemo } from "@/components/lead-demo";
 import { BRAND } from "@/lib/config";
 
 // Icone della homepage (tratto 1.6, 20x20).
@@ -354,6 +355,14 @@ export default function HomePage() {
             </ul>
           </StepCard>
         </div>
+      </Section>
+
+      <Section id="demo">
+        <Heading
+          title="Prova una ricerca, senza registrarti."
+          text="Imposta il tuo target e guarda come lavora il motore: ricerca delle aziende, referenti, verifica delle email. È una simulazione con dati dimostrativi: nessuna ricerca reale viene eseguita."
+        />
+        <div className="mt-10"><LeadDemo /></div>
       </Section>
 
       <Section tone="paper">
