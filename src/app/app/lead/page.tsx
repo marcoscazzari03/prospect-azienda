@@ -18,6 +18,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
   const q = str("q").replace(/[%,()*]/g, " ").trim().slice(0, 80);
   const tipo = str("tipo");
   const stato = str("stato");
+  const segnali = ["si", "no"].includes(str("segnali")) ? str("segnali") : "";
   const ricerca = str("ricerca");
   const fase = (LEAD_STAGES as readonly string[]).includes(str("fase")) ? str("fase") : "";
   const lista = /^[0-9a-f-]{36}$/i.test(str("lista")) ? str("lista") : "";
@@ -38,6 +39,8 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
   if (stato === "found_public" || stato === "validated") query = query.eq("email_status", stato);
   if (ricerca) query = query.eq("search_id", ricerca);
   if (fase) query = query.eq("stage", fase);
+  if (segnali === "si") query = query.not("data->signals", "is", null);
+  if (segnali === "no") query = query.is("data->signals", null);
   if (inList) query = query.in("id", inList.length ? inList : ["00000000-0000-0000-0000-000000000000"]);
 
   const [{ data, count }, { data: searches }] = await Promise.all([
@@ -46,7 +49,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
   ]);
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE));
-  const qs = (over: Record<string, string>) => new URLSearchParams({ q, tipo, stato, ricerca, fase, lista, ...over }).toString();
+  const qs = (over: Record<string, string>) => new URLSearchParams({ q, tipo, stato, segnali, ricerca, fase, lista, ...over }).toString();
   const exportQs = (format: string) =>
     new URLSearchParams({ format, ...(ricerca ? { search: ricerca } : {}), ...(tipo ? { tipo } : {}), ...(fase ? { fase } : {}), ...(lista ? { lista } : {}) }).toString();
 
@@ -80,7 +83,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
         ))}
         <div className="ml-auto"><NewListForm /></div>
       </div>
-      <form className="mb-6 grid gap-3 rounded-xl border border-line bg-card p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1.5fr_auto]">
+      <form className="mb-6 grid gap-3 rounded-xl border border-line bg-card p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1.5fr_auto]">
         {lista && <input type="hidden" name="lista" value={lista} />}
         <Input name="q" defaultValue={q} placeholder="Cerca nome, azienda, ruolo, email" aria-label="Cerca" />
         <Select name="tipo" defaultValue={tipo} aria-label="Tipo email">
@@ -92,6 +95,11 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
           <option value="">Ogni stato</option>
           <option value="found_public">Trovate sul sito</option>
           <option value="validated">Verificate</option>
+        </Select>
+        <Select name="segnali" defaultValue={segnali} aria-label="Opportunità">
+          <option value="">Tutti i lead</option>
+          <option value="si">Con opportunità</option>
+          <option value="no">Solo in target</option>
         </Select>
         <Select name="fase" defaultValue={fase} aria-label="Stato del contatto">
           <option value="">Ogni contatto</option>
@@ -115,7 +123,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
           )}
         </>
       ) : (
-        <EmptyState title={q || tipo || stato || ricerca || fase || lista ? "Nessun lead con questi filtri" : "Ancora nessun lead"} action={<ButtonLink href="/app/ricerche/nuova">Nuova ricerca</ButtonLink>} />
+        <EmptyState title={q || tipo || stato || segnali || ricerca || fase || lista ? "Nessun lead con questi filtri" : "Ancora nessun lead"} action={<ButtonLink href="/app/ricerche/nuova">Nuova ricerca</ButtonLink>} />
       )}
     </>
   );

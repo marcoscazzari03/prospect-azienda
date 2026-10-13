@@ -258,6 +258,18 @@ export const CMS_RELEASES: Record<"wordpress" | "joomla" | "woocommerce", [strin
 export const signalByCode = (code: string) => SIGNALS.find((s) => s.code === code);
 export const jobFamilyByCode = (code: string) => JOB_FAMILIES.find((f) => f.code === code);
 
+// Nomi brevi per le etichette (tabelle, homepage).
+export const SIGNAL_SHORT: Record<string, string> = {
+  job_ad: "Annuncio attivo",
+  no_https: "Senza HTTPS",
+  no_mobile: "Non adatto ai cellulari",
+  outdated_cms: "Software non aggiornato",
+  single_language: "Una sola lingua",
+  stale_copyright: "Fermo da tempo",
+  under_construction: "In costruzione",
+  no_booking_engine: "Senza prenotazioni online",
+};
+
 export const VERIFIED_SIGNAL_CODES = SIGNALS.filter((s) => s.level === "verified").map((s) => s.code);
 
 // Segnali scelti dal cliente -> target per motore e database (target.signals).
