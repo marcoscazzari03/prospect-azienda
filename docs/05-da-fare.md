@@ -51,7 +51,9 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] V9 + V11: CSP, controllo dei link mostrati, `/app` e `/admin` esclusi dai motori di ricerca
 - [x] V6: magazzino ripulito dopo 24 mesi (cron notturno) e subito dopo un'opposizione (migrazione `20261020000014_retention_optout.sql`)
 - [ ] Facoltativo: captcha anche su accesso e recupero password (captcha di Supabase)
-- [ ] Fase 3: backup (Supabase Pro), conservazione esecuzioni n8n, Sentry, V13, V14, repository privato
+- [x] Fase 3: monitoraggio errori con email all'admin (migrazione `20261021000015_error_events.sql`), V13, V14
+- [ ] Fase 3: conservazione esecuzioni n8n
+- [ ] Più avanti: backup (Supabase Pro), repository privato
 
 ## Nuova funzione: segnali di bisogno (dopo la sicurezza)
 - [ ] Catalogo segnali dal sito, calibrato sulle 10 ricerche di prova

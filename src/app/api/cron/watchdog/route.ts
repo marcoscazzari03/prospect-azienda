@@ -3,6 +3,7 @@ import { env } from "@/lib/env";
 import { safeEqual } from "@/lib/server/crypto";
 import { closeStaleRuns, runDueRepeats } from "@/lib/server/searches";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { reportError } from "@/lib/server/monitoring";
 
 // Chiamato da Vercel Cron: chiude i giri senza notizie e restituisce i crediti,
 // registra le scadenze dei crediti maturate, avvia le ricerche ricorrenti e
@@ -17,9 +18,11 @@ export async function GET(request: Request) {
   }
   const closed = await closeStaleRuns();
   const { data: expired, error } = await createAdminClient().rpc("expire_credits", {});
-  if (error) console.error("expire_credits", error.message);
+  if (error) await reportError("cron", error.message, "expire_credits");
   const repeats = await runDueRepeats();
   const { data: purged, error: purgeError } = await createAdminClient().rpc("purge_stale_warehouse", { p_months: 24 });
-  if (purgeError) console.error("purge_stale_warehouse", purgeError.message);
+  if (purgeError) await reportError("cron", purgeError.message, "purge_stale_warehouse");
+  // Il registro degli errori si tiene 90 giorni.
+  await createAdminClient().from("error_events").delete().lt("at", new Date(Date.now() - 90 * 86_400_000).toISOString());
   return NextResponse.json({ closed, expired: expired ?? 0, repeats, purged: purged ?? null });
 }

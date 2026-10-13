@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/server/stripe";
+import { reportError } from "@/lib/server/monitoring";
 
 // Webhook Stripe: fonte di verità per pagamenti, crediti e abbonamenti.
 // Idempotente: ogni evento è registrato una sola volta (stripe_events) e
@@ -65,7 +66,9 @@ async function handle(event: Stripe.Event) {
   }
 
   if (event.type.startsWith("customer.subscription.")) {
-    const sub = event.data.object as Stripe.Subscription;
+    // Gli eventi possono arrivare fuori ordine (V13): si rilegge sempre lo stato
+    // attuale dell'abbonamento da Stripe invece di usare la copia nell'evento.
+    const sub = await stripe().subscriptions.retrieve((event.data.object as Stripe.Subscription).id);
     const orgId = sub.metadata?.org_id;
     const planId = sub.metadata?.plan_id;
     if (!orgId || !planId) return;
@@ -103,6 +106,7 @@ export async function POST(request: Request) {
     await handle(event);
   } catch (e) {
     console.error("stripe webhook", event.type, e);
+    await reportError("stripe", e, event.type);
     return NextResponse.json({ error: "errore interno" }, { status: 500 }); // Stripe ritenta
   }
   await db.from("stripe_events").insert({ id: event.id, type: event.type });

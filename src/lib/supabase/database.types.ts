@@ -179,6 +179,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"error_events": {
+                  Row: {
+                    "at": string,"digest": string | null,"emailed": boolean,"id": number,"message": string,"route": string,"signature": string,"source": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "at"?: string,"digest"?: string | null,"emailed"?: boolean,"id"?: never,"message": string,"route"?: string,"signature": string,"source": string
+                  }
+                  Update: {
+                    "at"?: string,"digest"?: string | null,"emailed"?: boolean,"id"?: never,"message"?: string,"route"?: string,"signature"?: string,"source"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"exports": {
                   Row: {
                     "created_at": string,"filters": NonNullable<Json>,"format": string,"id": number,"org_id": string,"rows": number,"user_id": string | null
