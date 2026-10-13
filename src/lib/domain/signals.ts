@@ -1,3 +1,5 @@
+import cmsReleases from "./cms-releases.json";
+
 // Catalogo dei "Segnali": fatti verificabili che indicano che un'azienda può
 // avere bisogno di un servizio. Fonte unica per motore, database e app.
 // Le regole complete (cosa vale, cosa si scarta, che prova si salva) sono in
@@ -246,23 +248,12 @@ export const SERVICES: ServiceDef[] = [
 // versione V è vecchia se la sua data nota è oltre i 2 anni, oppure se esiste
 // in tabella una versione successiva a V già uscita da oltre 2 anni. Versioni
 // più recenti dell'ultima in tabella non vengono mai segnalate.
-export const CMS_RELEASES: Record<"wordpress" | "joomla" | "woocommerce", [string, string][]> = {
-  wordpress: [
-    ["4.9", "2017-11-16"], ["5.0", "2018-12-06"], ["5.1", "2019-02-21"], ["5.2", "2019-05-07"], ["5.3", "2019-11-12"],
-    ["5.4", "2020-03-31"], ["5.5", "2020-08-11"], ["5.6", "2020-12-08"], ["5.7", "2021-03-09"], ["5.8", "2021-07-20"],
-    ["5.9", "2022-01-25"], ["6.0", "2022-05-24"], ["6.1", "2022-11-01"], ["6.2", "2023-03-29"], ["6.3", "2023-08-08"],
-    ["6.4", "2023-11-07"], ["6.5", "2024-04-02"], ["6.6", "2024-07-16"], ["6.7", "2024-11-12"], ["6.8", "2025-04-15"],
-  ],
-  joomla: [
-    ["3.9", "2018-10-30"], ["3.10", "2021-08-17"], ["4.0", "2021-08-17"], ["4.1", "2022-02-15"], ["4.2", "2022-08-16"],
-    ["4.3", "2023-04-18"], ["4.4", "2023-10-17"], ["5.0", "2023-10-17"], ["5.1", "2024-04-16"], ["5.2", "2024-10-15"],
-    ["5.3", "2025-04-15"],
-  ],
-  // Solo le versioni principali, prudenzialmente (da ricontrollare sul changelog in fase 2).
-  woocommerce: [
-    ["5.0", "2021-02-09"], ["6.0", "2021-12-14"], ["7.0", "2022-10-11"], ["8.0", "2023-08-08"], ["9.0", "2024-06-11"],
-  ],
-};
+// I dati sono in cms-releases.json, letto anche dal motore n8n (build.py).
+// WooCommerce: solo le versioni principali, prudenzialmente.
+export const CMS_RELEASES: Record<"wordpress" | "joomla" | "woocommerce", [string, string][]> = cmsReleases as Record<
+  "wordpress" | "joomla" | "woocommerce",
+  [string, string][]
+>;
 
 export const signalByCode = (code: string) => SIGNALS.find((s) => s.code === code);
 export const jobFamilyByCode = (code: string) => JOB_FAMILIES.find((f) => f.code === code);

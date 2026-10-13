@@ -273,4 +273,44 @@ const altroSito = esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"
 assert.equal(altroSito.contact_page, '', 'pagina contatti di un altro dominio ignorata (verrebbe scaricata)');
 assert.equal(esitoRef('', { type: 'error', error: { message: 'x' } })._scarto_segnale, 'referente_errore_ricerca');
 console.log('ok  annunci in due passaggi: aziende senza referente, referente mirato, controlli');
+
+// 9. Segnali dal sito sulle pagine di prova (fase 2)
+const cmsJson = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'src', 'lib', 'domain', 'cms-releases.json'), 'utf8');
+const valuta = src('14-valuta-segnali-sito.js', { __CMS_RELEASES__: cmsJson });
+const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
+const jobSito = (codes, match = 'any') => ({ ...job, today: '2026-10-13', target: { ...job.target, signals: { codes, match, job_families: [], max_age_days: 60 } } });
+const prospettoSito = { company_name: 'Prova', website: 'https://prova.it/', domain: 'prova.it', signals: [] };
+const valutaFile = (file, codes = SITO, https = undefined, match = 'any') => run(valuta, {
+  nodes: { 'Valida richiesta': [jobSito(codes, match)], 'Estrai email homepage': [prospettoSito], 'HTTP - Homepage': [{ html: readFileSync(join(fx, file), 'utf8') }] },
+  json: https ?? prospettoSito
+}).json;
+for (const [file, info] of Object.entries(attesi)) {
+  if (typeof info.expect !== 'object') continue;
+  const r = valutaFile(file);
+  for (const [code, atteso] of Object.entries(info.expect)) {
+    if (code === 'technology') { assert.deepEqual(r.technologies, atteso, `${file}: tecnologie`); continue; }
+    const s = r.signals.find(x => x.code === code);
+    assert.equal(s?.status, atteso, `${file}: ${code} = ${s?.status} invece di ${atteso}`);
+  }
+}
+const vecchioWp = valutaFile('site-old-wp.html', ['outdated_cms']);
+assert.match(vecchioWp.signals[0].evidence.detail, /WordPress 5\.4\.2/);
+assert.equal(vecchioWp._scarto_segnale, undefined);
+const moderno = valutaFile('site-modern.html', ['no_mobile', 'outdated_cms']);
+assert.equal(moderno._scarto_segnale, 'segnale_assente');
+const jsOnly = valutaFile('site-js-only.html', ['outdated_cms']);
+assert.equal(jsOnly._scarto_segnale, 'segnale_non_determinabile');
+const tutti = valutaFile('site-old-wp.html', ['no_mobile', 'single_language'], undefined, 'all');
+assert.equal(tutti._scarto_segnale, undefined, 'servono tutti: presenti tutti');
+const indicativo = valutaFile('site-modern.html', ['stale_copyright']);
+assert.equal(indicativo._scarto_segnale, undefined, 'gli indicativi non scartano mai');
+const httpsOk = valutaFile('site-modern.html', ['no_https'], { https_body: '<html></html>' });
+assert.equal(httpsOk.signals[0].status, 'fail');
+const httpsCert = valutaFile('site-modern.html', ['no_https'], { error: { message: 'certificate has expired' } });
+assert.equal(httpsCert.signals[0].status, 'pass');
+const httpsBoh = valutaFile('site-modern.html', ['no_https'], { error: { message: 'ETIMEDOUT' } });
+assert.equal(httpsBoh.signals[0].status, 'undetermined');
+const senzaSegnali = run(valuta, { nodes: { 'Valida richiesta': [job], 'Estrai email homepage': [prospettoSito], 'HTTP - Homepage': [{ html: '' }] }, json: prospettoSito }).json;
+assert.deepEqual(senzaSegnali, prospettoSito, 'ricerche senza segnali: nessun cambiamento');
+console.log('ok  segnali dal sito: viewport, CMS, lingue, copyright, costruzione, booking, HTTPS, decisione');
 console.log('\nTutti i test superati.');

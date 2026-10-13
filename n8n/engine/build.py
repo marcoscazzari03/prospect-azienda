@@ -44,7 +44,7 @@ def estrai(fase, sorgente, fonte):
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"
 
 
-def http_page(var, name, url_expr):
+def http_page(var, name, url_expr, prop="html", timeout=10000):
     return f"""const {var} = node({{
   type: 'n8n-nodes-base.httpRequest',
   version: 4.5,
@@ -60,8 +60,8 @@ def http_page(var, name, url_expr):
       options: {{
         batching: {{ batch: {{ batchSize: 10, batchInterval: 200 }} }},
         redirect: {{ redirect: {{ followRedirects: true, maxRedirects: 3 }} }},
-        response: {{ response: {{ neverError: true, responseFormat: 'text', outputPropertyName: 'html' }} }},
-        timeout: 10000
+        response: {{ response: {{ neverError: true, responseFormat: 'text', outputPropertyName: '{prop}' }} }},
+        timeout: {timeout}
       }}
     }},
     // Un sito irraggiungibile o un URL rotto non deve mai fermare la ricerca.
@@ -348,6 +348,19 @@ add(http_page("homepage", "HTTP - Homepage", "{{ $json.website }}"))
 add(code("estraiHome", "Estrai email homepage",
          estrai("HOMEPAGE", "Referente ok?", "$('Referente ok?').item.json.website"),
          mode="runOnceForEachItem", output="{ email_site: 'info@acme.it', email_site_type: 'generic', page_1: 'https://acme.it/contatti', page_2: '' }"))
+# Segnali dal sito: controllo HTTPS (solo se richiesto), poi valutazione sull'HTML della homepage.
+CMS_RELEASES = json.dumps(json.loads((ROOT.parent.parent / "src" / "lib" / "domain" / "cms-releases.json").read_text(encoding="utf-8")), separators=(",", ":"))
+add(if_node("serveHttps", "Serve controllo HTTPS?",
+            "{{ $('Valida richiesta').first().json.target.signals.codes.includes('no_https') }}", "boolean", "true"))
+add(http_page("controlloHttps", "HTTP - Controllo HTTPS", "{{ 'https://' + $json.domain + '/' }}", prop="https_body", timeout=8000))
+add("""const riunisciHttps = merge({
+  version: 3.2,
+  config: { name: 'Riunisci controllo HTTPS', parameters: { mode: 'append', numberInputs: 2 } }
+});
+""")
+add(code("valutaSito", "Valuta segnali sito", js("14-valuta-segnali-sito.js", __CMS_RELEASES__=CMS_RELEASES), mode="runOnceForEachItem",
+         output="{ company_name: 'Acme Srl', signals: [], technologies: ['wordpress'] }"))
+add(if_node("segnaliSitoOk", "Segnali sito ok?", "{{ $json._scarto_segnale ?? '' }}", "string", "empty"))
 add(if_node("servePagina2", "Serve pagina 2?", "{{ $json.page_1 }}", "string", "notEmpty"))
 add(http_page("pagina2", "HTTP - Pagina 2", "{{ $json.page_1 }}"))
 add(code("estraiP2", "Estrai email pagina 2",
@@ -423,7 +436,7 @@ add(code("normalizzaIcy", "Normalizza Icypeas", js("07-normalizza-icypeas.js"), 
 
 add("""const riunisciEsiti = merge({
   version: 3.2,
-  config: { name: 'Riunisci esiti', parameters: { mode: 'append', numberInputs: 5 } }
+  config: { name: 'Riunisci esiti', parameters: { mode: 'append', numberInputs: 6 } }
 });
 """)
 add(code("classifica", "Classifica e prepara risultati", js("08-classifica-e-prepara-risultati.js"),
@@ -487,9 +500,16 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
     .onFalse(riunisciEsiti.input(4)))
   .add(homepage)
   .to(estraiHome)
-  .to(servePagina2
-    .onTrue(pagina2)
-    .onFalse(riunisciEmail.input(0)))
+  .to(serveHttps
+    .onTrue(controlloHttps.to(riunisciHttps.input(1)))
+    .onFalse(riunisciHttps.input(0)))
+  .add(riunisciHttps)
+  .to(valutaSito)
+  .to(segnaliSitoOk
+    .onTrue(servePagina2
+      .onTrue(pagina2)
+      .onFalse(riunisciEmail.input(0)))
+    .onFalse(riunisciEsiti.input(5)))
   .add(pagina2)
   .to(estraiP2)
   .to(servePagina3
@@ -515,7 +535,7 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .add(nota)
   .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
   .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, """ + RICERCA_GROUP + """, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
-  .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk, serveReferente, preparaRef, claudeRef, esitoRef, riunisciRef, referenteOk], { description: 'Annuncio di lavoro riaperto e verificato (titolo, azienda, data) prima di cercare le email.' })
+  .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk, serveReferente, preparaRef, claudeRef, esitoRef, riunisciRef, referenteOk, serveHttps, controlloHttps, riunisciHttps, valutaSito, segnaliSitoOk], { description: 'Annuncio di lavoro riaperto e verificato (titolo, azienda, data) prima di cercare le email.' })
   .group('3 - Email dal sito', [homepage, estraiHome, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
   .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })
   .group('5 - Consegna', [classifica, inviaRisultati], { description: 'Classifica per modalita email, calcola qualita e invia i risultati al backend con retry.' });

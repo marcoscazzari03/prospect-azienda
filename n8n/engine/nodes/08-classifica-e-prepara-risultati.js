@@ -154,7 +154,7 @@ return [{
       leads_generic: leads.filter(l => l.email.type === 'generic').length,
       rejected: rejected.length,
       rejected_reasons: motivi,
-      signal_discards: Object.fromEntries(Object.entries(motivi).filter(([k]) => k.startsWith('annuncio_'))),
+      signal_discards: Object.fromEntries(Object.entries(motivi).filter(([k]) => /^(annuncio_|segnale_|referente_)/.test(k))),
       leads_with_signals: leads.filter(l => l.signals.length).length
     },
     usage: {

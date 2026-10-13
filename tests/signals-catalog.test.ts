@@ -30,6 +30,7 @@ describe("catalogo dei segnali (fase 0)", () => {
 
   it("date di rilascio dei CMS in ordine", () => {
     for (const list of Object.values(CMS_RELEASES)) {
+      expect(list.length).toBeGreaterThan(4);
       const dates = list.map(([, d]) => d);
       expect([...dates].sort()).toEqual(dates);
     }

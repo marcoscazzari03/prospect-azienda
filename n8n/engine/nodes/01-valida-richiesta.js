@@ -94,7 +94,9 @@ if (!job.target.countries.length && !job.target.country_names.length) errori.pus
 // Con gli annunci si parte da chi assume: una parte degli annunci viene
 // scartata in verifica (agenzie, scaduti, pagine illeggibili).
 const conAnnunci = job.target.signals.codes.includes('job_ad');
-const SOVRACAMPIONAMENTO = (job.email_mode === 'personal_only' ? 2.6 : 1.8) * (conAnnunci ? 1.4 : 1);
+// Con i segnali dal sito una parte dei candidati non ha il segnale richiesto.
+const conSegnaliSito = job.target.signals.codes.some(c => c !== 'job_ad');
+const SOVRACAMPIONAMENTO = (job.email_mode === 'personal_only' ? 2.6 : 1.8) * (conAnnunci ? 1.4 : 1) * (conSegnaliSito ? 1.6 : 1);
 const lotti = Math.min(
   job.limits.max_lots,
   Math.max(1, Math.ceil(job.quantity * SOVRACAMPIONAMENTO / job.limits.candidates_per_lot))
