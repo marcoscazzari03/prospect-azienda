@@ -5,6 +5,7 @@ import { getViewer } from "@/lib/server/dal";
 import { toCsv } from "@/lib/domain/csv";
 import { EXPORT_COLUMNS, LEAD_STAGES, flattenDelivery, type DeliveryRow } from "@/lib/domain/leads";
 import { toXlsx } from "@/lib/server/xlsx";
+import { RATE_LIMITS } from "@/lib/config";
 
 // Export CSV o Excel dei lead dell'organizzazione (letti con la RLS dell'utente).
 export async function GET(request: Request) {
@@ -17,6 +18,23 @@ export async function GET(request: Request) {
   const format = params.get("format") === "xlsx" ? "xlsx" : "csv";
   const stage = params.get("fase");
   const listId = params.get("lista");
+
+  // Limite d'uso (V12): l'export viene registrato prima di leggere i lead, così
+  // anche le richieste in parallelo si vedono a vicenda.
+  const db = createAdminClient();
+  const filters = { search: searchId, tipo: emailType, fase: stage, lista: listId };
+  const { data: log } = await db
+    .from("exports")
+    .insert({ org_id: viewer.org.id, user_id: viewer.user.id, format, rows: 0, filters })
+    .select("id")
+    .single();
+  const since = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
+  const recent = (h: number) =>
+    db.from("exports").select("id", { count: "exact", head: true }).eq("user_id", viewer.user.id).gte("created_at", since(h));
+  const [{ count: lastHour }, { count: lastDay }] = await Promise.all([recent(1), recent(24)]);
+  if ((lastHour ?? 0) > RATE_LIMITS.exportsPerHour || (lastDay ?? 0) > RATE_LIMITS.exportsPerDay) {
+    return NextResponse.json({ error: "Troppi export in poco tempo: riprova più tardi." }, { status: 429, headers: { "Retry-After": "3600" } });
+  }
 
   const supabase = await createClient();
   const inList =
@@ -41,13 +59,7 @@ export async function GET(request: Request) {
     if (!data || data.length < 1000) break;
   }
 
-  await createAdminClient().from("exports").insert({
-    org_id: viewer.org.id,
-    user_id: viewer.user.id,
-    format,
-    rows: rows.length,
-    filters: { search: searchId, tipo: emailType, fase: stage, lista: listId },
-  });
+  if (log) await db.from("exports").update({ rows: rows.length }).eq("id", log.id);
 
   const date = new Date().toISOString().slice(0, 10);
   if (format === "xlsx") {

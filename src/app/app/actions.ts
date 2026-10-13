@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { defaultSearchName, nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { startSearch } from "@/lib/server/searches";
 import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
-import { SEARCH_RULES } from "@/lib/config";
+import { RATE_LIMITS, SEARCH_RULES } from "@/lib/config";
 
 export type ActionState = { error?: string; info?: string };
 
@@ -48,6 +48,15 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
   const input = parsed.data;
 
   const db = createAdminClient();
+  const since = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
+  const recent = (h: number) =>
+    db.from("searches").select("id", { count: "exact", head: true })
+      .eq("org_id", viewer.org.id).is("repeat_of", null).gte("created_at", since(h));
+  const [{ count: lastHour }, { count: lastDay }] = await Promise.all([recent(1), recent(24)]);
+  if ((lastHour ?? 0) >= RATE_LIMITS.searchesPerHour || (lastDay ?? 0) >= RATE_LIMITS.searchesPerDay) {
+    return { error: "Hai avviato molte ricerche in poco tempo: riprova più tardi." };
+  }
+
   const { data, error } = await db
     .rpc("create_search", {
       p_user: viewer.user.id,
@@ -102,6 +111,11 @@ export async function reportLead(_: ActionState, form: FormData): Promise<Action
   if (ageDays > window) return { error: `Le segnalazioni per questo motivo sono possibili entro ${window} giorni dalla consegna.` };
 
   const db = createAdminClient();
+  const { count: todayReports } = await db.from("lead_reports").select("id", { count: "exact", head: true })
+    .eq("org_id", viewer.org.id).gte("created_at", new Date(Date.now() - 86_400_000).toISOString());
+  if ((todayReports ?? 0) >= RATE_LIMITS.reportsPerDay) {
+    return { error: "Hai inviato molte segnalazioni oggi: riprova domani o scrivici." };
+  }
   const { data: report, error } = await db
     .from("lead_reports")
     .insert({ delivery_id: deliveryId, org_id: viewer.org.id, reason, note, created_by: viewer.user.id })

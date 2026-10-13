@@ -17,3 +17,12 @@ export const SEARCH_RULES = {
   autoRefundMaxShare: 0.1, // rimborsi automatici fino al 10% dei lead di una ricerca
   warehouseMaxAgeDays: 180, // il magazzino consegna solo contatti verificati negli ultimi N giorni
 } as const;
+
+// Limiti d'uso per account (V12): bloccano script e abusi, invisibili per un uso normale.
+export const RATE_LIMITS = {
+  searchesPerHour: 20, // nuove ricerche avviate a mano (le ripetizioni automatiche non contano)
+  searchesPerDay: 60,
+  exportsPerHour: 30, // per utente
+  exportsPerDay: 200,
+  reportsPerDay: 50, // segnalazioni di lead per organizzazione
+} as const;
