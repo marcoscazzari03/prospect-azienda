@@ -302,3 +302,25 @@ export function signalPhrase(s: LeadSignal) {
   const checked = itDate(e.checked_at);
   return `${e.detail || def?.label || s.code}${checked ? ` (controllato il ${checked})` : ""}`;
 }
+
+// Anteprima della ricerca opportunità: cosa faremo davvero, con le parole dei fatti.
+export function describeOpportunity(args: { codes: string[]; match: "any" | "all"; jobFamilies: string[]; industry: string; where: string }) {
+  const phrase = (c: string) => {
+    if (c === "job_ad") {
+      const fams = args.jobFamilies.map((f) => jobFamilyByCode(f)?.label).filter(Boolean).map((l) => `«${l}»`);
+      return `un annuncio di lavoro per ${fams.length ? fams.join(" o ") : "la figura scelta"} negli ultimi ${SIGNAL_RULES.jobAdMaxAgeDays} giorni`;
+    }
+    return (signalByCode(c)?.label ?? c).toLowerCase().replace(/^sito /, "il sito ");
+  };
+  const join = (xs: string[], last: string) => (xs.length > 1 ? `${xs.slice(0, -1).join(", ")} ${last} ${xs[xs.length - 1]}` : xs[0]);
+  const decisive = args.codes.filter((c) => VERIFIED_SIGNAL_CODES.includes(c)).map(phrase);
+  const extra = args.codes.filter((c) => !VERIFIED_SIGNAL_CODES.includes(c)).map(phrase);
+  if (!decisive.length) return "";
+  const sector = args.industry.trim().replace(/^\p{Lu}(?=\p{Ll})/u, (c) => c.toLowerCase()); // «Aziende…» -> «aziende…», non «IT…»
+  const who = `${sector || "aziende del settore scelto"}${args.where ? ` in ${args.where}` : ""}`;
+  return [
+    `Cercheremo ${who} con ${join(decisive, args.match === "all" ? "e" : "oppure")}.`,
+    extra.length ? `Ti indichiamo anche, come informazione in più, ${join(extra, "e")}.` : "",
+    "Ogni segnale ha una prova (link e data): le aziende senza prova vengono escluse.",
+  ].filter(Boolean).join(" ");
+}

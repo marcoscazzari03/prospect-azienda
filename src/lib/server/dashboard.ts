@@ -26,7 +26,7 @@ export async function dashboardData(period: Period) {
     supabase.from("searches").select("credits_reserved, credits_charged").in("status", ["queued", "running"]),
     supabase
       .from("searches")
-      .select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at, repeat")
+      .select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at, repeat, signals:target->signals->codes")
       .order("created_at", { ascending: false })
       .limit(5),
   ]);

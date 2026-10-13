@@ -27,9 +27,12 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
         title={firstName ? `Ciao ${firstName} 👋` : "Panoramica"}
         description="Le tue ricerche, i lead consegnati e i crediti a disposizione."
         actions={
-          <ButtonLink href="/app/ricerche/nuova">
-            <span className="text-lg leading-none">+</span> Nuova ricerca
-          </ButtonLink>
+          <>
+            <ButtonLink href="/app/ricerche/nuova?tipo=opportunita" variant="secondary">Trova aziende con opportunità</ButtonLink>
+            <ButtonLink href="/app/ricerche/nuova">
+              <span className="text-lg leading-none">+</span> Nuova ricerca
+            </ButtonLink>
+          </>
         }
       />
 

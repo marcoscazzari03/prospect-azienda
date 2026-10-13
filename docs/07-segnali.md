@@ -158,6 +158,17 @@ manifatturiere in Lombardia con annunci per ruoli IT negli ultimi 60 giorni»).
   rimborso automatico entro il tetto del 10%; se approvato, la prova contestata viene cancellata.
 - Export: colonne «Perché è in target» e «Prova del segnale».
 
+## App (fase 4)
+- Nuova ricerca con due modalità in cima al form: «Trova aziende in target» (invariata) e «Trova
+  aziende con opportunità» (`/app/ricerche/nuova?tipo=opportunita`, anche dalla dashboard e da
+  «Ricerche»). Passo «Opportunità»: servizio venduto → segnali consigliati (modificabili, max 3),
+  figura degli annunci, «basta un segnale» / «servono tutti».
+- Riepilogo con anteprima (`describeOpportunity`: solo i segnali che decidono; gli indicativi come
+  informazione in più) e costo reale con il +1. «Ripeti con nuovi lead» conserva i segnali.
+- Lead: etichette dei segnali sotto l'azienda, riquadro «Perché è in target» con frase, data e link
+  alla prova; segnalazione «Segnale non corretto» solo sui lead con segnale.
+- Termini (sezione «Ricerche con segnali» e garanzia) e privacy (cosa conserviamo degli annunci).
+
 ## Obiettivi del collaudo (fase 5)
 - ≥ **95%** di prove corrette su un controllo manuale di ~50 lead.
 - < **20%** di casi «non determinabile» per segnale (sopra, la regola va rivista).

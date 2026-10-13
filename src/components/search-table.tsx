@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ButtonLink, Progress, SearchStatus } from "./ui";
+import { Badge, ButtonLink, Progress, SearchStatus } from "./ui";
 import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
 
 export type SearchListItem = {
@@ -12,6 +12,7 @@ export type SearchListItem = {
   credits_charged: number;
   created_at: string;
   repeat?: string;
+  signals?: unknown; // codici dei segnali (target.signals.codes), se ricerca opportunità
 };
 
 const MODE_SHORT: Record<string, string> = { generic_ok: "Generiche incluse", mixed: "Mista", personal_only: "Solo nominative" };
@@ -39,6 +40,9 @@ export function SearchTable({ searches, href = (id) => `/app/ricerche/${id}` }: 
             <tr key={s.id} className="hover:bg-paper/60">
               <td className="px-4 py-3">
                 <Link href={href(s.id)} className="font-medium hover:text-ledger">{s.name}</Link>
+                {Array.isArray(s.signals) && s.signals.length > 0 && (
+                  <Badge tone="stamp" className="ml-2" title="Ricerca con segnali">Opportunità</Badge>
+                )}
                 {s.repeat && s.repeat !== "none" && (
                   <span className="ml-2 text-xs text-ledger" title="Ricerca ricorrente">↻ {s.repeat === "weekly" ? "settimanale" : "mensile"}</span>
                 )}

@@ -22,7 +22,8 @@ export default function PrivacyPage() {
       <ul>
         <li>Destinatari: clienti della piattaforma che acquistano i lead, che ne diventano titolari autonomi. Gli stessi dati possono essere forniti a più clienti interessati allo stesso settore e zona: li conserviamo per questo, riverificandoli periodicamente.</li>
         <li>Conservazione: i dati vengono riverificati o cancellati entro 24 mesi dalla raccolta.</li>
-        <li>Fornitori: infrastruttura e servizi tecnici (Supabase, Vercel, n8n, OpenAI, servizi di verifica email), con dati ospitati nell&apos;Unione Europea dove possibile.</li>
+        <li>Segnali: riguardano le aziende, non le persone. Degli annunci di lavoro conserviamo solo link, titolo e data (nessun dato di candidati o dei referenti indicati nell&apos;annuncio); delle caratteristiche dei siti, il dettaglio tecnico e la data del controllo.</li>
+        <li>Fornitori: infrastruttura e servizi tecnici (Supabase, Vercel, n8n, Anthropic, OpenAI, servizi di verifica email), con dati ospitati nell&apos;Unione Europea dove possibile.</li>
       </ul>
 
       <h2>I tuoi diritti</h2>

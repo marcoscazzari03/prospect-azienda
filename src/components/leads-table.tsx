@@ -3,6 +3,7 @@ import { Fragment, useActionState, useState, useTransition } from "react";
 import { reportLead, type ActionState } from "@/app/app/actions";
 import { saveLeadNotes, setLeadStage, setListMembership, type LeadActionState } from "@/app/app/lead/actions";
 import { LEAD_STAGES, LEAD_STAGE_LABEL, ROLE_MATCH_LABEL, type DeliveryRow, type LeadStage } from "@/lib/domain/leads";
+import { signalByCode, signalPhrase } from "@/lib/domain/signals";
 import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
 import { Alert, Badge, Button, ProvenanceStamp, Select, cx } from "./ui";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
@@ -182,6 +183,11 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                   <td className="px-4 py-3">
                     <a href={safeHttpUrl(d.company?.website)} target="_blank" rel="noopener noreferrer nofollow" className="font-medium hover:text-ledger">{d.company?.name}</a>
                     <p className="text-xs text-ink-2">{[d.company?.city, d.company?.country].filter(Boolean).join(", ")}</p>
+                    {!!d.signals?.length && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {d.signals.map((sg) => <Badge key={sg.code} tone="stamp">{signalByCode(sg.code)?.label ?? sg.code}</Badge>)}
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-mono text-[13px]">{r.email_address}</p>
@@ -202,6 +208,22 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                 {isOpen && (
                   <tr className="bg-paper/70">
                     <td colSpan={cols} className="px-4 pb-5">
+                      {!!d.signals?.length && (
+                        <div className="mb-4 rounded-lg border border-stamp/30 bg-stamp-soft/60 px-4 py-3 text-xs">
+                          <p className="mb-1 font-medium uppercase tracking-wider text-stamp-ink">Perché è in target</p>
+                          <ul className="flex flex-col gap-1">
+                            {d.signals.map((sg) => (
+                              <li key={sg.code}>
+                                <span className="font-medium">{signalByCode(sg.code)?.label ?? sg.code}:</span> {signalPhrase(sg)}
+                                {safeHttpUrl(sg.evidence?.url) && (
+                                  <> · <a className="text-ledger underline" href={safeHttpUrl(sg.evidence?.url)} target="_blank" rel="noopener noreferrer nofollow">vedi la prova</a></>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="mt-2 text-muted">Fatti pubblici osservati alla data indicata: non garantiscono che l&apos;azienda abbia bisogno di un servizio.</p>
+                        </div>
+                      )}
                       <div className="grid gap-4 md:grid-cols-3">
                         <div className="text-xs">
                           <p className="mb-1 font-medium uppercase tracking-wider text-muted">Fonti</p>

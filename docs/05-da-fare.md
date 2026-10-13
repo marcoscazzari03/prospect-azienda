@@ -64,7 +64,7 @@ Piano e regole in `docs/07-segnali.md`. Fasi: 0 regole · 1 motore annunci · 2 
 - [x] Fase 1: motore, annunci di lavoro (nodo «Verifica annuncio», pubblicato; annunci in due passaggi da provare con Adzuna al collaudo)
 - [x] Fase 2: motore, segnali dal sito (nodo «Valuta segnali sito», pubblicato)
 - [x] Fase 3: database e crediti (migrazione `20261022000016_signals.sql`: +1 credito, segnale obbligatorio, prove per azienda, magazzino con prove fresche, rimborso «segnale non corretto»)
-- [ ] Fase 4: app («Cosa offri?», «Perché è in target», testi legali)
+- [x] Fase 4: app (due modalità: «aziende in target» e «aziende con opportunità», anteprima e costo, «Perché è in target» sui lead, etichetta «Opportunità», termini e privacy)
 - [ ] Fase 5: collaudo sulle 10 ricerche di prova
 - [ ] Dopo il lancio: nuove sedi, espansione all'estero, appalti pubblici (ANAC)
 

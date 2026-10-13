@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
-import { VERIFIED_SIGNAL_CODES, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
+import { SERVICES, VERIFIED_SIGNAL_CODES, describeOpportunity, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
 import { flattenDelivery } from "@/lib/domain/leads";
 
 const base = {
@@ -75,5 +75,24 @@ describe("segnali nella ricerca (fase 3)", () => {
     });
     expect(row.segnali).toBe("Sito non adatto ai cellulari: Homepage senza impostazione per dispositivi mobili");
     expect(row.prove_segnali).toBe("https://b.it");
+  });
+
+  it("anteprima: solo i segnali che decidono, indicativi come informazione in più", () => {
+    expect(
+      describeOpportunity({ codes: ["job_ad"], match: "any", jobFamilies: ["it_systems"], industry: "Aziende manifatturiere", where: "Lombardia" }),
+    ).toBe(
+      "Cercheremo aziende manifatturiere in Lombardia con un annuncio di lavoro per «Sistemista / tecnico IT» negli ultimi 60 giorni. Ogni segnale ha una prova (link e data): le aziende senza prova vengono escluse.",
+    );
+    const t = describeOpportunity({ codes: ["no_mobile", "no_https", "stale_copyright"], match: "all", jobFamilies: [], industry: "Hotel", where: "" });
+    expect(t).toContain("con il sito non adatto ai cellulari e il sito senza connessione sicura.");
+    expect(t).toContain("come informazione in più, il sito fermo da tempo.");
+    expect(describeOpportunity({ codes: ["stale_copyright"], match: "any", jobFamilies: [], industry: "x", where: "" })).toBe("");
+  });
+
+  it("ogni servizio, scelto così com'è, produce una ricerca valida in Italia", () => {
+    for (const svc of SERVICES) {
+      const r = searchInputSchema.safeParse({ ...base, signals: { codes: svc.signals.slice(0, 3), jobFamilies: svc.jobFamilies.slice(0, 3) } });
+      expect(r.success, svc.code).toBe(svc.code !== "hotel_booking" || svc.signals.includes("no_mobile"));
+    }
   });
 });

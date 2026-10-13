@@ -10,6 +10,7 @@ import { closeStaleRuns } from "@/lib/server/searches";
 import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
 import type { DeliveryRow } from "@/lib/domain/leads";
 import { REPEAT_LABEL, type Repeat, type SearchTarget } from "@/lib/domain/search-input";
+import { describeOpportunity, signalByCode } from "@/lib/domain/signals";
 import { stopRepeat } from "../../actions";
 
 export const metadata: Metadata = { title: "Ricerca" };
@@ -42,6 +43,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
           <span className="flex flex-wrap items-center gap-2">
             <SearchStatus status={search.status} />
             <Badge>{MODE_INFO[search.email_mode as EmailMode]?.label}</Badge>
+            {!!t.signals?.codes.length && <Badge tone="stamp">Opportunità</Badge>}
             <span className="text-sm text-muted">avviata il {new Date(search.created_at).toLocaleString("it-IT")}</span>
             {search.repeat_of && (
               <Link href={`/app/ricerche/${search.repeat_of}`} className="text-sm text-ledger underline">ripetizione automatica</Link>
@@ -67,6 +69,21 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
             <input type="hidden" name="searchId" value={search.id} />
             <Button type="submit" size="sm" variant="secondary">Ferma la ripetizione</Button>
           </form>
+        </div>
+      )}
+
+      {!!t.signals?.codes.length && (
+        <div className="mb-6 rounded-xl border border-ledger/30 bg-ledger-soft/60 px-5 py-4 text-sm">
+          <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ledger">Ricerca opportunità</p>
+          <p className="text-ink-2">
+            {describeOpportunity({
+              codes: t.signals.codes,
+              match: t.signals.match,
+              jobFamilies: t.signals.job_families.map((f) => f.code),
+              industry: t.industry,
+              where: t.regions?.join(", ") || t.country_names?.join(", ") || "",
+            })}
+          </p>
         </div>
       )}
 
@@ -116,6 +133,16 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
           <dt className="text-muted">Ruoli</dt><dd>{t.roles?.join(", ")}</dd>
           {!!t.keywords?.length && (<><dt className="text-muted">Parole chiave</dt><dd>{t.keywords.join(", ")}</dd></>)}
           {!!t.exclude_keywords?.length && (<><dt className="text-muted">Escluse</dt><dd>{t.exclude_keywords.join(", ")}</dd></>)}
+          {!!t.signals?.codes.length && (
+            <>
+              <dt className="text-muted">Segnali</dt>
+              <dd>
+                {t.signals.codes.map((c) => signalByCode(c)?.label ?? c).join(", ")}
+                {t.signals.job_families.length > 0 && ` (${t.signals.job_families.map((f) => f.label).join(", ")})`}
+                {t.signals.codes.length > 1 && ` · ${t.signals.match === "all" ? "servono tutti" : "basta uno"}`}
+              </dd>
+            </>
+          )}
         </dl>
       </details>
 
@@ -126,7 +153,9 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
         <EmptyState title={running ? "Stiamo cercando…" : "Nessun lead in questa ricerca"}>
           {running
             ? "Pianifichiamo la ricerca, visitiamo i siti ufficiali e verifichiamo le email. Di solito servono 5-20 minuti: puoi chiudere la pagina, ti avvisiamo via email."
-            : "Prova ad allargare l'area geografica, i ruoli o ad accettare anche le email generiche."}
+            : t.signals?.codes.length
+              ? "Nessuna azienda con la prova del segnale richiesto. Prova ad allargare l'area, a scegliere «basta un segnale» o ad aggiungere un altro segnale."
+              : "Prova ad allargare l'area geografica, i ruoli o ad accettare anche le email generiche."}
         </EmptyState>
       )}
     </>
