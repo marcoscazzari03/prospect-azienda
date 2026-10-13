@@ -47,9 +47,9 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Fase 1: V1, V2, V3 (captcha Turnstile), V4, V5 (motore), V8
 - [ ] 2FA su tutti gli account (Supabase, Vercel, GitHub, n8n, Stripe, Cloudflare, Resend, Icypeas, MillionVerifier, OpenAI)
 - [x] V7: tetto dei rimborsi automatici in SQL (migrazione `20261018000012_auto_refund_lock.sql`)
-- [ ] V12: limiti su export e avvio ricerche
-- [ ] V9 + V11: CSP, controllo dei link mostrati, `/app` e `/admin` esclusi dai motori di ricerca
-- [ ] V6: cancellazione dei lead dopo 24 mesi e rimozione dal magazzino dopo un'opposizione
+- [x] V12: limiti su export, ricerche e segnalazioni (migrazione `20261019000013_rate_limit_indexes.sql`)
+- [x] V9 + V11: CSP, controllo dei link mostrati, `/app` e `/admin` esclusi dai motori di ricerca
+- [x] V6: magazzino ripulito dopo 24 mesi (cron notturno) e subito dopo un'opposizione (migrazione `20261020000014_retention_optout.sql`)
 - [ ] Facoltativo: captcha anche su accesso e recupero password (captcha di Supabase)
 - [ ] Fase 3: backup (Supabase Pro), conservazione esecuzioni n8n, Sentry, V13, V14, repository privato
 

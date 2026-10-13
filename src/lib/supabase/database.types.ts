@@ -721,6 +721,12 @@ isOneToOne: false
 "org_available_credits":
 { Args: { "p_org": string }; Returns: number
                            },
+"purge_stale_warehouse":
+{ Args: { "p_months"?: number }; Returns: Json
+                           },
+"purge_suppressed":
+{ Args: { "p_domain_hash": string,"p_email_hash": string }; Returns: number
+                           },
 "record_engine_progress":
 { Args: { "p_counters": Json,"p_message": string,"p_run": string,"p_stage": string,"p_token_hash": string }; Returns: boolean
                            },

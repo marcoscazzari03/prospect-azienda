@@ -162,3 +162,30 @@ select pg_temp.check(org_available_credits((select org_id from memberships where
                      and exists (select 1 from profiles where user_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
                      'tetto giornaliero raggiunto: account creato ma senza crediti');
 \echo 'Test registrazioni superati.'
+
+-- V6: opposizione e conservazione.
+insert into companies (domain, name, website) values ('optout.it', 'Optout Srl', 'https://optout.it'), ('tenuta.it', 'Tenuta Srl', 'https://tenuta.it');
+insert into people (company_id, person_key, full_name) select id, 'gino verdi|optout.it', 'Gino Verdi' from companies where domain = 'optout.it';
+insert into people (company_id, person_key, full_name) select id, 'lia neri|tenuta.it', 'Lia Neri' from companies where domain = 'tenuta.it';
+insert into emails (company_id, person_id, address, type, status, source)
+  select c.id, p.id, 'gino.verdi@optout.it', 'personal', 'found_public', 'website' from companies c join people p on p.company_id = c.id where c.domain = 'optout.it';
+insert into emails (company_id, address, type, status, source)
+  select id, 'info@optout.it', 'generic', 'found_public', 'website' from companies where domain = 'optout.it';
+insert into emails (company_id, person_id, address, type, status, source)
+  select c.id, p.id, 'lia@tenuta.it', 'personal', 'found_public', 'website' from companies c join people p on p.company_id = c.id where c.domain = 'tenuta.it';
+insert into suppression_list (email_hash, reason) values (sha256_hex('Gino.Verdi@optout.it'), 'opt_out');
+select pg_temp.check(not exists (select 1 from emails where address = 'gino.verdi@optout.it')
+                     and not exists (select 1 from people where person_key = 'gino verdi|optout.it')
+                     and exists (select 1 from emails where address = 'info@optout.it'), 'opposizione email: persona ed email cancellate, generica resta');
+insert into suppression_list (domain_hash, reason) values (sha256_hex('optout.it'), 'opt_out_domain');
+select pg_temp.check(not exists (select 1 from companies where domain = 'optout.it')
+                     and not exists (select 1 from emails where address like '%@optout.it'), 'opposizione dominio: azienda cancellata');
+update people set last_verified_at = now() - interval '25 months' where person_key = 'lia neri|tenuta.it';
+update companies set last_verified_at = now() - interval '25 months' where domain = 'tenuta.it';
+insert into optout_requests (email_hash, token_hash, created_at) values ('x', 'vecchio', now() - interval '40 days'), ('y', 'nuovo', now());
+select pg_temp.check((purge_stale_warehouse(24) ->> 'people')::int = 1, 'una persona scaduta');
+select pg_temp.check(not exists (select 1 from emails where address = 'lia@tenuta.it')
+                     and not exists (select 1 from companies where domain = 'tenuta.it')
+                     and exists (select 1 from companies), 'dati non riverificati da 24 mesi cancellati, il resto no');
+select pg_temp.check((select count(*) = 1 from optout_requests where token_hash in ('vecchio', 'nuovo')), 'richieste di opposizione scadute cancellate');
+\echo 'Test conservazione superati.'
