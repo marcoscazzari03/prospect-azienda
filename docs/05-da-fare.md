@@ -68,6 +68,7 @@ Piano e regole in `docs/07-segnali.md`. Fasi: 0 regole · 1 motore annunci · 2 
 - [x] Homepage con le due modalità (in target / opportunità) e demo
 - [x] Prezzo dei segnali modificabile dall'admin (sito e annunci)
 - [x] Magazzino completo: si salva ogni lead valido trovato, anche non consegnato
+- [x] Pagina «Il mio account» (profilo, sicurezza, piano e fatturazione, assistenza)
 - [ ] Prova reale dall'app: una ricerca normale e una opportunità (crediti, consegna, prove, export)
 - [ ] Fase 5: collaudo sulle 10 ricerche di prova
 - [ ] Annunci di lavoro: prova di Adzuna al collaudo (con la sola ricerca web si trovano pochi candidati)
@@ -78,3 +79,7 @@ Piano e regole in `docs/07-segnali.md`. Fasi: 0 regole · 1 motore annunci · 2 
 - [ ] Apertura partita IVA (prima di incassare) e scelta del regime con un commercialista
 - [ ] Validazione di informativa privacy, termini, LIA/DPIA con un consulente
 - [ ] Passaggio di Stripe in modalità live
+- [ ] Chiusura dell'account: oggi è una richiesta via email dalla pagina «Il mio account». Decidere con il
+      consulente se renderla automatica (crediti residui, fatture da conservare, lead acquistati)
+- [ ] Dati di fatturazione italiani (ragione sociale, P.IVA, codice SDI/PEC): oggi li raccoglie il portale
+      Stripe. Verificare con il commercialista se bastano per la fattura elettronica o se servono campi nostri
