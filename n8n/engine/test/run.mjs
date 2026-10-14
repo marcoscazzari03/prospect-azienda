@@ -36,6 +36,10 @@ assert.equal(job.valida, true, job.errori.join(', '));
 assert.ok(job.lotti_previsti >= 2);
 const [bad] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, callback_url: 'https://weborastudio.it.evil.com/api/engine/callback' } }] }).map(i => i.json);
 assert.equal(bad.valida, false);
+const senzaSettore = (signals) => run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, target: { ...body.target, industry: '', industry_keywords: [], signals } } }] })[0].json;
+assert.equal(senzaSettore({ codes: ['outdated_cms'] }).valida, true, 'opportunità senza settore: valida');
+assert.match(senzaSettore({ codes: ['outdated_cms'] }).brief, /Settore: qualsiasi/);
+assert.equal(senzaSettore(undefined).valida, false, 'ricerca normale senza settore: rifiutata');
 console.log('ok  validazione + anti-SSRF');
 
 // 2. Deduplica

@@ -95,3 +95,16 @@ select pg_temp.check((select e.address = 'tino@terzo.it' from people p join emai
                      'la nominativa resta nella scheda anche se poi arriva una generica');
 
 \echo 'Test magazzino completo superati.'
+
+-- Ricerca opportunità «tutti i settori»: il magazzino non filtra per settore.
+create temp table sa as
+  select * from create_search('d1d1d1d1-0000-4000-8000-000000000002', (select org_p from o5), 'Tutti i settori',
+    '{"industry":"","countries":["IT"],"regions":["Piemonte"],"roles":["Titolare"]}', 'mixed', 5, 2);
+select pg_temp.check((select count(*) = 0 from warehouse_candidates((select id from sa))),
+                     'tutti i settori: nessun candidato che il cliente ha già');
+create temp table sa2 as
+  select * from create_search('d1d1d1d1-0000-4000-8000-000000000001', (select org_o from o5), 'Tutti i settori 2',
+    '{"industry":"","countries":["IT"],"regions":["Piemonte"],"roles":["Titolare"]}', 'mixed', 5, 2);
+select pg_temp.check((select count(*) >= 1 from warehouse_candidates((select id from sa2))),
+                     'tutti i settori: candidati di qualsiasi settore');
+\echo 'Test tutti i settori superati.'

@@ -437,7 +437,7 @@ export function describeOffer(args: { offer: string; industry: string; where: st
   const o = found ? { ...found, lookFor: args.lookFor || found.lookFor } : null;
   if (!o) return "";
   const sector = args.industry.trim().replace(/^\p{Lu}(?=\p{Ll})/u, (c) => c.toLowerCase());
-  const who = `${sector || "aziende del settore scelto"}${args.where ? ` in ${args.where}` : ""}`;
+  const who = `${sector || "aziende di ogni settore"}${args.where ? ` in ${args.where}` : ""}`;
   return `Cercheremo ${who} con ${o.lookFor}. Ogni lead ha la prova (link e data): le aziende senza prova vengono escluse.`;
 }
 

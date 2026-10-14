@@ -86,7 +86,9 @@ if (!/^[0-9a-f-]{8,64}$/i.test(job.job_id)) errori.push('job_id mancante o non v
 if (!job.run_id) errori.push('run_id mancante');
 if (job.run_token.length < 24) errori.push('run_token mancante');
 if (!CALLBACK_AMMESSI.some(r => r.test(job.callback_url))) errori.push('callback_url non ammesso');
-if (!job.target.industry && !job.target.industry_keywords.length) errori.push('settore mancante');
+// Ricerca opportunità «tutti i settori»: senza settore, ma con almeno un segnale.
+const tuttiISettori = !job.target.industry && !job.target.industry_keywords.length;
+if (tuttiISettori && !job.target.signals.codes.length) errori.push('settore mancante');
 if (!job.target.countries.length && !job.target.country_names.length) errori.push('paese mancante');
 
 // Lotti: sovracampioniamo (deduplica, siti senza email, ruoli non coerenti
@@ -109,7 +111,7 @@ const lotti = Math.min(
 
 const paesi = job.target.country_names.length ? job.target.country_names : job.target.countries;
 const brief = [
-  `Settore: ${job.target.industry || job.target.industry_keywords.join(', ')}`,
+  `Settore: ${job.target.industry || job.target.industry_keywords.join(', ') || 'qualsiasi: piccole e medie imprese di ogni settore (indica il settore reale di ognuna in "industry")'}`,
   job.target.industry_keywords.length ? `Parole chiave del settore: ${job.target.industry_keywords.join(', ')}` : '',
   `Paesi: ${paesi.join(', ')}`,
   job.target.regions.length ? `Aree / città: ${job.target.regions.join(', ')}` : '',

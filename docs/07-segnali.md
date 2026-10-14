@@ -172,6 +172,9 @@ manifatturiere in Lombardia con annunci per ruoli IT negli ultimi 60 giorni»).
 - Il backend ricava i segnali dal servizio (`offerChoice`): quelli inviati dal browser vengono ignorati.
   `target.signals.offer` resta sulla ricerca (riepilogo, «Ripeti con nuovi lead»).
 - Sul lead restano visibili le prove («Perché è in target»).
+- «In quali aziende»: di default **tutti i settori** (settore facoltativo solo nella ricerca opportunità).
+  Il motore cerca PMI di ogni settore e salva il settore reale di ognuna; il magazzino, senza settore,
+  consegna aziende di qualsiasi settore (migrazione `20261025000019_any_sector.sql`).
 - Regole modificabili dall'admin in «Servizi opportunità» (`app_settings.offer_rules`): per ogni servizio
   segnali, figure, combinazione, frase del riepilogo e visibilità. Stessi vincoli del catalogo
   (`validateOfferRule`); una regola non valida viene ignorata. Valgono per le ricerche nuove: ogni

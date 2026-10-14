@@ -127,7 +127,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
       <details className="mt-4 rounded-xl border border-line bg-card px-6 py-4 text-sm">
         <summary className="cursor-pointer font-medium">Filtri della ricerca</summary>
         <dl className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-[160px_1fr]">
-          <dt className="text-muted">Settore</dt><dd>{t.industry}</dd>
+          <dt className="text-muted">Settore</dt><dd>{t.industry || "Tutti i settori"}</dd>
           <dt className="text-muted">Paesi</dt><dd>{t.country_names?.join(", ")}</dd>
           {!!t.regions?.length && (<><dt className="text-muted">Aree</dt><dd>{t.regions.join(", ")}</dd></>)}
           {!!t.company_size?.length && (<><dt className="text-muted">Dimensione</dt><dd>{t.company_size.join(", ")}</dd></>)}

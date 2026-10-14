@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
-import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
+import { defaultSearchName, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { OFFERS, VERIFIED_SIGNAL_CODES, applyOfferRules, describeOffer, describeOpportunity, offerChoice, validateOfferRule, extraCreditsLabel, signalExtraRange, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
 import { flattenDelivery } from "@/lib/domain/leads";
 
@@ -143,5 +143,16 @@ describe("segnali nella ricerca (fase 3)", () => {
     expect(describeOffer({ offer: "wp_maintenance", industry: "Studi dentistici", where: "Lombardia" })).toBe(
       "Cercheremo studi dentistici in Lombardia con un sito WordPress, Joomla o WooCommerce con una versione uscita da più di 2 anni. Ogni lead ha la prova (link e data): le aziende senza prova vengono escluse.",
     );
+  });
+  it("opportunità: «tutti i settori» ammesso solo con un servizio", () => {
+    const tutti = searchInputSchema.safeParse({ ...base, industry: "", signals: offerChoice("it_support") });
+    expect(tutti.success).toBe(true);
+    if (tutti.success) {
+      expect(toTarget(tutti.data).industry).toBe("");
+      expect(defaultSearchName(tutti.data)).toBe("Assistenza IT e sistemistica · Lombardia");
+    }
+    expect(searchInputSchema.safeParse({ ...base, industry: "" }).success).toBe(false);
+    expect(searchInputSchema.safeParse({ ...base, industry: "ab", signals: offerChoice("it_support") }).success).toBe(false);
+    expect(describeOffer({ offer: "translation", industry: "", where: "Veneto" })).toMatch(/^Cercheremo aziende di ogni settore in Veneto/);
   });
 });

@@ -94,6 +94,8 @@ export function SearchWizard({
   const [kind, setKind] = useState<SearchKind>(initialKind);
   const [step, setStep] = useState(0);
   const [industry, setIndustry] = useState(defaults.industry ?? "");
+  // Ricerca opportunità: di default tutti i settori (più resa per il cliente, magazzino più ampio).
+  const [allSectors, setAllSectors] = useState(!defaults.industry);
   const [regions, setRegions] = useState(defaults.regions?.join("\n") ?? "");
   const [offer, setOffer] = useState(defaults.offer ?? "");
   const [area, setArea] = useState(offerByCode(defaults.offer ?? "", offers)?.area ?? "");
@@ -134,7 +136,7 @@ export function SearchWizard({
       : offerUsesJobAds(chosen) && !jobAdCountriesOk
         ? "Per questo servizio usiamo gli annunci di lavoro, disponibili solo in alcuni paesi: togli i paesi non coperti."
         : "";
-  const preview = chosen ? describeOffer({ offer: chosen.code, industry, where, offers }) : "";
+  const preview = chosen ? describeOffer({ offer: chosen.code, industry: allSectors ? "" : industry, where, offers }) : "";
 
   return (
     <form action={action} className="grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -253,9 +255,26 @@ export function SearchWizard({
 
         {/* Passo: target */}
         <Card className={cx("flex flex-col gap-5 p-6", current !== "target" && "hidden")}>
-          <Field label="Settore o tipo di azienda" htmlFor="industry" hint="Scrivilo come lo spiegheresti a un collega: «agenzie di marketing digitale», «studi dentistici», «produttori di macchine per il packaging».">
-            <Input id="industry" name="industry" value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="es. Software house che sviluppano gestionali" />
-          </Field>
+          {opportunity && (
+            <div>
+              <p className="mb-2 text-sm font-medium">In quali aziende?</p>
+              <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Settore">
+                {([[true, "Tutti i settori", "Consigliato: più aziende con il segnale, risultati più rapidi."], [false, "Solo un settore", "Se il tuo servizio è pensato per un settore preciso."]] as const).map(([v, l, d]) => (
+                  <label key={l} className={cx("flex cursor-pointer gap-3 rounded-lg border px-4 py-3 text-sm", allSectors === v ? "border-ledger bg-ledger-soft" : "border-line hover:border-ink-2")}>
+                    <input type="radio" name="sectorScope" checked={allSectors === v} onChange={() => setAllSectors(v)} className="mt-0.5 accent-[var(--color-ledger)]" />
+                    <span><span className="block font-medium">{l}</span><span className="block text-xs text-ink-2">{d}</span></span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+          {opportunity && allSectors ? (
+            <input type="hidden" name="industry" value="" />
+          ) : (
+            <Field label="Settore o tipo di azienda" htmlFor="industry" hint="Scrivilo come lo spiegheresti a un collega: «agenzie di marketing digitale», «studi dentistici», «produttori di macchine per il packaging».">
+              <Input id="industry" name="industry" value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="es. Software house che sviluppano gestionali" />
+            </Field>
+          )}
           <div>
             <p className="mb-2 text-sm font-medium">Paesi</p>
             <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">
@@ -271,9 +290,11 @@ export function SearchWizard({
             <Field label="Regioni o città (facoltativo)" htmlFor="regions" hint="Una per riga o separate da virgola.">
               <Textarea id="regions" name="regions" value={regions} onChange={(e) => setRegions(e.target.value)} placeholder={"Milano\nTorino"} className="min-h-20" />
             </Field>
-            <Field label="Parole chiave del settore (facoltativo)" htmlFor="industryKeywords" hint="Termini usati dalle aziende, anche in lingua locale.">
-              <Textarea id="industryKeywords" name="industryKeywords" defaultValue={defaults.industryKeywords?.join("\n")} placeholder={"software gestionale\nERP"} className="min-h-20" />
-            </Field>
+            {!(opportunity && allSectors) && (
+              <Field label="Parole chiave del settore (facoltativo)" htmlFor="industryKeywords" hint="Termini usati dalle aziende, anche in lingua locale.">
+                <Textarea id="industryKeywords" name="industryKeywords" defaultValue={defaults.industryKeywords?.join("\n")} placeholder={"software gestionale\nERP"} className="min-h-20" />
+              </Field>
+            )}
           </div>
           <div>
             <p className="mb-2 text-sm font-medium">Dimensione (dipendenti)</p>

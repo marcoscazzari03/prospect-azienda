@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { COMPANY_SIZES, COUNTRY_NAME, EMAIL_MODES } from "./catalog";
-import { JOB_AD_COUNTRIES, JOB_FAMILIES, OFFERS, SIGNALS, SIGNAL_RULES, chargesSignal, toSignalsTarget } from "./signals";
+import { JOB_AD_COUNTRIES, JOB_FAMILIES, OFFERS, SIGNALS, SIGNAL_RULES, chargesSignal, offerByCode, toSignalsTarget } from "./signals";
 
 const list = (max: number, itemMax = 80) =>
   z
@@ -10,7 +10,8 @@ const list = (max: number, itemMax = 80) =>
 
 export const searchInputSchema = z.object({
   name: z.string().trim().max(120).optional().default(""),
-  industry: z.string().trim().min(3, "Descrivi il settore (almeno 3 caratteri)").max(200),
+  // Facoltativo solo nella ricerca opportunità («tutti i settori»): vedi il controllo sotto.
+  industry: z.string().trim().max(200).default(""),
   industryKeywords: list(10),
   countries: list(10, 2)
     .refine((a) => a.length > 0, "Scegli almeno un paese")
@@ -42,6 +43,9 @@ export const searchInputSchema = z.object({
     .refine((s) => !s.codes.length || chargesSignal(s.codes), "I segnali indicativi non si possono usare da soli: aggiungi un segnale verificato")
     .refine((s) => !s.codes.includes("job_ad") || s.jobFamilies.length > 0, "Scegli la figura cercata negli annunci"),
 }).refine(
+  (i) => i.industry.length >= 3 || (Boolean(i.signals.offer) && !i.industry.length),
+  "Descrivi il settore (almeno 3 caratteri)",
+).refine(
   (i) => !i.signals.codes.includes("job_ad") || i.countries.every((c) => (JOB_AD_COUNTRIES as readonly string[]).includes(c)),
   "Gli annunci di lavoro non sono ancora disponibili per uno dei paesi scelti",
 );
@@ -82,5 +86,6 @@ export type SearchTarget = ReturnType<typeof toTarget>;
 
 export function defaultSearchName(input: SearchInput) {
   const where = input.regions[0] ?? COUNTRY_NAME[input.countries[0]];
-  return `${input.industry} · ${where}`.slice(0, 120);
+  const what = input.industry || (input.signals.offer && offerByCode(input.signals.offer)?.label) || "Ricerca";
+  return `${what} · ${where}`.slice(0, 120);
 }
