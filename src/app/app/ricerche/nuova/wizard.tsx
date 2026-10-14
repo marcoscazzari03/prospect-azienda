@@ -142,21 +142,24 @@ export function SearchWizard({
   const preview = chosen ? describeOffer({ offer: chosen.code, industry: allSectors ? "" : industry, where, offers }) : "";
 
   // Disponibilità dal database (stesso calcolo della riserva del motore), ricalcolata
-  // quando cambiano servizio, zona, settore o esclusioni.
+  // quando cambiano servizio, zona, settore o esclusioni. Per le ricerche in target vale
+  // solo per quelle semplici (settore e zona): per le altre il server risponde null.
   const chosenCode = chosen?.code ?? "";
-  const availabilityKey = `${chosenCode}|${formTick}`;
+  const wantsAvailability = opportunity ? Boolean(chosenCode) : Boolean(industry.trim());
+  const availabilityKey = `${kind}|${chosenCode}|${formTick}`;
   useEffect(() => {
-    if (!opportunity || !chosenCode) return;
+    if (!wantsAvailability) return;
     const t = setTimeout(async () => {
       if (!formRef.current) return;
       const value = await searchAvailability(new FormData(formRef.current)).catch(() => null);
       setAvailability({ key: availabilityKey, value });
     }, 600);
     return () => clearTimeout(t);
-  }, [opportunity, chosenCode, availabilityKey]);
-  const available = opportunity && chosen && availability?.key === availabilityKey ? availability.value : null;
-  const checking = Boolean(opportunity && chosen && availability?.key !== availabilityKey);
-  const noneAvailable = Boolean(available?.databaseOnly && available.count === 0);
+  }, [wantsAvailability, availabilityKey]);
+  const available = wantsAvailability && availability?.key === availabilityKey ? availability.value : null;
+  const checking = Boolean(wantsAvailability && availability?.key !== availabilityKey);
+  const noneAvailable = Boolean(opportunity && available?.kind === "opportunity" && available.databaseOnly && available.count === 0);
+  const targetReady = !opportunity && available?.kind === "target" && available.count > 0 ? available.count : 0;
   const howMany = (n: number) => (n > 500 ? "oltre 500" : String(n));
 
   return (
@@ -446,6 +449,11 @@ export function SearchWizard({
                 </p>
               )}
             </div>
+          )}
+          {targetReady > 0 && (
+            <p className="rounded-lg border border-ledger/30 bg-ledger-soft/60 p-3 text-xs text-ink-2" aria-live="polite">
+              <strong className="font-mono">{howMany(targetReady)}</strong> aziende già pronte nel database; le altre le cerchiamo sul web.
+            </p>
           )}
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
             <dt className="text-muted">Paesi</dt>

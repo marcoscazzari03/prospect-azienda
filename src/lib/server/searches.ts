@@ -6,6 +6,7 @@ import {
   buildEnginePayload,
   enrichmentSearchBudget,
   jobAdFromDatabaseOnly,
+  targetIsSimple,
   maxAttemptsFor,
   nextStep,
   type ApplyResult,
@@ -79,21 +80,24 @@ async function loadRunMemory(searchId: string) {
   return { checked: [...checked], reserve: reserve.slice(0, 40) };
 }
 
-// Ricerca opportunità «database first»: aziende del database con una prova recente dei
-// segnali richiesti (annunci raccolti dalle API, segnali dal sito), nella zona e nel
-// settore della ricerca. Vanno nella riserva dopo quelle dei giri precedenti: il motore
-// ricontrolla il sito e cerca il referente, e l'AI parte solo per i lead mancanti.
+// Ricerca «database first»: aziende del database che corrispondono alla ricerca. Per le
+// opportunità quelle con una prova recente dei segnali richiesti (annunci, segnali dal
+// sito); per le ricerche in target «semplici» (settore e zona, senza vincoli che il
+// database non sa verificare) quelle del settore e della zona con il sito vivo. Vanno
+// nella riserva dopo quelle dei giri precedenti: il motore cerca il referente e l'AI
+// cerca aziende solo per i lead mancanti.
 const RESERVE_MAX = 40;
 async function loadDatabaseReserve(search: SearchRow, exclude: string[], reserve: Record<string, unknown>[]) {
   const free = RESERVE_MAX - reserve.length;
-  if (!search.target.signals?.codes?.length || free <= 0) return [];
-  const { data, error } = await createAdminClient().rpc("opportunity_reserve", {
+  const opportunity = Boolean(search.target.signals?.codes?.length);
+  if (free <= 0 || (!opportunity && !targetIsSimple(search.target))) return [];
+  const { data, error } = await createAdminClient().rpc(opportunity ? "opportunity_reserve" : "target_reserve", {
     p_search: search.id,
     p_exclude: exclude,
     p_limit: free,
   });
   if (error) {
-    console.error("opportunity_reserve", error.message);
+    console.error(opportunity ? "opportunity_reserve" : "target_reserve", error.message);
     return [];
   }
   const host = (u: unknown) => String(u ?? "").trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split(/[/?#:]/)[0];

@@ -82,7 +82,9 @@ const job = {
     candidates_per_lot: clamp((b.limits || {}).candidates_per_lot, 5, 30, 20),
     enrichment_cap: clamp((b.limits || {}).enrichment_cap, 0, 500, 0)
   },
-  // Aziende con segnale già verificato nei giri precedenti (gli URL li ricontrolla la deduplica).
+  // Riserva dal backend (gli URL li ricontrolla la deduplica): per le ricerche opportunità
+  // aziende con segnale già verificato; per le ricerche in target semplici aziende del
+  // database con settore e zona corrispondenti e sito controllato di recente.
   reserve: (Array.isArray(b.reserve) ? b.reserve : []).slice(0, 40).map(r => ({
     company_name: str(r?.company_name, 200), website: str(r?.website, 300), country: str(r?.country, 80),
     city: str(r?.city, 80), industry: str(r?.industry, 120), size_hint: str(r?.size_hint, 60),
@@ -90,8 +92,9 @@ const job = {
     signals: (Array.isArray(r?.signals) ? r.signals : []).slice(0, 5)
       .filter(x => CODICI_SEGNALI.includes(x?.code))
       .map(x => ({ code: x.code, status: 'pass', evidence: x.evidence && typeof x.evidence === 'object' ? x.evidence : {} }))
-  })).filter(r => r.company_name && r.website && r.signals.length)
+  }))
 };
+job.reserve = job.reserve.filter(r => r.company_name && r.website && (r.signals.length || !job.target.signals.codes.length));
 
 if (!/^[0-9a-f-]{8,64}$/i.test(job.job_id)) errori.push('job_id mancante o non valido');
 if (!job.run_id) errori.push('run_id mancante');
@@ -141,9 +144,14 @@ if (job.target.signals.codes.length) {
   job.ai = { ...AI, max_searches: 8 };
 } else {
   const SOVRACAMPIONAMENTO = job.email_mode === 'personal_only' ? 2.6 : 1.8;
-  lotti = Math.min(
+  // Riserva dal database (ricerche in target semplici): il motore cerca solo referente ed
+  // email; l'AI cerca aziende solo per la parte che la riserva non copre.
+  if (job.reserve.length) job.limits.referenti_max = Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2.2 : 1.5)) + 1;
+  const bastaRiserva = job.reserve.length >= Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2 : 1.4));
+  const daCercare = Math.max(0, job.quantity * SOVRACAMPIONAMENTO - job.reserve.length);
+  lotti = bastaRiserva ? 0 : Math.min(
     job.limits.max_lots,
-    Math.max(1, Math.ceil(job.quantity * SOVRACAMPIONAMENTO / job.limits.candidates_per_lot))
+    Math.max(1, Math.ceil(daCercare / job.limits.candidates_per_lot))
   );
 }
 

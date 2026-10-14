@@ -193,6 +193,15 @@ assert.equal(lottiCon(7, { email_mode: 'mixed' }), 0, 'riserva 1,4 volte i lead:
 assert.ok(lottiCon(6, { email_mode: 'mixed' }) > 0, 'riserva scarsa: ricerca AI');
 assert.equal(lottiCon(10, { email_mode: 'personal_only' }), 0);
 assert.ok(lottiCon(9, { email_mode: 'personal_only' }) > 0);
+// Ricerca in target semplice: riserva dal database senza segnali.
+const riservaTarget = riserva.map(({ signals, ...r }) => ({ ...r, signals: [] }));
+const target = (n, extra = {}) => run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, quantity: 5, reserve: riservaTarget.slice(0, n), ...extra } }] })[0].json;
+assert.equal(target(7, { email_mode: 'mixed' }).reserve.length, 7, 'target: riserva senza segnali ammessa');
+assert.equal(target(7, { email_mode: 'mixed' }).lotti_previsti, 0, 'target: riserva sufficiente, niente AI');
+assert.equal(target(7, { email_mode: 'mixed' }).limits.referenti_max, Math.ceil(5 * 1.5) + 1);
+assert.ok(target(3, { email_mode: 'mixed' }).lotti_previsti >= 1, 'target: riserva scarsa, AI per il resto');
+assert.equal(target(0).limits.referenti_max, undefined, 'target senza riserva: come prima');
+assert.equal(run(src('01-valida-richiesta.js'), { input: [{ body: { ...sitoBody, reserve: riservaTarget } }] })[0].json.reserve.length, 0, 'opportunità: riserva senza segnali scartata');
 const dedR = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [{ ...conRiserva, exclusions: { domains: ['r1.it'], person_keys: [] } }] }, input: [{ candidates: [], lotto: 1 }] }).map(i => i.json);
 assert.equal(dedR[0].company_name, 'R0');
 assert.equal(dedR[0]._riserva, true);

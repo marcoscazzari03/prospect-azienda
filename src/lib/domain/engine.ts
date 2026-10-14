@@ -89,6 +89,18 @@ export function jobAdFromDatabaseOnly(target: SearchTarget) {
   return codes.includes("job_ad") && (codes.length === 1 || target.signals?.match === "all");
 }
 
+// Ricerca in target «semplice» (stessa regola di target_is_simple in SQL): settore e zona,
+// senza vincoli che il database delle aziende non sa verificare (dimensione, fatturato,
+// parole chiave, note). Solo queste usano le aziende del database come riserva.
+export function targetIsSimple(target: SearchTarget) {
+  return !(target.signals?.codes?.length)
+    && Boolean(target.industry?.trim() || target.industry_keywords?.length)
+    && !target.company_size?.length
+    && !target.revenue_range?.trim()
+    && !target.keywords?.length
+    && !target.notes?.trim();
+}
+
 export type ApplyResult = {
   ok: boolean;
   reason?: string;

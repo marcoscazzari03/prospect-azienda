@@ -951,6 +951,20 @@ isOneToOne: false
 "tag_company":
 { Args: { "p_company": string,"p_target": Json }; Returns: undefined
                            },
+"target_availability":
+{ Args: { "p_contacts": number,"p_org": string,"p_target": Json }; Returns: number
+                           },
+"target_is_simple":
+{ Args: { "p_target": Json }; Returns: boolean
+                           },
+"target_pool":
+{ Args: { "p_contacts": number,"p_exclude": (string)[],"p_org": string,"p_target": Json }; Returns: {
+              "checked_at": string,"city": string,"country": string,"domain": string,"id": string,"industry": string,"name": string,"size_hint": string,"technologies": (string)[],"website": string
+            }[]
+                           },
+"target_reserve":
+{ Args: { "p_exclude": (string)[],"p_limit": number,"p_search": string }; Returns: Json
+                           },
 "term_stems":
 { Args: { "p": string }; Returns: (string)[]
                            },

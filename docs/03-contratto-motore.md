@@ -245,3 +245,17 @@ settore della ricerca, escluse aziende già consegnate, già controllate nella r
 Il motore le tratta come la riserva: niente ricerca AI se bastano, referente dal sito, poi email.
 La selezione è `opportunity_pool(org, target, contatti, esclusi)`: il wizard la usa tramite
 `opportunity_availability` per mostrare quante aziende sono disponibili prima di avviare.
+
+## Riserva dal database (ricerche in target, versione prudente)
+
+Solo per le ricerche in target «semplici» (`target_is_simple`: settore o parole chiave del settore,
+eventuali zona ed esclusioni; nessuna dimensione, fatturato, parole chiave aggiuntive o note, che il
+database non sa verificare) il backend aggiunge alla `reserve` le aziende di
+`target_reserve(search, esclusi, n)` (massimo 40, senza `signals`): tutte le parole del settore
+nelle etichette dell'azienda, sito controllato negli ultimi 60 giorni con un esito leggibile, paese
+e zona, escluse aziende già consegnate, in opposizione o chiuse. Il motore ammette la riserva senza
+segnali solo se la ricerca non ha segnali; scarica la homepage («Serve controllo sito?» vale anche
+per `_riserva`), cerca il referente prima sul sito e poi sul web (tetto `referenti_max`), poi le
+email. Niente ricerca AI se la riserva è almeno 1,4 volte i lead (2 con «solo nominative»),
+altrimenti i lotti AI coprono solo la parte mancante. Il wizard mostra il numero con
+`target_availability` (migrazione 029).

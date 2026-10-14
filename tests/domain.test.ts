@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
-import { buildEnginePayload, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep } from "@/lib/domain/engine";
+import { buildEnginePayload, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
 import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
 import { flattenDelivery } from "@/lib/domain/leads";
@@ -162,5 +162,23 @@ describe("ricerche con annunci di lavoro", () => {
     expect(jobAdFromDatabaseOnly(target(["job_ad", "outdated_cms"], "any"))).toBe(false);
     expect(jobAdFromDatabaseOnly(target(["outdated_cms"]))).toBe(false);
     expect(jobAdFromDatabaseOnly(target([]))).toBe(false);
+  });
+});
+
+describe("ricerche in target dal database", () => {
+  const target = (extra: Record<string, unknown> = {}) =>
+    ({ countries: ["IT"], industry: "Studi dentistici", roles: [], signals: { codes: [] }, ...extra }) as unknown as Parameters<typeof targetIsSimple>[0];
+  it("settore e zona: semplice", () => {
+    expect(targetIsSimple(target())).toBe(true);
+    expect(targetIsSimple(target({ regions: ["Modena"], exclude_keywords: ["ortodonzia"] }))).toBe(true);
+    expect(targetIsSimple(target({ industry: "", industry_keywords: ["dentista"] }))).toBe(true);
+  });
+  it("vincoli che il database non sa verificare: solo ricerca web", () => {
+    expect(targetIsSimple(target({ company_size: ["11-50"] }))).toBe(false);
+    expect(targetIsSimple(target({ revenue_range: "1-5M" }))).toBe(false);
+    expect(targetIsSimple(target({ keywords: ["implantologia"] }))).toBe(false);
+    expect(targetIsSimple(target({ notes: "solo studi con più sedi" }))).toBe(false);
+    expect(targetIsSimple(target({ industry: "" }))).toBe(false);
+    expect(targetIsSimple(target({ signals: { codes: ["no_mobile"] } }))).toBe(false);
   });
 });
