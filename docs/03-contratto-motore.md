@@ -189,3 +189,13 @@ Massimo 2.000 annunci per chiamata. `store_job_ads` scarta gli annunci senza lin
 nome azienda, aggiorna `last_seen_at` di quelli già visti, collega l'annuncio all'azienda del
 database quando il nome normalizzato (`company_name_key`) corrisponde a una sola azienda e cancella
 gli annunci più vecchi di 180 giorni. Risposta: `{ ok, received, saved, new, linked, deleted }`.
+
+## Sito delle aziende degli annunci (`/api/engine/job-ads/companies`)
+
+Workflow n8n «Annunci | Siti aziende» (generato da `n8n/annunci/build.mjs` in `siti.sdk.ts`), stesso segreto.
+
+- `GET ?limit=150` → `{ companies: [{ company_key, company_name, city, ads }] }`: aziende degli annunci senza
+  sito, mai provate o non trovate da più di 30 giorni, le più attive per prime.
+- `POST { results: [{ company_key, company_name, city, domain, method }] }` (domain vuoto = non trovato) →
+  `{ ok, found, not_found, linked_ads }`. Le trovate entrano in `companies` (origine `adzuna`, paese Italia)
+  e i loro annunci vengono collegati; ogni esito resta in `company_resolutions`.

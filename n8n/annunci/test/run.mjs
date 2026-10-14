@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { codice } from '../build.mjs';
 
-const run = (code, { nodes = {}, input = [], eseguiti = [] }) => {
+const run = (code, { nodes = {}, input = [], eseguiti = [], json = {} }) => {
   const $ = (name) => {
     const n = nodes[name];
     if (!n) {
@@ -12,8 +12,8 @@ const run = (code, { nodes = {}, input = [], eseguiti = [] }) => {
     }
     return { first: () => ({ json: n[0] }), all: () => n.map(j => ({ json: j })), isExecuted: true };
   };
-  const $input = { all: () => input.map((j, i) => ({ json: j, pairedItem: { item: i } })) };
-  return new Function('$', '$input', '$execution', code)($, $input, { id: 'test', mode: 'test' }).map(i => i.json);
+  const $input = { all: () => input.map((j, i) => ({ json: j, pairedItem: { item: i } })), first: () => (input.length ? { json: input[0] } : undefined) };
+  return new Function('$', '$input', '$execution', '$json', code)($, $input, { id: 'test', mode: 'test' }, json).map(i => i.json);
 };
 
 // 1. Richieste: una per titolo del catalogo, ogni mattina 2 giorni, a mano 30.
@@ -79,3 +79,51 @@ assert.equal(out.ads[1].family, 'sales', 'business developer è commerciale, non
 assert.deepEqual(out.stats, { requests: 3, errors: 1, results: 7, off_topic: 1, agencies: 2, anonymous: 1, duplicates: 1, kept: 2 });
 
 console.log('Test raccolta annunci superati.');
+
+// 3. Siti delle aziende: domini candidati
+const aziende = [
+  { company_key: 'var', company_name: 'Var Group S.p.A.', city: 'Bologna' },
+  { company_key: 'maggioli', company_name: 'Gruppo Maggioli', city: 'Santarcangelo' },
+  { company_key: 'max mara fashion', company_name: 'Max Mara Fashion Group', city: 'Reggio Emilia' },
+  { company_key: 'eng', company_name: 'ENG', city: 'Bologna' },
+  { company_key: 'gruppo', company_name: 'Gruppo Italia S.r.l.', city: '' }
+];
+const cand = run(codice('03-domini-candidati.js'), { input: [{ companies: aziende }] });
+const di = (k) => cand.filter(c => c.company_key === k).map(c => c.domain);
+assert.deepEqual(di('var').slice(0, 4), ['var.it', 'var.com', 'vargroup.it', 'vargroup.com']);
+assert.ok(di('maggioli').includes('maggioli.it') && di('maggioli').includes('gruppomaggioli.it'));
+assert.ok(di('max mara fashion').includes('maxmara.it'), 'prime due parole');
+assert.ok(cand.every(c => c.url === `https://${c.domain}`));
+assert.equal(di('gruppo').length, 0, 'solo parole generiche: nessun dominio');
+assert.ok(cand.filter(c => c.company_key === 'max mara fashion').length <= 6);
+
+// 4. Siti delle aziende: scelta
+const pagina = (title, body) => ({ html: `<html><head><title>${title}</title></head><body>${body}${' testo'.repeat(120)}</body></html>` });
+const paginaDi = {
+  'var.it': pagina('Var Sport - abbigliamento', 'Negozio'),
+  'vargroup.it': pagina('Var Group | Digital Integrator', 'Var Group spa, Empoli'),
+  'maggioli.it': pagina('Maggioli Editore', 'Gruppo Maggioli'),
+  'maxmara.it': pagina('Max Mara Official Site', 'Max Mara fashion house'),
+  'eng.it': pagina('Engineering', 'eng eng'),
+  'eng.com': { html: '' }
+};
+const [scelta] = run(codice('04-scegli-sito.js'), {
+  nodes: { 'Domini candidati': cand, 'Aziende senza sito': [{ companies: aziende }] },
+  input: cand.map(c => paginaDi[c.domain] || { html: c.domain === 'var.com' ? pagina('This domain is for sale', 'Buy this domain') .html : '' })
+});
+const sito = (k) => scelta.results.find(r => r.company_key === k)?.domain;
+assert.equal(sito('var'), 'vargroup.it', '«var» da solo nel testo non basta');
+assert.equal(sito('maggioli'), 'maggioli.it');
+assert.equal(sito('max mara fashion'), 'maxmara.it', 'tutte le parole nella pagina');
+assert.equal(sito('eng'), '', 'nome breve non nel titolo');
+assert.equal(sito('gruppo'), '', 'azienda senza domini registrata come non trovata');
+assert.equal(scelta.stats.companies, 5);
+assert.equal(scelta.stats.found, 3);
+assert.ok(scelta.stats.parked >= 1);
+const parcheggio = run(codice('04-scegli-sito.js'), {
+  nodes: { 'Domini candidati': [{ company_key: 'k', company_name: 'Possedono Srl', city: '', nucleo: 'possedono', nome: 'possedono', domain: 'possedono.it', ordine: 0 }], 'Aziende senza sito': [{ companies: [] }] },
+  input: [pagina('Possedono', 'Le aziende che possedono un sito')]
+})[0];
+assert.equal(parcheggio.results[0].domain, 'possedono.it', '«possedono» non è «sedo»');
+
+console.log('Test siti aziende superati.');

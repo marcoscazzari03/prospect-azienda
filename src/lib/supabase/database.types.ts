@@ -67,6 +67,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"company_resolutions": {
+                  Row: {
+                    "attempts": number,"company_key": string,"company_name": string,"domain": string,"method": string,"status": string,"tried_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempts"?: number,"company_key": string,"company_name": string,"domain"?: string,"method"?: string,"status": string,"tried_at"?: string
+                  }
+                  Update: {
+                    "attempts"?: number,"company_key"?: string,"company_name"?: string,"domain"?: string,"method"?: string,"status"?: string,"tried_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"company_signals": {
                   Row: {
                     "checked_at": string,"code": string,"company_id": string,"evidence": NonNullable<Json>
@@ -809,6 +823,11 @@ isOneToOne: false
 "org_available_credits":
 { Args: { "p_org": string }; Returns: number
                            },
+"pending_ad_companies":
+{ Args: { "p_limit": number }; Returns: {
+              "ads": number,"city": string,"company_key": string,"company_name": string
+            }[]
+                           },
 "purge_stale_warehouse":
 { Args: { "p_months"?: number }; Returns: Json
                            },
@@ -895,6 +914,9 @@ isOneToOne: false
                            },
 "store_company_checks":
 { Args: { "p_items": Json,"p_origin": string,"p_target": Json }; Returns: number
+                           },
+"store_company_resolutions":
+{ Args: { "p_items": Json }; Returns: Json
                            },
 "store_job_ads":
 { Args: { "p_ads": Json,"p_source": string }; Returns: Json
