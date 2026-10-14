@@ -10,7 +10,7 @@ const ogniQuattroOre = trigger({
   version: 1.3,
   config: {
     name: 'Ogni 4 ore',
-    // Ogni 4 ore con 160 aziende: il piano n8n ha un tetto di esecuzioni al mese.
+    // Ogni 4 ore con 120 aziende: il piano n8n ha un tetto di esecuzioni al mese (oltre, rischio memoria).
     parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 4, triggerAtMinute: 10 }] } }
   }
 });
@@ -30,7 +30,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=160',
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=120',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }

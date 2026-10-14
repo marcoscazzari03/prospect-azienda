@@ -1,7 +1,7 @@
 import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 
 // GENERATO da n8n/annunci/build.mjs: non modificare a mano.
-// Controllo dei siti del database (gratis, solo richieste HTTP): ogni 2 ore 200 aziende mai
+// Controllo dei siti del database (gratis, solo richieste HTTP): ogni 2 ore 150 aziende mai
 // controllate o controllate da più di 25 giorni, con le stesse regole del motore. Le prove
 // (HTTPS, CMS vecchio, mobile, lingue, copyright...) servono alle ricerche opportunità
 // senza ricerca AI e restano fresche (valgono 30 giorni).
@@ -31,7 +31,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=200',
+      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=150',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -57,6 +57,9 @@ const https = node({
   config: {
     name: 'Controllo HTTPS',
     parameters: {
+      // HEAD: serve solo sapere se la connessione HTTPS riesce, non la pagina (con il GET
+      // ogni sito veniva scaricato due volte e il giro andava in crash per memoria).
+      method: 'HEAD',
       url: expr("{{ 'https://' + $json.domain + '/' }}"),
       sendHeaders: true,
       headerParameters: { parameters: [
