@@ -36,6 +36,7 @@ return {
     lotto: lotto.lotto,
     paese_lotto: lotto.paese,
     stato_lotto: stato,
+    saltato: lotto._salta === true,
     errore,
     candidates: candidati.map(c => ({ ...c, country: c?.country || lotto.paese }))
   }

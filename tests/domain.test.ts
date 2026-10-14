@@ -51,6 +51,16 @@ describe("motore", () => {
     expect(p.quantity).toBe(12);
     expect(p.limits.enrichment_cap).toBe(5);
     expect(p.exclusions.domains).toEqual(["a.it"]);
+    expect("reserve" in p).toBe(false);
+  });
+
+  it("riserva dei giri precedenti passata al motore", () => {
+    const reserve = Array.from({ length: 50 }, (_, i) => ({ company_name: `A${i}`, website: `https://a${i}.it` }));
+    const p = buildEnginePayload({
+      search, plan: { enrichment_per_run_max: 5 }, runId: "r", runToken: "t", callbackUrl: "https://x/api/engine/callback",
+      exclusions: { domains: [], personKeys: [] }, reserve,
+    });
+    expect(p.reserve).toHaveLength(40);
   });
 
   it("arricchimento proporzionale alla modalità", () => {

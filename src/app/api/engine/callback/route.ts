@@ -70,7 +70,9 @@ export async function POST(request: Request) {
   if (stockOnly.length) payload.leads = [...(payload.leads ?? []), ...stockOnly].slice(0, 2000);
   // Aziende già controllate e scartate in questo giro: i giri successivi della stessa
   // ricerca non le ripropongono (salvate in search_runs.stats).
-  payload.stats = { ...payload.stats, checked_domains: checkedDomains(payload.rejected) };
+  // Aziende con il segnale verificato ma senza referente cercato (oltre il tetto del giro):
+  // il giro successivo le usa per prime, senza una nuova ricerca AI.
+  payload.stats = { ...payload.stats, checked_domains: checkedDomains(payload.rejected), reserve: reserveOf(payload.rejected) };
   let apiCalls = 0;
   const { data: run } = await db.rpc("check_run", { p_run: evt.run_id, p_token_hash: tokenHash }).maybeSingle();
   const open = run && ["dispatched", "running"].includes((run as { status: string }).status);
@@ -127,7 +129,32 @@ function checkedDomains(rejected: unknown[] | undefined) {
   for (const r of rejected ?? []) {
     const x = r as { reason?: string; company?: { domain?: string } };
     const d = String(x?.company?.domain ?? "").trim().toLowerCase();
-    if (d && x.reason !== "arricchimento_da_riprovare") out.add(d);
+    if (d && x.reason !== "arricchimento_da_riprovare" && x.reason !== "riserva") out.add(d);
   }
   return [...out].slice(0, 500);
+}
+
+function reserveOf(rejected: unknown[] | undefined) {
+  type R = {
+    reason?: string;
+    company?: { name?: string; website?: string; country?: string; city?: string; industry?: string; size_hint?: string; technologies?: unknown };
+    sources?: { discovery_url?: string; contact_page?: string };
+    signals?: unknown;
+  };
+  return (rejected ?? [])
+    .map((r) => r as R)
+    .filter((r) => r?.reason === "riserva" && r.company?.website && Array.isArray(r.signals) && r.signals.length)
+    .slice(0, 40)
+    .map((r) => ({
+      company_name: r.company?.name ?? "",
+      website: r.company?.website ?? "",
+      country: r.company?.country ?? "",
+      city: r.company?.city ?? "",
+      industry: r.company?.industry ?? "",
+      size_hint: r.company?.size_hint ?? "",
+      technologies: Array.isArray(r.company?.technologies) ? r.company.technologies : [],
+      source_url: r.sources?.discovery_url ?? "",
+      contact_page: r.sources?.contact_page ?? "",
+      signals: r.signals,
+    }));
 }

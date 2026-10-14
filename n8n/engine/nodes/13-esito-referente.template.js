@@ -1,7 +1,9 @@
-// Esito della ricerca del referente: controlla la risposta e completa il prospect.
-// Senza una persona valida l'azienda esce dal flusso (nessuna ricerca email).
+// Esito della ricerca del referente (__FASE__): controlla la risposta e completa il prospect.
+// SITO: letto dal testo del sito; se non c'è si passa alla ricerca web (_cerca_web).
+// WEB: ricerca web; senza una persona valida l'azienda esce dal flusso (nessuna ricerca email).
+const FASE = '__FASE__';
 const job = $('Valida richiesta').first().json;
-const p = $('Serve referente?').item.json;
+const { _claude_ref, _claude_sito, ...p } = $('__ORIGINE__').item.json;
 const r = $json;
 
 const norm = (v) => String(v ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -31,18 +33,27 @@ const persona = dati && typeof dati.person === 'object' ? dati.person : null;
 // Consumo di Claude per questa ricerca del referente (sommato in «Classifica e prepara risultati»).
 const u = r.usage || {};
 const out = {
-  ...p, _serve_referente: false, enrichment_lookups: p.enrichment_lookups || 0,
-  ai_input_tokens: Number(u.input_tokens) || 0,
-  ai_output_tokens: Number(u.output_tokens) || 0,
-  ai_web_searches: Number(u.server_tool_use?.web_search_requests) || 0
+  ...p, _serve_referente: false, _cerca_web: false, enrichment_lookups: p.enrichment_lookups || 0,
+  ai_input_tokens: (Number(p.ai_input_tokens) || 0) + (Number(u.input_tokens) || 0),
+  ai_output_tokens: (Number(p.ai_output_tokens) || 0) + (Number(u.output_tokens) || 0),
+  ai_web_searches: (Number(p.ai_web_searches) || 0) + (Number(u.server_tool_use?.web_search_requests) || 0)
 };
 const nome = pulito(persona?.full_name, 120);
 const parti = norm(nome).split(' ').filter(x => x.length > 1);
-const fonte = urlPulito(persona?.source_url);
+// Dal sito la fonte deve essere una delle pagine lette (altrimenti la homepage).
+const pagine = Array.isArray(p._pagine_referente) ? p._pagine_referente : [];
+const fonte = FASE === 'SITO'
+  ? (pagine.find(x => urlPulito(x) && urlPulito(x) === urlPulito(persona?.source_url)) || urlPulito(pagine[0]))
+  : urlPulito(persona?.source_url);
+// Note dell'AI al posto del nome («cognome non indicato») non sono un referente.
+const NOTE_AI = /\b(non|nd|cognome|nome|surname|name|unknown|anonim[oa]|indicat\w*|specificat\w*|disponibil\w*|sconosciut\w*)\b/i;
 
-if (r.type === 'error' || r.error) {
+const valido = persona && parti.length >= 2 && parti.length <= 5 && !/[()\[\]{}0-9@:;?!/]/.test(nome) && !NOTE_AI.test(nome) && fonte;
+if (FASE === 'SITO' && (r.type === 'error' || r.error || !valido)) {
+  out._cerca_web = true;
+} else if (r.type === 'error' || r.error) {
   out._scarto_segnale = 'referente_errore_ricerca';
-} else if (!persona || parti.length < 2 || !fonte) {
+} else if (!valido) {
   out._scarto_segnale = 'referente_non_trovato';
 } else {
   const kp = `${norm(nome)}|${p.company_key}`;
@@ -67,4 +78,6 @@ if (r.type === 'error' || r.error) {
     });
   }
 }
+delete out._pagine_referente;
+delete out._referente_sito;
 return { json: out };

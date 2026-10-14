@@ -43,6 +43,8 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Motore: workflow di errore n8n «Lead Engine | Errori» → `POST /api/engine/error`: la ricerca si chiude subito e i crediti tornano (pubblicato e impostato come errorWorkflow del motore)
 - [x] Prova completa "solo nominative" (4/5, 3 da Icypeas) e "mista" (10/10)
 - [x] Ritocchi grafici: bianco e grigi al posto del crema, verde smeraldo più chiaro, riepilogo "Dall'ultimo accesso" in panoramica (migrazione `20261015000009_activity.sql`)
+- [x] Collaudo 14/10 (3 ricerche opportunità): costo quasi tutto nella lettura delle pagine web; ricerca in due passaggi, tetto ai referenti, riserva tra i giri, referente prima dal sito
+- [ ] Ripetere le 3 ricerche di collaudo dopo i due passaggi e confrontare lead per giro e costo per lead
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
 - [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale
 

@@ -1,19 +1,38 @@
 // Segnali dal sito (regole in docs/07-segnali.md), calcolati sull'HTML della
-// homepage già scaricata, PRIMA delle pagine successive e di Icypeas: chi non
-// ha il segnale richiesto non costa altro. Ogni segnale ha un esito:
+// homepage PRIMA della ricerca del referente, delle email e di Icypeas: chi non
+// ha il segnale richiesto non costa altro. Prepara anche il testo della homepage
+// e la pagina «chi siamo» per cercare il referente sul sito. Ogni segnale ha un esito:
 //   pass -> presente (con la prova), fail -> assente, undetermined -> non dimostrabile.
 // "Non determinabile" non conta mai come superato.
 const job = $('Valida richiesta').first().json;
-const p = $('Estrai email homepage').item.json;
+const base = $('Serve controllo sito?').item.json;
 const sg = job.target.signals;
 const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
 const DECISIVI = ['job_ad', 'no_https', 'no_mobile', 'outdated_cms', 'single_language']; // gli indicativi non decidono mai
-const richiesti = sg.codes.filter(c => SITO.includes(c));
-if (!richiesti.length) return { json: p };
+const richiesti = base._riserva ? [] : sg.codes.filter(c => SITO.includes(c));
 
-const html = String($('HTTP - Homepage').item.json.html ?? '');
+const html = String($('HTTP - Sito (segnali)').item.json.html ?? '');
 const testo = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<noscript[\s\S]*?<\/noscript>/gi, ' ')
   .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/&copy;|&#169;/gi, '©').replace(/\s+/g, ' ').trim();
+
+// Per il referente: testo della homepage e la pagina più adatta (chi siamo, team, note legali, contatti).
+let paginaReferente = '';
+if (base._serve_referente) {
+  const dom = String(base.domain || '');
+  const origine = (String(base.website).match(/^(https?:\/\/[^\/?#]+)/i) || [])[1] || '';
+  const assoluto = (h) => /^https?:\/\//i.test(h) ? h : h.startsWith('//') ? 'https:' + h : h.startsWith('/') ? origine + h : origine + '/' + h.replace(/^\.\//, '');
+  const link = [...html.matchAll(/href\s*=\s*["']([^"'#]+)["']/gi)].map(m => assoluto(m[1].trim()))
+    .filter(u => { const h = u.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split(/[/?#:]/)[0]; return dom && (h === dom || h.endsWith('.' + dom)); })
+    .filter(u => !/\.(pdf|jpe?g|png|gif|svg|webp|zip|css|js)(\?|$)/i.test(u))
+    .filter(u => u.replace(/\/+$/, '') !== String(base.website).replace(/\/+$/, ''));
+  const PRIORITA = [/chi-?siamo|chi_siamo|about|azienda|storia|team|staff|lo-studio|profilo|who-we-are|uber-uns|ueber-uns|quienes-somos|qui-sommes/i,
+    /note-legali|impressum|aviso-legal|mentions-legales|colofon/i, /contatt|contact|kontakt/i];
+  for (const re of PRIORITA) { paginaReferente = link.find(u => re.test(u)) || ''; if (paginaReferente) break; }
+  if (!paginaReferente && base.contact_page) paginaReferente = base.contact_page;
+}
+const aux = base._serve_referente ? { _testo_home: testo.slice(0, 6000), _pagina_referente: paginaReferente } : {};
+const p = { ...base, ...aux };
+if (!richiesti.length) return { json: p };
 const leggibile = html.length > 200 && /<html|<body|<head/i.test(html);
 const contenuto = testo.length >= 200;
 const anno = Number(job.today.slice(0, 4));

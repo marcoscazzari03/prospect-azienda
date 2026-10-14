@@ -308,9 +308,11 @@ else:
              output="{ output: '', _continua: false }"))
     add("""const riunisciRicerca = merge({
   version: 3.2,
-  config: { name: 'Riunisci ricerca', parameters: { mode: 'append', numberInputs: 2 } }
+  config: { name: 'Riunisci ricerca', parameters: { mode: 'append', numberInputs: 3 } }
 });
 """)
+    # Giro coperto dalla riserva dei giri precedenti: nessuna ricerca AI.
+    add(if_node("serveRicercaAI", "Serve ricerca AI?", "{{ $json._salta === true }}", "boolean", "false"))
 
 add(code("normalizzaAI", "Normalizza output AI", js("03-normalizza-output-ai.js"), mode="runOnceForEachItem",
          output="{ lotto: 1, stato_lotto: 'OK', candidates: [] }"))
@@ -333,29 +335,14 @@ add("""const riunisciAnnunci = merge({
 });
 """)
 add(if_node("segnaleOk", "Segnale ok?", "{{ $json._scarto_segnale ?? '' }}", "string", "empty"))
-# Annunci in due passaggi: referente cercato solo per le aziende con annuncio verificato.
-add(if_node("serveReferente", "Serve referente?", "{{ $json._serve_referente === true }}", "boolean", "true"))
-add(code("preparaRef", "Prepara ricerca referente", js("12-prepara-referente.js"), mode="runOnceForEachItem",
-         output="{ company_name: 'Acme Srl', _claude_ref: {} }"))
-add(claude_http("claudeRef", "HTTP - Claude referente", "{{ JSON.stringify($json._claude_ref) }}"))
-add(code("esitoRef", "Esito ricerca referente", js("13-esito-referente.js"), mode="runOnceForEachItem",
-         output="{ company_name: 'Acme Srl', full_name: 'Mario Rossi' }"))
-add("""const riunisciRef = merge({
-  version: 3.2,
-  config: { name: 'Riunisci referenti', parameters: { mode: 'append', numberInputs: 2 } }
-});
-""")
-add(if_node("referenteOk", "Referente ok?", "{{ $json._scarto_segnale ?? '' }}", "string", "empty"))
-
-add(http_page("homepage", "HTTP - Homepage", "{{ $json.website }}"))
-add(code("estraiHome", "Estrai email homepage",
-         estrai("HOMEPAGE", "Referente ok?", "$('Referente ok?').item.json.website"),
-         mode="runOnceForEachItem", output="{ email_site: 'info@acme.it', email_site_type: 'generic', page_1: 'https://acme.it/contatti', page_2: '' }"))
-# Segnali dal sito: controllo HTTPS (solo se richiesto), poi valutazione sull'HTML della homepage.
+# Ricerche con segnali: homepage scaricata e segnali dal sito controllati PRIMA del referente.
 CMS_RELEASES = json.dumps(json.loads((ROOT.parent.parent / "src" / "lib" / "domain" / "cms-releases.json").read_text(encoding="utf-8")), separators=(",", ":"))
+add(if_node("serveControlloSito", "Serve controllo sito?",
+            "{{ $('Valida richiesta').first().json.target.signals.codes.length > 0 }}", "boolean", "true"))
+add(http_page("sitoSegnali", "HTTP - Sito (segnali)", "{{ $json.website }}"))
 add(if_node("serveHttps", "Serve controllo HTTPS?",
             "{{ $('Valida richiesta').first().json.target.signals.codes.includes('no_https') }}", "boolean", "true"))
-add(http_page("controlloHttps", "HTTP - Controllo HTTPS", "{{ 'https://' + $json.domain + '/' }}", prop="https_body", timeout=8000))
+add(http_page("controlloHttps", "HTTP - Controllo HTTPS", "{{ 'https://' + $('Serve controllo sito?').item.json.domain + '/' }}", prop="https_body", timeout=8000))
 add("""const riunisciHttps = merge({
   version: 3.2,
   config: { name: 'Riunisci controllo HTTPS', parameters: { mode: 'append', numberInputs: 2 } }
@@ -364,6 +351,53 @@ add("""const riunisciHttps = merge({
 add(code("valutaSito", "Valuta segnali sito", js("14-valuta-segnali-sito.js", __CMS_RELEASES__=CMS_RELEASES), mode="runOnceForEachItem",
          output="{ company_name: 'Acme Srl', signals: [], technologies: ['wordpress'] }"))
 add(if_node("segnaliSitoOk", "Segnali sito ok?", "{{ $json._scarto_segnale ?? '' }}", "string", "empty"))
+add("""const riunisciSegnali = merge({
+  version: 3.2,
+  config: { name: 'Riunisci controllo sito', parameters: { mode: 'append', numberInputs: 2 } }
+});
+""")
+# Tetto alle ricerche del referente; le aziende in più restano in riserva per il giro dopo.
+add(code("scegliRef", "Scegli referenti", js("15-scegli-referenti.js"),
+         output="{ company_name: 'Acme Srl', _serve_referente: true }"))
+# Referente in due tentativi: prima dal testo del sito (senza ricerca web), poi dal web.
+add(if_node("serveReferente", "Serve referente?", "{{ $json._serve_referente === true }}", "boolean", "true"))
+add(if_node("servePaginaRef", "Serve pagina referente?", "{{ $json._pagina_referente ?? '' }}", "string", "notEmpty"))
+add(http_page("paginaRef", "HTTP - Pagina referente", "{{ $json._pagina_referente }}"))
+add("""const riunisciPaginaRef = merge({
+  version: 3.2,
+  config: { name: 'Riunisci pagina referente', parameters: { mode: 'append', numberInputs: 2 } }
+});
+""")
+add(code("preparaRefSito", "Prepara referente dal sito", js("16-prepara-referente-sito.js"), mode="runOnceForEachItem",
+         output="{ company_name: 'Acme Srl', _referente_sito: true, _claude_sito: {} }"))
+add(if_node("refSitoPossibile", "Testo del sito utile?", "{{ $json._referente_sito === true }}", "boolean", "true"))
+add(claude_http("claudeRefSito", "HTTP - Claude referente dal sito", "{{ JSON.stringify($json._claude_sito) }}"))
+add(code("esitoRefSito", "Esito referente dal sito",
+         js("13-esito-referente.template.js", __FASE__="SITO", __ORIGINE__="Prepara referente dal sito"), mode="runOnceForEachItem",
+         output="{ company_name: 'Acme Srl', full_name: 'Mario Rossi', _cerca_web: false }"))
+add(if_node("serveRefWeb", "Serve ricerca web referente?", "{{ $json._cerca_web === true }}", "boolean", "true"))
+add("""const riunisciRefWeb = merge({
+  version: 3.2,
+  config: { name: 'Riunisci ricerca web referente', parameters: { mode: 'append', numberInputs: 2 } }
+});
+""")
+add(code("preparaRef", "Prepara ricerca referente", js("12-prepara-referente.js"), mode="runOnceForEachItem",
+         output="{ company_name: 'Acme Srl', _claude_ref: {} }"))
+add(claude_http("claudeRef", "HTTP - Claude referente", "{{ JSON.stringify($json._claude_ref) }}"))
+add(code("esitoRef", "Esito ricerca referente",
+         js("13-esito-referente.template.js", __FASE__="WEB", __ORIGINE__="Prepara ricerca referente"), mode="runOnceForEachItem",
+         output="{ company_name: 'Acme Srl', full_name: 'Mario Rossi' }"))
+add("""const riunisciRef = merge({
+  version: 3.2,
+  config: { name: 'Riunisci referenti', parameters: { mode: 'append', numberInputs: 3 } }
+});
+""")
+add(if_node("referenteOk", "Referente ok?", "{{ $json._scarto_segnale ?? '' }}", "string", "empty"))
+
+add(http_page("homepage", "HTTP - Homepage", "{{ $json.website }}"))
+add(code("estraiHome", "Estrai email homepage",
+         estrai("HOMEPAGE", "Referente ok?", "$('Referente ok?').item.json.website"),
+         mode="runOnceForEachItem", output="{ email_site: 'info@acme.it', email_site_type: 'generic', page_1: 'https://acme.it/contatti', page_2: '' }"))
 add(if_node("servePagina2", "Serve pagina 2?", "{{ $json.page_1 }}", "string", "notEmpty"))
 add(http_page("pagina2", "HTTP - Pagina 2", "{{ $json.page_1 }}"))
 add(code("estraiP2", "Estrai email pagina 2",
@@ -463,7 +497,10 @@ add("""const nota = sticky(
 """)
 
 RICERCA_WIRING = """  .to(ricerca)
-""" if AI_PROVIDER == "openai" else """  .to(preparaClaude)
+""" if AI_PROVIDER == "openai" else """  .to(serveRicercaAI
+    .onTrue(preparaClaude)
+    .onFalse(riunisciRicerca.input(2)))
+  .add(preparaClaude)
   .to(claudeRicerca)
   .to(esitoClaude)
   .to(claudeInPausa
@@ -472,7 +509,7 @@ RICERCA_WIRING = """  .to(ricerca)
   .add(riunisciRicerca)
 """
 RICERCA_GROUP = "ricerca, modelloRicerca" if AI_PROVIDER == "openai" else \
-    "preparaClaude, claudeRicerca, esitoClaude, claudeInPausa, claudeSeguito, esitoClaude2, riunisciRicerca"
+    "serveRicercaAI, preparaClaude, claudeRicerca, esitoClaude, claudeInPausa, claudeSeguito, esitoClaude2, riunisciRicerca"
 
 add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v1)')
   .add(webhook)
@@ -493,26 +530,50 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .to(notificaVerifica)
   .add(riunisciAnnunci)
   .to(segnaleOk
-    .onTrue(serveReferente
-      .onTrue(preparaRef.to(claudeRef).to(esitoRef).to(riunisciRef.input(1)))
-      .onFalse(riunisciRef.input(0)))
+    .onTrue(serveControlloSito
+      .onTrue(sitoSegnali)
+      .onFalse(riunisciSegnali.input(0)))
     .onFalse(riunisciEsiti.input(3)))
-  .add(riunisciRef)
-  .to(referenteOk
-    .onTrue(homepage)
-    .onFalse(riunisciEsiti.input(4)))
-  .add(homepage)
-  .to(estraiHome)
+  .add(sitoSegnali)
   .to(serveHttps
     .onTrue(controlloHttps.to(riunisciHttps.input(1)))
     .onFalse(riunisciHttps.input(0)))
   .add(riunisciHttps)
   .to(valutaSito)
   .to(segnaliSitoOk
-    .onTrue(servePagina2
-      .onTrue(pagina2)
-      .onFalse(riunisciEmail.input(0)))
+    .onTrue(riunisciSegnali.input(1))
     .onFalse(riunisciEsiti.input(5)))
+  .add(riunisciSegnali)
+  .to(scegliRef)
+  .to(serveReferente
+    .onTrue(servePaginaRef
+      .onTrue(paginaRef.to(riunisciPaginaRef.input(1)))
+      .onFalse(riunisciPaginaRef.input(0)))
+    .onFalse(riunisciRef.input(0)))
+  .add(riunisciPaginaRef)
+  .to(preparaRefSito)
+  .to(refSitoPossibile
+    .onTrue(claudeRefSito)
+    .onFalse(riunisciRefWeb.input(1)))
+  .add(claudeRefSito)
+  .to(esitoRefSito)
+  .to(serveRefWeb
+    .onTrue(riunisciRefWeb.input(0))
+    .onFalse(riunisciRef.input(1)))
+  .add(riunisciRefWeb)
+  .to(preparaRef)
+  .to(claudeRef)
+  .to(esitoRef)
+  .to(riunisciRef.input(2))
+  .add(riunisciRef)
+  .to(referenteOk
+    .onTrue(homepage)
+    .onFalse(riunisciEsiti.input(4)))
+  .add(homepage)
+  .to(estraiHome)
+  .to(servePagina2
+    .onTrue(pagina2)
+    .onFalse(riunisciEmail.input(0)))
   .add(pagina2)
   .to(estraiP2)
   .to(servePagina3
@@ -538,7 +599,8 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .add(nota)
   .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
   .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, """ + RICERCA_GROUP + """, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
-  .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk, serveReferente, preparaRef, claudeRef, esitoRef, riunisciRef, referenteOk, serveHttps, controlloHttps, riunisciHttps, valutaSito, segnaliSitoOk], { description: 'Annuncio di lavoro riaperto e verificato (titolo, azienda, data) prima di cercare le email.' })
+  .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk, serveControlloSito, sitoSegnali, serveHttps, controlloHttps, riunisciHttps, valutaSito, segnaliSitoOk, riunisciSegnali], { description: 'Annuncio di lavoro verificato e segnali controllati sul sito PRIMA di cercare il referente.' })
+  .group('2c - Referente', [scegliRef, serveReferente, servePaginaRef, paginaRef, riunisciPaginaRef, preparaRefSito, refSitoPossibile, claudeRefSito, esitoRefSito, serveRefWeb, riunisciRefWeb, preparaRef, claudeRef, esitoRef, riunisciRef, referenteOk], { description: 'Referente solo per chi ha il segnale, entro un tetto: prima dal testo del sito, poi con la ricerca web.' })
   .group('3 - Email dal sito', [homepage, estraiHome, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
   .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })
   .group('5 - Consegna', [classifica, inviaRisultati], { description: 'Classifica per modalita email, calcola qualita e invia i risultati al backend con retry.' });

@@ -54,15 +54,28 @@ async function loadExclusions(orgId: string, contactsPerCompany: number) {
   return { personKeys, domains: [...domains] };
 }
 
-// Aziende già controllate e scartate nei giri precedenti di questa ricerca.
-async function loadCheckedDomains(searchId: string) {
-  const { data } = await createAdminClient().from("search_runs").select("stats").eq("search_id", searchId).limit(50);
-  const out = new Set<string>();
+// Memoria dei giri precedenti di questa ricerca: aziende già controllate e scartate
+// (da non riproporre) e riserva di aziende con il segnale già verificato, rimaste
+// senza referente (il prossimo giro le usa per prime, senza nuova ricerca AI).
+async function loadRunMemory(searchId: string) {
+  const { data } = await createAdminClient()
+    .from("search_runs").select("stats").eq("search_id", searchId)
+    .order("created_at", { ascending: false }).limit(50);
+  const checked = new Set<string>();
   for (const r of data ?? []) {
     const list = (r.stats as { checked_domains?: unknown } | null)?.checked_domains;
-    if (Array.isArray(list)) for (const d of list) if (typeof d === "string") out.add(d);
+    if (Array.isArray(list)) for (const d of list) if (typeof d === "string") checked.add(d);
   }
-  return [...out];
+  const host = (u: string) => u.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split(/[/?#:]/)[0];
+  const reserve: Record<string, unknown>[] = [];
+  const seen = new Set<string>();
+  // Solo la riserva del giro più recente che ne ha una: quelle più vecchie sono già state usate.
+  const latest = (data ?? []).find((r) => Array.isArray((r.stats as { reserve?: unknown } | null)?.reserve));
+  for (const x of ((latest?.stats as { reserve?: unknown[] } | null)?.reserve ?? []) as Record<string, unknown>[]) {
+    const d = host(String(x?.website ?? ""));
+    if (d && !checked.has(d) && !seen.has(d)) { seen.add(d); reserve.push(x); }
+  }
+  return { checked: [...checked], reserve: reserve.slice(0, 40) };
 }
 
 // Verifiche a pagamento ancora disponibili per un giro: il minimo tra quanto
@@ -114,12 +127,12 @@ export async function dispatchRun(searchId: string) {
   if (error || !run) return finalizeSearch(searchId, "Impossibile avviare il giro di ricerca");
   const runId = (run as { id: string }).id;
 
-  const [exclusions, enrichmentBudget, checked] = await Promise.all([
+  const [exclusions, enrichmentBudget, memory] = await Promise.all([
     loadExclusions(search.org_id, search.contacts_per_company),
     loadEnrichmentBudget(search),
-    loadCheckedDomains(searchId),
+    loadRunMemory(searchId),
   ]);
-  exclusions.domains = [...new Set([...checked, ...exclusions.domains])];
+  exclusions.domains = [...new Set([...memory.checked, ...exclusions.domains])];
   const payload = buildEnginePayload({
     search,
     plan,
@@ -128,6 +141,7 @@ export async function dispatchRun(searchId: string) {
     callbackUrl: `${env.appUrl()}/api/engine/callback`,
     exclusions,
     enrichmentBudget,
+    reserve: memory.reserve,
   });
   // Il tetto concesso a questo giro conta subito nel budget del mese.
   await db.from("search_runs").update({ enrichment_cap: payload.limits.enrichment_cap }).eq("id", runId);

@@ -11,7 +11,7 @@ const CALLBACK_AMMESSI = [
 
 // Modello AI del motore: per cambiare basta questa riga (es. 'claude-opus-5-5').
 // Il ritorno a OpenAI si fa ricollegando i nodi OpenAI rimasti nel workflow.
-const AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', effort: 'medium', max_searches: 12, max_ref_searches: 3 };
+const AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', effort: 'medium', max_searches: 12, max_ref_searches: 2 };
 
 const raw = $input.first().json;
 const b = raw.body && typeof raw.body === 'object' ? raw.body : raw;
@@ -79,7 +79,16 @@ const job = {
     max_lots: clamp((b.limits || {}).max_lots, 1, 20, 6),
     candidates_per_lot: clamp((b.limits || {}).candidates_per_lot, 5, 30, 20),
     enrichment_cap: clamp((b.limits || {}).enrichment_cap, 0, 500, 0)
-  }
+  },
+  // Aziende con segnale già verificato nei giri precedenti (gli URL li ricontrolla la deduplica).
+  reserve: (Array.isArray(b.reserve) ? b.reserve : []).slice(0, 40).map(r => ({
+    company_name: str(r?.company_name, 200), website: str(r?.website, 300), country: str(r?.country, 80),
+    city: str(r?.city, 80), industry: str(r?.industry, 120), size_hint: str(r?.size_hint, 60),
+    technologies: list(r?.technologies, 10), source_url: str(r?.source_url, 500), contact_page: str(r?.contact_page, 500),
+    signals: (Array.isArray(r?.signals) ? r.signals : []).slice(0, 5)
+      .filter(x => CODICI_SEGNALI.includes(x?.code))
+      .map(x => ({ code: x.code, status: 'pass', evidence: x.evidence && typeof x.evidence === 'object' ? x.evidence : {} }))
+  })).filter(r => r.company_name && r.website && r.signals.length)
 };
 
 if (!/^[0-9a-f-]{8,64}$/i.test(job.job_id)) errori.push('job_id mancante o non valido');
@@ -103,11 +112,31 @@ const SEGNALI_SITO = {
   single_language: 'sito in una sola lingua', stale_copyright: 'sito fermo da anni', under_construction: 'sito in costruzione',
   no_booking_engine: 'nessun sistema di prenotazione online'
 };
-const SOVRACAMPIONAMENTO = (job.email_mode === 'personal_only' ? 2.6 : 1.8) * (conAnnunci ? 1.4 : 1) * (conSegnaliSito ? 1.6 : 1);
-const lotti = Math.min(
-  job.limits.max_lots,
-  Math.max(1, Math.ceil(job.quantity * SOVRACAMPIONAMENTO / job.limits.candidates_per_lot))
-);
+let lotti;
+if (job.target.signals.codes.length) {
+  // Due passaggi: l'AI cerca solo aziende (molte per lotto, costano poco), il motore
+  // controlla i segnali gratis e cerca il referente solo per chi li ha, fino a un tetto:
+  // i lead richiesti più un margine per referenti ed email non trovati.
+  job.limits.referenti_max = Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2.2 : 1.5)) + 1;
+  job.limits.candidates_per_lot = 30;
+  // Quota attesa di aziende con il segnale (collaudo del 14/10: CMS vecchio ~20%,
+  // una sola lingua ~55%, annunci verificati ~60%).
+  const QUOTA = { job_ad: 0.6, no_https: 0.1, no_mobile: 0.15, outdated_cms: 0.25, single_language: 0.5 };
+  const quote = job.target.signals.codes.map(c => QUOTA[c] ?? 0.3);
+  const quota = job.target.signals.match === 'all'
+    ? quote.reduce((a, q) => a * q, 1)
+    : Math.min(0.8, 1 - quote.reduce((a, q) => a * (1 - q), 1));
+  const daCercare = Math.max(0, job.limits.referenti_max - job.reserve.length);
+  // Riserva sufficiente: nessuna nuova ricerca AI in questo giro.
+  lotti = daCercare === 0 ? 0 : Math.min(job.limits.max_lots, Math.max(1, Math.ceil(daCercare / Math.max(quota, 0.1) / job.limits.candidates_per_lot)));
+  job.ai = { ...AI, max_searches: 8 };
+} else {
+  const SOVRACAMPIONAMENTO = job.email_mode === 'personal_only' ? 2.6 : 1.8;
+  lotti = Math.min(
+    job.limits.max_lots,
+    Math.max(1, Math.ceil(job.quantity * SOVRACAMPIONAMENTO / job.limits.candidates_per_lot))
+  );
+}
 
 const paesi = job.target.country_names.length ? job.target.country_names : job.target.countries;
 const brief = [

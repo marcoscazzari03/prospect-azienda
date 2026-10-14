@@ -147,7 +147,8 @@ for (const p of prospects) {
 // Ordine: prima le nominative e i punteggi più alti.
 leads.sort((a, b) => b.quality.score - a.quality.score);
 
-const lotti = $('Normalizza output AI').all().map(i => i.json);
+// Lotti davvero cercati (un giro coperto dalla riserva non ne fa nessuno).
+const lotti = $('Normalizza output AI').all().map(i => i.json).filter(l => !l.saltato);
 const dedup = vuoto ? items[0].stats : (prospects.find(j => j._stats_deduplica)?._stats_deduplica || {});
 const motivi = rejected.reduce((m, r) => ({ ...m, [r.reason]: (m[r.reason] || 0) + 1 }), {});
 
@@ -174,6 +175,8 @@ return [{
       rejected: rejected.length,
       rejected_reasons: motivi,
       signal_discards: Object.fromEntries(Object.entries(motivi).filter(([k]) => /^(annuncio_|segnale_|referente_)/.test(k))),
+      reserve_count: motivi.riserva || 0,
+      from_reserve: prospects.filter(p => p._riserva).length,
       leads_with_signals: leads.filter(l => l.signals.length).length
     },
     usage: {

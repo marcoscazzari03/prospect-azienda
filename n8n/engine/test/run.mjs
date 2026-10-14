@@ -108,6 +108,9 @@ assert.equal(tipoDi('<a href="mailto:segreteria.rossi@gmail.com">x</a>'), 'gener
 assert.equal(tipoDi('<a href="mailto:studiodentisticorossi@gmail.com">x</a>'), 'generic');
 assert.equal(tipoDi('<a href="mailto:info-rossi@acme.it">x</a>'), 'generic');
 assert.equal(tipoDi('<a href="mailto:mario.rossi@gmail.com">x</a>'), 'personal');
+assert.equal(tipoDi('<a href="mailto:rossicostruzionisrl@libero.it">x</a>'), 'generic', 'casella aziendale col cognome');
+assert.equal(tipoDi('<a href="mailto:rossicostruzioni@acme.it">x</a>'), 'generic');
+assert.equal(tipoDi('<a href="mailto:mrossi74@gmail.com">x</a>'), 'personal');
 console.log('ok  estrazione email, offuscamento, PEC/noreply scartate, pagine successive, caselle di ufficio');
 
 // 4. Classificazione finale per modalità
@@ -160,7 +163,21 @@ const bodyAnnunci = (fam, extra = {}) => ({ ...body, today: '2026-10-13', target
 const [jobA] = run(src('01-valida-richiesta.js'), { input: [{ body: bodyAnnunci('it_systems') }] }).map(i => i.json);
 assert.deepEqual(jobA.target.signals.codes, ['job_ad']);
 assert.equal(jobA.today, '2026-10-13');
-assert.ok(jobA.lotti_previsti > job.lotti_previsti, 'più lotti: una parte degli annunci verrà scartata');
+assert.ok(jobA.lotti_previsti >= 1);
+assert.equal(jobA.limits.candidates_per_lot, 30, 'due passaggi: solo aziende, tante per lotto');
+assert.equal(jobA.limits.referenti_max, Math.ceil(jobA.quantity * (jobA.email_mode === 'personal_only' ? 2.2 : 1.5)) + 1, 'tetto ai referenti');
+assert.equal(jobA.ai.max_searches, 8);
+// Riserva sufficiente: nessuna ricerca AI.
+const riserva = Array.from({ length: 40 }, (_, i) => ({ company_name: `R${i}`, website: `https://r${i}.it`, signals: [{ code: 'job_ad', evidence: { url: 'https://r.it/a' } }] }));
+const [conRiserva] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...bodyAnnunci('it_systems'), quantity: 3, reserve: riserva } }] }).map(i => i.json);
+assert.equal(conRiserva.lotti_previsti, 0);
+assert.equal(conRiserva.reserve[0].signals[0].status, 'pass');
+const [saltato] = run(src('02-prepara-lotti.js'), { nodes: { 'Valida richiesta': [conRiserva] }, input: [{ output: '' }] }).map(i => i.json);
+assert.equal(saltato._salta, true);
+const dedR = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [{ ...conRiserva, exclusions: { domains: ['r1.it'], person_keys: [] } }] }, input: [{ candidates: [], lotto: 1 }] }).map(i => i.json);
+assert.equal(dedR[0].company_name, 'R0');
+assert.equal(dedR[0]._riserva, true);
+assert.ok(!dedR.some(p => p.domain === 'r1.it'), 'riserva già acquistata esclusa');
 assert.match(jobA.planner_prompt, /ANNUNCI DI LAVORO/);
 const [senzaFam] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, target: { ...body.target, signals: { codes: ['job_ad', 'inventato'] } } } }] }).map(i => i.json);
 assert.deepEqual(senzaFam.target.signals.codes, [], 'job_ad senza figure e codici sconosciuti ignorati');
@@ -270,9 +287,9 @@ assert.equal(senzaPersona[0].source_url, 'https://brugola.com/posizione-aperta-i
 assert.equal(senzaPersona[0].person_key, '|brugola.com');
 const reqRef = run(src('12-prepara-referente.js'), { nodes: { 'Valida richiesta': [jobA] }, json: senzaPersona[0] }).json._claude_ref;
 assert.match(reqRef.messages[0].content, /Brugola Spa/);
-assert.equal(reqRef.tools[0].max_uses, 3);
-const esitoRef = (testoRisposta, extra = {}) => run(src('13-esito-referente.js'), {
-  nodes: { 'Valida richiesta': [jobA], 'Serve referente?': [senzaPersona[0]] },
+assert.equal(reqRef.tools[0].max_uses, 2);
+const esitoRef = (testoRisposta, extra = {}) => run(src('13-esito-referente.template.js', { __FASE__: 'WEB', __ORIGINE__: 'Prepara ricerca referente' }), {
+  nodes: { 'Valida richiesta': [jobA], 'Prepara ricerca referente': [{ ...senzaPersona[0], _claude_ref: {} }] },
   json: { content: [{ type: 'text', text: testoRisposta }], ...extra }
 }).json;
 const trovato = esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"CEO e titolare","source_url":"https://brugola.com/chi-siamo","contact_page":"https://brugola.com/contatti","linkedin_url":""}}');
@@ -287,7 +304,37 @@ assert.equal(esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"CEO",
 const altroSito = esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"CEO","source_url":"https://registro.it/x","contact_page":"https://evil.example.org/c"}}');
 assert.equal(altroSito.contact_page, '', 'pagina contatti di un altro dominio ignorata (verrebbe scaricata)');
 assert.equal(esitoRef('', { type: 'error', error: { message: 'x' } })._scarto_segnale, 'referente_errore_ricerca');
-console.log('ok  annunci in due passaggi: aziende senza referente, referente mirato, controlli');
+assert.equal(esitoRef('{"person":{"full_name":"Massimo (cognome non indicato)","job_title":"Titolare","source_url":"https://brugola.com/x"}}')._scarto_segnale, 'referente_non_trovato', 'nota dell AI al posto del nome');
+
+// Referente dal sito: testo già scaricato, senza ricerca web; se manca si passa al web.
+const conTesto = { ...senzaPersona[0], _testo_home: 'Brugola Spa, viti e bulloni dal 1926. '.repeat(10), _pagina_referente: 'https://brugola.com/chi-siamo' };
+const reqSito = run(src('16-prepara-referente-sito.js'), { nodes: { 'Valida richiesta': [jobA], 'Serve pagina referente?': [conTesto] },
+  json: { html: '<p>Fondata da Marco Brugola, CEO e titolare.</p>' } }).json;
+assert.equal(reqSito._referente_sito, true);
+assert.equal(reqSito._claude_sito.tools, undefined, 'nessuna ricerca web');
+assert.match(reqSito._claude_sito.messages[0].content, /Fondata da Marco Brugola/);
+assert.equal(reqSito._testo_home, undefined, 'testo non portato avanti');
+const esitoSito = (testoRisposta) => run(src('13-esito-referente.template.js', { __FASE__: 'SITO', __ORIGINE__: 'Prepara referente dal sito' }), {
+  nodes: { 'Valida richiesta': [jobA], 'Prepara referente dal sito': [reqSito] },
+  json: { content: [{ type: 'text', text: testoRisposta }], usage: { input_tokens: 3000, output_tokens: 80 } }
+}).json;
+const dalSito = esitoSito('{"person":{"full_name":"Marco Brugola","job_title":"CEO e titolare","source_url":"https://brugola.com/chi-siamo"}}');
+assert.equal(dalSito._cerca_web, false);
+assert.equal(dalSito.person_key, 'marco brugola|brugola.com');
+assert.equal(dalSito.source_url, 'https://brugola.com/chi-siamo');
+assert.equal(dalSito.ai_input_tokens, 3000);
+assert.equal(esitoSito('{"person":{"full_name":"Marco Brugola","job_title":"CEO","source_url":"https://altro.it/x"}}').source_url, 'https://brugola.com/', 'fonte fuori dalle pagine lette: la homepage');
+const nonTrovato = esitoSito('{"person":null}');
+assert.equal(nonTrovato._cerca_web, true);
+assert.equal(nonTrovato._scarto_segnale, undefined);
+
+// Tetto ai referenti: oltre il tetto le aziende restano in riserva (prima la riserva già pagata).
+const scegli = src('15-scegli-referenti.js');
+const conSegnaleRef = (n, extra = {}) => ({ company_name: `A${n}`, domain: `a${n}.it`, _serve_referente: true, signals: [{ code: 'no_mobile', status: 'pass' }], ...extra });
+const sceltiRef = run(scegli, { nodes: { 'Valida richiesta': [{ ...jobA, limits: { ...jobA.limits, referenti_max: 2 } }] },
+  input: [conSegnaleRef(1), conSegnaleRef(2), { company_name: "Nominativo", _serve_referente: false }, conSegnaleRef(3, { _riserva: true })] }).map(i => i.json);
+assert.deepEqual(sceltiRef.map(p => p._scarto_segnale ?? 'ok'), ['ok', 'riserva', 'ok', 'ok']);
+console.log('ok  annunci in due passaggi: aziende senza referente, referente dal sito e dal web, tetto e riserva');
 
 // 9. Segnali dal sito sulle pagine di prova (fase 2)
 const cmsJson = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'src', 'lib', 'domain', 'cms-releases.json'), 'utf8');
@@ -296,7 +343,7 @@ const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale
 const jobSito = (codes, match = 'any') => ({ ...job, today: '2026-10-13', target: { ...job.target, signals: { codes, match, job_families: [], max_age_days: 60 } } });
 const prospettoSito = { company_name: 'Prova', website: 'https://prova.it/', domain: 'prova.it', signals: [] };
 const valutaFile = (file, codes = SITO, https = undefined, match = 'any') => run(valuta, {
-  nodes: { 'Valida richiesta': [jobSito(codes, match)], 'Estrai email homepage': [prospettoSito], 'HTTP - Homepage': [{ html: readFileSync(join(fx, file), 'utf8') }] },
+  nodes: { 'Valida richiesta': [jobSito(codes, match)], 'Serve controllo sito?': [prospettoSito], 'HTTP - Sito (segnali)': [{ html: readFileSync(join(fx, file), 'utf8') }] },
   json: https ?? prospettoSito
 }).json;
 for (const [file, info] of Object.entries(attesi)) {
@@ -325,7 +372,7 @@ const httpsCert = valutaFile('site-modern.html', ['no_https'], { error: { messag
 assert.equal(httpsCert.signals[0].status, 'pass');
 const httpsBoh = valutaFile('site-modern.html', ['no_https'], { error: { message: 'ETIMEDOUT' } });
 assert.equal(httpsBoh.signals[0].status, 'undetermined');
-const senzaSegnali = run(valuta, { nodes: { 'Valida richiesta': [job], 'Estrai email homepage': [prospettoSito], 'HTTP - Homepage': [{ html: '' }] }, json: prospettoSito }).json;
+const senzaSegnali = run(valuta, { nodes: { 'Valida richiesta': [job], 'Serve controllo sito?': [prospettoSito], 'HTTP - Sito (segnali)': [{ html: '' }] }, json: prospettoSito }).json;
 assert.deepEqual(senzaSegnali, prospettoSito, 'ricerche senza segnali: nessun cambiamento');
 console.log('ok  segnali dal sito: viewport, CMS, lingue, copyright, costruzione, booking, HTTPS, decisione');
 console.log('\nTutti i test superati.');

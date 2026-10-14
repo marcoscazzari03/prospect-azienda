@@ -49,6 +49,12 @@ const chiaveAzienda = (sito) => {
 const NON_UFFICIALI = /(^|\.)(linkedin|facebook|instagram|twitter|x|youtube|tiktok|google|goo|bing|yelp|trustpilot|tripadvisor|glassdoor|indeed|crunchbase|zoominfo|rocketreach|apollo|dnb|bloomberg|wikipedia|kompass|europages|infobel|paginegialle|paginebianche|paginasamarillas|yellowpages|gelbeseiten|pagesjaunes|herold|panoramafirm|firmy|zlatestranky|cylex|hotfrog|yell|192|houzz|clutch|g2|capterra|amazon|ebay|etsy|medium|wordpress|blogspot|wixsite|reddit|quora|ufficiocamerale|registroimprese|reportaziende|informazione-aziende|atoka|companieshouse|northdata|opencorporates)\.[a-z.]+$/;
 
 const parti = (nome) => norm(nome).split(' ').filter(p => p.length > 1);
+// Nome di una persona reale: niente note dell'AI («cognome non indicato»), parentesi o numeri.
+const NOTE_AI = /\b(non|nd|cognome|nome|surname|name|unknown|anonim[oa]|indicat\w*|specificat\w*|disponibil\w*|sconosciut\w*)\b/i;
+const nomeValido = (nome) => {
+  const n = String(nome ?? '').trim();
+  return parti(n).length >= 2 && parti(n).length <= 5 && !/[()\[\]{}0-9@:;?!/]/.test(n) && !NOTE_AI.test(n);
+};
 const chiavePersona = (nome, dominio) => `${norm(nome)}|${dominio}`;
 
 const escludiDomini = new Set(job.exclusions.domains.map(d => chiaveAzienda(d)));
@@ -93,6 +99,9 @@ const coerenzaRuolo = (titolo) => {
 
 // Annuncio di lavoro (segnale job_ad): l'URL passa dagli stessi controlli anti-SSRF.
 const annunciRichiesti = job.target.signals.codes.includes('job_ad');
+// Con i segnali la ricerca va in due passaggi: prima le aziende, poi il referente
+// solo per chi ha il segnale (si paga la ricerca del referente solo quando serve).
+const dueFasi = job.target.signals.codes.length > 0;
 const annuncioObbligatorio = annunciRichiesti && (job.target.signals.codes.length === 1 || job.target.signals.match === 'all');
 
 const visti = new Set();
@@ -101,20 +110,46 @@ const scarti = {};
 const scarta = (m) => { scarti[m] = (scarti[m] || 0) + 1; };
 const out = [];
 
+// Riserva: aziende con il segnale GIÀ verificato nei giri precedenti di questa
+// ricerca, rimaste senza referente. Vanno per prime e non costano una nuova ricerca AI.
+for (const r of job.reserve || []) {
+  const sito = urlPulito(r.website, 300);
+  const dominio = host(sito);
+  const chiave = chiaveAzienda(sito);
+  if (!r.company_name || !dominio || !dominio.includes('.') || NON_UFFICIALI.test(dominio)) continue;
+  if (escludiDomini.has(chiave) || visti.has(`|${chiave}`) || (perAzienda[chiave] || 0) >= job.contacts_per_company) continue;
+  visti.add(`|${chiave}`);
+  perAzienda[chiave] = (perAzienda[chiave] || 0) + 1;
+  out.push({
+    json: {
+      company_name: pulito(r.company_name), website: sito, domain: dominio, company_key: chiave,
+      country: pulito(r.country, 80), city: pulito(r.city, 80), industry: pulito(r.industry, 120) || job.target.industry,
+      size_hint: pulito(r.size_hint, 60), technologies: r.technologies || [],
+      full_name: '', first_name: '', last_name: '', job_title: '', role_match: 'unknown', person_key: `|${chiave}`, linkedin_url: '',
+      source_url: urlPulito(r.source_url) || sito,
+      contact_page: host(urlPulito(r.contact_page)) === dominio ? urlPulito(r.contact_page) : '',
+      job_ad_url: '', job_ad_title: '', job_ad_date: '',
+      signals: r.signals, lotto: 0, _riserva: true, _serve_referente: true
+    }
+  });
+}
+
 for (const item of $input.all()) {
   for (const c of item.json.candidates || []) {
     const azienda = pulito(c?.company_name);
-    const nome = pulito(c?.full_name, 120);
+    const nomeAI = pulito(c?.full_name, 120);
+    // Un nome non valido vale come assente: nei due passaggi il referente lo cerchiamo noi.
+    const nome = nomeValido(nomeAI) ? nomeAI : (dueFasi ? '' : nomeAI);
     const sito = urlPulito(c?.website, 300);
     const dominio = host(sito);
     const chiave = chiaveAzienda(sito);
     const fonte = /^https?:\/\//i.test(String(c?.source_url ?? '').trim()) ? urlPulito(c.source_url) : '';
 
-    // Con gli annunci il referente arriva in un secondo passaggio, solo per gli annunci verificati.
-    const senzaReferente = annunciRichiesti && (!nome || parti(nome).length < 2);
+    // Con i segnali il referente arriva in un secondo passaggio, solo per chi ha il segnale.
+    const senzaReferente = dueFasi && (!nome || parti(nome).length < 2);
     const annuncio = annunciRichiesti && /^https?:\/\//i.test(String(c?.job_ad_url ?? '').trim()) ? urlPulito(c.job_ad_url) : '';
 
-    if (!azienda || (!senzaReferente && (!nome || parti(nome).length < 2))) { scarta('dati_persona_incompleti'); continue; }
+    if (!azienda || (!senzaReferente && !nomeValido(nome))) { scarta('dati_persona_incompleti'); continue; }
     if (!fonte && !annuncio) { scarta('senza_fonte'); continue; }
     if (!dominio || !dominio.includes('.') || NON_UFFICIALI.test(dominio)) { scarta('sito_non_ufficiale'); continue; }
     if (escludiDomini.has(chiave)) { scarta('azienda_gia_acquistata'); continue; }

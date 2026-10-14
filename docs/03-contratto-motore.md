@@ -60,9 +60,26 @@ Cliente ──► Backend (Next.js) ──POST webhook──► n8n "Lead Engine
     "max_lots": 6,                     // tetto alle ricerche AI (costo)
     "candidates_per_lot": 20,
     "enrichment_cap": 30               // tetto alle ricerche Icypeas (costo), 0 = disattivato
-  }
+  },
+  "reserve": [                         // facoltativo: aziende con segnale già verificato nei giri
+    { "company_name": "Acme Srl",      // precedenti di questa ricerca, rimaste senza referente
+      "website": "https://acme.it", "source_url": "https://…", "contact_page": "",
+      "signals": [{ "code": "outdated_cms", "evidence": { "detail": "WordPress 5.2 …", "url": "https://acme.it" } }] }
+  ]
 }
 ```
+
+### Ricerche con segnali: due passaggi
+
+1. L'AI cerca **solo aziende e siti** (fino a 30 per lotto, massimo 8 ricerche web), senza referente.
+2. Il motore scarica la homepage e controlla i segnali (e gli annunci): chi non li ha esce subito.
+3. **Tetto ai referenti**: il referente si cerca solo per `quantità × 1,5 + 1` aziende
+   (`× 2,2` con «solo nominative"); le altre con il segnale escono con `reason: "riserva"`
+   e il backend le ripassa nel campo `reserve` del giro successivo. Se la riserva basta,
+   il giro non fa nessuna ricerca AI.
+4. **Referente in due tentativi**: prima Claude legge il testo della homepage e della pagina
+   «chi siamo / note legali / contatti» già scaricate (nessuna ricerca web, ~1 centesimo);
+   solo se lì non c'è, ricerca web mirata (massimo 2 ricerche).
 
 Risposta immediata: `200 {"accepted": true}`. Il lavoro prosegue in background.
 
@@ -117,7 +134,7 @@ Il backend segna il giro come fallito (`fail_engine_run`), chiude la ricerca e r
     "signals": [{ "code": "job_ad", "evidence": { "url": "https://…", "title": "Sistemista IT", "date": "2026-09-28",
                   "family": "it_systems", "source": "company_site", "checked_at": "2026-10-13" } }]
   }],
-  "rejected": [{ "company": {…}, "person": {…}, "reason": "solo_email_generica | nessuna_email | arricchimento_da_riprovare" }],
+  "rejected": [{ "company": {…}, "person": {…}, "reason": "solo_email_generica | nessuna_email | arricchimento_da_riprovare | riserva | …" }],
   "stats": { "lots": 4, "lots_failed": 0, "ai_candidates": 80, "valid_candidates": 46,
              "dedup_discards": { "sito_non_ufficiale": 12, "azienda_gia_acquistata": 5 },
              "leads": 31, "leads_personal": 12, "leads_generic": 19, "rejected": 15, "rejected_reasons": {…} },

@@ -52,6 +52,8 @@ export function buildEnginePayload(args: {
   callbackUrl: string;
   exclusions: { domains: string[]; personKeys: string[] };
   enrichmentBudget?: number;
+  // Aziende con segnale già verificato nei giri precedenti (ricerche opportunità).
+  reserve?: Record<string, unknown>[];
 }) {
   const { search, plan } = args;
   const remaining = Math.max(0, search.quantity - search.delivered);
@@ -75,6 +77,7 @@ export function buildEnginePayload(args: {
       candidates_per_lot: 20,
       enrichment_cap: enrichmentCap(search.email_mode, remaining, plan, args.enrichmentBudget),
     },
+    ...(args.reserve?.length ? { reserve: args.reserve.slice(0, 40) } : {}),
   };
 }
 
