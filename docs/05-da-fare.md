@@ -70,6 +70,7 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [ ] Accordo commerciale con Adzuna; TheirStack rimandato
 - [x] Fase 4 – controllo dei siti del database: workflow «Aziende | Controllo siti» (ogni ora 60 aziende mai controllate o da più di 25 giorni, gratis, stesse regole del motore grazie a `lib-controlli-sito.js` condiviso), migrazione 027, endpoint `/api/engine/site-checks`. Le prove restano sempre fresche (valgono 30 giorni)
 - [x] Fase 4 – popolamento del database da OpenStreetMap: workflow «Aziende | Popolamento OSM» (una regione a notte, solo aziende con sito, settore dalla categoria OSM), migrazione 028, endpoint `/api/engine/companies-import`. Controllo siti portato a 120 aziende l'ora, settore a 80 ogni 2 ore
+- [x] Esecuzioni n8n sotto il tetto del piano (2.500/mese, obiettivo < 2.100): workflow di servizio a giri più grandi e meno frequenti (controllo siti ogni 2 ore × 200, settore ogni 4 ore × 160, siti aziende ogni 4 ore × 120, Adzuna e OSM 1 al giorno) ≈ 780/mese + altri progetti ~120: restano ~1.200 esecuzioni per il motore
 - [ ] OSM: citare la fonte («© OpenStreetMap contributors», licenza ODbL) nell'informativa / pagina fonti
 - [ ] Ricontrollo gratuito delle persone del magazzino ogni 90 giorni (il nome è ancora sul sito?)
 - [ ] Fase 5 – togliere dal workflow Target i rami opportunità; prezzi definitivi sui costi misurati

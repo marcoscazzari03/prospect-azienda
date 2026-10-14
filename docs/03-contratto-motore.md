@@ -203,7 +203,7 @@ Workflow n8n «Annunci | Siti aziende» (generato da `n8n/annunci/build.mjs` in 
 ## Settore delle aziende degli annunci (`/api/engine/job-ads/industries`)
 
 Workflow n8n «Annunci | Settore aziende» (generato da `n8n/annunci/build.mjs` in `settore.sdk.ts`), stesso
-segreto. Ogni 2 ore legge la homepage di 80 aziende e la fa classificare a Claude Haiku a lotti di 20
+segreto. Ogni 4 ore legge la homepage di 160 aziende e la fa classificare a Claude Haiku a lotti di 20
 (senza ricerca web, circa 0,1 centesimi per azienda).
 
 - `GET ?limit=40` → `{ companies: [{ company_id, company_name, website, city, ads }] }`: aziende con annunci
@@ -215,10 +215,10 @@ segreto. Ogni 2 ore legge la homepage di 80 aziende e la fa classificare a Claud
 ## Controllo dei siti del database (`/api/engine/site-checks`)
 
 Workflow n8n «Aziende | Controllo siti» (generato da `n8n/annunci/build.mjs` in `controllo.sdk.ts`), stesso
-segreto. Ogni ora 120 aziende: richiesta HTTPS stretta (per `no_https`) e homepage, poi gli stessi controlli
+segreto. Ogni 2 ore 200 aziende: richiesta HTTPS stretta (per `no_https`) e homepage, poi gli stessi controlli
 del motore (`n8n/engine/nodes/lib-controlli-sito.js`).
 
-- `GET ?limit=120` → `{ companies: [{ company_id, domain, name, website }] }`: mai controllate prima, poi
+- `GET ?limit=200` → `{ companies: [{ company_id, domain, name, website }] }`: mai controllate prima, poi
   controllate da più di 25 giorni (le prove valgono 30); escluse opposizioni e aziende chiuse.
 - `POST { items: [{ company, checks }] }` → `{ ok, saved }`, salvati da `store_company_checks` (origine `seed`).
 

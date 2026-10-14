@@ -11,9 +11,9 @@ const ogniGiorno = trigger({
   version: 1.3,
   config: {
     name: 'Ogni mattina',
-    // Ogni 2 ore, 120 aziende per giro: con 300 aziende (circa 1.200 pagine in memoria)
-    // l'esecuzione n8n si interrompeva.
-    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 2, triggerAtMinute: 40 }] } }
+    // Ogni 4 ore, 120 aziende per giro: con 300 aziende (circa 1.200 pagine in memoria)
+    // l'esecuzione n8n si interrompeva; più spesso no per il tetto di esecuzioni al mese.
+    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 4, triggerAtMinute: 40 }] } }
   }
 });
 

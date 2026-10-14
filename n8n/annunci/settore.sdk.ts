@@ -5,12 +5,13 @@ import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 // settore e la fa classificare a Claude Haiku (settore e parole chiave in italiano), così
 // escono anche nelle ricerche con un settore. Esiti in companies (industry, tags).
 
-const ogniDueOre = trigger({
+const ogniQuattroOre = trigger({
   type: 'n8n-nodes-base.scheduleTrigger',
   version: 1.3,
   config: {
-    name: 'Ogni 2 ore',
-    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 2, triggerAtMinute: 10 }] } }
+    name: 'Ogni 4 ore',
+    // Ogni 4 ore con 160 aziende: il piano n8n ha un tetto di esecuzioni al mese.
+    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 4, triggerAtMinute: 10 }] } }
   }
 });
 
@@ -29,7 +30,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=80',
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=160',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -151,7 +152,7 @@ export default workflow('annunci-settore', 'Annunci | Settore aziende', {
   errorWorkflow: 'LOw3fRo49WKvrF6z',
   executionOrder: 'v1'
 })
-  .add(ogniDueOre)
+  .add(ogniQuattroOre)
   .to(aziende)
   .to(daLeggere)
   .to(apri)
