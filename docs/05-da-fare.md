@@ -40,7 +40,7 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Motore: email d'ufficio (segreteria.cognome@gmail.com, studiodentisticorossi@…, info-rossi@…) classificate come generiche
 - [ ] Budget mensile di arricchimento da rivedere
 - [ ] Testo dell'invito per la beta
-- [x] Motore: workflow di errore n8n «Lead Engine | Errori» → `POST /api/engine/error`: la ricerca si chiude subito e i crediti tornano (da pubblicare e impostare come errorWorkflow del motore)
+- [x] Motore: workflow di errore n8n «Lead Engine | Errori» → `POST /api/engine/error`: la ricerca si chiude subito e i crediti tornano (pubblicato e impostato come errorWorkflow del motore)
 - [x] Prova completa "solo nominative" (4/5, 3 da Icypeas) e "mista" (10/10)
 - [x] Ritocchi grafici: bianco e grigi al posto del crema, verde smeraldo più chiaro, riepilogo "Dall'ultimo accesso" in panoramica (migrazione `20261015000009_activity.sql`)
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
