@@ -113,6 +113,39 @@ Piano e regole in `docs/07-segnali.md`. Fasi: 0 regole · 1 motore annunci · 2 
 - [ ] Prezzo finale: costo reale per lead (in target, segnali dal sito, annunci) dal collaudo, poi crediti dei segnali e pacchetti
 - [ ] Dopo il lancio: nuove sedi, espansione all'estero, appalti pubblici (ANAC)
 
+## Revisione esterna del 14/10 (punti da gestire e controllare)
+
+Analisi di un'altra AI sul documento «come funziona il sistema», filtrata sul codice reale.
+Le stime della revisione non sono dati misurati.
+
+### Bloccanti per il lancio
+- [ ] Parere legale privacy, prima del listino: art. 130 Codice privacy (email promozionali anche a caselle aziendali), raccolta e rivendita di email nominative, cessione a terzi, licenza ODbL di OpenStreetMap (regole sui database derivati, non solo l'attribuzione). Il parere decide cosa si può vendere
+- [ ] Limiti Adzuna: la revisione indica 250 chiamate/giorno e 2.500/mese, il nostro codice ne assume 500/5.000. Verificare sul pannello Adzuna e ridurre la raccolta se serve; accordo scritto per l'uso commerciale degli annunci come segnali
+- [ ] Collaudo dei costi (15/10) e poi misura su almeno 100 lead per modalità: costo per lead accettato, percentuale di richieste soddisfatte, quota di lead nominativi da Icypeas
+- [ ] Beta su invito con 5-10 aziende (agenzie web, società IT, consulenti HR): aziende davvero in target, email valide, segnali confermati, lead giudicati interessanti dai clienti
+- [ ] Backup del database con prova di ripristino (già in lista sicurezza)
+- [ ] Testi e termini coerenti con gli usi consentiti: niente promesse di «email pronte per campagne»
+
+### Brevi, senza costi API (dopo il collaudo)
+- [ ] Contatore del wizard realistico: «aziende da elaborare», poi stima dei lead dalla resa misurata (aziende disponibili ≠ lead consegnabili)
+- [ ] Costo stimato in euro nel wizard (dal prezzo per credito del piano) e lead acquistabili con il saldo; cursore della quantità limitato a quanto si può comprare
+- [ ] Dimensione e fatturato dei lead indicati come «stimati» quando non hanno una fonte
+- [ ] Una sola ricerca web del referente invece di due, se il collaudo mostra che la seconda rende poco
+- [ ] Sinonimi per i 30-50 settori più cercati (es. dentista / odontoiatra / studio dentistico), solo SQL, senza AI per ricerca
+
+### Dopo (quando il database cresce o dopo la beta)
+- [ ] Controllo siti con priorità: 150 ogni 2 ore ≈ 54.000 al mese, 60.000 aziende ogni 25 giorni ne richiedono ≈ 72.000. Prima zone e settori cercati dai clienti, intervallo più lungo per le altre (esecuzioni n8n invariate)
+- [ ] Modalità «solo azienda» (azienda + email generica + segnale, senza referente): costo più basso, più lead, meno dati personali. Da decidere dopo il parere legale
+- [ ] Nuovi segnali: errori tecnici evidenti sul sito, pagine «Lavora con noi» delle aziende del database, sito lento su mobile
+- [ ] Campi di qualità nel magazzino: ultima verifica dell'azienda, del referente e dell'email, scadenza del segnale, contestazioni
+- [ ] Abbonamenti come monitoraggio continuo: ricerca salvata che segnala nuove aziende compatibili
+- [ ] Capacità: con circa 1.200 giri al mese per il motore, oltre 50-100 clienti attivi alzare il piano n8n; verso 300+ clienti coda e worker separati da n8n
+
+### Non da fare (valutati)
+- Overpass self-hosted: con 4 query al giorno siamo molto sotto i limiti d'uso dei server pubblici
+- Idempotenza callback e anti-SSRF del motore: già coperti (token monouso per giro, callback solo verso il nostro dominio)
+- Distinzione fatto / esigenza: già presente (segnali verificati e indicativi, avviso nel wizard, prova su ogni lead)
+
 ## Legale e fiscale
 - [ ] Apertura partita IVA (prima di incassare) e scelta del regime con un commercialista
 - [ ] Validazione di informativa privacy, termini, LIA/DPIA con un consulente
