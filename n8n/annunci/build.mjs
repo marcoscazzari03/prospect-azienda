@@ -15,11 +15,17 @@ const { JOB_FAMILIES } = await createJiti(join(root, 'build.js')).import('./src/
 
 // Annunci in Italia: titoli in italiano e inglese.
 export const famiglie = JOB_FAMILIES.map(f => ({ code: f.code, titles: [...new Set([...f.titles.it, ...f.titles.en])] }));
-export const codice = (f) => readFileSync(join(dir, 'nodes', f), 'utf8').split('__FAMIGLIE__').join(JSON.stringify(famiglie));
+export const codice = (f, subs = {}) => Object.entries({ __FAMIGLIE__: JSON.stringify(famiglie), ...subs })
+  .reduce((s, [k, v]) => s.split(k).join(v), readFileSync(join(dir, 'nodes', f), 'utf8'));
+// Verifica dei siti: livello 2 (domini indovinati) e livello 3 (ricerca web).
+export const scegliSito = (livello) => codice('04-scegli-sito.js', livello === 2
+  ? { __METODO__: 'guess', __CANDIDATI__: 'Domini candidati', __ELENCO__: "($('Aziende senza sito').first().json.companies || [])" }
+  : { __METODO__: 'web', __CANDIDATI__: 'Esito ricerca web', __ELENCO__: "$('Esito ricerca web').all().map(i => i.json)" });
 
 const ADZUNA = "{ id: '9uw7ry3Mp3ULA4fe', name: 'Adzuna API' }";
 const CALLBACK = "{ id: 'kaAuSs06rml1sMA9', name: 'Lead Engine - Callback verso backend' }";
 const ERRORI = 'LOw3fRo49WKvrF6z';
+const ANTHROPIC = "{ id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' }";
 
 const sdk = `import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 
@@ -49,7 +55,7 @@ const preparaRichieste = node({
     name: 'Prepara richieste',
     parameters: { jsCode: ${JSON.stringify(codice('01-prepara-richieste.js'))} }
   },
-  output: [{ term: 'sistemista', region: 'Emilia-Romagna', max_days_old: 2 }]
+  output: [{ term: 'sistemista', region: '', max_days_old: 2 }]
 });
 
 const adzuna = node({
@@ -66,7 +72,6 @@ const adzuna = node({
         { name: 'results_per_page', value: '50' },
         { name: 'title_only', value: expr('{{ $json.term }}') },
         { name: 'location0', value: 'Italia' },
-        { name: 'location1', value: expr('{{ $json.region }}') },
         { name: 'max_days_old', value: expr('{{ $json.max_days_old }}') },
         { name: 'sort_by', value: 'date' },
         { name: 'content-type', value: 'application/json' }
@@ -177,7 +182,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies?limit=150',
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies?limit=300',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -232,9 +237,117 @@ const scegli = node({
   version: 2,
   config: {
     name: 'Scegli sito',
-    parameters: { jsCode: ${JSON.stringify(codice('04-scegli-sito.js'))} }
+    parameters: { jsCode: ${JSON.stringify(scegliSito(2))} }
   },
   output: [{ results: [], stats: {} }]
+});
+
+// Livello 3: ricerca web del sito con Claude Haiku per le aziende non trovate (max 40 al giorno).
+const preparaWeb = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Prepara ricerca web',
+    parameters: { jsCode: ${JSON.stringify(codice('05-prepara-ricerca-web.js'))} }
+  },
+  output: [{ company_key: 'var', company_name: 'Var Group', city: 'Bologna', _claude: {} }]
+});
+
+const claudeSito = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'HTTP - Claude sito',
+    onError: 'continueRegularOutput',
+    parameters: {
+      method: 'POST',
+      url: 'https://api.anthropic.com/v1/messages',
+      authentication: 'predefinedCredentialType',
+      nodeCredentialType: 'anthropicApi',
+      sendHeaders: true,
+      headerParameters: { parameters: [{ name: 'anthropic-version', value: '2023-06-01' }] },
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr('{{ JSON.stringify($json._claude) }}'),
+      options: {
+        batching: { batch: { batchSize: 3, batchInterval: 1000 } },
+        response: { response: { neverError: true } },
+        timeout: 120000
+      }
+    },
+    credentials: { anthropicApi: ${ANTHROPIC} }
+  },
+  output: [{ content: [], usage: {} }]
+});
+
+const esitoWeb = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Esito ricerca web',
+    parameters: { jsCode: ${JSON.stringify(codice('06-esito-ricerca-web.js'))} }
+  },
+  output: [{ company_key: 'var', company_name: 'Var Group', city: 'Bologna', nucleo: 'var', nome: 'var group', domain: 'vargroup.it', ordine: 0, url: 'https://vargroup.it' }]
+});
+
+const apriSitoWeb = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Apri sito trovato',
+    parameters: {
+      url: expr('{{ $json.url }}'),
+      sendHeaders: true,
+      headerParameters: { parameters: [
+        { name: 'User-Agent', value: '${UA}' },
+        { name: 'Accept', value: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
+        { name: 'Accept-Language', value: 'it,en;q=0.8' }
+      ] },
+      options: {
+        batching: { batch: { batchSize: 2, batchInterval: 500 } },
+        redirect: { redirect: { followRedirects: true, maxRedirects: 5 } },
+        response: { response: { neverError: true, responseFormat: 'text', outputPropertyName: 'html' } },
+        allowUnauthorizedCerts: true,
+        timeout: 8000
+      }
+    },
+    onError: 'continueRegularOutput'
+  },
+  output: [{ html: '<html></html>' }]
+});
+
+const verificaWeb = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Verifica sito trovato',
+    parameters: { jsCode: ${JSON.stringify(scegliSito(3))} }
+  },
+  output: [{ results: [], stats: {} }]
+});
+
+const salvaWeb = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Salva siti trovati sul web',
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
+    parameters: {
+      method: 'POST',
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      sendBody: true,
+      contentType: 'json',
+      specifyBody: 'json',
+      jsonBody: expr('{{ JSON.stringify({ results: $json.results }) }}'),
+      options: { timeout: 60000 }
+    },
+    credentials: { httpHeaderAuth: ${CALLBACK} }
+  },
+  output: [{ ok: true, found: 0, not_found: 0, linked_ads: 0 }]
 });
 
 const salva = node({
@@ -272,6 +385,13 @@ export default workflow('annunci-siti', 'Annunci | Siti aziende', {
   .to(apriSito)
   .to(scegli)
   .to(salva)
+  .add(scegli)
+  .to(preparaWeb)
+  .to(claudeSito)
+  .to(esitoWeb)
+  .to(apriSitoWeb)
+  .to(verificaWeb)
+  .to(salvaWeb)
   .add(aMano)
   .to(aziende);
 `;

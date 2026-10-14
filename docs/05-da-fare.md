@@ -57,9 +57,10 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [ ] Separare il workflow «Opportunità» dal Target (fase 5)
 - [x] Fase 3 – annunci da API: piano Adzuna (8 $/mese, chiave su n8n), tabella `job_ads` (migrazione 022), endpoint `/api/engine/job-ads`, workflow «Annunci | Raccolta Adzuna» (ogni mattina, Emilia-Romagna, una ricerca nel titolo per ogni figura del catalogo, 67 chiamate; sorgenti in `n8n/annunci/`). Primo riempimento 14/10: 363 annunci tenuti su 1.633 (703 di agenzie, 341 fuori tema)
 - [x] Annunci: workflow «Raccolta Adzuna» e «Siti aziende» pubblicati (14/10)
-- [ ] Annunci: estendere all'Italia (stesse ~67 ricerche senza filtro regione, più pagine: verificare il limite di 5.000 chiamate al mese)
+- [x] Annunci: raccolta estesa a tutta Italia (14/10): stesse 67 ricerche senza regione, salvataggio a blocchi da 1.000; siti cercati per 300 aziende al giorno
+- [ ] Annunci: controllare dopo una settimana le chiamate Adzuna del mese (limite 5.000)
 - [x] Annunci: sito delle aziende, livello 2 gratuito (domini probabili verificati sulla pagina): migrazione 023, workflow «Annunci | Siti aziende». Misura 14/10: 67 aziende su 150 (45%), 127 annunci collegati, costo zero
-- [ ] Annunci: sito delle aziende, livello 3 (ricerca web con Claude Haiku, ~1,2 cent/azienda, tetto di spesa giornaliero es. 0,50 $). Rimandato il 14/10 per costruire prima «Opportunità», ma è la soluzione da attivare appena servono più volumi: il livello 2 manca soprattutto i nomi grandi (TechnoGym, Ducati, Capgemini, Reply, Unipol, Chiesi…)
+- [x] Annunci: sito delle aziende, livello 3 (14/10): ricerca web con Claude Haiku per le aziende non trovate dal livello 2, massimo 40 al giorno (~0,50 $), sito verificato con le stesse regole
 - [ ] Accordo commerciale con Adzuna; TheirStack rimandato
 - [ ] Fase 4 – popolamento iniziale (una regione, budget concordato) e ricontrollo notturno delle prove in scadenza
 - [ ] Fase 5 – togliere dal workflow Target i rami opportunità; prezzi definitivi sui costi misurati

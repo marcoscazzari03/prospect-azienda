@@ -84,4 +84,9 @@ $input.all().forEach((item) => {
 });
 stats.kept = ads.length;
 
-return [{ json: { source: 'adzuna', ads, stats } }];
+// Il backend accetta al massimo 2.000 annunci per chiamata: blocchi da 1.000.
+const BLOCCO = 1000;
+const blocchi = [];
+for (let i = 0; i < ads.length; i += BLOCCO) blocchi.push(ads.slice(i, i + BLOCCO));
+if (!blocchi.length) blocchi.push([]);
+return blocchi.map((b, i) => ({ json: { source: 'adzuna', ads: b, stats: i === 0 ? stats : { chunk: i + 1 } } }));

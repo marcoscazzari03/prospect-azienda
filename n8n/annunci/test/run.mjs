@@ -1,7 +1,7 @@
 // Test locali dei Code node della raccolta annunci, senza n8n.
 // Uso: node n8n/annunci/test/run.mjs
 import assert from 'node:assert/strict';
-import { codice } from '../build.mjs';
+import { codice, scegliSito } from '../build.mjs';
 
 const run = (code, { nodes = {}, input = [], eseguiti = [], json = {} }) => {
   const $ = (name) => {
@@ -21,8 +21,8 @@ const giorno = run(codice('01-prepara-richieste.js'), { eseguiti: ['Ogni mattina
 const termini = giorno.map(r => r.term);
 assert.ok(termini.includes('sistemista') && termini.includes('developer') && termini.includes('graphic designer'));
 assert.ok(!termini.includes('web developer') && !termini.includes('software developer'), 'titoli già coperti saltati');
-assert.ok(giorno.length < 75, `al massimo ~70 chiamate al giorno per regione (${giorno.length})`);
-assert.ok(giorno.every(r => r.max_days_old === 2 && r.region === 'Emilia-Romagna'));
+assert.ok(giorno.length < 75, `al massimo ~70 ricerche al giorno (${giorno.length})`);
+assert.ok(giorno.every(r => r.max_days_old === 2 && r.region === ''), 'tutta Italia');
 const mano = run(codice('01-prepara-richieste.js'), {});
 assert.ok(mano.every(r => r.max_days_old === 30));
 
@@ -33,7 +33,7 @@ const ad = (id, title, company, extra = {}) => ({
   redirect_url: `https://www.adzuna.it/land/ad/${id}`, description: 'Descrizione', location: { area: ['Italia', 'Emilia-Romagna', 'Provincia di Modena', 'Carpi'] },
   contract_time: 'full_time', ...extra
 });
-const [out] = run(codice('02-normalizza-annunci.js'), {
+const [out, ...altriBlocchi] = run(codice('02-normalizza-annunci.js'), {
   nodes: { 'Prepara richieste': richieste },
   input: [
     { count: 4, results: [
@@ -70,7 +70,12 @@ assert.ok(agenzia('Samsic HR Italia', 'Per nostra importante azienda cliente'));
 assert.ok(!agenzia('Keyweb srl', 'azienda attenta al cliente, cerchiamo per la nostra sede di Modena'), 'chi assume direttamente resta');
 assert.ok(!agenzia('Pinalli', 'garantire un servizio di qualità per il cliente'), '«per il cliente» resta');
 assert.ok(!agenzia('Centro Premi', 'Contratto di lavoro: Tempo pieno'), '«contratto di lavoro» nel testo resta');
+assert.equal(altriBlocchi.length, 0, 'pochi annunci: un solo blocco');
 assert.deepEqual(out.ads.map(a => a.external_id), ['1', '5']);
+const tanti = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
+  input: [{ results: Array.from({ length: 2500 }, (_, i) => ad(`t${i}`, 'Sistemista', `Officina Rossi ${i}`)) }] });
+assert.deepEqual(tanti.map(b => b.ads.length), [1000, 1000, 500], 'blocchi da 1.000 per il backend');
+assert.equal(tanti[0].stats.kept, 2500);
 assert.equal(out.ads[0].title, 'Sistemista Windows Server', 'titolo senza HTML');
 assert.equal(out.ads[0].family, 'it_systems');
 assert.equal(out.ads[0].city, 'Carpi');
@@ -117,7 +122,7 @@ const paginaDi = {
   'archimede.it': pagina('Archimede', 'Archimede S.p.A. - P.IVA 01234567890'),
   'joinrs.it': { html: '', error: { code: 'ENOTFOUND' } }
 };
-const [scelta] = run(codice('04-scegli-sito.js'), {
+const [scelta] = run(scegliSito(2), {
   nodes: { 'Domini candidati': cand, 'Aziende senza sito': [{ companies: aziende }] },
   input: cand.map(c => paginaDi[c.domain] || { html: c.domain === 'var.com'
     ? '<html data-adblockkey=x><head><title>var.com - Diese Website steht zum Verkauf!</title></head><body>' + ' x'.repeat(400) + '</body></html>' : '' })
@@ -139,10 +144,34 @@ assert.equal(sito('gruppo'), '', 'azienda senza domini registrata come non trova
 assert.equal(scelta.stats.companies, 10);
 assert.equal(scelta.stats.found, 5);
 assert.ok(scelta.stats.parked >= 1);
-const parcheggio = run(codice('04-scegli-sito.js'), {
+const parcheggio = run(scegliSito(2), {
   nodes: { 'Domini candidati': [{ company_key: 'k', company_name: 'Possedono Srl', city: '', nucleo: 'possedono', nome: 'possedono', domain: 'possedono.it', ordine: 0 }], 'Aziende senza sito': [{ companies: [] }] },
   input: [pagina('Possedono', 'Le aziende che possedono un sito. Partita IVA 01234567890')]
 })[0];
 assert.equal(parcheggio.results[0].domain, 'possedono.it', '«possedono» non è «sedo»');
 
+// 5. Livello 3: ricerca web del sito per le non trovate, poi verifica come il livello 2.
+const nonTrovate = Array.from({ length: 45 }, (_, i) => ({ company_key: `k${i}`, company_name: `Officina ${i} Srl`, city: 'Modena', domain: i === 0 ? 'trovata.it' : '' }));
+const reqWeb = run(codice('05-prepara-ricerca-web.js'), { nodes: { 'Scegli sito': [{ results: nonTrovate }] } });
+assert.equal(reqWeb.length, 40, 'tetto di 40 al giorno, solo le non trovate');
+assert.ok(!reqWeb.some(r => r.company_key === 'k0'));
+assert.equal(reqWeb[0]._claude.model, 'claude-haiku-5-5');
+assert.equal(reqWeb[0]._claude.tools[0].max_uses, 1);
+const risposta = (website) => ({ content: [{ type: 'text', text: JSON.stringify({ website }) }] });
+const esitiWeb = run(codice('06-esito-ricerca-web.js'), {
+  nodes: { 'Prepara ricerca web': [
+    { company_key: 'a', company_name: 'Alfa Meccanica Srl', city: 'Modena' },
+    { company_key: 'b', company_name: 'Beta Srl', city: 'Parma' },
+    { company_key: 'c', company_name: 'Gamma Srl', city: 'Rimini' },
+    { company_key: 'd', company_name: 'Delta Srl', city: 'Forlì' }
+  ] },
+  input: [risposta('https://www.alfameccanica.it/chi-siamo'), risposta('https://www.linkedin.com/company/beta'), risposta(''), { error: { message: 'x' } }]
+});
+assert.deepEqual(esitiWeb.map(e => e.domain), ['alfameccanica.it'], 'social, risposte vuote ed errori scartati');
+assert.equal(esitiWeb[0].nucleo, 'alfa meccanica');
+const [verificaWeb] = run(scegliSito(3), {
+  nodes: { 'Esito ricerca web': esitiWeb },
+  input: [pagina('Alfa Meccanica - Modena', 'Alfa Meccanica Srl, lavorazioni meccaniche')]
+});
+assert.deepEqual(verificaWeb.results, [{ company_key: 'a', company_name: 'Alfa Meccanica Srl', city: 'Modena', domain: 'alfameccanica.it', method: 'web' }]);
 console.log('Test siti aziende superati.');

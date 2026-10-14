@@ -6,7 +6,9 @@
 // per caso) e una conferma che sia l'azienda italiana dell'annuncio: la città o una
 // partita IVA sulla pagina (canonical.it non è Canonical di Bologna).
 // Un'azienda senza dominio valido viene salvata come «non trovata» (si riprova tra 30 giorni).
-const candidati = $('Domini candidati').all().map(i => i.json);
+// Usato due volte: livello 2 (domini indovinati) e livello 3 (siti trovati con la ricerca web).
+const METODO = '__METODO__';
+const candidati = $('__CANDIDATI__').all().map(i => i.json);
 const pagine = $input.all().map(i => i.json);
 
 const norm = (v) => ` ${String(v ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
@@ -58,12 +60,12 @@ const valuta = (c, p) => {
 
 const esiti = new Map();
 // Anche le aziende senza domini da provare (nome fatto solo di parole generiche).
-for (const a of $('Aziende senza sito').first().json.companies || []) {
-  esiti.set(a.company_key, { company_key: a.company_key, company_name: a.company_name, city: a.city || '', domain: '', method: 'guess', ordine: 99 });
+for (const a of __ELENCO__) {
+  esiti.set(a.company_key, { company_key: a.company_key, company_name: a.company_name, city: a.city || '', domain: '', method: METODO, ordine: 99 });
 }
 const stats = { companies: 0, tried: candidati.length, found: 0, not_found: 0, unreachable: 0, parked: 0, name_missing: 0, unconfirmed: 0 };
 candidati.forEach((c, i) => {
-  const e = esiti.get(c.company_key) || { company_key: c.company_key, company_name: c.company_name, city: c.city, domain: '', method: 'guess', ordine: 99 };
+  const e = esiti.get(c.company_key) || { company_key: c.company_key, company_name: c.company_name, city: c.city, domain: '', method: METODO, ordine: 99 };
   const v = valuta(c, pagine[i]);
   if (v === 'irraggiungibile') stats.unreachable++;
   else if (v === 'parcheggiato') stats.parked++;
