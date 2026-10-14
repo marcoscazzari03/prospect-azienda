@@ -53,12 +53,14 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [ ] Da valutare: referente dal sito e ricerca aziende con Haiku (prima una prova di confronto)
 - [x] Ricerche con annuncio di lavoro decisivo: solo aziende del database, niente ricerca AI (14/10: 3 tentativi AI per ~0,9 $ senza lead). Finite le aziende, la ricerca si chiude e i crediti tornano
 - [x] Collaudo 3 (14/10, sviluppo software, Lombardia, 3 lead, motore nuovo): 3/3 lead in 2 giri, tutti dal database (37 aziende in riserva), nessuna ricerca AI di aziende. Costo misurato dai token ~0,16 $ (saldo -0,24 $): ~0,05-0,08 $ a lead. Voce principale: ricerche web del referente (0,01 $ l'una, 2 per azienda). Corretto: caselle privacy composte (contact.dataprivacy@) ora mai vendute
-- [ ] Da valutare: 1 sola ricerca web per il referente invece di 2 (dimezza la voce principale; prima misurare quanti referenti si perdono)
+- [ ] In sospeso (domande dell'utente prima): 1 sola ricerca web per il referente invece di 2 (dimezza la voce principale; misurare al prossimo collaudo, < 0,30 $, quanti referenti si perdono)
 - [x] Wizard opportunità: contatore delle aziende disponibili nel database (stesso calcolo della riserva, `opportunity_pool` / `opportunity_availability`, migrazione 026). Offerte solo annunci: con zero aziende la ricerca non si può avviare
 - [ ] Dopo ogni modifica al motore: ricordarsi di far PUBBLICARE il workflow su n8n (le modifiche restano in bozza)
 - [x] Settore delle aziende degli annunci: workflow «Annunci | Settore aziende» (homepage → Claude Haiku a lotti di 20: settore e parole chiave nelle etichette), migrazione 025. Nel settore scritto dal cliente le parole di collegamento («che», «sono»...) ora vengono ignorate
 - [ ] Settore: controllare i primi giri (qualità dei settori, costo) e la disponibilità nelle ricerche con un settore
-- [ ] Separare il workflow «Opportunità» dal Target (fase 5)
+- [ ] In sospeso (domande dell'utente prima): fase 5 – listino definitivo con i costi misurati (annunci ~0,05-0,08 $ a lead; segnali dal sito da misurare dopo i primi giri del controllo siti)
+- [ ] In sospeso: separare il workflow «Opportunità» dal Target (fase 5) – proposta: dopo il lancio, oggi le opportunità passano quasi tutte dal database
+- [x] Archiviati su n8n i workflow di prova «Adzuna | Prova» e «Referente | Prova Haiku» (14/10)
 - [x] Fase 3 – annunci da API: piano Adzuna (8 $/mese, chiave su n8n), tabella `job_ads` (migrazione 022), endpoint `/api/engine/job-ads`, workflow «Annunci | Raccolta Adzuna» (ogni mattina, Emilia-Romagna, una ricerca nel titolo per ogni figura del catalogo, 67 chiamate; sorgenti in `n8n/annunci/`). Primo riempimento 14/10: 363 annunci tenuti su 1.633 (703 di agenzie, 341 fuori tema)
 - [x] Annunci: workflow «Raccolta Adzuna» e «Siti aziende» pubblicati (14/10)
 - [x] Annunci: raccolta estesa a tutta Italia (14/10): stesse 67 ricerche senza regione, salvataggio a blocchi da 1.000; siti cercati per 300 aziende al giorno
