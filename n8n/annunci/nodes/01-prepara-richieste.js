@@ -1,35 +1,26 @@
-// Richieste ad Adzuna: una per famiglia di figure (catalogo JOB_FAMILIES) e regione,
-// ordinate dalla più recente. Le pagine da 50 vanno avanti finché ci sono annunci
-// (al massimo 6 al giorno, 10 nel primo riempimento). Ogni giorno bastano gli annunci
-// degli ultimi 2 giorni; il primo riempimento, avviato a mano, va indietro di 30.
+// Richieste ad Adzuna: una per figura del catalogo (JOB_FAMILIES, titoli italiani e
+// inglesi) e regione, cercata SOLO nel titolo dell'annuncio (title_only: tutte le
+// parole nel titolo). Le ricerche libere (what/what_or) di Adzuna sono troppo larghe:
+// con «sistemista» uscivano anche i corrieri. Si saltano i titoli già coperti da uno
+// più corto («web developer» è dentro «developer»).
+// Ogni giorno bastano gli annunci degli ultimi 2 giorni; il primo riempimento,
+// avviato a mano, va indietro di 30. Pagine da 50, al massimo 5 per ricerca.
 // Limiti del piano Adzuna: 50 chiamate al minuto, 500 al giorno, 5.000 al mese.
 const REGIONI = ['Emilia-Romagna'];
+const FAMIGLIE = __FAMIGLIE__;
 
-// Parole cercate da Adzuna (basta una, nel titolo o nel testo): la scelta finale la fa
-// «Normalizza annunci» confrontando il titolo con le figure del catalogo. Niente parole
-// generiche (sicurezza, account, risorse...): riempirebbero le pagine di annunci fuori tema.
-const PAROLE = {
-  it_systems: 'sistemista sysadmin helpdesk sistemisti',
-  software_dev: 'programmatore sviluppatore developer frontend backend fullstack',
-  cybersecurity: 'cybersecurity soc pentester',
-  digital_marketing: 'marketing seo',
-  sales: 'commerciale venditore',
-  hr: 'recruiter payroll paghe',
-  accounting: 'contabile controller accountant',
-  design: 'grafico designer'
-};
+const parole = (t) => t.split(/\s+/).filter(w => w && !['di', 'de', 'del'].includes(w));
+const titoli = [...new Set(FAMIGLIE.flatMap(f => f.titles))];
+const ricerche = titoli.filter(t => !titoli.some(a => a !== t && parole(a).every(w => parole(t).includes(w))));
 
 // Avvio a mano = primo riempimento. ($execution.mode non basta: vale «test» anche per
 // le prove dall'editor.)
 let programmato = false;
 try { programmato = $('Ogni mattina').isExecuted; } catch { programmato = false; }
 const giorni = programmato ? 2 : 30;
-const pagine = programmato ? 6 : 10;
 
 const out = [];
 for (const regione of REGIONI) {
-  for (const [famiglia, parole] of Object.entries(PAROLE)) {
-    out.push({ json: { family: famiglia, region: regione, what_or: parole, max_days_old: giorni, max_pages: pagine } });
-  }
+  for (const titolo of ricerche) out.push({ json: { term: titolo, region: regione, max_days_old: giorni } });
 }
 return out;

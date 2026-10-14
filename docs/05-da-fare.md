@@ -48,8 +48,8 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Decisione (14/10): ricerca opportunità «database first + API first», due workflow separati (Target / Opportunità), popolamento iniziale per i segnali dal sito, prove di Adzuna e TheirStack
 - [x] Fase 1 – fondamenta: ogni azienda controllata salvata con l'esito di ogni controllo (`company_checks`, migrazione `20261027000021_company_checks.sql`); controlli tecnici gratuiti anche nella ricerca in target
 - [ ] Fase 2 – workflow «Lead Engine | Opportunità»: database → ricontrollo gratuito → referente dal sito → email → AI solo per i lead mancanti
-- [x] Fase 3 – annunci da API: piano Adzuna (8 $/mese, chiave su n8n), tabella `job_ads` (migrazione 022), endpoint `/api/engine/job-ads`, workflow «Annunci | Raccolta Adzuna» (ogni mattina, Emilia-Romagna, 8 famiglie; sorgenti in `n8n/annunci/`)
-- [ ] Annunci: primo riempimento a mano, poi pubblicare il workflow; estendere alle altre regioni (~16 chiamate al giorno per regione, limite 500)
+- [x] Fase 3 – annunci da API: piano Adzuna (8 $/mese, chiave su n8n), tabella `job_ads` (migrazione 022), endpoint `/api/engine/job-ads`, workflow «Annunci | Raccolta Adzuna» (ogni mattina, Emilia-Romagna, una ricerca nel titolo per ogni figura del catalogo, 67 chiamate; sorgenti in `n8n/annunci/`). Primo riempimento 14/10: 363 annunci tenuti su 1.633 (703 di agenzie, 341 fuori tema)
+- [ ] Annunci: pubblicare il workflow; estendere all'Italia (stesse ~67 ricerche senza filtro regione, più pagine: verificare il limite di 5.000 chiamate al mese)
 - [ ] Annunci: sito delle aziende degli annunci (prima il database, poi ricerca web economica)
 - [ ] Accordo commerciale con Adzuna; TheirStack rimandato
 - [ ] Fase 4 – popolamento iniziale (una regione, budget concordato) e ricontrollo notturno delle prove in scadenza

@@ -49,7 +49,7 @@ const preparaRichieste = node({
     name: 'Prepara richieste',
     parameters: { jsCode: ${JSON.stringify(codice('01-prepara-richieste.js'))} }
   },
-  output: [{ family: 'it_systems', region: 'Emilia-Romagna', what_or: 'sistemista', max_days_old: 2, max_pages: 6 }]
+  output: [{ term: 'sistemista', region: 'Emilia-Romagna', max_days_old: 2 }]
 });
 
 const adzuna = node({
@@ -64,7 +64,7 @@ const adzuna = node({
       sendQuery: true,
       queryParameters: { parameters: [
         { name: 'results_per_page', value: '50' },
-        { name: 'what_or', value: expr('{{ $json.what_or }}') },
+        { name: 'title_only', value: expr('{{ $json.term }}') },
         { name: 'location0', value: 'Italia' },
         { name: 'location1', value: expr('{{ $json.region }}') },
         { name: 'max_days_old', value: expr('{{ $json.max_days_old }}') },
@@ -74,14 +74,15 @@ const adzuna = node({
       options: {
         // Piano Adzuna: massimo 50 chiamate al minuto.
         batching: { batch: { batchSize: 1, batchInterval: 1500 } },
-        // Pagina successiva finché la pagina è piena (50) e fino a max_pages.
+        // Pagina successiva finché la pagina è piena (50), al massimo 5 pagine.
+        // $pageCount vale 0 già alla prima richiesta: la prima è la pagina 1.
         pagination: { pagination: {
           paginationMode: 'responseContainsNextURL',
-          nextURL: expr("{{ 'https://api.adzuna.com/v1/api/jobs/it/search/' + (Number($request.url.split('?')[0].split('/').pop()) + 1) }}"),
+          nextURL: expr("{{ 'https://api.adzuna.com/v1/api/jobs/it/search/' + ($pageCount + 1) }}"),
           paginationCompleteWhen: 'other',
-          completeExpression: expr("{{ !Array.isArray($response.body.results) || $response.body.results.length < 50 || Number($request.url.split('?')[0].split('/').pop()) >= $json.max_pages }}"),
+          completeExpression: expr('{{ !Array.isArray($response.body.results) || $response.body.results.length < 50 }}'),
           limitPagesFetched: true,
-          maxRequests: 10,
+          maxRequests: 5,
           requestInterval: 1500
         } },
         response: { response: { neverError: true } },

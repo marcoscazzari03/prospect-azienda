@@ -14,16 +14,25 @@ const testo = (h) => String(h ?? '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi
 // (es. «business developer» è commerciale, non programmatore).
 const titoli = FAMIGLIE.flatMap(f => f.titles.map(t => ({ fam: f.code, t: norm(t) })))
   .sort((a, b) => b.t.length - a.t.length);
-const famigliaDi = (titolo) => { const n = norm(titolo); return titoli.find(x => n.includes(x.t))?.fam || ''; };
+// Mestieri di officina con titoli simili (programmatore CNC, grafico CAD): non sono le figure cercate.
+const OFFICINA = /\b(cnc|cad|cam|plc|fresatore|tornitore|saldatore|macchine utensili|centri di lavoro)\b/;
+const famigliaDi = (titolo) => {
+  const n = norm(titolo);
+  if (OFFICINA.test(n)) return '';
+  return titoli.find(x => n.includes(x.t))?.fam || '';
+};
 
 // Agenzie per il lavoro, società di selezione e consulenza «presso cliente»: dal nome
 // dell'azienda o da come è scritto l'annuncio.
-const AGENZIE = /\b(randstad|adecco|manpower|experis|gi group|synergie|openjobmetis|etjca|umana|lavoropiu|orienta|kelly services|hays|michael page|page personnel|robert half|spring professional|start people|quanta|eurointerim|ali spa|osm partners|indeed|jobrapido|infojobs|monster|stepstone|e work|trenkwalder|humangest|tempor|tempus|tempi moderni|wintime|samsic|maw|jobtech|in job|unimpiego|generazione vincente|articolo1|cooperjob|men at work|staff spa|lavoro|staffing|recruiting|recruitment|head ?hunt\w*|executive search|selezione|outsourcing)\b/;
+const AGENZIE = /\b(randstad|adecco|manpower|experis|gi group|synergie|openjobmetis|etjca|umana|lavoropiu|orienta|kelly services|hays|michael page|page personnel|robert half|spring professional|start people|quanta|eurointerim|ali spa|osm partners|indeed|jobrapido|infojobs|monster|stepstone|e work|trenkwalder|humangest|tempor|tempus|tempi moderni|wintime|samsic|maw|jobtech|in job|unimpiego|generazione vincente|articolo1|cooperjob|men at work|staff spa|risorse spa|adhr|nhrg|human resources|lavoro|staffing|recruiting|recruitment|head ?hunt\w*|executive search|selezione|outsourcing)\b/;
 const PER_CLIENTE = new RegExp([
   'agenzia per il lavoro', 'ricerca e selezion', 'selezione del personale', 'autorizzazione ministeriale', 'albo informatico',
   'somministrazione (di )?lavoro', 'contratto di somministrazione', 'career center',
   // «ricerca per importante azienda», «seleziona per conto di una società», «per azienda specializzata»
   '(ricerca|ricerchiamo|seleziona|selezioniamo|cerca|cerchiamo) per (conto di )?(un |una |l )?((importante|nota|notevole|primaria|solida|storica|affermata|prestigiosa|dinamica|strutturata) )*(azienda|societa|realta|gruppo|ente|struttura|multinazionale|cliente)\\b',
+  // «NEXT SPA, Filiale di Bologna, seleziona un/una junior accountant per società di trasporti»
+  'filiale di( [a-z]+){1,3} (seleziona|ricerca|cerca)',
+  '(seleziona|ricerca|ricerchiamo|selezioniamo)( [a-z]+){1,6} per (un |una |l )?((importante|nota|notevole|primaria|solida|storica|affermata|prestigiosa|dinamica|strutturata) )*(azienda|societa|realta|gruppo|cliente)\\b',
   // «per importante cliente», «per un nostro cliente» (non «per il cliente»: lo scrive anche chi assume)
   'per (un |una )?(nostro |nostra )?(importante|nota|notevole|primario|primaria) client',
   // «per nostra importante azienda cliente», «gruppo ceramico cliente»
@@ -39,10 +48,10 @@ const stats = { requests: richieste.length, errors: 0, results: 0, off_topic: 0,
 const visti = new Set();
 const ads = [];
 
-$input.all().forEach((item, i) => {
+$input.all().forEach((item) => {
   const r = item.json || {};
   if (!Array.isArray(r.results)) { stats.errors++; return; }
-  const richiesta = richieste[item.pairedItem?.item ?? i] || {};
+  const richiesta = richieste[item.pairedItem?.item ?? 0] || {};
   for (const a of r.results) {
     stats.results++;
     const id = String(a.id ?? '');
