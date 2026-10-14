@@ -68,6 +68,9 @@ export async function POST(request: Request) {
     .filter((r) => r?.reason === "solo_email_generica" && r.email?.address)
     .map((r) => ({ ...r, _stock_only: true }));
   if (stockOnly.length) payload.leads = [...(payload.leads ?? []), ...stockOnly].slice(0, 2000);
+  // Aziende già controllate e scartate in questo giro: i giri successivi della stessa
+  // ricerca non le ripropongono (salvate in search_runs.stats).
+  payload.stats = { ...payload.stats, checked_domains: checkedDomains(payload.rejected) };
   let apiCalls = 0;
   const { data: run } = await db.rpc("check_run", { p_run: evt.run_id, p_token_hash: tokenHash }).maybeSingle();
   const open = run && ["dispatched", "running"].includes((run as { status: string }).status);
@@ -116,4 +119,15 @@ async function recordVerifierCost(runId: string, units: number) {
     unit_cost_eur: unitCost,
     total_eur: Math.round(units * unitCost * 10_000) / 10_000,
   });
+}
+
+// Domini delle aziende scartate (tranne quelle da riprovare per limiti temporanei).
+function checkedDomains(rejected: unknown[] | undefined) {
+  const out = new Set<string>();
+  for (const r of rejected ?? []) {
+    const x = r as { reason?: string; company?: { domain?: string } };
+    const d = String(x?.company?.domain ?? "").trim().toLowerCase();
+    if (d && x.reason !== "arricchimento_da_riprovare") out.add(d);
+  }
+  return [...out].slice(0, 500);
 }

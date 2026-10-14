@@ -54,6 +54,17 @@ async function loadExclusions(orgId: string, contactsPerCompany: number) {
   return { personKeys, domains: [...domains] };
 }
 
+// Aziende già controllate e scartate nei giri precedenti di questa ricerca.
+async function loadCheckedDomains(searchId: string) {
+  const { data } = await createAdminClient().from("search_runs").select("stats").eq("search_id", searchId).limit(50);
+  const out = new Set<string>();
+  for (const r of data ?? []) {
+    const list = (r.stats as { checked_domains?: unknown } | null)?.checked_domains;
+    if (Array.isArray(list)) for (const d of list) if (typeof d === "string") out.add(d);
+  }
+  return [...out];
+}
+
 // Verifiche a pagamento ancora disponibili per un giro: il minimo tra quanto
 // resta alla ricerca e quanto resta del budget mensile impostato dall'admin.
 async function loadEnrichmentBudget(search: SearchRow) {
@@ -103,10 +114,12 @@ export async function dispatchRun(searchId: string) {
   if (error || !run) return finalizeSearch(searchId, "Impossibile avviare il giro di ricerca");
   const runId = (run as { id: string }).id;
 
-  const [exclusions, enrichmentBudget] = await Promise.all([
+  const [exclusions, enrichmentBudget, checked] = await Promise.all([
     loadExclusions(search.org_id, search.contacts_per_company),
     loadEnrichmentBudget(search),
+    loadCheckedDomains(searchId),
   ]);
+  exclusions.domains = [...new Set([...checked, ...exclusions.domains])];
   const payload = buildEnginePayload({
     search,
     plan,

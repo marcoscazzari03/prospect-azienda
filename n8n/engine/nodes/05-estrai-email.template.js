@@ -205,6 +205,16 @@ const candidate = [...new Set(linkTrovati)]
   .filter(x => x.score > 0)
   .sort((a, b) => b.score - a.score || a.url.length - b.url.length);
 
+// Homepage che rimanda altrove con <meta http-equiv="refresh">: si segue il rimando.
+const rimando = (html.match(/http-equiv\s*=\s*["']?refresh["']?[^>]*content\s*=\s*["'][^"']*url\s*=\s*([^"'>\s]+)/i) || [])[1];
+if (rimando) {
+  const u = rendiAssoluto(rimando.replace(/^['"]|['"]$/g, ''));
+  const h = cleanHost(u);
+  if (u && h && dominio && (h === dominio || h.endsWith('.' + dominio)) && normalizeUrl(u) !== homeNorm) {
+    candidate.unshift({ url: u.split('#')[0], cat: 'RIMANDO', score: 120 });
+  }
+}
+
 const paginaAI = String(prospect.contact_page ?? '');
 if (paginaAI && normalizeUrl(paginaAI) !== homeNorm) {
   candidate.unshift({ url: paginaAI, cat: categoria(paginaAI)[0] || 'AI', score: 110 });

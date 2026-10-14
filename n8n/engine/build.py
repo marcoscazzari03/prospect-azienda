@@ -55,6 +55,9 @@ def http_page(var, name, url_expr, prop="html", timeout=10000):
       sendHeaders: true,
       headerParameters: {{ parameters: [
         {{ name: 'User-Agent', value: '{UA}' }},
+        // Senza Accept esplicito n8n chiede JSON per primo: alcuni costruttori di siti
+        // (es. Duda) rispondono con JSON invece della pagina.
+        {{ name: 'Accept', value: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' }},
         {{ name: 'Accept-Language', value: 'it,en;q=0.9,es;q=0.8,fr;q=0.8,de;q=0.7,*;q=0.5' }}
       ] }},
       options: {{

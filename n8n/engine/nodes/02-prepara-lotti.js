@@ -36,6 +36,10 @@ if (!lotti.length) {
 const annunci = job.target.signals.codes.includes('job_ad');
 const figure = job.target.signals.job_families.map(f => f.label).join('; ');
 
+// Aziende da non riproporre (già acquistate dal cliente o già scartate in questa
+// ricerca): le più recenti, per non sprecare candidati. Le altre le scarta la deduplica.
+const giaViste = job.exclusions.domains.slice(0, 80);
+
 const ruoli = job.target.roles.length ? job.target.roles.join(', ') : 'titolare, fondatore, CEO, amministratore delegato';
 const perAzienda = job.contacts_per_company;
 
@@ -86,6 +90,11 @@ const prompt = (l, i) => [
     '   Jobsora...) servono solo se portano a un\'azienda con nome: non fermarti lì;',
     '2) per ogni annuncio indica l\'azienda, il suo sito ufficiale e la pagina dell\'annuncio.',
     'Restituisci tutte le aziende con annuncio che trovi, anche poche: non serve altro.',
+    ''
+  ] : []),
+  ...(giaViste.length ? [
+    'AZIENDE GIÀ VISTE (non proporle, cercane altre)',
+    giaViste.join(', '),
     ''
   ] : []),
   'PAGINA CONTATTI',

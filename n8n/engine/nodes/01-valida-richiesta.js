@@ -96,6 +96,11 @@ if (!job.target.countries.length && !job.target.country_names.length) errori.pus
 const conAnnunci = job.target.signals.codes.includes('job_ad');
 // Con i segnali dal sito una parte dei candidati non ha il segnale richiesto.
 const conSegnaliSito = job.target.signals.codes.some(c => c !== 'job_ad');
+const SEGNALI_SITO = {
+  no_https: 'sito senza HTTPS', no_mobile: 'sito non adatto ai cellulari', outdated_cms: 'WordPress/Joomla non aggiornato',
+  single_language: 'sito in una sola lingua', stale_copyright: 'sito fermo da anni', under_construction: 'sito in costruzione',
+  no_booking_engine: 'nessun sistema di prenotazione online'
+};
 const SOVRACAMPIONAMENTO = (job.email_mode === 'personal_only' ? 2.6 : 1.8) * (conAnnunci ? 1.4 : 1) * (conSegnaliSito ? 1.6 : 1);
 const lotti = Math.min(
   job.limits.max_lots,
@@ -114,6 +119,7 @@ const brief = [
   job.target.keywords.length ? `Parole chiave aggiuntive: ${job.target.keywords.join(', ')}` : '',
   job.target.exclude_keywords.length ? `Da escludere: ${job.target.exclude_keywords.join(', ')}` : '',
   job.target.notes ? `Note del cliente: ${job.target.notes}` : '',
+  conSegnaliSito ? `Cerchiamo aziende con questi segnali sul sito: ${job.target.signals.codes.filter(c => c !== 'job_ad').map(c => SEGNALI_SITO[c] || c).join('; ')}. Privilegia aziende piccole e locali, con siti semplici o poco aggiornati: le controlliamo una per una.` : '',
   conAnnunci ? `Segnale richiesto: aziende che hanno pubblicato negli ultimi ${job.target.signals.max_age_days} giorni un annuncio di lavoro per: ${job.target.signals.job_families.map(f => f.label).join('; ')}` : ''
 ].filter(Boolean).join('\n');
 

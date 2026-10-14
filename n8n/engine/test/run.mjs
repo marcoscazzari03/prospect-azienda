@@ -95,6 +95,10 @@ assert.equal(r.page_1, '', 'nominativa trovata: niente altre pagine');
 const r2 = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: '<a href="mailto:info@acme.it">x</a><a href="/contatti">c</a>' } }).json;
 assert.equal(r2.email_site_type, 'generic');
 assert.equal(r2.page_1, 'https://www.acme.it/contatti', 'solo generica in personal_only: continua a cercare');
+const r3 = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: '<html><head><meta http-equiv="refresh" content="0; url=/it/home"></head></html>' } }).json;
+assert.equal(r3.page_1, 'https://www.acme.it/it/home', 'homepage con meta refresh: si segue il rimando');
+const r4 = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: '<meta http-equiv="refresh" content="0;url=https://altro.it/">' } }).json;
+assert.notEqual(r4.page_1, 'https://altro.it/', 'rimando verso un altro dominio: ignorato');
 console.log('ok  estrazione email, offuscamento, PEC/noreply scartate, pagine successive');
 
 // 4. Classificazione finale per modalità
