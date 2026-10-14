@@ -172,6 +172,10 @@ manifatturiere in Lombardia con annunci per ruoli IT negli ultimi 60 giorni»).
 - Il backend ricava i segnali dal servizio (`offerChoice`): quelli inviati dal browser vengono ignorati.
   `target.signals.offer` resta sulla ricerca (riepilogo, «Ripeti con nuovi lead»).
 - Sul lead restano visibili le prove («Perché è in target»).
+- Regole modificabili dall'admin in «Servizi opportunità» (`app_settings.offer_rules`): per ogni servizio
+  segnali, figure, combinazione, frase del riepilogo e visibilità. Stessi vincoli del catalogo
+  (`validateOfferRule`); una regola non valida viene ignorata. Valgono per le ricerche nuove: ogni
+  ricerca salva la sua regola in `target.signals` (codici, figure, `look_for`).
 
 ## App (fase 4)
 - Nuova ricerca con due modalità in cima al form: «Trova aziende in target» (invariata) e «Trova

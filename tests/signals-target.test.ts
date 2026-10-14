@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
-import { OFFERS, VERIFIED_SIGNAL_CODES, describeOffer, describeOpportunity, extraCreditsLabel, signalExtraRange, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
+import { OFFERS, VERIFIED_SIGNAL_CODES, applyOfferRules, describeOffer, describeOpportunity, offerChoice, validateOfferRule, extraCreditsLabel, signalExtraRange, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
 import { flattenDelivery } from "@/lib/domain/leads";
 
 const base = {
@@ -95,25 +95,48 @@ describe("segnali nella ricerca (fase 3)", () => {
     expect(describeOpportunity({ codes: ["stale_copyright"], match: "any", jobFamilies: [], industry: "x", where: "" })).toBe("");
   });
 
-  it("servizio venduto: la regola dei segnali è la nostra, non quella inviata dal browser", () => {
-    const input = searchInputSchema.parse({ ...base, signals: { offer: "translation", codes: ["no_https"], match: "all", jobFamilies: [] } });
-    const t = toTarget(input).signals!;
+  it("servizio venduto: la regola viene dal catalogo (e dalle modifiche dell'admin)", () => {
+    const rule = offerChoice("translation")!;
+    expect(rule).toMatchObject({ offer: "translation", codes: ["single_language"], match: "any" });
+    const t = toTarget(searchInputSchema.parse({ ...base, signals: rule })).signals!;
     expect(t.offer).toBe("translation");
-    expect(t.codes).toEqual(["single_language"]);
-    expect(t.match).toBe("any");
+    expect(t.look_for).toContain("una sola lingua");
     expect(searchInputSchema.safeParse({ ...base, signals: { offer: "inventato", codes: [] } }).success).toBe(false);
+  });
+
+  it("regole dell'admin: applicate se valide, ignorate se no, servizi nascosti", () => {
+    const offers = applyOfferRules({
+      translation: { signals: ["single_language", "stale_copyright"], match: "all", lookFor: "un sito solo in italiano e fermo da anni" },
+      wp_maintenance: { signals: ["stale_copyright"] }, // solo indicativo: non valida
+      graphic_design: { enabled: false },
+    });
+    const tr = offers.find((o) => o.code === "translation")!;
+    expect(tr).toMatchObject({ signals: ["single_language", "stale_copyright"], match: "all", customized: true, enabled: true });
+    expect(offerChoice("translation", offers)!.lookFor).toBe("un sito solo in italiano e fermo da anni");
+    expect(offers.find((o) => o.code === "wp_maintenance")).toMatchObject({ signals: ["outdated_cms"], customized: false });
+    expect(offers.find((o) => o.code === "graphic_design")!.enabled).toBe(false);
+  });
+
+  it("validazione delle regole", () => {
+    const ok = { signals: ["outdated_cms"], jobFamilies: [], match: "any" as const, lookFor: "un sito con software vecchio" };
+    expect(validateOfferRule(ok)).toBeNull();
+    expect(validateOfferRule({ ...ok, signals: [] })).toMatch(/almeno un segnale/);
+    expect(validateOfferRule({ ...ok, signals: ["stale_copyright"] })).toMatch(/verificato/);
+    expect(validateOfferRule({ ...ok, signals: ["job_ad"] })).toMatch(/figura/);
+    expect(validateOfferRule({ ...ok, signals: ["no_https", "no_mobile", "outdated_cms", "single_language"] })).toMatch(/massimo|Al massimo/i);
+    expect(validateOfferRule({ ...ok, lookFor: "corto" })).toMatch(/cosa cerchiamo/);
   });
 
   it("ogni servizio produce una ricerca valida in Italia", () => {
     for (const o of OFFERS) {
-      const r = searchInputSchema.safeParse({ ...base, signals: { offer: o.code, codes: [], match: "any", jobFamilies: [] } });
+      const r = searchInputSchema.safeParse({ ...base, signals: offerChoice(o.code) });
       expect(r.success, o.code).toBe(true);
     }
   });
 
   it("servizi con annunci: solo nei paesi coperti", () => {
-    expect(searchInputSchema.safeParse({ ...base, countries: ["PL"], signals: { offer: "it_support", codes: [] } }).success).toBe(false);
-    expect(searchInputSchema.safeParse({ ...base, countries: ["PL"], signals: { offer: "translation", codes: [] } }).success).toBe(true);
+    expect(searchInputSchema.safeParse({ ...base, countries: ["PL"], signals: offerChoice("it_support") }).success).toBe(false);
+    expect(searchInputSchema.safeParse({ ...base, countries: ["PL"], signals: offerChoice("translation") }).success).toBe(true);
   });
 
   it("anteprima del servizio in parole semplici", () => {

@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sha256Hex } from "@/lib/server/crypto";
 import { finalizeSearch } from "@/lib/server/searches";
 import type { Json } from "@/lib/supabase/database.types";
+import { OFFERS, validateOfferRule, type OfferRules } from "@/lib/domain/signals";
 
 async function audit(actor: string, action: string, target: string, metadata: NonNullable<Json> = {}) {
   await createAdminClient().from("audit_log").insert({ actor_id: actor, action, target, metadata });
@@ -106,4 +107,47 @@ export async function updateSignalPrices(form: FormData) {
   revalidatePath("/admin/costi");
   revalidatePath("/");
   revalidatePath("/termini");
+}
+
+// Regole dei servizi della ricerca opportunità: segnali, figure, combinazione, testo,
+// servizio attivo o nascosto. Valgono per le ricerche create da ora in poi.
+async function saveOfferRules(update: (rules: OfferRules) => OfferRules, actor: string, action: string, target: string) {
+  const db = createAdminClient();
+  const { data } = await db.from("app_settings").select("value").eq("key", "offer_rules").maybeSingle();
+  const rules = update({ ...((data?.value ?? {}) as OfferRules) });
+  await db.from("app_settings").upsert({ key: "offer_rules", value: rules as unknown as NonNullable<Json>, updated_at: new Date().toISOString(), updated_by: actor });
+  await audit(actor, action, target, (rules[target] ?? {}) as unknown as NonNullable<Json>);
+  revalidatePath("/admin/servizi");
+  revalidatePath("/");
+}
+
+export type OfferRuleState = { error?: string; info?: string };
+
+export async function updateOfferRule(_: OfferRuleState, form: FormData): Promise<OfferRuleState> {
+  const admin = await requireAdmin();
+  const code = String(form.get("code") ?? "");
+  const offer = OFFERS.find((o) => o.code === code);
+  if (!offer) return { error: "Servizio sconosciuto." };
+  const signals = form.getAll("signals").map(String);
+  const rule = {
+    enabled: form.get("enabled") === "on",
+    signals,
+    jobFamilies: signals.includes("job_ad") ? form.getAll("jobFamilies").map(String) : [],
+    match: form.get("match") === "all" ? ("all" as const) : ("any" as const),
+    lookFor: String(form.get("lookFor") ?? "").trim(),
+  };
+  const error = validateOfferRule(rule);
+  if (error) return { error };
+  await saveOfferRules((r) => ({ ...r, [code]: rule }), admin.user.id, "settings.offer_rule", code);
+  return { info: "Regola salvata: vale per le nuove ricerche." };
+}
+
+export async function resetOfferRule(form: FormData) {
+  const admin = await requireAdmin();
+  const code = String(form.get("code") ?? "");
+  await saveOfferRules((r) => {
+    const next = { ...r };
+    delete next[code];
+    return next;
+  }, admin.user.id, "settings.offer_rule_reset", code);
 }

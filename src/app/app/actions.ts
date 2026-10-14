@@ -9,7 +9,8 @@ import { defaultSearchName, nextRepeatAt, searchInputSchema, toTarget } from "@/
 import { startSearch } from "@/lib/server/searches";
 import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
 import { RATE_LIMITS, SEARCH_RULES } from "@/lib/config";
-import { SIGNAL_RULES } from "@/lib/domain/signals";
+import { SIGNAL_RULES, offerChoice } from "@/lib/domain/signals";
+import { getEnabledOffers } from "@/lib/server/offer-rules";
 
 export type ActionState = { error?: string; info?: string };
 
@@ -28,6 +29,11 @@ const ERRORS: [RegExp, (m: string) => string][] = [
 
 export async function createSearch(_: ActionState, form: FormData): Promise<ActionState> {
   const viewer = await requireViewer();
+  // Ricerca opportunità: il cliente sceglie il servizio, la regola dei segnali è la nostra
+  // (catalogo + modifiche dell'admin); quello che arriva dal browser oltre al servizio è ignorato.
+  const offerCode = String(form.get("offer") ?? "");
+  const offerRule = offerCode ? offerChoice(offerCode, await getEnabledOffers()) : null;
+  if (offerCode && !offerRule) return { error: "Questo servizio non è al momento disponibile: scegline un altro." };
   const parsed = searchInputSchema.safeParse({
     name: form.get("name") ?? "",
     industry: form.get("industry"),
@@ -44,10 +50,7 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
     quantity: form.get("quantity"),
     contactsPerCompany: form.get("contactsPerCompany") ?? 1,
     repeat: form.get("repeat") ?? "none",
-    // Ricerca opportunità: il cliente sceglie il servizio, la regola dei segnali è nostra.
-    signals: form.get("offer")
-      ? { offer: String(form.get("offer")), codes: [], match: "any", jobFamilies: [] }
-      : { codes: [], match: "any", jobFamilies: [] },
+    signals: offerRule ?? { codes: [], match: "any", jobFamilies: [] },
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dati non validi" };
   const input = parsed.data;

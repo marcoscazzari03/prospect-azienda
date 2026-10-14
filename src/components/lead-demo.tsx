@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ProvenanceStamp, cx } from "./ui";
-import { OFFER_AREAS, SIGNAL_SHORT, VERIFIED_SIGNAL_CODES, describeOffer, extraCreditsLabel, offerByCode, offersOfArea, type SignalPrices } from "@/lib/domain/signals";
+import { OFFER_AREAS, OFFERS, SIGNAL_SHORT, VERIFIED_SIGNAL_CODES, describeOffer, extraCreditsLabel, offerByCode, offersOfArea, type OfferDef, type SignalPrices } from "@/lib/domain/signals";
 
 // Demo interattiva della homepage: simula una ricerca interamente nel browser.
 // Nessuna chiamata al server, al database o al motore: i "risultati" sono
@@ -70,11 +70,11 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 type Row = { name: string; company: string; role: string; email: string; status: "validated" | "found_public"; type: "personal" | "generic"; signals: string[] };
 
-function buildResults(cfg: Config) {
+function buildResults(cfg: Config, offers: OfferDef[]) {
   const country = COUNTRIES.find((c) => c.id === cfg.country) ?? COUNTRIES[0];
   const rand = rng(JSON.stringify(cfg));
   const opportunity = cfg.kind === "opportunity";
-  const rule = offerByCode(cfg.offer);
+  const rule = offerByCode(cfg.offer, offers);
   const codes = rule?.signals ?? [];
   const match = rule?.match ?? "any";
   const decisive = codes.filter((c) => VERIFIED_SIGNAL_CODES.includes(c));
@@ -141,11 +141,11 @@ const TICK = (
   </svg>
 );
 
-export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
+export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: SignalPrices; offers?: OfferDef[] }) {
   const [cfg, setCfg] = useState<Config>({
     kind: "opportunity",
-    area: "web",
-    offer: "web_redesign",
+    area: (offerByCode("web_redesign", offers) ?? offers[0])?.area ?? "web",
+    offer: (offerByCode("web_redesign", offers) ?? offers[0])?.code ?? "",
     country: "IT",
     region: "Lombardia",
     sector: "software",
@@ -171,8 +171,8 @@ export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
 
   const country = COUNTRIES.find((c) => c.id === cfg.country) ?? COUNTRIES[0];
   const sector = SECTORS.find((s) => s.id === cfg.sector) ?? SECTORS[0];
-  const results = useMemo(() => buildResults(cfg), [cfg]);
-  const rule = offerByCode(cfg.offer);
+  const results = useMemo(() => buildResults(cfg, offers), [cfg, offers]);
+  const rule = offerByCode(cfg.offer, offers);
   const decisive = (rule?.signals ?? []).filter((c) => VERIFIED_SIGNAL_CODES.includes(c));
   const valid = !opportunity || decisive.length > 0;
 
@@ -215,7 +215,7 @@ export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
     setTick(null);
   };
   const preview = opportunity
-    ? describeOffer({ offer: cfg.offer, industry: sector.who, where: cfg.region })
+    ? describeOffer({ offer: cfg.offer, industry: sector.who, where: cfg.region, offers })
     : `Cercheremo ${sector.who} in ${cfg.region} (${cfg.size}) e il referente giusto: ${cfg.role}. Ogni lead con la fonte e lo stato dell'email.`;
 
   return (
@@ -260,13 +260,13 @@ export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
           {opportunity && (
             <>
               <Row label="Che servizio vendi?">
-                <select className={selectCls} value={cfg.area} onChange={(e) => update({ area: e.target.value, offer: offersOfArea(e.target.value)[0]?.code ?? "" })}>
-                  {OFFER_AREAS.map((a) => <option key={a.code} value={a.code}>{a.label}</option>)}
+                <select className={selectCls} value={cfg.area} onChange={(e) => update({ area: e.target.value, offer: offersOfArea(e.target.value, offers)[0]?.code ?? "" })}>
+                  {OFFER_AREAS.filter((a) => offersOfArea(a.code, offers).length).map((a) => <option key={a.code} value={a.code}>{a.label}</option>)}
                 </select>
               </Row>
               <Row label="Più nello specifico">
                 <select className={selectCls} value={cfg.offer} onChange={(e) => update({ offer: e.target.value })}>
-                  {offersOfArea(cfg.area).map((o) => <option key={o.code} value={o.code}>{o.label}</option>)}
+                  {offersOfArea(cfg.area, offers).map((o) => <option key={o.code} value={o.code}>{o.label}</option>)}
                 </select>
               </Row>
               {rule && (

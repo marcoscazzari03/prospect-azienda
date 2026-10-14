@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
 import { getSignalPrices } from "@/lib/server/signal-prices";
+import { getEnabledOffers } from "@/lib/server/offer-rules";
 import { createClient } from "@/lib/supabase/server";
 import { SearchWizard, type SearchKind, type WizardDefaults } from "./wizard";
 import type { SearchTarget } from "@/lib/domain/search-input";
@@ -46,7 +47,7 @@ export default async function NewSearchPage({ searchParams }: PageProps<"/app/ri
         title="Chi sono i tuoi clienti ideali?"
         description="Scegli il tipo di ricerca. Più sei preciso, più i lead saranno pertinenti. I contatti che hai già ricevuto vengono esclusi in automatico."
       />
-      <SearchWizard credits={viewer.credits} maxQuantity={viewer.plan?.max_quantity_per_search ?? 10} defaults={defaults} initialKind={kind} signalPrices={await getSignalPrices()} />
+      <SearchWizard credits={viewer.credits} maxQuantity={viewer.plan?.max_quantity_per_search ?? 10} defaults={defaults} initialKind={kind} signalPrices={await getSignalPrices()} offers={await getEnabledOffers()} />
     </>
   );
 }

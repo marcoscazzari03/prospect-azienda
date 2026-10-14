@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { COMPANY_SIZES, COUNTRY_NAME, EMAIL_MODES } from "./catalog";
-import { JOB_AD_COUNTRIES, JOB_FAMILIES, OFFERS, SIGNALS, SIGNAL_RULES, chargesSignal, offerChoice, toSignalsTarget } from "./signals";
+import { JOB_AD_COUNTRIES, JOB_FAMILIES, OFFERS, SIGNALS, SIGNAL_RULES, chargesSignal, toSignalsTarget } from "./signals";
 
 const list = (max: number, itemMax = 80) =>
   z
@@ -33,10 +33,12 @@ export const searchInputSchema = z.object({
       match: z.enum(["any", "all"]).default("any"),
       jobFamilies: z.array(z.enum(JOB_FAMILIES.map((f) => f.code) as [string, ...string[]])).max(3).default([]),
       // Servizio venduto (ricerca opportunità): se presente, la regola dei segnali è la nostra.
+      // La regola (codici, figure, combinazione) la mette il server dalle regole dei servizi.
       offer: z.enum(OFFERS.map((o) => o.code) as [string, ...string[]]).optional(),
+      lookFor: z.string().trim().max(300).optional(),
     })
     .default({ codes: [], match: "any", jobFamilies: [] })
-    .transform((s) => (s.offer ? offerChoice(s.offer)! : { ...s, codes: [...new Set(s.codes)], jobFamilies: [...new Set(s.jobFamilies)] }))
+    .transform((s) => ({ ...s, codes: [...new Set(s.codes)], jobFamilies: [...new Set(s.jobFamilies)] }))
     .refine((s) => !s.codes.length || chargesSignal(s.codes), "I segnali indicativi non si possono usare da soli: aggiungi un segnale verificato")
     .refine((s) => !s.codes.includes("job_ad") || s.jobFamilies.length > 0, "Scegli la figura cercata negli annunci"),
 }).refine(

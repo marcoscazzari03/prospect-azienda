@@ -12,6 +12,7 @@ import {
   offerUsesJobAds,
   offersOfArea,
   signalExtraRange,
+  type ActiveOffer,
   type OfferArea,
   type SignalPrices,
 } from "@/lib/domain/signals";
@@ -80,12 +81,14 @@ export function SearchWizard({
   defaults = {},
   initialKind = "standard",
   signalPrices,
+  offers,
 }: {
   credits: number;
   maxQuantity: number;
   defaults?: WizardDefaults;
   initialKind?: SearchKind;
   signalPrices: SignalPrices;
+  offers: ActiveOffer[]; // servizi attivi, con le regole dell'admin
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(createSearch, {});
   const [kind, setKind] = useState<SearchKind>(initialKind);
@@ -93,7 +96,7 @@ export function SearchWizard({
   const [industry, setIndustry] = useState(defaults.industry ?? "");
   const [regions, setRegions] = useState(defaults.regions?.join("\n") ?? "");
   const [offer, setOffer] = useState(defaults.offer ?? "");
-  const [area, setArea] = useState(offerByCode(defaults.offer ?? "")?.area ?? "");
+  const [area, setArea] = useState(offerByCode(defaults.offer ?? "", offers)?.area ?? "");
   const [mode, setMode] = useState<EmailMode>(defaults.emailMode ?? "mixed");
   const [quantity, setQuantity] = useState(Math.min(defaults.quantity ?? 10, maxQuantity));
   const [countries, setCountries] = useState<string[]>(defaults.countries ?? ["IT"]);
@@ -102,7 +105,7 @@ export function SearchWizard({
 
   const info = MODE_INFO[mode];
   const opportunity = kind === "opportunity";
-  const chosen = opportunity ? offerByCode(offer) : undefined;
+  const chosen = opportunity ? offerByCode(offer, offers) : undefined;
   const withSignal = Boolean(chosen);
   const extra = chosen ? signalExtraRange(signalPrices, chosen.signals) : 0;
   const estimate = estimateCredits(mode, quantity, extra);
@@ -131,7 +134,7 @@ export function SearchWizard({
       : offerUsesJobAds(chosen) && !jobAdCountriesOk
         ? "Per questo servizio usiamo gli annunci di lavoro, disponibili solo in alcuni paesi: togli i paesi non coperti."
         : "";
-  const preview = chosen ? describeOffer({ offer: chosen.code, industry, where }) : "";
+  const preview = chosen ? describeOffer({ offer: chosen.code, industry, where, offers }) : "";
 
   return (
     <form action={action} className="grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -188,7 +191,7 @@ export function SearchWizard({
               <p className="text-sm font-medium">Che servizio vendi?</p>
               <p className="mt-1 text-xs text-muted">Scegli l&apos;area, poi il servizio: cerchiamo le aziende con un segnale concreto collegato, e su ogni lead trovi la prova.</p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="radiogroup" aria-label="Area del servizio">
-                {OFFER_AREAS.map((a) => (
+                {OFFER_AREAS.filter((a) => offersOfArea(a.code, offers).length).map((a) => (
                   <button
                     key={a.code}
                     type="button"
@@ -196,7 +199,7 @@ export function SearchWizard({
                     aria-checked={area === a.code}
                     onClick={() => {
                       setArea(a.code);
-                      if (offerByCode(offer)?.area !== a.code) setOffer(offersOfArea(a.code).length === 1 ? offersOfArea(a.code)[0].code : "");
+                      if (offerByCode(offer, offers)?.area !== a.code) setOffer(offersOfArea(a.code, offers).length === 1 ? offersOfArea(a.code, offers)[0].code : "");
                     }}
                     className={cx(
                       "flex items-start gap-3 rounded-xl border bg-card p-4 text-left transition-colors",
@@ -219,7 +222,7 @@ export function SearchWizard({
               <div className="animate-row-in">
                 <p className="text-sm font-medium">Più nello specifico</p>
                 <div className="mt-3 grid gap-2" role="radiogroup" aria-label="Servizio">
-                  {offersOfArea(area).map((o) => (
+                  {offersOfArea(area, offers).map((o) => (
                     <label
                       key={o.code}
                       className={cx(

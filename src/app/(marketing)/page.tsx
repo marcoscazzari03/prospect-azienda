@@ -6,6 +6,7 @@ import { BRAND } from "@/lib/config";
 import { LogoMark } from "@/components/logo";
 import { extraCreditsLabel, type SignalPrices } from "@/lib/domain/signals";
 import { getSignalPrices } from "@/lib/server/signal-prices";
+import { getEnabledOffers } from "@/lib/server/offer-rules";
 
 // Icone della homepage (tratto 1.6, 20x20).
 const PATHS = {
@@ -330,7 +331,7 @@ function AppPreview() {
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const prices = await getSignalPrices();
+  const [prices, offers] = await Promise.all([getSignalPrices(), getEnabledOffers()]);
   return (
     <>
       <section className="ruled">
@@ -436,7 +437,7 @@ export default async function HomePage() {
           title="Prova una ricerca, standard o con opportunità."
           text="Imposta i tuoi filtri e prova subito. Vedrai un'anteprima dei risultati con le stesse informazioni che riceverai, inclusa la prova per ogni opportunità. È una simulazione con dati dimostrativi."
         />
-        <div className="mt-10"><LeadDemo signalPrices={prices} /></div>
+        <div className="mt-10"><LeadDemo signalPrices={prices} offers={offers} /></div>
       </Section>
 
       <Section tone="paper">

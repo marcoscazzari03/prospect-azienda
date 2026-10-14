@@ -77,7 +77,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
           <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ledger">Ricerca opportunità</p>
           <p className="text-ink-2">
             {t.signals.offer && offerByCode(t.signals.offer) && <span className="mb-1 block font-medium text-ink">{offerByCode(t.signals.offer)!.label}</span>}
-            {t.signals.offer ? describeOffer({ offer: t.signals.offer, industry: t.industry, where: t.regions?.join(", ") || t.country_names?.join(", ") || "" }) : describeOpportunity({
+            {t.signals.offer ? describeOffer({ offer: t.signals.offer, lookFor: t.signals.look_for, industry: t.industry, where: t.regions?.join(", ") || t.country_names?.join(", ") || "" }) : describeOpportunity({
               codes: t.signals.codes,
               match: t.signals.match,
               jobFamilies: t.signals.job_families.map((f) => f.code),

@@ -333,9 +333,46 @@ export const OFFERS: OfferDef[] = [
   },
 ];
 
-export const offerByCode = (code: string) => OFFERS.find((o) => o.code === code);
-export const offersOfArea = (area: string) => OFFERS.filter((o) => o.area === area);
+export const offerByCode = (code: string, offers: OfferDef[] = OFFERS) => offers.find((o) => o.code === code);
+export const offersOfArea = (area: string, offers: OfferDef[] = OFFERS) => offers.filter((o) => o.area === area);
 export const offerUsesJobAds = (o: OfferDef) => o.signals.includes("job_ad");
+
+// Regole dei servizi modificabili dall'admin (app_settings "offer_rules"): per ogni
+// servizio si può cambiare la regola o nasconderlo. Nomi e aree restano nel codice.
+export type OfferRule = { enabled: boolean; signals: string[]; jobFamilies: string[]; match: "any" | "all"; lookFor: string };
+export type OfferRules = Record<string, Partial<OfferRule>>;
+export type ActiveOffer = OfferDef & { enabled: boolean; customized: boolean };
+
+// Stessi vincoli del catalogo: errore in italiano, oppure null se la regola è valida.
+export function validateOfferRule(r: Pick<OfferRule, "signals" | "jobFamilies" | "match" | "lookFor">): string | null {
+  const codes = [...new Set(r.signals)];
+  if (!codes.length) return "Scegli almeno un segnale.";
+  if (codes.length > SIGNAL_RULES.maxSignalsPerSearch) return `Al massimo ${SIGNAL_RULES.maxSignalsPerSearch} segnali.`;
+  if (codes.some((c) => !signalByCode(c))) return "Segnale sconosciuto.";
+  if (!chargesSignal(codes)) return "Serve almeno un segnale verificato: gli indicativi da soli non bastano.";
+  if (codes.includes("job_ad") && !r.jobFamilies.length) return "Con gli annunci di lavoro scegli almeno una figura.";
+  if (r.jobFamilies.length > 3 || r.jobFamilies.some((f) => !jobFamilyByCode(f))) return "Figure degli annunci non valide (massimo 3).";
+  if (r.match !== "any" && r.match !== "all") return "Combinazione non valida.";
+  if (r.lookFor.trim().length < 10 || r.lookFor.length > 300) return "Scrivi cosa cerchiamo (da 10 a 300 caratteri).";
+  return null;
+}
+
+// Catalogo + modifiche dell'admin. Una modifica non valida viene ignorata (vale il catalogo).
+export function applyOfferRules(rules: OfferRules | null | undefined): ActiveOffer[] {
+  return OFFERS.map((o) => {
+    const r = rules?.[o.code];
+    if (!r) return { ...o, enabled: true, customized: false };
+    const merged = {
+      signals: Array.isArray(r.signals) ? r.signals.map(String) : o.signals,
+      jobFamilies: Array.isArray(r.jobFamilies) ? r.jobFamilies.map(String) : o.jobFamilies,
+      match: r.match === "all" || r.match === "any" ? r.match : o.match,
+      lookFor: typeof r.lookFor === "string" && r.lookFor.trim() ? r.lookFor.trim() : o.lookFor,
+    };
+    const fixed = { ...merged, jobFamilies: merged.signals.includes("job_ad") ? merged.jobFamilies : [] };
+    const ok = !validateOfferRule(fixed);
+    return { ...o, ...(ok ? fixed : {}), enabled: r.enabled !== false, customized: ok };
+  });
+}
 
 // Date di rilascio (per "outdated_cms": più di 2 anni). Regola prudente: una
 // versione V è vecchia se la sua data nota è oltre i 2 anni, oppure se esiste
@@ -367,7 +404,7 @@ export const VERIFIED_SIGNAL_CODES = SIGNALS.filter((s) => s.level === "verified
 
 // Segnali scelti dal cliente -> target per motore e database (target.signals).
 // I titoli degli annunci vanno al motore in tutte le lingue: confronta per parole.
-export type SignalsChoice = { codes: string[]; match: "any" | "all"; jobFamilies: string[]; offer?: string };
+export type SignalsChoice = { codes: string[]; match: "any" | "all"; jobFamilies: string[]; offer?: string; lookFor?: string };
 
 export function toSignalsTarget(choice: SignalsChoice) {
   const codes = [...new Set(choice.codes)].filter((c) => signalByCode(c)).slice(0, SIGNAL_RULES.maxSignalsPerSearch);
@@ -376,6 +413,7 @@ export function toSignalsTarget(choice: SignalsChoice) {
     : [];
   return {
     ...(choice.offer && offerByCode(choice.offer) ? { offer: choice.offer } : {}),
+    ...(choice.offer && choice.lookFor ? { look_for: choice.lookFor.slice(0, 300) } : {}),
     codes,
     match: choice.match,
     job_families: families.map((f) => ({
@@ -388,14 +426,15 @@ export function toSignalsTarget(choice: SignalsChoice) {
 }
 
 // Il servizio scelto dal cliente -> regola dei segnali (decisa da noi).
-export function offerChoice(code: string): SignalsChoice | null {
-  const o = offerByCode(code);
-  return o ? { offer: o.code, codes: o.signals, match: o.match, jobFamilies: o.jobFamilies } : null;
+export function offerChoice(code: string, offers: OfferDef[] = OFFERS): SignalsChoice | null {
+  const o = offerByCode(code, offers);
+  return o ? { offer: o.code, codes: o.signals, match: o.match, jobFamilies: o.jobFamilies, lookFor: o.lookFor } : null;
 }
 
 // Anteprima della ricerca opportunità per servizio: cosa cerchiamo, in parole semplici.
-export function describeOffer(args: { offer: string; industry: string; where: string }) {
-  const o = offerByCode(args.offer);
+export function describeOffer(args: { offer: string; industry: string; where: string; lookFor?: string; offers?: OfferDef[] }) {
+  const found = offerByCode(args.offer, args.offers);
+  const o = found ? { ...found, lookFor: args.lookFor || found.lookFor } : null;
   if (!o) return "";
   const sector = args.industry.trim().replace(/^\p{Lu}(?=\p{Ll})/u, (c) => c.toLowerCase());
   const who = `${sector || "aziende del settore scelto"}${args.where ? ` in ${args.where}` : ""}`;
