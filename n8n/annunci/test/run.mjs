@@ -241,45 +241,44 @@ assert.ok(controllo.items[0].checks.find(c => c.code === 'outdated_cms').evidenc
 assert.equal(controllo.stats.unreachable, 1);
 console.log('Test controllo siti superati.');
 
-// 9. Popolamento OpenStreetMap.
+// 9. Popolamento OpenStreetMap, per riquadro di provincia.
 const richiesteOsm = run(codice('10-prepara-osm.js'), {});
-assert.ok(richiesteOsm.every(r => r.regione === 'Emilia-Romagna' && r.data.includes('"ISO3166-2"="IT-45"') && r.data.includes('out tags;')), 'a mano: Emilia-Romagna');
-assert.deepEqual(richiesteOsm.map(r => r.tipo), ['office', 'craft', 'shop', 'amenity', 'tourism', 'healthcare', 'industrial']);
+assert.equal(richiesteOsm.length, 1, 'a mano: Modena');
+assert.deepEqual([richiesteOsm[0].sigla, richiesteOsm[0].regione], ['MO', 'Emilia-Romagna']);
+assert.ok(richiesteOsm[0].data.includes('[bbox:44.2,10.4,45.0,11.4]') && richiesteOsm[0].data.includes('nwr["website"]["office"]') && richiesteOsm[0].data.includes('out tags;'));
 const giornoOsm = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'] });
-assert.equal(new Set(giornoOsm.map(r => r.regione)).size, 1, 'una regione al giorno');
+assert.ok(giornoOsm.length >= 1 && giornoOsm.every(r => r.url.startsWith('https://')), 'alcune province al giorno');
 const el = (tags) => ({ type: 'node', id: Math.random(), tags });
 const [osm] = run(codice('11-normalizza-osm.js'), {
-  nodes: { 'Prepara richieste OSM': [{ tipo: 'office', regione: 'Emilia-Romagna' }, { tipo: 'amenity', regione: 'Emilia-Romagna' }, { tipo: 'shop', regione: 'Emilia-Romagna' }] },
+  nodes: { 'Prepara richieste OSM': [{ sigla: 'MO', provincia: 'Modena', regione: 'Emilia-Romagna' }, { sigla: 'XX', provincia: 'Altrove', regione: 'Altrove' }] },
   input: [
     { elements: [
       el({ office: 'lawyer', name: 'Studio Legale Bianchi', website: 'https://www.studiobianchi.it/contatti', 'addr:city': 'Modena' }),
       el({ office: 'government', name: 'Agenzia delle Entrate', website: 'https://www.agenziaentrate.gov.it' }),
-      el({ office: 'company', name: 'Meccanica Rossi', 'contact:website': 'meccanicarossi.it' }),
+      el({ office: 'company', name: 'Meccanica Rossi', 'contact:website': 'meccanicarossi.it', 'addr:province': 'MO' }),
       el({ office: 'it', name: 'Comune di Carpi informatica', website: 'https://www.comune.carpi.mo.it' }),
-      el({ office: 'accountant', website: 'https://senzanome.it' })
-    ] },
-    { elements: [
+      el({ office: 'accountant', website: 'https://senzanome.it' }),
       el({ amenity: 'dentist', name: 'Studio Dentistico Verdi', website: 'http://dentistaverdi.it' }),
       el({ amenity: 'parking', name: 'Parcheggio', website: 'https://parcheggio.it' }),
-      el({ amenity: 'restaurant', name: 'Trattoria', website: 'https://www.facebook.com/trattoria' })
-    ] },
-    { elements: [
+      el({ amenity: 'restaurant', name: 'Trattoria', website: 'https://www.facebook.com/trattoria' }),
       el({ shop: 'supermarket', name: 'Conad Carpi', brand: 'Conad', website: 'https://www.conad.it' }),
       el({ shop: 'supermarket', name: 'Conad Modena', brand: 'Conad', website: 'https://www.conad.it/negozi' }),
       el({ shop: 'clothes', name: 'Boutique Anna', website: 'https://boutiqueanna.it' }),
-      el({ shop: 'clothes', name: 'Boutique Anna 2', website: 'https://boutiqueanna.it/negozio2' })
+      el({ shop: 'clothes', name: 'Boutique Anna 2', website: 'https://boutiqueanna.it/negozio2' }),
+      el({ shop: 'clothes', name: 'Moda Svizzera', website: 'https://modasvizzera.ch' })
     ] },
     { error: { message: 'timeout' } }
   ]
 });
 assert.deepEqual(osm.companies.map(c => c.domain), ['studiobianchi.it', 'meccanicarossi.it', 'dentistaverdi.it', 'boutiqueanna.it']);
 const bianchi = osm.companies[0];
-assert.deepEqual([bianchi.industry, bianchi.city, bianchi.region, bianchi.website], ['Studio legale', 'Modena', 'Emilia-Romagna', 'https://www.studiobianchi.it/contatti']);
+assert.deepEqual([bianchi.industry, bianchi.city, bianchi.province, bianchi.region, bianchi.website], ['Studio legale', 'Modena', 'Modena', 'Emilia-Romagna', 'https://www.studiobianchi.it/contatti']);
 assert.ok(bianchi.keywords.includes('avvocati'));
 assert.equal(osm.companies[1].industry, '', 'categoria generica: settore da Haiku');
 assert.equal(osm.companies[1].website, 'https://meccanicarossi.it');
-assert.equal(osm.companies[3].industry, 'Abbigliamento', 'shop senza elenco: categoria nota tradotta');
-assert.deepEqual([osm.stats.excluded_category, osm.stats.no_name, osm.stats.not_company_site, osm.stats.chains, osm.stats.duplicates, osm.stats.errors], [2, 1, 2, 2, 1, 1]);
+assert.equal(osm.companies[3].industry, 'Abbigliamento');
+assert.deepEqual([osm.stats.excluded_category, osm.stats.no_name, osm.stats.not_company_site, osm.stats.foreign, osm.stats.chains, osm.stats.duplicates, osm.stats.errors], [2, 1, 2, 1, 2, 1, 1]);
+assert.deepEqual(osm.stats.failed_provinces, ['Altrove']);
 console.log('Test popolamento OSM superati.');
 
 // 10. Settore: risposta troncata dal limite di token, si salvano le aziende complete.

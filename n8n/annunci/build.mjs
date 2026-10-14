@@ -18,7 +18,9 @@ export const famiglie = JOB_FAMILIES.map(f => ({ code: f.code, titles: [...new S
 // Controlli sul sito: gli stessi del motore (n8n/engine/nodes/lib-controlli-sito.js).
 const controlliSito = readFileSync(join(root, 'n8n', 'engine', 'nodes', 'lib-controlli-sito.js'), 'utf8');
 const rilasciCms = JSON.stringify(JSON.parse(readFileSync(join(root, 'src', 'lib', 'domain', 'cms-releases.json'), 'utf8')));
-export const codice = (f, subs = {}) => Object.entries({ __FAMIGLIE__: JSON.stringify(famiglie), __CMS_RELEASES__: rilasciCms, ...subs })
+// Province con riquadro (sud,ovest,nord,est) e regione, per il popolamento da OpenStreetMap.
+const province = JSON.stringify(JSON.parse(readFileSync(join(dir, 'province.json'), 'utf8')));
+export const codice = (f, subs = {}) => Object.entries({ __FAMIGLIE__: JSON.stringify(famiglie), __CMS_RELEASES__: rilasciCms, __PROVINCE__: province, ...subs })
   .reduce((s, [k, v]) => s.split(k).join(v), readFileSync(join(dir, 'nodes', f), 'utf8').split('__CONTROLLI_SITO__').join(controlliSito));
 // Verifica dei siti: livello 2 (domini indovinati) e livello 3 (ricerca web).
 export const scegliSito = (livello) => codice('04-scegli-sito.js', livello === 2
@@ -729,7 +731,7 @@ const popolamento = `import { workflow, node, trigger, expr } from '@n8n/workflo
 
 // GENERATO da n8n/annunci/build.mjs: non modificare a mano.
 // Popolamento del database aziende da OpenStreetMap (dati aperti, licenza ODbL): ogni notte
-// una regione a rotazione, le attività con un sito web (uffici, artigiani, negozi, studi,
+// 4 province a rotazione (riquadri in province.json), le attività con un sito web (uffici, artigiani, negozi, studi,
 // hotel, industrie). Solo dati d'azienda, nessun dato personale. Poi «Aziende | Controllo
 // siti» trova i segnali e «Annunci | Settore aziende» classifica chi non ha una categoria.
 
@@ -755,7 +757,7 @@ const prepara = node({
     name: 'Prepara richieste OSM',
     parameters: { jsCode: ${JSON.stringify(codice('10-prepara-osm.js'))} }
   },
-  output: [{ regione: 'Emilia-Romagna', tipo: 'office', data: '' }]
+  output: [{ sigla: 'MO', provincia: 'Modena', regione: 'Emilia-Romagna', url: '', data: '' }]
 });
 
 const overpass = node({
@@ -765,7 +767,8 @@ const overpass = node({
     name: 'Overpass',
     parameters: {
       method: 'POST',
-      url: 'https://overpass-api.de/api/interpreter',
+      // Server scelto in «Prepara richieste OSM» (overpass-api.de è spesso sovraccarico).
+      url: expr('{{ $json.url }}'),
       sendHeaders: true,
       headerParameters: { parameters: [
         // Overpass rifiuta (406) le richieste senza un User-Agent che identifichi il servizio.

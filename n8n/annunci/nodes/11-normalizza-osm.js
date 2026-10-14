@@ -90,15 +90,20 @@ const dominio = (url) => String(url || '').trim().toLowerCase().replace(/^https?
 const pulisci = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
 const trovate = [];
-const stats = { elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0 };
+const stats = { provinces: richieste.map(r => r.provincia), elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, foreign: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0, failed_provinces: [] };
+const TIPI = ['office', 'craft', 'industrial', 'healthcare', 'tourism', 'shop', 'amenity'];
+// Sigla della provincia scritta nell'indirizzo (addr:province = «BO»): più precisa del riquadro,
+// che sui confini prende anche attività delle province vicine.
+const PROVINCE = Object.fromEntries((__PROVINCE__).map(([sigla, nome, regione]) => [sigla, [nome, regione]]));
 $input.all().forEach((item, i) => {
-  const tipo = richieste[item.pairedItem?.item ?? i]?.tipo;
-  const regione = richieste[item.pairedItem?.item ?? i]?.regione;
+  const { regione, provincia } = richieste[item.pairedItem?.item ?? i] || {};
   const elementi = item.json?.elements;
-  if (!Array.isArray(elementi)) { stats.errors++; return; }
+  if (!Array.isArray(elementi)) { stats.errors++; stats.failed_provinces.push(provincia); return; }
   for (const el of elementi) {
     stats.elements++;
     const t = el.tags || {};
+    // Tipo di attività: il primo tra quelli noti (un ufficio dentro un negozio è un ufficio).
+    const tipo = TIPI.find(k => t[k]) || '';
     const valore = String(t[tipo] || '').toLowerCase();
     if (SCARTA.test(valore) || (SOLO_ELENCO.has(tipo) && !SETTORI[tipo]?.[valore])) { stats.excluded_category++; continue; }
     const nome = pulisci(t.name || t['name:it'] || t.operator, 200);
@@ -106,11 +111,16 @@ $input.all().forEach((item, i) => {
     const sito = String(t.website || t['contact:website'] || '').split(/[;\s]/)[0];
     const dom = dominio(sito);
     if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,24}$/.test(dom) || NON_AZIENDALI.test(dom)) { stats.not_company_site++; continue; }
+    // Riquadri di confine: niente attività estere (paese o dominio straniero).
+    if ((t['addr:country'] && t['addr:country'].toUpperCase() !== 'IT') || /\.(ch|fr|at|si|de|hr|sm|va|mt|li|mc)$/.test(dom)) { stats.foreign++; continue; }
     const mappa = SETTORI[tipo]?.[valore];
     if (!mappa) stats.unmapped++;
     trovate.push({
       domain: dom, name: nome, website: /^https?:\/\//i.test(sito) ? sito.slice(0, 300) : `https://${dom}`,
-      city: pulisci(t['addr:city'], 80), province: pulisci(t['addr:province'], 80), region: regione,
+      ...(() => {
+        const dichiarata = PROVINCE[String(t['addr:province'] || '').trim().toUpperCase()];
+        return { city: pulisci(t['addr:city'], 80), province: dichiarata ? dichiarata[0] : provincia, region: dichiarata ? dichiarata[1] : regione };
+      })(),
       industry: mappa ? mappa[0] : '', keywords: mappa ? mappa[1] : [], brand: Boolean(t.brand || t['brand:wikidata'])
     });
   }
