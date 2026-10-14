@@ -11,10 +11,6 @@ return {
       model: ai.model,
       max_tokens: 16000,
       output_config: { effort: ai.effort },
-      // Cache dei prompt: tra una ricerca web e l'altra Claude rilegge tutto il contesto;
-      // con la cache le parti già lette costano il 10% (le ricerche web aggiungono da sole
-      // un punto di cache dopo ogni risultato).
-      cache_control: { type: 'ephemeral' },
       system: 'Sei un ricercatore di prospect B2B. Usi la ricerca web, citi sempre la fonte e non inventi mai dati. Rispondi solo con JSON valido.',
       messages: [{ role: 'user', content: $json.prompt }],
       // Versione base della ricerca web: i risultati arrivano direttamente al modello.

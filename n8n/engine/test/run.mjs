@@ -261,7 +261,8 @@ const ok = esito('PRIMA', { stop_reason: 'end_turn', content: [
 assert.equal(ok.output, '{"candidates":[]}');
 assert.equal(ok._continua, false);
 assert.equal(ok.usage.web_search_requests, 3);
-assert.deepEqual(req.cache_control, { type: 'ephemeral' }, 'cache dei prompt tra una ricerca web e l altra');
+// Niente cache dei prompt: una richiesta con ricerca web è pagata una volta sola, la cache aggiungeva il 25% (test del 14/10).
+assert.equal(req.cache_control, undefined);
 const conCache = esito('PRIMA', { stop_reason: 'end_turn', content: [{ type: 'text', text: '{"candidates":[]}' }],
   usage: { input_tokens: 1000, cache_creation_input_tokens: 8000, cache_read_input_tokens: 50000, output_tokens: 10 } });
 assert.equal(conCache.usage.input_tokens, 1000 + 10000 + 5000, 'costo equivalente: scrittura 1,25×, lettura 0,1×');
