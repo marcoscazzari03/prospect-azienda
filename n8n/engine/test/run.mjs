@@ -393,6 +393,17 @@ const jsOnly = valutaFile('site-js-only.html', ['outdated_cms']);
 assert.equal(jsOnly._scarto_segnale, 'segnale_non_determinabile');
 const tutti = valutaFile('site-old-wp.html', ['no_mobile', 'single_language'], undefined, 'all');
 assert.equal(tutti._scarto_segnale, undefined, 'servono tutti: presenti tutti');
+// Versione di jQuery in wp-includes: non è la versione di WordPress (falso positivo del 14/10).
+const valutaHtml = (html, codes) => run(valuta, {
+  nodes: { 'Valida richiesta': [jobSito(codes)], 'Serve controllo sito?': [prospettoSito], 'HTTP - Sito (segnali)': [{ html }] },
+  json: prospettoSito
+}).json;
+const paginaWp = (script) => `<html><head><meta name="viewport" content="width=device-width">${script}</head><body>${'Testo della pagina aziendale. '.repeat(20)}</body></html>`;
+const conJquery = valutaHtml(paginaWp('<script src="/wp-includes/js/jquery/jquery.min.js?ver=3.7.1"></script><script src="/wp-includes/js/masonry.min.js?ver=4.2.2"></script>'), ['outdated_cms']);
+assert.equal(conJquery.signals.find(x => x.code === 'outdated_cms').status, 'undetermined', 'jQuery 3.7.1 non è WordPress 3.7.1');
+const conEmoji = valutaHtml(paginaWp('<script src="/wp-includes/js/wp-emoji-release.min.js?ver=5.2.4"></script>'), ['outdated_cms']);
+assert.equal(conEmoji.signals.find(x => x.code === 'outdated_cms').status, 'pass', 'versione di WordPress dal file delle emoji');
+assert.match(conEmoji.signals.find(x => x.code === 'outdated_cms').evidence.detail, /WordPress 5\.2\.4/);
 const indicativo = valutaFile('site-modern.html', ['stale_copyright']);
 assert.equal(indicativo._scarto_segnale, undefined, 'gli indicativi non scartano mai');
 const httpsOk = valutaFile('site-modern.html', ['no_https'], { https_body: '<html></html>' });

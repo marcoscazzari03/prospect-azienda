@@ -54,7 +54,9 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
       const wc = g.match(/WooCommerce\s+(\d+\.\d+(?:\.\d+)?)/i); if (wc) versioni.push(['woocommerce', wc[1]]);
     }
     if (!versioni.some(([c]) => c === 'wordpress')) {
-      const ver = html.match(/\/wp-includes\/[^"'?]+\?ver=(\d+\.\d+(?:\.\d+)?)/i);
+      // Solo i file che portano la versione di WordPress: le librerie in wp-includes hanno la
+      // propria (jquery.min.js?ver=3.7.1 è jQuery 3.7.1, non WordPress 3.7.1).
+      const ver = html.match(/\/wp-includes\/(?:js\/(?:wp-emoji-release|wp-embed|comment-reply)(?:\.min)?\.js|css\/(?:dist\/block-library\/style|dashicons|admin-bar)(?:\.min)?\.css)\?ver=(\d+\.\d+(?:\.\d+)?)/i);
       if (ver) versioni.push(['wordpress', ver[1]]);
     }
     const NOMI = { wordpress: 'WordPress', joomla: 'Joomla', woocommerce: 'WooCommerce' };
