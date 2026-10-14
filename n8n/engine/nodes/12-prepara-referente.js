@@ -26,7 +26,7 @@ return {
   json: {
     ...p,
     _claude_ref: {
-      model: ai.model,
+      model: ai.ref_model || ai.model,
       max_tokens: 2000,
       output_config: { effort: ai.effort },
       system: 'Sei un ricercatore B2B. Usi la ricerca web, citi la fonte e non inventi mai dati. Rispondi solo con JSON valido.',

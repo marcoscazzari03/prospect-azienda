@@ -305,6 +305,7 @@ assert.equal(senzaPersona[0].person_key, '|brugola.com');
 const reqRef = run(src('12-prepara-referente.js'), { nodes: { 'Valida richiesta': [jobA] }, json: senzaPersona[0] }).json._claude_ref;
 assert.match(reqRef.messages[0].content, /Brugola Spa/);
 assert.equal(reqRef.tools[0].max_uses, 2);
+assert.equal(reqRef.model, 'claude-haiku-5-5', 'referente via web con Haiku');
 const esitoRef = (testoRisposta, extra = {}) => run(src('13-esito-referente.template.js', { __FASE__: 'WEB', __ORIGINE__: 'Prepara ricerca referente' }), {
   nodes: { 'Valida richiesta': [jobA], 'Prepara ricerca referente': [{ ...senzaPersona[0], _claude_ref: {} }] },
   json: { content: [{ type: 'text', text: testoRisposta }], ...extra }
@@ -316,6 +317,10 @@ assert.equal(trovato.role_match, 'exact');
 assert.equal(trovato.contact_page, 'https://brugola.com/contatti');
 assert.equal(trovato.first_name, 'Marco');
 assert.equal(esitoRef('{"person":null}')._scarto_segnale, 'referente_non_trovato');
+const haikuUso = esitoRef('{"person":null}', { model: 'claude-haiku-5-5', usage: { input_tokens: 24000, output_tokens: 200, server_tool_use: { web_search_requests: 2 } } });
+assert.equal(haikuUso.ai_input_tokens, 1200, 'token Haiku a prezzo Sonnet equivalente');
+assert.equal(haikuUso.ai_output_tokens, 10);
+assert.equal(haikuUso.ai_web_searches, 2);
 assert.equal(esitoRef('nessun JSON')._scarto_segnale, 'referente_non_trovato');
 assert.equal(esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"CEO","source_url":"http://10.0.0.1/x"}}')._scarto_segnale, 'referente_non_trovato', 'fonte su IP interno');
 const altroSito = esitoRef('{"person":{"full_name":"Marco Brugola","job_title":"CEO","source_url":"https://registro.it/x","contact_page":"https://evil.example.org/c"}}');

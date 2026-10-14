@@ -32,12 +32,15 @@ const persona = dati && typeof dati.person === 'object' ? dati.person : null;
 
 // Consumo di Claude per questa ricerca del referente (sommato in «Classifica e prepara risultati»).
 const u = r.usage || {};
+// Il costo del giro usa i prezzi di Sonnet: i token di Haiku contano in proporzione al
+// prezzo (0,10/0,50 $ contro 2/10 $ per milione: × 0,05).
+const prezzo = /haiku/i.test(String(r.model ?? '')) ? 0.05 : 1;
 const out = {
   ...p, _serve_referente: false, _cerca_web: false, enrichment_lookups: p.enrichment_lookups || 0,
   // Token di input equivalenti al prezzo pieno: scrittura in cache 1,25×, lettura 0,1×.
-  ai_input_tokens: (Number(p.ai_input_tokens) || 0) + Math.round((Number(u.input_tokens) || 0)
-    + 1.25 * (Number(u.cache_creation_input_tokens) || 0) + 0.1 * (Number(u.cache_read_input_tokens) || 0)),
-  ai_output_tokens: (Number(p.ai_output_tokens) || 0) + (Number(u.output_tokens) || 0),
+  ai_input_tokens: (Number(p.ai_input_tokens) || 0) + Math.round(prezzo * ((Number(u.input_tokens) || 0)
+    + 1.25 * (Number(u.cache_creation_input_tokens) || 0) + 0.1 * (Number(u.cache_read_input_tokens) || 0))),
+  ai_output_tokens: (Number(p.ai_output_tokens) || 0) + Math.round(prezzo * (Number(u.output_tokens) || 0)),
   ai_web_searches: (Number(p.ai_web_searches) || 0) + (Number(u.server_tool_use?.web_search_requests) || 0)
 };
 const nome = pulito(persona?.full_name, 120);
