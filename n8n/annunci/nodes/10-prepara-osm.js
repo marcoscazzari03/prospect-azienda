@@ -4,7 +4,8 @@
 // a mano Modena.
 const PROVINCE = __PROVINCE__; // [sigla, nome, regione]
 const PER_GIORNO = 4;
-const SERVER = 'https://overpass.private.coffee/api/interpreter';
+// Server principale: è l'unico che regge le query per area (private.coffee va in timeout).
+const SERVER = 'https://overpass-api.de/api/interpreter';
 
 let programmato = false;
 try { programmato = $('Ogni giorno').isExecuted; } catch { programmato = false; }

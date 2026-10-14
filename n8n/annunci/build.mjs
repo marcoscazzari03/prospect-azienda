@@ -785,8 +785,9 @@ const overpass = node({
         timeout: 280000
       }
     },
+    // Il server è a volte sovraccarico: fino a 3 tentativi.
     retryOnFail: true,
-    maxTries: 2,
+    maxTries: 3,
     waitBetweenTries: 5000,
     onError: 'continueRegularOutput'
   },
