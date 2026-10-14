@@ -942,6 +942,9 @@ isOneToOne: false
 "store_company_resolutions":
 { Args: { "p_items": Json }; Returns: Json
                            },
+"store_imported_companies":
+{ Args: { "p_items": Json,"p_source": string }; Returns: Json
+                           },
 "store_job_ads":
 { Args: { "p_ads": Json,"p_source": string }; Returns: Json
                            },

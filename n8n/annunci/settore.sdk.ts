@@ -29,7 +29,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=40',
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=80',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }

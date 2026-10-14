@@ -1,7 +1,7 @@
 import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 
 // GENERATO da n8n/annunci/build.mjs: non modificare a mano.
-// Controllo dei siti del database (gratis, solo richieste HTTP): ogni ora 60 aziende mai
+// Controllo dei siti del database (gratis, solo richieste HTTP): ogni ora 120 aziende mai
 // controllate o controllate da più di 25 giorni, con le stesse regole del motore. Le prove
 // (HTTPS, CMS vecchio, mobile, lingue, copyright...) servono alle ricerche opportunità
 // senza ricerca AI e restano fresche (valgono 30 giorni).
@@ -30,7 +30,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=60',
+      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=120',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }

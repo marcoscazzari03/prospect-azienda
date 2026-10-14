@@ -203,11 +203,11 @@ Workflow n8n «Annunci | Siti aziende» (generato da `n8n/annunci/build.mjs` in 
 ## Settore delle aziende degli annunci (`/api/engine/job-ads/industries`)
 
 Workflow n8n «Annunci | Settore aziende» (generato da `n8n/annunci/build.mjs` in `settore.sdk.ts`), stesso
-segreto. Ogni 2 ore legge la homepage di 40 aziende e la fa classificare a Claude Haiku a lotti di 20
+segreto. Ogni 2 ore legge la homepage di 80 aziende e la fa classificare a Claude Haiku a lotti di 20
 (senza ricerca web, circa 0,1 centesimi per azienda).
 
 - `GET ?limit=40` → `{ companies: [{ company_id, company_name, website, city, ads }] }`: aziende con annunci
-  e senza settore, mai classificate o non classificabili da più di 60 giorni, le più attive per prime.
+  (o importate da OpenStreetMap) e senza settore, mai classificate o non classificabili da più di 60 giorni, le più attive per prime.
 - `POST { results: [{ company_id, industry, keywords }] }` (industry vuoto = non classificabile) →
   `{ ok, classified, unknown }`. Il settore va in `companies.industry` (se vuoto), settore e parole chiave
   nelle etichette `tags` usate da magazzino e riserva.
@@ -215,12 +215,25 @@ segreto. Ogni 2 ore legge la homepage di 40 aziende e la fa classificare a Claud
 ## Controllo dei siti del database (`/api/engine/site-checks`)
 
 Workflow n8n «Aziende | Controllo siti» (generato da `n8n/annunci/build.mjs` in `controllo.sdk.ts`), stesso
-segreto. Ogni ora 60 aziende: richiesta HTTPS stretta (per `no_https`) e homepage, poi gli stessi controlli
+segreto. Ogni ora 120 aziende: richiesta HTTPS stretta (per `no_https`) e homepage, poi gli stessi controlli
 del motore (`n8n/engine/nodes/lib-controlli-sito.js`).
 
-- `GET ?limit=60` → `{ companies: [{ company_id, domain, name, website }] }`: mai controllate prima, poi
+- `GET ?limit=120` → `{ companies: [{ company_id, domain, name, website }] }`: mai controllate prima, poi
   controllate da più di 25 giorni (le prove valgono 30); escluse opposizioni e aziende chiuse.
 - `POST { items: [{ company, checks }] }` → `{ ok, saved }`, salvati da `store_company_checks` (origine `seed`).
+
+## Popolamento del database aziende (`/api/engine/companies-import`)
+
+Workflow n8n «Aziende | Popolamento OSM» (generato da `n8n/annunci/build.mjs` in `popolamento.sdk.ts`), stesso
+segreto. Ogni notte una regione a rotazione (a mano l'Emilia-Romagna): Overpass API di OpenStreetMap, una
+query per tipo di attività (office, craft, shop, amenity, tourism, healthcare, industrial) con sito web.
+Scartati enti pubblici, associazioni, luoghi non commerciali, siti non aziendali (social, portali) e catene
+(stesso dominio su 3+ punti). Categoria OSM tradotta in settore italiano + parole chiave; le categorie senza
+traduzione restano senza settore e le classifica Claude Haiku («Annunci | Settore aziende»).
+
+- `POST { source: "osm", companies: [{ domain, name, website, city, province, region, industry, keywords }] }`
+  (max 5.000) → `{ ok, received, new, updated, skipped }` da `store_imported_companies`. Solo dati d'azienda;
+  le aziende già presenti non vengono sovrascritte (si aggiungono luoghi ed etichette).
 
 ## Riserva dal database (ricerche opportunità)
 

@@ -69,7 +69,9 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Annunci: sito delle aziende, livello 3 (14/10): ricerca web con Claude Haiku per le aziende non trovate dal livello 2, massimo 40 al giorno (~0,50 $), sito verificato con le stesse regole
 - [ ] Accordo commerciale con Adzuna; TheirStack rimandato
 - [x] Fase 4 – controllo dei siti del database: workflow «Aziende | Controllo siti» (ogni ora 60 aziende mai controllate o da più di 25 giorni, gratis, stesse regole del motore grazie a `lib-controlli-sito.js` condiviso), migrazione 027, endpoint `/api/engine/site-checks`. Le prove restano sempre fresche (valgono 30 giorni)
-- [ ] Fase 4 – nuove aziende per i segnali dal sito: oggi il controllo copre solo le aziende già nel database (target, annunci); per allargarlo servono elenchi di aziende (es. registro imprese / fonti aperte)
+- [x] Fase 4 – popolamento del database da OpenStreetMap: workflow «Aziende | Popolamento OSM» (una regione a notte, solo aziende con sito, settore dalla categoria OSM), migrazione 028, endpoint `/api/engine/companies-import`. Controllo siti portato a 120 aziende l'ora, settore a 80 ogni 2 ore
+- [ ] OSM: citare la fonte («© OpenStreetMap contributors», licenza ODbL) nell'informativa / pagina fonti
+- [ ] Ricontrollo gratuito delle persone del magazzino ogni 90 giorni (il nome è ancora sul sito?)
 - [ ] Fase 5 – togliere dal workflow Target i rami opportunità; prezzi definitivi sui costi misurati
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
 - [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale

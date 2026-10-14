@@ -1,0 +1,111 @@
+import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
+
+// GENERATO da n8n/annunci/build.mjs: non modificare a mano.
+// Popolamento del database aziende da OpenStreetMap (dati aperti, licenza ODbL): ogni notte
+// una regione a rotazione, le attività con un sito web (uffici, artigiani, negozi, studi,
+// hotel, industrie). Solo dati d'azienda, nessun dato personale. Poi «Aziende | Controllo
+// siti» trova i segnali e «Annunci | Settore aziende» classifica chi non ha una categoria.
+
+const ogniGiorno = trigger({
+  type: 'n8n-nodes-base.scheduleTrigger',
+  version: 1.3,
+  config: {
+    name: 'Ogni giorno',
+    parameters: { rule: { interval: [{ field: 'days', daysInterval: 1, triggerAtHour: 4, triggerAtMinute: 20 }] } }
+  }
+});
+
+const aMano = trigger({
+  type: 'n8n-nodes-base.manualTrigger',
+  version: 1,
+  config: { name: 'A mano' }
+});
+
+const prepara = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Prepara richieste OSM',
+    parameters: { jsCode: "// Popolamento da OpenStreetMap: una regione al giorno (a rotazione, ogni regione circa ogni\n// 20 giorni), a mano l'Emilia-Romagna. Una query Overpass per tipo di attività, solo gli\n// elementi con un sito web; si scaricano solo le etichette (niente geometrie).\nconst REGIONI = [\n  ['IT-21', 'Piemonte'], ['IT-23', \"Valle d'Aosta\"], ['IT-25', 'Lombardia'], ['IT-32', 'Trentino-Alto Adige'],\n  ['IT-34', 'Veneto'], ['IT-36', 'Friuli-Venezia Giulia'], ['IT-42', 'Liguria'], ['IT-45', 'Emilia-Romagna'],\n  ['IT-52', 'Toscana'], ['IT-55', 'Umbria'], ['IT-57', 'Marche'], ['IT-62', 'Lazio'], ['IT-65', 'Abruzzo'],\n  ['IT-67', 'Molise'], ['IT-72', 'Campania'], ['IT-75', 'Puglia'], ['IT-77', 'Basilicata'], ['IT-78', 'Calabria'],\n  ['IT-82', 'Sicilia'], ['IT-88', 'Sardegna']\n];\nconst TIPI = ['office', 'craft', 'shop', 'amenity', 'tourism', 'healthcare', 'industrial'];\n\nlet programmato = false;\ntry { programmato = $('Ogni giorno').isExecuted; } catch { programmato = false; }\nconst oggi = new Date();\nconst giorno = Math.floor((oggi - new Date(oggi.getFullYear(), 0, 0)) / 86400000);\nconst [codice, regione] = programmato ? REGIONI[giorno % REGIONI.length] : REGIONI.find(([c]) => c === 'IT-45');\n\nreturn TIPI.map(tipo => ({ json: {\n  regione, tipo,\n  data: `[out:json][timeout:240];area[\"ISO3166-2\"=\"${codice}\"]->.r;(nwr(area.r)[\"${tipo}\"][\"website\"];nwr(area.r)[\"${tipo}\"][\"contact:website\"];);out tags;`\n} }));\n" }
+  },
+  output: [{ regione: 'Emilia-Romagna', tipo: 'office', data: '' }]
+});
+
+const overpass = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Overpass',
+    parameters: {
+      method: 'POST',
+      url: 'https://overpass-api.de/api/interpreter',
+      sendHeaders: true,
+      headerParameters: { parameters: [
+        // Overpass rifiuta (406) le richieste senza un User-Agent che identifichi il servizio.
+        { name: 'User-Agent', value: 'WeboraLeads/1.0 (+https://leads.weborastudio.it)' },
+        { name: 'Accept', value: 'application/json' }
+      ] },
+      sendBody: true,
+      contentType: 'form-urlencoded',
+      bodyParameters: { parameters: [{ name: 'data', value: expr('{{ $json.data }}') }] },
+      options: {
+        // Uso corretto del servizio pubblico: una richiesta alla volta, con una pausa.
+        batching: { batch: { batchSize: 1, batchInterval: 10000 } },
+        response: { response: { neverError: true } },
+        timeout: 280000
+      }
+    },
+    retryOnFail: true,
+    maxTries: 2,
+    waitBetweenTries: 5000,
+    onError: 'continueRegularOutput'
+  },
+  output: [{ elements: [] }]
+});
+
+const normalizza = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Normalizza OSM',
+    parameters: { jsCode: "// Dalle attività di OpenStreetMap alle aziende del database: dominio dal sito web, nome,\n// città, settore in italiano (dalla categoria OSM) e parole chiave. Scarta enti pubblici,\n// associazioni, luoghi non commerciali, siti che non sono dell'azienda (social, portali) e\n// catene (lo stesso dominio su 3 o più punti: sono filiali o negozi in franchising).\n// Le categorie senza traduzione restano senza settore: lo assegna poi Claude Haiku.\nconst richieste = $('Prepara richieste OSM').all().map(i => i.json);\n\n// Categoria OSM -> [settore, parole chiave]. Solo attività che comprano servizi alle imprese.\nconst SETTORI = {\n  office: {\n    it: ['Informatica e software', ['informatica', 'software', 'it']],\n    lawyer: ['Studio legale', ['avvocati', 'avvocato', 'legale']], accountant: ['Studio commercialista', ['commercialisti', 'commercialista', 'contabilità', 'fiscale']],\n    tax_advisor: ['Consulenza fiscale', ['commercialista', 'fiscale', 'tributario']], notary: ['Studio notarile', ['notaio', 'notai', 'notarile']],\n    architect: ['Studio di architettura', ['architetti', 'architetto', 'architettura', 'progettazione']], engineer: ['Studio di ingegneria', ['ingegneri', 'ingegneria', 'progettazione']],\n    surveyor: ['Studio tecnico', ['geometri', 'geometra', 'tecnico']], consulting: ['Consulenza aziendale', ['consulenza', 'consulenti']],\n    insurance: ['Assicurazioni', ['assicurazioni', 'assicurativo', 'broker']], financial: ['Servizi finanziari', ['finanza', 'finanziario']],\n    financial_advisor: ['Consulenza finanziaria', ['finanza', 'consulenza finanziaria']], estate_agent: ['Agenzia immobiliare', ['immobiliare', 'immobiliari', 'real estate']],\n    travel_agent: ['Agenzia di viaggi', ['viaggi', 'turismo']], advertising_agency: ['Agenzia di pubblicità', ['pubblicità', 'marketing', 'comunicazione']],\n    marketing: ['Marketing e comunicazione', ['marketing', 'comunicazione']], graphic_design: ['Grafica e design', ['grafica', 'design']],\n    logistics: ['Trasporti e logistica', ['logistica', 'trasporti', 'spedizioni']], moving_company: ['Traslochi', ['traslochi', 'trasporti']],\n    construction_company: ['Impresa edile', ['edilizia', 'edile', 'costruzioni']], energy_supplier: ['Energia', ['energia']],\n    telecommunication: ['Telecomunicazioni', ['telecomunicazioni']], publisher: ['Editoria', ['editoria', 'editore']],\n    coworking: ['Coworking', ['coworking', 'uffici']], property_management: ['Amministrazione condomini', ['amministratore di condominio', 'condomini']],\n    employment_agency: ['Agenzia per il lavoro', ['selezione del personale', 'risorse umane']], research: ['Ricerca e sviluppo', ['ricerca']],\n    security: ['Sicurezza e vigilanza', ['vigilanza', 'sicurezza']], design: ['Design', ['design']], translator: ['Traduzioni', ['traduzioni', 'traduttori']]\n  },\n  craft: {\n    carpenter: ['Falegnameria', ['falegnameria', 'legno', 'artigiano']], electrician: ['Impianti elettrici', ['elettricista', 'impianti elettrici', 'artigiano']],\n    plumber: ['Idraulica', ['idraulico', 'impianti idraulici', 'artigiano']], hvac: ['Impianti termici e climatizzazione', ['climatizzazione', 'riscaldamento', 'impianti']],\n    metal_construction: ['Carpenteria metallica', ['metalmeccanica', 'carpenteria', 'metallo']], builder: ['Impresa edile', ['edilizia', 'edile', 'costruzioni']],\n    painter: ['Imbiancatura', ['imbianchino', 'edilizia']], roofer: ['Coperture e tetti', ['tetti', 'edilizia']], tiler: ['Pavimenti e rivestimenti', ['piastrelle', 'edilizia']],\n    gardener: ['Giardinaggio', ['giardinaggio', 'verde']], photographer: ['Fotografia', ['fotografo', 'fotografia']], printer: ['Tipografia', ['tipografia', 'stampa']],\n    winery: ['Cantina vinicola', ['vino', 'cantina', 'agroalimentare']], brewery: ['Birrificio', ['birra', 'birrificio', 'agroalimentare']],\n    confectionery: ['Pasticceria', ['pasticceria', 'dolci', 'alimentare']], bakery: ['Panificio', ['panificio', 'alimentare']], caterer: ['Catering', ['catering', 'ristorazione']],\n    upholsterer: ['Tappezzeria', ['tappezzeria', 'arredamento']], jeweller: ['Gioielleria artigiana', ['gioielli', 'oreficeria']], tailor: ['Sartoria', ['sartoria', 'abbigliamento']],\n    shoemaker: ['Calzaturificio', ['calzature', 'scarpe']], window_construction: ['Serramenti', ['serramenti', 'infissi']], stonemason: ['Lavorazione pietra e marmo', ['marmo', 'pietra']],\n    glaziery: ['Vetreria', ['vetro', 'vetreria']], key_cutter: ['Ferramenta e chiavi', ['chiavi']], blacksmith: ['Fabbro', ['fabbro', 'metallo']], electronics_repair: ['Riparazioni elettroniche', ['elettronica']]\n  },\n  shop: {\n    car: ['Concessionaria auto', ['automobili', 'auto', 'concessionaria']], car_repair: ['Officina auto', ['officina', 'autoriparazioni', 'auto']], car_parts: ['Ricambi auto', ['ricambi', 'auto']],\n    motorcycle: ['Concessionaria moto', ['moto', 'motocicli']], bicycle: ['Negozio di biciclette', ['biciclette', 'bici']], furniture: ['Arredamento', ['mobili', 'arredamento']],\n    kitchen: ['Cucine', ['cucine', 'arredamento']], clothes: ['Abbigliamento', ['abbigliamento', 'moda']], shoes: ['Calzature', ['calzature', 'scarpe']], boutique: ['Abbigliamento', ['moda', 'abbigliamento']],\n    jewelry: ['Gioielleria', ['gioielli', 'gioielleria']], optician: ['Ottica', ['ottica', 'occhiali']], hairdresser: ['Parrucchiere', ['parrucchiere', 'acconciature', 'bellezza']],\n    beauty: ['Centro estetico', ['estetista', 'bellezza']], florist: ['Fioraio', ['fiori', 'fiorista']], bakery: ['Panificio', ['panificio', 'alimentare']], butcher: ['Macelleria', ['macelleria', 'alimentare']],\n    wine: ['Enoteca', ['vino', 'enoteca']], deli: ['Gastronomia', ['gastronomia', 'alimentare']], pastry: ['Pasticceria', ['pasticceria', 'dolci']], hardware: ['Ferramenta', ['ferramenta']],\n    doityourself: ['Bricolage', ['bricolage', 'ferramenta']], electronics: ['Elettronica', ['elettronica']], computer: ['Informatica', ['informatica', 'computer']],\n    mobile_phone: ['Telefonia', ['telefonia', 'cellulari']], books: ['Libreria', ['libri', 'libreria']], stationery: ['Cartoleria', ['cartoleria']], toys: ['Giocattoli', ['giocattoli']],\n    sports: ['Articoli sportivi', ['sport']], pet: ['Articoli per animali', ['animali']], garden_centre: ['Vivaio e giardinaggio', ['vivaio', 'giardinaggio']], travel_agency: ['Agenzia di viaggi', ['viaggi', 'turismo']],\n    copyshop: ['Copisteria', ['stampa', 'copisteria']], photo: ['Fotografia', ['fotografia']], interior_decoration: ['Arredamento e decorazione', ['arredamento', 'interior design']],\n    tiles: ['Pavimenti e rivestimenti', ['piastrelle', 'pavimenti']], bathroom_furnishing: ['Arredo bagno', ['arredo bagno', 'arredamento']], lighting: ['Illuminazione', ['illuminazione']],\n    tyres: ['Gommista', ['pneumatici', 'gommista', 'auto']], cosmetics: ['Cosmetica', ['cosmetici', 'bellezza']], gift: ['Articoli da regalo', ['regali']], wholesale: ['Commercio all\\'ingrosso', ['ingrosso', 'distribuzione']],\n    trade: ['Commercio all\\'ingrosso', ['ingrosso', 'distribuzione', 'materiali']], agrarian: ['Prodotti per l\\'agricoltura', ['agricoltura']], farm: ['Azienda agricola', ['agricoltura', 'agroalimentare']]\n  },\n  amenity: {\n    restaurant: ['Ristorante', ['ristorante', 'ristorazione']], cafe: ['Bar e caffetteria', ['bar', 'caffetteria', 'ristorazione']], bar: ['Bar', ['bar', 'ristorazione']],\n    pub: ['Pub', ['pub', 'ristorazione']], fast_food: ['Ristorazione veloce', ['ristorazione', 'fast food']], ice_cream: ['Gelateria', ['gelateria', 'gelato']],\n    dentist: ['Studio dentistico', ['dentista', 'dentisti', 'odontoiatria']], doctors: ['Studio medico', ['medico', 'medici', 'sanità']], clinic: ['Poliambulatorio', ['clinica', 'poliambulatorio', 'sanità']],\n    veterinary: ['Clinica veterinaria', ['veterinario', 'veterinari']], pharmacy: ['Farmacia', ['farmacia', 'farmacie']], driving_school: ['Autoscuola', ['autoscuola', 'patente']],\n    language_school: ['Scuola di lingue', ['lingue', 'formazione']], music_school: ['Scuola di musica', ['musica', 'formazione']], car_rental: ['Noleggio auto', ['noleggio', 'auto']],\n    car_wash: ['Autolavaggio', ['autolavaggio', 'auto']], nightclub: ['Discoteca', ['discoteca', 'intrattenimento']], cinema: ['Cinema', ['cinema']], theatre: ['Teatro', ['teatro', 'spettacolo']],\n    events_venue: ['Location per eventi', ['eventi', 'location']], coworking_space: ['Coworking', ['coworking']], childcare: ['Asilo nido', ['asilo', 'infanzia']],\n    kindergarten: ['Scuola dell\\'infanzia', ['asilo', 'infanzia']], prep_school: ['Doposcuola e ripetizioni', ['formazione', 'ripetizioni']], bank: ['Banca', ['banca', 'credito']]\n  },\n  tourism: {\n    hotel: ['Hotel', ['hotel', 'albergo', 'alberghi', 'turismo', 'ricettivo']], guest_house: ['Bed and breakfast', ['b&b', 'bed and breakfast', 'turismo', 'ricettivo']],\n    apartment: ['Case vacanza', ['case vacanza', 'turismo', 'ricettivo']], motel: ['Motel', ['motel', 'turismo', 'ricettivo']], hostel: ['Ostello', ['ostello', 'turismo']],\n    camp_site: ['Campeggio', ['campeggio', 'turismo', 'ricettivo']], chalet: ['Case vacanza', ['turismo', 'ricettivo']], agriturismo: ['Agriturismo', ['agriturismo', 'turismo', 'ricettivo']],\n    wine_cellar: ['Cantina vinicola', ['vino', 'cantina']]\n  },\n  healthcare: {\n    dentist: ['Studio dentistico', ['dentista', 'odontoiatria']], doctor: ['Studio medico', ['medico', 'sanità']], clinic: ['Poliambulatorio', ['clinica', 'sanità']],\n    physiotherapist: ['Fisioterapia', ['fisioterapia', 'fisioterapista', 'sanità']], psychotherapist: ['Psicoterapia', ['psicologo', 'psicoterapia']],\n    laboratory: ['Laboratorio di analisi', ['analisi', 'laboratorio', 'sanità']], optometrist: ['Ottica', ['ottica']], podiatrist: ['Podologia', ['podologo', 'sanità']],\n    speech_therapist: ['Logopedia', ['logopedia', 'sanità']], alternative: ['Medicina alternativa', ['benessere']], audiologist: ['Centro acustico', ['apparecchi acustici']]\n  },\n  industrial: {\n    factory: ['Produzione industriale', ['manifattura', 'manifatturiero', 'industria', 'produzione']], mechanical_engineering: ['Meccanica', ['meccanica', 'metalmeccanica', 'manifattura']],\n    food_industry: ['Industria alimentare', ['alimentare', 'agroalimentare', 'industria']], machine_shop: ['Officina meccanica', ['meccanica', 'metalmeccanica']],\n    warehouse: ['Logistica e magazzini', ['logistica', 'magazzino']], logistics: ['Trasporti e logistica', ['logistica', 'trasporti']], printing: ['Stampa industriale', ['stampa', 'tipografia']],\n    chemical: ['Industria chimica', ['chimica', 'industria']], plastic: ['Materie plastiche', ['plastica', 'industria']], textile: ['Tessile', ['tessile', 'moda']],\n    wood: ['Lavorazione legno', ['legno', 'industria']], brickyard: ['Laterizi', ['edilizia', 'materiali']], concrete_plant: ['Calcestruzzo', ['edilizia', 'materiali']]\n  }\n};\n// Categorie scartate: enti pubblici, associazioni, culto, politica, luoghi non commerciali.\nconst SCARTA = /^(government|association|religion|political_party|ngo|union|diplomatic|educational_institution|charity|foundation|parish|quango|administrative|vacant|disused|yes|no)$/;\nconst SOLO_ELENCO = new Set(['amenity', 'tourism', 'healthcare', 'industrial']); // per questi solo le categorie note\nconst NON_AZIENDALI = /(^|\\.)(facebook|instagram|twitter|x|youtube|tiktok|linkedin|wikipedia|tripadvisor|booking|airbnb|google|goo|linktr|paginegialle|paginebianche|virgilio|subito|amazon|ebay|etsy|business\\.site|wixsite|blogspot|wordpress|altervista|jimdo|weebly|webnode|github)\\.[a-z.]+$|\\.(gov|edu)\\.it$|(^|\\.)(comune|regione|provincia|asl|ausl|usl|unibo|unimore|unipr|unife)\\.|(^|\\.)gov\\.it$/;\n\nconst dominio = (url) => String(url || '').trim().toLowerCase().replace(/^https?:\\/\\//, '').replace(/^www\\d?\\./, '').split(/[/?#:\\s]/)[0];\nconst pulisci = (v, max) => String(v ?? '').replace(/\\s+/g, ' ').trim().slice(0, max);\n\nconst trovate = [];\nconst stats = { elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0 };\n$input.all().forEach((item, i) => {\n  const tipo = richieste[item.pairedItem?.item ?? i]?.tipo;\n  const regione = richieste[item.pairedItem?.item ?? i]?.regione;\n  const elementi = item.json?.elements;\n  if (!Array.isArray(elementi)) { stats.errors++; return; }\n  for (const el of elementi) {\n    stats.elements++;\n    const t = el.tags || {};\n    const valore = String(t[tipo] || '').toLowerCase();\n    if (SCARTA.test(valore) || (SOLO_ELENCO.has(tipo) && !SETTORI[tipo]?.[valore])) { stats.excluded_category++; continue; }\n    const nome = pulisci(t.name || t['name:it'] || t.operator, 200);\n    if (!nome) { stats.no_name++; continue; }\n    const sito = String(t.website || t['contact:website'] || '').split(/[;\\s]/)[0];\n    const dom = dominio(sito);\n    if (!/^[a-z0-9-]+(\\.[a-z0-9-]+)*\\.[a-z]{2,24}$/.test(dom) || NON_AZIENDALI.test(dom)) { stats.not_company_site++; continue; }\n    const mappa = SETTORI[tipo]?.[valore];\n    if (!mappa) stats.unmapped++;\n    trovate.push({\n      domain: dom, name: nome, website: /^https?:\\/\\//i.test(sito) ? sito.slice(0, 300) : `https://${dom}`,\n      city: pulisci(t['addr:city'], 80), province: pulisci(t['addr:province'], 80), region: regione,\n      industry: mappa ? mappa[0] : '', keywords: mappa ? mappa[1] : [], brand: Boolean(t.brand || t['brand:wikidata'])\n    });\n  }\n});\n\n// Catene: stesso dominio su 3 o più punti (o marchio noto su 2 o più).\nconst conta = {};\nfor (const a of trovate) conta[a.domain] = (conta[a.domain] || 0) + 1;\nconst viste = new Set();\nconst companies = [];\nfor (const a of trovate) {\n  if (conta[a.domain] >= 3 || (a.brand && conta[a.domain] >= 2)) { stats.chains++; continue; }\n  if (viste.has(a.domain)) { stats.duplicates++; continue; }\n  viste.add(a.domain);\n  const { brand, ...azienda } = a;\n  companies.push(azienda);\n}\nstats.saved = companies.length;\n\n// Blocchi da 2.000 aziende per il salvataggio.\nconst blocchi = [];\nfor (let k = 0; k < companies.length; k += 2000) blocchi.push(companies.slice(k, k + 2000));\nif (!blocchi.length) blocchi.push([]);\nreturn blocchi.map((b, k) => ({ json: { source: 'osm', companies: b, ...(k === 0 ? { stats } : {}) } }));\n" }
+  },
+  output: [{ source: 'osm', companies: [], stats: {} }]
+});
+
+const salva = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Salva aziende',
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
+    parameters: {
+      method: 'POST',
+      url: 'https://leads.weborastudio.it/api/engine/companies-import',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      sendBody: true,
+      contentType: 'json',
+      specifyBody: 'json',
+      jsonBody: expr('{{ JSON.stringify({ source: $json.source, companies: $json.companies }) }}'),
+      options: { timeout: 120000 }
+    },
+    credentials: { httpHeaderAuth: { id: 'kaAuSs06rml1sMA9', name: 'Lead Engine - Callback verso backend' } }
+  },
+  output: [{ ok: true, received: 0, new: 0, updated: 0, skipped: 0 }]
+});
+
+export default workflow('aziende-popolamento-osm', 'Aziende | Popolamento OSM', {
+  timezone: 'Europe/Rome',
+  errorWorkflow: 'LOw3fRo49WKvrF6z',
+  executionOrder: 'v1'
+})
+  .add(ogniGiorno)
+  .to(prepara)
+  .to(overpass)
+  .to(normalizza)
+  .to(salva)
+  .add(aMano)
+  .to(prepara);

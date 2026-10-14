@@ -2,7 +2,7 @@
 // I Code node vivono in nodes/*.js (testati da test/run.mjs); le figure da cercare
 // vengono dal catalogo del sito (src/lib/domain/signals.ts, JOB_FAMILIES): una sola
 // fonte di verità per motore, sito e raccolta annunci.
-// Uso: node n8n/annunci/build.mjs  ->  n8n/annunci/workflow.sdk.ts, siti.sdk.ts, settore.sdk.ts e controllo.sdk.ts
+// Uso: node n8n/annunci/build.mjs  ->  n8n/annunci/workflow.sdk.ts, siti.sdk.ts, settore.sdk.ts, controllo.sdk.ts e popolamento.sdk.ts
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -432,7 +432,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=40',
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=80',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -569,7 +569,7 @@ export default workflow('annunci-settore', 'Annunci | Settore aziende', {
 const controllo = `import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 
 // GENERATO da n8n/annunci/build.mjs: non modificare a mano.
-// Controllo dei siti del database (gratis, solo richieste HTTP): ogni ora 60 aziende mai
+// Controllo dei siti del database (gratis, solo richieste HTTP): ogni ora 120 aziende mai
 // controllate o controllate da più di 25 giorni, con le stesse regole del motore. Le prove
 // (HTTPS, CMS vecchio, mobile, lingue, copyright...) servono alle ricerche opportunità
 // senza ricerca AI e restano fresche (valgono 30 giorni).
@@ -598,7 +598,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=60',
+      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=120',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -720,10 +720,124 @@ export default workflow('aziende-controllo-siti', 'Aziende | Controllo siti', {
   .to(aziende);
 `;
 
+const popolamento = `import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
+
+// GENERATO da n8n/annunci/build.mjs: non modificare a mano.
+// Popolamento del database aziende da OpenStreetMap (dati aperti, licenza ODbL): ogni notte
+// una regione a rotazione, le attività con un sito web (uffici, artigiani, negozi, studi,
+// hotel, industrie). Solo dati d'azienda, nessun dato personale. Poi «Aziende | Controllo
+// siti» trova i segnali e «Annunci | Settore aziende» classifica chi non ha una categoria.
+
+const ogniGiorno = trigger({
+  type: 'n8n-nodes-base.scheduleTrigger',
+  version: 1.3,
+  config: {
+    name: 'Ogni giorno',
+    parameters: { rule: { interval: [{ field: 'days', daysInterval: 1, triggerAtHour: 4, triggerAtMinute: 20 }] } }
+  }
+});
+
+const aMano = trigger({
+  type: 'n8n-nodes-base.manualTrigger',
+  version: 1,
+  config: { name: 'A mano' }
+});
+
+const prepara = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Prepara richieste OSM',
+    parameters: { jsCode: ${JSON.stringify(codice('10-prepara-osm.js'))} }
+  },
+  output: [{ regione: 'Emilia-Romagna', tipo: 'office', data: '' }]
+});
+
+const overpass = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Overpass',
+    parameters: {
+      method: 'POST',
+      url: 'https://overpass-api.de/api/interpreter',
+      sendHeaders: true,
+      headerParameters: { parameters: [
+        // Overpass rifiuta (406) le richieste senza un User-Agent che identifichi il servizio.
+        { name: 'User-Agent', value: 'WeboraLeads/1.0 (+https://leads.weborastudio.it)' },
+        { name: 'Accept', value: 'application/json' }
+      ] },
+      sendBody: true,
+      contentType: 'form-urlencoded',
+      bodyParameters: { parameters: [{ name: 'data', value: expr('{{ $json.data }}') }] },
+      options: {
+        // Uso corretto del servizio pubblico: una richiesta alla volta, con una pausa.
+        batching: { batch: { batchSize: 1, batchInterval: 10000 } },
+        response: { response: { neverError: true } },
+        timeout: 280000
+      }
+    },
+    retryOnFail: true,
+    maxTries: 2,
+    waitBetweenTries: 5000,
+    onError: 'continueRegularOutput'
+  },
+  output: [{ elements: [] }]
+});
+
+const normalizza = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Normalizza OSM',
+    parameters: { jsCode: ${JSON.stringify(codice('11-normalizza-osm.js'))} }
+  },
+  output: [{ source: 'osm', companies: [], stats: {} }]
+});
+
+const salva = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Salva aziende',
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
+    parameters: {
+      method: 'POST',
+      url: 'https://leads.weborastudio.it/api/engine/companies-import',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      sendBody: true,
+      contentType: 'json',
+      specifyBody: 'json',
+      jsonBody: expr('{{ JSON.stringify({ source: $json.source, companies: $json.companies }) }}'),
+      options: { timeout: 120000 }
+    },
+    credentials: { httpHeaderAuth: ${CALLBACK} }
+  },
+  output: [{ ok: true, received: 0, new: 0, updated: 0, skipped: 0 }]
+});
+
+export default workflow('aziende-popolamento-osm', 'Aziende | Popolamento OSM', {
+  timezone: 'Europe/Rome',
+  errorWorkflow: '${ERRORI}',
+  executionOrder: 'v1'
+})
+  .add(ogniGiorno)
+  .to(prepara)
+  .to(overpass)
+  .to(normalizza)
+  .to(salva)
+  .add(aMano)
+  .to(prepara);
+`;
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   writeFileSync(join(dir, 'workflow.sdk.ts'), sdk);
   writeFileSync(join(dir, 'siti.sdk.ts'), siti);
   writeFileSync(join(dir, 'settore.sdk.ts'), settore);
   writeFileSync(join(dir, 'controllo.sdk.ts'), controllo);
-  console.log('workflow.sdk.ts, siti.sdk.ts, settore.sdk.ts e controllo.sdk.ts generati');
+  writeFileSync(join(dir, 'popolamento.sdk.ts'), popolamento);
+  console.log('workflow.sdk.ts, siti.sdk.ts, settore.sdk.ts, controllo.sdk.ts e popolamento.sdk.ts generati');
 }
