@@ -15,6 +15,14 @@ const PAESE = new Set(['italia', 'italy', 'italiana']);
 
 const out = [];
 for (const a of aziende) {
+  // Nome che è già un dominio («Facile.it», «www.giancarlobetta.com»): si prova quello.
+  const giaDominio = String(a.company_name || '').toLowerCase().match(/^(?:https?:\/\/)?(?:www\.)?([a-z0-9-]+\.(?:it|com|eu|net|org))\/?$/);
+  if (giaDominio) {
+    const d = giaDominio[1];
+    const base = d.split('.')[0].replace(/-/g, ' ');
+    out.push({ json: { company_key: a.company_key, company_name: a.company_name, city: a.city || '', nucleo: base, nome: base, domain: d, ordine: 0, url: `https://${d}`, dominio_nel_nome: true } });
+    continue;
+  }
   const parole = norm(a.company_name).split(' ').filter(w => w && !FORME.has(w));
   const nucleo = parole.filter(w => !GENERICHE.has(w));
   // Nomi troppo corti o ambigui («ENG», «B&M»): li lasciamo alla ricerca web. «Var Group»

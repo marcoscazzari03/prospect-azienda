@@ -88,6 +88,8 @@ const aziende = [
   { company_key: 'eng', company_name: 'ENG', city: 'Bologna' },
   { company_key: 'joinrs', company_name: 'Joinrs Italia', city: 'Bologna' },
   { company_key: 'canonical', company_name: 'Canonical', city: 'Bologna' },
+  { company_key: 'hybris company', company_name: 'Hybris Company srls', city: 'Bologna' },
+  { company_key: 'facile it', company_name: 'Facile.it', city: 'Forlì' },
   { company_key: 'archimede', company_name: 'Archimede S.p.A.', city: 'Provincia di Ferrara' },
   { company_key: 'gruppo', company_name: 'Gruppo Italia S.r.l.', city: '' }
 ];
@@ -110,6 +112,8 @@ const paginaDi = {
   'maxmara.it': pagina('Max Mara Official Site', 'Max Mara fashion house'),
   'joinrs.com': pagina('Joinrs - lavoro per giovani', 'Joinrs, Milano'),
   'canonical.it': pagina('Canonical - studio legale', 'Studio a Roma'),
+  'hybris.com': pagina('SAP Commerce Cloud', 'SAP Hybris: the company platform'),
+  'facile.it': pagina('Facile.it', 'Confronta assicurazioni'),
   'archimede.it': pagina('Archimede', 'Archimede S.p.A. - P.IVA 01234567890'),
   'joinrs.it': { html: '', error: { code: 'ENOTFOUND' } }
 };
@@ -126,11 +130,14 @@ assert.equal(sito('eng'), '', 'nome breve: non provato');
 assert.equal(sito('joinrs'), '', 'una parola: nome nel titolo ma senza città né partita IVA');
 assert.equal(sito('canonical'), '', 'canonical.it di Roma non è Canonical di Bologna');
 assert.equal(sito('archimede'), 'archimede.it', 'confermata dalla partita IVA');
+assert.equal(sito('hybris company'), '', 'parole sparse non bastano');
+assert.equal(sito('facile it'), 'facile.it', 'nome che è già un dominio');
+assert.deepEqual(di('facile it'), ['facile.it']);
 assert.ok(scelta.stats.unconfirmed >= 2);
 assert.equal(scelta.stats.errors.ENOTFOUND, 1, 'errori contati per tipo');
 assert.equal(sito('gruppo'), '', 'azienda senza domini registrata come non trovata');
-assert.equal(scelta.stats.companies, 8);
-assert.equal(scelta.stats.found, 4);
+assert.equal(scelta.stats.companies, 10);
+assert.equal(scelta.stats.found, 5);
 assert.ok(scelta.stats.parked >= 1);
 const parcheggio = run(codice('04-scegli-sito.js'), {
   nodes: { 'Domini candidati': [{ company_key: 'k', company_name: 'Possedono Srl', city: '', nucleo: 'possedono', nome: 'possedono', domain: 'possedono.it', ordine: 0 }], 'Aziende senza sito': [{ companies: [] }] },

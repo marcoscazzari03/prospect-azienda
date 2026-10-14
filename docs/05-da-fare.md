@@ -50,7 +50,7 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [ ] Fase 2 – workflow «Lead Engine | Opportunità»: database → ricontrollo gratuito → referente dal sito → email → AI solo per i lead mancanti
 - [x] Fase 3 – annunci da API: piano Adzuna (8 $/mese, chiave su n8n), tabella `job_ads` (migrazione 022), endpoint `/api/engine/job-ads`, workflow «Annunci | Raccolta Adzuna» (ogni mattina, Emilia-Romagna, una ricerca nel titolo per ogni figura del catalogo, 67 chiamate; sorgenti in `n8n/annunci/`). Primo riempimento 14/10: 363 annunci tenuti su 1.633 (703 di agenzie, 341 fuori tema)
 - [ ] Annunci: pubblicare il workflow; estendere all'Italia (stesse ~67 ricerche senza filtro regione, più pagine: verificare il limite di 5.000 chiamate al mese)
-- [x] Annunci: sito delle aziende, livello 2 gratuito (domini probabili verificati sulla pagina): migrazione 023, workflow «Annunci | Siti aziende»
+- [x] Annunci: sito delle aziende, livello 2 gratuito (domini probabili verificati sulla pagina): migrazione 023, workflow «Annunci | Siti aziende». Misura 14/10: 67 aziende su 150 (45%), 127 annunci collegati, costo zero
 - [ ] Annunci: sito delle aziende, livello 3 (ricerca web economica con tetto di spesa) – da decidere dopo la misura del livello 2
 - [ ] Accordo commerciale con Adzuna; TheirStack rimandato
 - [ ] Fase 4 – popolamento iniziale (una regione, budget concordato) e ricontrollo notturno delle prove in scadenza

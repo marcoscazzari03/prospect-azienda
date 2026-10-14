@@ -38,6 +38,7 @@ const valuta = (c, p) => {
   const tutto = `${titolo}${meta}${corpo}`;
   const parole = c.nucleo.split(' ').filter(Boolean);
   const attaccato = parole.join('');
+  if (c.dominio_nel_nome) return 'ok';
   if (parole.length === 1) {
     const nome = String(c.nome || attaccato);
     if (nome !== attaccato) return tutto.includes(` ${nome} `) || tutto.includes(` ${nome.replace(/ /g, '')} `) ? 'ok' : 'nome_assente';
@@ -46,7 +47,11 @@ const valuta = (c, p) => {
     const conferma = (citta.length >= 3 && corpo.includes(` ${citta} `)) || PARTITA_IVA.test(corpo);
     return conferma ? 'ok' : 'non_confermato';
   }
-  if (parole.every(w => tutto.includes(` ${w} `))) return 'ok';
+  // Più parole: le prime due vicine o attaccate («Antares Vision», «antaresvision») e le
+  // altre presenti. Parole sparse non bastano: «Hybris Company» non è hybris.com di SAP.
+  const [a, b, ...resto] = parole;
+  const coppia = tutto.includes(` ${a} ${b} `) || tutto.includes(` ${a}${b} `);
+  if (coppia && resto.every(w => tutto.includes(` ${w} `))) return 'ok';
   if (tutto.replace(/ /g, '').includes(attaccato)) return 'ok';
   return 'nome_assente';
 };
