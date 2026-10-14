@@ -1,6 +1,6 @@
 // Esito della classificazione: settore e parole chiave per ogni azienda del lotto (la
-// posizione «n» collega la risposta all'azienda). Una risposta mancante o illeggibile
-// non salva nulla: quelle aziende tornano nel prossimo giro.
+// posizione «n» collega la risposta all'azienda). Le aziende senza risposta (chiamata
+// fallita o risposta troncata) non vengono salvate: tornano nel prossimo giro.
 const richieste = $('Prepara settore').all().map(i => i.json);
 const pulisci = (v, max) => String(v ?? '').replace(/[\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
 
@@ -16,6 +16,12 @@ $input.all().forEach((item, i) => {
   const testo = (Array.isArray(r.content) ? r.content : []).filter(b => b?.type === 'text').map(b => b.text).join('');
   let elenco = null;
   try { const a = testo.indexOf('{'); const b = testo.lastIndexOf('}'); elenco = JSON.parse(testo.slice(a, b + 1)).aziende; } catch { elenco = null; }
+  // Risposta troncata (limite di token): si salvano le aziende già complete.
+  if (!Array.isArray(elenco)) {
+    elenco = [...testo.matchAll(/\{[^{}\[\]]*"n"\s*:\s*\d+[^{}\[\]]*"keywords"\s*:\s*\[[^\]]*\][^{}\[\]]*\}/g)]
+      .map(m => { try { return JSON.parse(m[0]); } catch { return null; } }).filter(Boolean);
+    if (!elenco.length) elenco = null;
+  }
   if (!Array.isArray(elenco)) { stats.failed += (p.aziende || []).length; return; }
   (p.aziende || []).forEach((id, k) => {
     const e = elenco.find(x => Number(x?.n) === k + 1);

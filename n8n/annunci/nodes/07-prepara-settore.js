@@ -36,7 +36,8 @@ return lotti.map((lotto, k) => ({ json: {
   senza_testo: k === 0 ? senzaTesto : [],
   _claude: {
     model: MODELLO,
-    max_tokens: 4000,
+    // Il ragionamento interno di Haiku usa 2-3 mila token: con 4.000 il secondo lotto si troncava.
+    max_tokens: 8000,
     output_config: { effort: 'low' },
     system: 'Classifichi aziende italiane per settore a partire dal testo della loro homepage. Non inventi: se il testo non basta lo dici. Rispondi solo con JSON valido.',
     messages: [{ role: 'user', content: [

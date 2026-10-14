@@ -281,3 +281,12 @@ assert.equal(osm.companies[1].website, 'https://meccanicarossi.it');
 assert.equal(osm.companies[3].industry, 'Abbigliamento', 'shop senza elenco: categoria nota tradotta');
 assert.deepEqual([osm.stats.excluded_category, osm.stats.no_name, osm.stats.not_company_site, osm.stats.chains, osm.stats.duplicates, osm.stats.errors], [2, 1, 2, 2, 1, 1]);
 console.log('Test popolamento OSM superati.');
+
+// 10. Settore: risposta troncata dal limite di token, si salvano le aziende complete.
+const [troncata] = run(codice('08-esito-settore.js'), {
+  nodes: { 'Prepara settore': [{ aziende: ['a', 'b', 'c'], senza_testo: [] }] },
+  input: [{ content: [{ type: 'text', text: '{"aziende":[{"n":1,"industry":"Crociere","keywords":["crociere","viaggi"]},{"n":2,"industry":"","keywords":[]},{"n":3,"industry":"Software","keywords":' }], stop_reason: 'max_tokens' }]
+});
+assert.deepEqual(troncata.results, [{ company_id: 'a', industry: 'Crociere', keywords: ['crociere', 'viaggi'] }, { company_id: 'b', industry: '', keywords: [] }]);
+assert.equal(troncata.stats.failed, 1);
+console.log('Test settore troncato superati.');
