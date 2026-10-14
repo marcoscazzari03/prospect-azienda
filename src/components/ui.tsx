@@ -63,6 +63,7 @@ const BADGE = {
   ledger: "bg-ledger-soft text-ledger-2 border-ledger/20",
   stamp: "bg-stamp-soft text-stamp-ink border-stamp/30",
   brick: "bg-brick-soft text-brick border-brick/20",
+  sky: "bg-sky-50 text-sky-700 border-sky-200",
 } as const;
 export function Badge({ tone = "neutral", className, ...props }: ComponentProps<"span"> & { tone?: keyof typeof BADGE }) {
   return <span className={cx("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap", BADGE[tone], className)} {...props} />;
@@ -93,19 +94,24 @@ export function ProvenanceStamp({ status, type, href }: { status: string; type?:
   );
 }
 
-const STATUS: Record<string, { label: string; tone: keyof typeof BADGE }> = {
-  queued: { label: "In coda", tone: "neutral" },
-  running: { label: "In corso", tone: "stamp" },
-  completed: { label: "Completata", tone: "ledger" },
-  partial: { label: "Parziale", tone: "stamp" },
-  failed: { label: "Non riuscita", tone: "brick" },
-  cancelled: { label: "Annullata", tone: "neutral" },
+const STATUS: Record<string, { label: string; tone: keyof typeof BADGE; icon: string }> = {
+  queued: { label: "In coda", tone: "neutral", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM8 4.5V8l2.5 1.5" },
+  running: { label: "In corso", tone: "sky", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z" },
+  completed: { label: "Completata", tone: "ledger", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM5.25 8.25l1.75 1.75 3.75-4" },
+  partial: { label: "Parziale", tone: "stamp", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM8 4.75v3.75M8 10.75v.25" },
+  failed: { label: "Non riuscita", tone: "brick", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM5.75 5.75l4.5 4.5M10.25 5.75l-4.5 4.5" },
+  cancelled: { label: "Annullata", tone: "neutral", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM3.5 12.5l9-9" },
 };
+export const SEARCH_STATUS_LABEL: Record<string, string> = Object.fromEntries(Object.entries(STATUS).map(([k, v]) => [k, v.label]));
 export function SearchStatus({ status }: { status: string }) {
-  const s = STATUS[status] ?? { label: status, tone: "neutral" as const };
+  const s = STATUS[status] ?? { label: status, tone: "neutral" as const, icon: "" };
   return (
     <Badge tone={s.tone}>
-      {status === "running" && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-stamp" />}
+      {s.icon && (
+        <svg viewBox="0 0 16 16" className={cx("h-3.5 w-3.5", status === "running" && "animate-pulse")} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d={s.icon} />
+        </svg>
+      )}
       {s.label}
     </Badge>
   );

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
+import { blockedSector } from "@/lib/domain/blocked-sectors";
 import { buildEnginePayload, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
 import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
@@ -180,5 +181,22 @@ describe("ricerche in target dal database", () => {
     expect(targetIsSimple(target({ notes: "solo studi con più sedi" }))).toBe(false);
     expect(targetIsSimple(target({ industry: "" }))).toBe(false);
     expect(targetIsSimple(target({ signals: { codes: ["no_mobile"] } }))).toBe(false);
+  });
+});
+
+describe("settori bloccati", () => {
+  it("riconosce i settori a rischio", () => {
+    expect(blockedSector(["Escort - Milano"])).toBe("attività per adulti");
+    expect(blockedSector(["Sale scommesse"])).toBe("gioco d'azzardo e scommesse");
+    expect(blockedSector(["", "negozi di armi"])).toBe("armi e munizioni");
+    expect(blockedSector(["Negozi di CBD"])).toBe("droghe e cannabis");
+  });
+  it("non blocca settori normali con parole simili", () => {
+    for (const t of ["Farmacie", "Studi dentistici", "Termoidraulica", "Armadi su misura"]) expect(blockedSector([t])).toBeNull();
+    expect(blockedSector(["Agenzie di marketing", "Hotel", "Droghieria"])).toBeNull();
+  });
+  it("la ricerca viene rifiutata", () => {
+    const r = searchInputSchema.safeParse({ ...baseInput, industry: "Escort" });
+    expect(r.success).toBe(false);
   });
 });

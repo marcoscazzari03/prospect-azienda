@@ -65,7 +65,7 @@ export default async function ClientPage({ params }: PageProps<"/admin/clienti/[
         </Card>
       </div>
       <h2 className="mb-4 mt-10 font-display text-xl font-semibold">Ricerche</h2>
-      <SearchTable searches={(searches ?? []) as SearchListItem[]} href={(sid) => `/admin/ricerche?id=${sid}`} />
+      <SearchTable searches={(searches ?? []) as SearchListItem[]} href={(sid) => `/admin/ricerche?id=${sid}`} actions={false} />
       <h2 className="mb-4 mt-10 font-display text-xl font-semibold">Registro crediti</h2>
       <Card className="divide-y divide-line">
         {(ledger ?? []).map((l) => (

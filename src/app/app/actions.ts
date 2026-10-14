@@ -222,4 +222,5 @@ export async function stopRepeat(form: FormData) {
   if (!id.success) return;
   await createAdminClient().from("searches").update({ repeat: "none", next_repeat_at: null }).eq("id", id.data).eq("org_id", viewer.org.id);
   revalidatePath(`/app/ricerche/${id.data}`);
+  revalidatePath("/app/ricerche");
 }

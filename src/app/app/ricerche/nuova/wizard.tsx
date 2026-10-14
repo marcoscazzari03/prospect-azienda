@@ -3,6 +3,7 @@ import { useActionState, useEffect, useRef, useState, type ReactNode } from "rea
 import { Alert, Button, Card, Field, Input, Select, Textarea, cx } from "@/components/ui";
 import { COMPANY_SIZES, COUNTRIES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
 import { estimateCredits } from "@/lib/domain/pricing";
+import { BLOCKED_SECTORS_MESSAGE, blockedSector } from "@/lib/domain/blocked-sectors";
 import {
   JOB_AD_COUNTRIES,
   OFFER_AREAS,
@@ -275,6 +276,7 @@ export function SearchWizard({
   const targetReady = !opportunity && available?.kind === "target" && available.count > 0 ? available.count : 0;
   const howMany = (n: number) => (n > 500 ? "oltre 500" : String(n));
   const showIndustry = !(opportunity && allSectors);
+  const blocked = showIndustry && blockedSector([industry]) ? BLOCKED_SECTORS_MESSAGE : "";
 
   const summary: [string, ReactNode][] = [
     ["Tipologia", opportunity ? "Aziende con opportunità" : "Aziende in target"],
@@ -489,6 +491,7 @@ export function SearchWizard({
                   </ul>
                 )}
               </div>
+              {blocked && <p className="mt-2 text-xs text-brick">{blocked}</p>}
               <p className="mt-3 text-xs text-muted">Esempi popolari</p>
               <div className="mt-1.5 flex flex-wrap gap-2">
                 {POPULAR_INDUSTRIES.map((p) => (
@@ -737,7 +740,8 @@ export function SearchWizard({
           )}
           {!enough && <Alert>Crediti insufficienti per questa quantità. Riduci i lead o acquista crediti.</Alert>}
           {signalProblem && <p className="text-xs text-brick">{signalProblem}</p>}
-          <Button type="submit" size="lg" className="gap-2" disabled={pending || !enough || countries.length === 0 || Boolean(signalProblem) || noneAvailable}>
+          {blocked && <p className="text-xs text-brick">{blocked}</p>}
+          <Button type="submit" size="lg" className="gap-2" disabled={pending || !enough || countries.length === 0 || Boolean(signalProblem) || noneAvailable || Boolean(blocked)}>
             {!pending && <Icon name="play" className="h-4 w-4" />}
             {pending ? "Avvio in corso…" : "Avvia la ricerca"}
           </Button>

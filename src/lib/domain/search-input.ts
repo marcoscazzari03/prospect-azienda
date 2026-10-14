@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { COMPANY_SIZES, COUNTRY_NAME, EMAIL_MODES } from "./catalog";
+import { BLOCKED_SECTORS_MESSAGE, blockedSector } from "./blocked-sectors";
 import { JOB_AD_COUNTRIES, JOB_FAMILIES, OFFERS, SIGNALS, SIGNAL_RULES, chargesSignal, offerByCode, toSignalsTarget } from "./signals";
 
 const list = (max: number, itemMax = 80) =>
@@ -45,6 +46,9 @@ export const searchInputSchema = z.object({
 }).refine(
   (i) => i.industry.length >= 3 || (Boolean(i.signals.offer) && !i.industry.length),
   "Descrivi il settore (almeno 3 caratteri)",
+).refine(
+  (i) => !blockedSector([i.industry, ...i.industryKeywords, ...i.keywords, i.notes, i.name]),
+  BLOCKED_SECTORS_MESSAGE,
 ).refine(
   (i) => !i.signals.codes.includes("job_ad") || i.countries.every((c) => (JOB_AD_COUNTRIES as readonly string[]).includes(c)),
   "Gli annunci di lavoro non sono ancora disponibili per uno dei paesi scelti",
