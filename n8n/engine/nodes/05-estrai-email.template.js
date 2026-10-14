@@ -77,7 +77,10 @@ const GENERICHE = new Set([
   'team', 'studio', 'company', 'azienda', 'firma', 'direzione', 'management', 'board', 'export', 'import', 'shop', 'store',
   'booking', 'prenotazioni', 'kanzlei', 'kancelaria', 'cabinet', 'despacho', 'bufete', 'biuro', 'kontor', 'web', 'mailbox'
 ]);
-const PRIVACY = /^(privacy|dpo|gdpr|rodo|datenschutz|dataprotection|data\.protection|protecciondedatos|lopd|rgpd|avg|legal|compliance)$/;
+// Caselle privacy anche composte: contact.dataprivacy@, privacy-office@, dpo.italia@.
+const PRIVACY_PAROLE = /privacy|gdpr|datenschutz|dataprotection|protecciondedatos|datiperson/;
+const PRIVACY_SIGLE = /^(dpo|rodo|lopd|rgpd|avg|legal|compliance)$/;
+const privacy = (local) => PRIVACY_PAROLE.test(local.replace(/[^a-z]/g, '')) || local.split(/[._-]+/).some(t => PRIVACY_SIGLE.test(t));
 const SEGNAPOSTO = /^(firstname|first\.?name|name|nome|nombre|prenom|vorname|voornaam|imie|jmeno|etunimi|fornamn|fornavn)[._-]?(lastname|last\.?name|surname|cognome|apellidos?|nom|nachname|achternaam|nazwisko|prijmeni|sukunimi|efternamn|etternavn)?$/;
 
 const dominio = cleanHost(prospect.website);
@@ -114,6 +117,7 @@ const punteggio = (email) => {
   if (dom.startsWith('www.') || SEGNAPOSTO.test(local) || PEC.test(dom)) return 0;
   const delDominio = dominio && (dom === dominio || dom.endsWith('.' + dominio));
   if (delDominio) {
+    if (privacy(local)) return 1;
     if (diUfficio(local)) return 4;
     // Cognome che è anche il nome dell'azienda (Paolo Maggioli, maggioli.it): senza il nome
     // o l'iniziale è la casella dell'azienda (maggiolispa@, maggioli@), non della persona.
@@ -127,7 +131,6 @@ const punteggio = (email) => {
         /^[a-z]{3,}$/.test(t) && !parti.some(p => p === t || t.includes(p) || p.includes(t)));
       return altroNome ? 3 : soloNome(local) ? 5 : 4;
     }
-    if (PRIVACY.test(local)) return 1;
     return 3;
   }
   if (GRATUITE.test(dom) && sicure.has(email)) return conNome(local) && soloNome(local) && !diUfficio(local) ? 4.5 : 2;

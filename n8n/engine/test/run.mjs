@@ -111,6 +111,9 @@ assert.equal(tipoDi('<a href="mailto:mario.rossi@gmail.com">x</a>'), 'personal')
 assert.equal(tipoDi('<a href="mailto:rossicostruzionisrl@libero.it">x</a>'), 'generic', 'casella aziendale col cognome');
 assert.equal(tipoDi('<a href="mailto:rossicostruzioni@acme.it">x</a>'), 'generic');
 assert.equal(tipoDi('<a href="mailto:mrossi74@gmail.com">x</a>'), 'personal');
+assert.equal(tipoDi('<a href="mailto:contact.dataprivacy@acme.it">x</a>'), 'privacy', 'casella privacy composta: mai venduta');
+assert.equal(tipoDi('<a href="mailto:dpo.italia@acme.it">x</a>'), 'privacy');
+assert.equal(tipoDi('<a href="mailto:privacy@acme.it">x</a><a href="mailto:info@acme.it">y</a>'), 'generic', 'privacy scartata se c\'è altro');
 const famiglia = { ...dedup[0], website: 'https://www.maggioli.it', full_name: 'Paolo Maggioli', first_name: 'Paolo', last_name: 'Maggioli' };
 const tipoFam = (h) => run(estrai, { nodes: { P: [famiglia], 'Valida richiesta': [job] }, json: { html: h } }).json.email_site_type;
 assert.equal(tipoFam('<a href="mailto:maggiolispa@maggioli.it">x</a>'), 'generic', 'cognome = azienda: casella dell\'azienda');
