@@ -10,12 +10,16 @@ const norm = (v) => String(v ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').to
 const FORME = new Set(['srl', 'srls', 'spa', 'sas', 'snc', 'sapa', 'scarl', 'scrl', 'soc', 'coop', 'societa', 'cooperativa',
   'unipersonale', 's', 'r', 'l', 'p', 'a', 'c', 'e', 'di', 'del', 'della', 'the', 'and', 'ltd', 'inc', 'gmbh', 'ag', 'sa', 'bv']);
 const GENERICHE = new Set(['group', 'gruppo', 'italia', 'italy', 'italiana', 'holding', 'international', 'filiale', 'sede']);
+// «Italia» spesso non compare sul sito («Joinrs Italia» -> joinrs); «Group» sì («Var Group»).
+const PAESE = new Set(['italia', 'italy', 'italiana']);
 
 const out = [];
 for (const a of aziende) {
   const parole = norm(a.company_name).split(' ').filter(w => w && !FORME.has(w));
   const nucleo = parole.filter(w => !GENERICHE.has(w));
-  if (!nucleo.length) continue;
+  // Nomi troppo corti o ambigui («ENG», «B&M»): li lasciamo alla ricerca web. «Var Group»
+  // va bene: la pagina dovrà contenere il nome intero.
+  if (!nucleo.length || parole.join('').length < 4) continue;
   const slug = [
     nucleo.join(''),
     nucleo.length > 2 ? nucleo.slice(0, 2).join('') : '',
@@ -26,7 +30,7 @@ for (const a of aziende) {
   const domini = slug.flatMap(s => [`${s}.it`, `${s}.com`]).slice(0, 6);
   domini.forEach((d, ordine) => out.push({ json: {
     company_key: a.company_key, company_name: a.company_name, city: a.city || '',
-    nucleo: nucleo.join(' '), nome: parole.join(' '), domain: d, ordine, url: `https://${d}`
+    nucleo: nucleo.join(' '), nome: parole.filter(w => !PAESE.has(w)).join(' '), domain: d, ordine, url: `https://${d}`
   } }));
 }
 return out;

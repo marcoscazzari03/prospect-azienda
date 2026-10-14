@@ -14,9 +14,19 @@ const testo = (h) => String(h ?? '').replace(/<script[\s\S]*?<\/script>|<style[\
   .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&');
 const PARCHEGGIATO = /\b((domain|dominio) (is )?(for sale|in vendita|acquistabile)|buy this domain|this domain (is|may be) for sale|sedo|dan com|parkingcrew|bodis|domain parking|parked (free|domain)|registra il tuo dominio|questo dominio e stato registrato|hugedomains|afternic)\b/;
 
+// Pagine di parcheggio riconoscibili dal codice (anche in tedesco: «steht zum Verkauf»).
+const PARCHEGGIO_HTML = /sedoparking|data-adblockkey|parkingcrew|bodis\.com|afternic|hugedomains|dan\.com\/buy|steht zum verkauf|est a vendre|se vende este dominio/i;
+
+const errori = {};
 const valuta = (c, p) => {
   const html = String(p?.html ?? '');
+  if (p?.error) {
+    const e = p.error;
+    const tipo = String(e.code || e.name || e.message || 'errore').slice(0, 40);
+    errori[tipo] = (errori[tipo] || 0) + 1;
+  }
   if (html.length < 500) return 'irraggiungibile';
+  if (PARCHEGGIO_HTML.test(html.slice(0, 20000))) return 'parcheggiato';
   const corpo = norm(testo(html).slice(0, 150000));
   if (PARCHEGGIATO.test(corpo)) return 'parcheggiato';
   const titolo = norm(testo((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1]));
@@ -54,4 +64,5 @@ const results = [...esiti.values()].map(({ ordine, ...e }) => e);
 stats.companies = results.length;
 stats.found = results.filter(r => r.domain).length;
 stats.not_found = stats.companies - stats.found;
+stats.errors = errori;
 return [{ json: { results, stats } }];

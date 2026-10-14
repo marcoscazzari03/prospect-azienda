@@ -86,6 +86,7 @@ const aziende = [
   { company_key: 'maggioli', company_name: 'Gruppo Maggioli', city: 'Santarcangelo' },
   { company_key: 'max mara fashion', company_name: 'Max Mara Fashion Group', city: 'Reggio Emilia' },
   { company_key: 'eng', company_name: 'ENG', city: 'Bologna' },
+  { company_key: 'joinrs', company_name: 'Joinrs Italia', city: 'Bologna' },
   { company_key: 'gruppo', company_name: 'Gruppo Italia S.r.l.', city: '' }
 ];
 const cand = run(codice('03-domini-candidati.js'), { input: [{ companies: aziende }] });
@@ -95,6 +96,7 @@ assert.ok(di('maggioli').includes('maggioli.it') && di('maggioli').includes('gru
 assert.ok(di('max mara fashion').includes('maxmara.it'), 'prime due parole');
 assert.ok(cand.every(c => c.url === `https://${c.domain}`));
 assert.equal(di('gruppo').length, 0, 'solo parole generiche: nessun dominio');
+assert.equal(di('eng').length, 0, 'nome troppo corto: alla ricerca web');
 assert.ok(cand.filter(c => c.company_key === 'max mara fashion').length <= 6);
 
 // 4. Siti delle aziende: scelta
@@ -104,21 +106,24 @@ const paginaDi = {
   'vargroup.it': pagina('Var Group | Digital Integrator', 'Var Group spa, Empoli'),
   'maggioli.it': pagina('Maggioli Editore', 'Gruppo Maggioli'),
   'maxmara.it': pagina('Max Mara Official Site', 'Max Mara fashion house'),
-  'eng.it': pagina('Engineering', 'eng eng'),
-  'eng.com': { html: '' }
+  'joinrs.com': pagina('Joinrs - lavoro per giovani', 'Joinrs'),
+  'joinrs.it': { html: '', error: { code: 'ENOTFOUND' } }
 };
 const [scelta] = run(codice('04-scegli-sito.js'), {
   nodes: { 'Domini candidati': cand, 'Aziende senza sito': [{ companies: aziende }] },
-  input: cand.map(c => paginaDi[c.domain] || { html: c.domain === 'var.com' ? pagina('This domain is for sale', 'Buy this domain') .html : '' })
+  input: cand.map(c => paginaDi[c.domain] || { html: c.domain === 'var.com'
+    ? '<html data-adblockkey=x><head><title>var.com - Diese Website steht zum Verkauf!</title></head><body>' + ' x'.repeat(400) + '</body></html>' : '' })
 });
 const sito = (k) => scelta.results.find(r => r.company_key === k)?.domain;
 assert.equal(sito('var'), 'vargroup.it', '«var» da solo nel testo non basta');
 assert.equal(sito('maggioli'), 'maggioli.it');
 assert.equal(sito('max mara fashion'), 'maxmara.it', 'tutte le parole nella pagina');
-assert.equal(sito('eng'), '', 'nome breve non nel titolo');
+assert.equal(sito('eng'), '', 'nome breve: non provato');
+assert.equal(sito('joinrs'), 'joinrs.com', '«Italia» non serve sulla pagina');
+assert.equal(scelta.stats.errors.ENOTFOUND, 1, 'errori contati per tipo');
 assert.equal(sito('gruppo'), '', 'azienda senza domini registrata come non trovata');
-assert.equal(scelta.stats.companies, 5);
-assert.equal(scelta.stats.found, 3);
+assert.equal(scelta.stats.companies, 6);
+assert.equal(scelta.stats.found, 4);
 assert.ok(scelta.stats.parked >= 1);
 const parcheggio = run(codice('04-scegli-sito.js'), {
   nodes: { 'Domini candidati': [{ company_key: 'k', company_name: 'Possedono Srl', city: '', nucleo: 'possedono', nome: 'possedono', domain: 'possedono.it', ordine: 0 }], 'Aziende senza sito': [{ companies: [] }] },

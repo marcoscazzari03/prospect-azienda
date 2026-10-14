@@ -24,7 +24,7 @@ const famigliaDi = (titolo) => {
 
 // Agenzie per il lavoro, società di selezione e consulenza «presso cliente»: dal nome
 // dell'azienda o da come è scritto l'annuncio.
-const AGENZIE = /\b(randstad|adecco|manpower|experis|gi group|synergie|openjobmetis|etjca|umana|lavoropiu|orienta|kelly services|hays|michael page|page personnel|robert half|spring professional|start people|quanta|eurointerim|ali spa|osm partners|indeed|jobrapido|infojobs|monster|stepstone|e work|trenkwalder|humangest|tempor|tempus|tempi moderni|wintime|samsic|maw|jobtech|in job|unimpiego|generazione vincente|articolo1|cooperjob|men at work|staff spa|risorse spa|adhr|nhrg|human resources|lavoro|staffing|recruiting|recruitment|head ?hunt\w*|executive search|selezione|outsourcing)\b/;
+const AGENZIE = /\b(randstad|adecco|manpower|experis|gi group|gigroup|synergie|openjobmetis|etjca|umana|lavoropiu|orienta|kelly services|hays|michael page|page personnel|robert half|spring professional|start people|quanta|eurointerim|ali spa|osm partners|indeed|jobrapido|infojobs|monster|stepstone|e work|trenkwalder|humangest|tempor|tempus|tempi moderni|wintime|samsic|maw|jobtech|in job|unimpiego|generazione vincente|articolo1|cooperjob|men at work|staff spa|risorse spa|adhr|nhrg|hunters group|lhh|joinrs|selection 4 0|hrspecialist|reclutamente|job services|during spa|labor spa|human resources|lavoro|staffing|recruiting|recruitment|head ?hunt\w*|executive search|selezione|outsourcing)\b/;
 const PER_CLIENTE = new RegExp([
   'agenzia per il lavoro', 'ricerca e selezion', 'selezione del personale', 'autorizzazione ministeriale', 'albo informatico',
   'somministrazione (di )?lavoro', 'contratto di somministrazione', 'career center',

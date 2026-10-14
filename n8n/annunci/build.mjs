@@ -214,6 +214,8 @@ const apriSito = node({
         batching: { batch: { batchSize: 10, batchInterval: 300 } },
         redirect: { redirect: { followRedirects: true, maxRedirects: 5 } },
         response: { response: { neverError: true, responseFormat: 'text', outputPropertyName: 'html' } },
+        // Si legge solo la pagina pubblica: molti siti hanno il certificato solo su www.
+        allowUnauthorizedCerts: true,
         timeout: 8000
       }
     },
