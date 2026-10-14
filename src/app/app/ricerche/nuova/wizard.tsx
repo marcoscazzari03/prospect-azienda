@@ -704,7 +704,7 @@ export function SearchWizard({
                         ? "Per ora nessuna azienda con un annuncio recente per questa ricerca: prova ad allargare la zona o a scegliere tutti i settori."
                         : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < quantity && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
                       : available.count > 0
-                        ? <><strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda già pronta" : "aziende già pronte"} con la prova; le altre le cerchiamo sul web.</>
+                        ? <>Stima preliminare: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda compatibile" : "aziende compatibili"} con la prova. Avvia la ricerca per scoprire altri risultati.</>
                         : "Cerchiamo le aziende sul web: può richiedere qualche minuto in più."}
                 </p>
               )}
@@ -720,7 +720,7 @@ export function SearchWizard({
           </dl>
           {targetReady > 0 && (
             <p className="rounded-lg border border-ledger/30 bg-ledger-soft/60 p-3 text-xs text-ink-2" aria-live="polite">
-              <strong className="font-mono">{howMany(targetReady)}</strong> {targetReady === 1 ? "azienda già pronta" : "aziende già pronte"} nel database; le altre le cerchiamo sul web.
+              Stima preliminare: <strong className="font-mono">{howMany(targetReady)}</strong> {targetReady === 1 ? "azienda compatibile" : "aziende compatibili"}. Avvia la ricerca per scoprire altri risultati.
             </p>
           )}
           <div className="rounded-xl bg-ledger-soft p-4">
