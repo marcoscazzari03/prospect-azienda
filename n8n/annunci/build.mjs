@@ -163,7 +163,9 @@ const ogniGiorno = trigger({
   version: 1.3,
   config: {
     name: 'Ogni mattina',
-    parameters: { rule: { interval: [{ field: 'days', daysInterval: 1, triggerAtHour: 6, triggerAtMinute: 40 }] } }
+    // Ogni 2 ore, 120 aziende per giro: con 300 aziende (circa 1.200 pagine in memoria)
+    // l'esecuzione n8n si interrompeva.
+    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 2, triggerAtMinute: 40 }] } }
   }
 });
 
@@ -182,7 +184,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies?limit=300',
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies?limit=120',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }

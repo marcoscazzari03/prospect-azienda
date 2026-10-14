@@ -153,7 +153,7 @@ assert.equal(parcheggio.results[0].domain, 'possedono.it', '«possedono» non è
 // 5. Livello 3: ricerca web del sito per le non trovate, poi verifica come il livello 2.
 const nonTrovate = Array.from({ length: 45 }, (_, i) => ({ company_key: `k${i}`, company_name: `Officina ${i} Srl`, city: 'Modena', domain: i === 0 ? 'trovata.it' : '' }));
 const reqWeb = run(codice('05-prepara-ricerca-web.js'), { nodes: { 'Scegli sito': [{ results: nonTrovate }] } });
-assert.equal(reqWeb.length, 40, 'tetto di 40 al giorno, solo le non trovate');
+assert.equal(reqWeb.length, 3, 'tetto di 3 per giro (circa 36 al giorno), solo le non trovate');
 assert.ok(!reqWeb.some(r => r.company_key === 'k0'));
 assert.equal(reqWeb[0]._claude.model, 'claude-haiku-5-5');
 assert.equal(reqWeb[0]._claude.tools[0].max_uses, 1);

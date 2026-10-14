@@ -1,8 +1,9 @@
 // Livello 3: per le aziende che i domini indovinati non hanno trovato, una ricerca web
 // del sito ufficiale con Claude Haiku (una sola ricerca, ~1,2 centesimi per azienda).
-// Tetto giornaliero: le prime MAX aziende (le più attive: l'elenco arriva ordinato per
-// numero di annunci). Il sito proposto viene poi verificato come nel livello 2.
-const MAX = 40;
+// Tetto: le prime MAX aziende per giro (le più attive: l'elenco arriva ordinato per numero
+// di annunci); con un giro ogni 2 ore sono circa 36 al giorno, meno di 0,50 $.
+// Il sito proposto viene poi verificato come nel livello 2.
+const MAX = 3;
 const MODELLO = 'claude-haiku-5-5';
 const risultati = $('Scegli sito').first().json.results || [];
 
