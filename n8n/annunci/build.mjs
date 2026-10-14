@@ -2,7 +2,7 @@
 // I Code node vivono in nodes/*.js (testati da test/run.mjs); le figure da cercare
 // vengono dal catalogo del sito (src/lib/domain/signals.ts, JOB_FAMILIES): una sola
 // fonte di verità per motore, sito e raccolta annunci.
-// Uso: node n8n/annunci/build.mjs  ->  n8n/annunci/workflow.sdk.ts, siti.sdk.ts e settore.sdk.ts
+// Uso: node n8n/annunci/build.mjs  ->  n8n/annunci/workflow.sdk.ts, siti.sdk.ts, settore.sdk.ts e controllo.sdk.ts
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,8 +15,11 @@ const { JOB_FAMILIES } = await createJiti(join(root, 'build.js')).import('./src/
 
 // Annunci in Italia: titoli in italiano e inglese.
 export const famiglie = JOB_FAMILIES.map(f => ({ code: f.code, titles: [...new Set([...f.titles.it, ...f.titles.en])] }));
-export const codice = (f, subs = {}) => Object.entries({ __FAMIGLIE__: JSON.stringify(famiglie), ...subs })
-  .reduce((s, [k, v]) => s.split(k).join(v), readFileSync(join(dir, 'nodes', f), 'utf8'));
+// Controlli sul sito: gli stessi del motore (n8n/engine/nodes/lib-controlli-sito.js).
+const controlliSito = readFileSync(join(root, 'n8n', 'engine', 'nodes', 'lib-controlli-sito.js'), 'utf8');
+const rilasciCms = JSON.stringify(JSON.parse(readFileSync(join(root, 'src', 'lib', 'domain', 'cms-releases.json'), 'utf8')));
+export const codice = (f, subs = {}) => Object.entries({ __FAMIGLIE__: JSON.stringify(famiglie), __CMS_RELEASES__: rilasciCms, ...subs })
+  .reduce((s, [k, v]) => s.split(k).join(v), readFileSync(join(dir, 'nodes', f), 'utf8').split('__CONTROLLI_SITO__').join(controlliSito));
 // Verifica dei siti: livello 2 (domini indovinati) e livello 3 (ricerca web).
 export const scegliSito = (livello) => codice('04-scegli-sito.js', livello === 2
   ? { __METODO__: 'guess', __CANDIDATI__: 'Domini candidati', __ELENCO__: "($('Aziende senza sito').first().json.companies || [])" }
@@ -563,9 +566,164 @@ export default workflow('annunci-settore', 'Annunci | Settore aziende', {
   .to(aziende);
 `;
 
+const controllo = `import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
+
+// GENERATO da n8n/annunci/build.mjs: non modificare a mano.
+// Controllo dei siti del database (gratis, solo richieste HTTP): ogni ora 60 aziende mai
+// controllate o controllate da più di 25 giorni, con le stesse regole del motore. Le prove
+// (HTTPS, CMS vecchio, mobile, lingue, copyright...) servono alle ricerche opportunità
+// senza ricerca AI e restano fresche (valgono 30 giorni).
+
+const ogniOra = trigger({
+  type: 'n8n-nodes-base.scheduleTrigger',
+  version: 1.3,
+  config: {
+    name: 'Ogni ora',
+    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 1, triggerAtMinute: 25 }] } }
+  }
+});
+
+const aMano = trigger({
+  type: 'n8n-nodes-base.manualTrigger',
+  version: 1,
+  config: { name: 'A mano' }
+});
+
+const aziende = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Aziende da controllare',
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
+    parameters: {
+      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=60',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      options: { timeout: 30000 }
+    },
+    credentials: { httpHeaderAuth: ${CALLBACK} }
+  },
+  output: [{ companies: [{ company_id: '00000000-0000-4000-8000-000000000000', domain: 'vargroup.it', name: 'Var Group', website: 'https://vargroup.it' }] }]
+});
+
+const daControllare = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Siti da controllare',
+    parameters: { jsCode: "return ($input.first().json.companies || []).map(c => ({ json: c }));" }
+  },
+  output: [{ company_id: '00000000-0000-4000-8000-000000000000', domain: 'vargroup.it', name: 'Var Group', website: 'https://vargroup.it' }]
+});
+
+const https = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Controllo HTTPS',
+    parameters: {
+      url: expr("{{ 'https://' + $json.domain + '/' }}"),
+      sendHeaders: true,
+      headerParameters: { parameters: [
+        { name: 'User-Agent', value: '${UA}' },
+        { name: 'Accept', value: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
+        { name: 'Accept-Language', value: 'it,en;q=0.8' }
+      ] },
+      options: {
+        batching: { batch: { batchSize: 2, batchInterval: 500 } },
+        redirect: { redirect: { followRedirects: true, maxRedirects: 3 } },
+        response: { response: { neverError: true, responseFormat: 'text', outputPropertyName: 'https_body' } },
+        timeout: 8000
+      }
+    },
+    // L'errore (certificato scaduto, HTTPS assente) è proprio l'esito da registrare.
+    onError: 'continueRegularOutput'
+  },
+  output: [{ https_body: '<html></html>' }]
+});
+
+const apri = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Apri sito',
+    parameters: {
+      url: expr("{{ $('Siti da controllare').item.json.website }}"),
+      sendHeaders: true,
+      headerParameters: { parameters: [
+        { name: 'User-Agent', value: '${UA}' },
+        { name: 'Accept', value: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
+        { name: 'Accept-Language', value: 'it,en;q=0.8' }
+      ] },
+      options: {
+        batching: { batch: { batchSize: 2, batchInterval: 500 } },
+        redirect: { redirect: { followRedirects: true, maxRedirects: 5 } },
+        response: { response: { neverError: true, responseFormat: 'text', outputPropertyName: 'html' } },
+        allowUnauthorizedCerts: true,
+        timeout: 10000
+      }
+    },
+    onError: 'continueRegularOutput'
+  },
+  output: [{ html: '<html></html>' }]
+});
+
+const valuta = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Valuta siti',
+    parameters: { jsCode: ${JSON.stringify(codice('09-valuta-siti.js'))} }
+  },
+  output: [{ items: [], stats: {} }]
+});
+
+const salva = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Salva controlli',
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
+    parameters: {
+      method: 'POST',
+      url: 'https://leads.weborastudio.it/api/engine/site-checks',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      sendBody: true,
+      contentType: 'json',
+      specifyBody: 'json',
+      jsonBody: expr('{{ JSON.stringify({ items: $json.items }) }}'),
+      options: { timeout: 60000 }
+    },
+    credentials: { httpHeaderAuth: ${CALLBACK} }
+  },
+  output: [{ ok: true, saved: 0 }]
+});
+
+export default workflow('aziende-controllo-siti', 'Aziende | Controllo siti', {
+  timezone: 'Europe/Rome',
+  errorWorkflow: '${ERRORI}',
+  executionOrder: 'v1'
+})
+  .add(ogniOra)
+  .to(aziende)
+  .to(daControllare)
+  .to(https)
+  .to(apri)
+  .to(valuta)
+  .to(salva)
+  .add(aMano)
+  .to(aziende);
+`;
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   writeFileSync(join(dir, 'workflow.sdk.ts'), sdk);
   writeFileSync(join(dir, 'siti.sdk.ts'), siti);
   writeFileSync(join(dir, 'settore.sdk.ts'), settore);
-  console.log('workflow.sdk.ts, siti.sdk.ts e settore.sdk.ts generati');
+  writeFileSync(join(dir, 'controllo.sdk.ts'), controllo);
+  console.log('workflow.sdk.ts, siti.sdk.ts, settore.sdk.ts e controllo.sdk.ts generati');
 }

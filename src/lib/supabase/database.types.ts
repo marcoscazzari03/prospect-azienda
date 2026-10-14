@@ -844,6 +844,11 @@ isOneToOne: false
               "ads": number,"city": string,"company_id": string,"company_name": string,"website": string
             }[]
                            },
+"pending_site_checks":
+{ Args: { "p_limit": number }; Returns: {
+              "company_id": string,"domain": string,"name": string,"website": string
+            }[]
+                           },
 "purge_stale_warehouse":
 { Args: { "p_months"?: number }; Returns: Json
                            },

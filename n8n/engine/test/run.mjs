@@ -8,7 +8,8 @@ import assert from 'node:assert/strict';
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'nodes');
 const src = (f, subs = {}) => Object.entries(subs)
-  .reduce((s, [k, v]) => s.split(k).join(v), readFileSync(join(dir, f), 'utf8'));
+  .reduce((s, [k, v]) => s.split(k).join(v), readFileSync(join(dir, f), 'utf8')
+    .split('__CONTROLLI_SITO__').join(readFileSync(join(dir, 'lib-controlli-sito.js'), 'utf8')));
 
 const run = (code, { nodes = {}, input = [], json = {} }) => {
   const $ = (name) => {

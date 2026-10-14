@@ -217,3 +217,26 @@ assert.deepEqual(esitoSettore.results.slice(0, 3), [
 assert.equal(esitoSettore.results.length, 3, 'risposte mancanti: nessun salvataggio, si riprova');
 assert.deepEqual([esitoSettore.stats.classified, esitoSettore.stats.unknown, esitoSettore.stats.failed], [1, 2, 20]);
 console.log('Test settore aziende superati.');
+
+// 8. Controllo siti del database: stesse regole del motore.
+const siti = [
+  { company_id: 'c1', domain: 'vecchio.it', name: 'Vecchio Srl', website: 'http://vecchio.it' },
+  { company_id: 'c2', domain: 'moderno.it', name: 'Moderno Srl', website: 'https://moderno.it' },
+  { company_id: 'c3', domain: 'spento.it', name: 'Spento Srl', website: 'https://spento.it' }
+];
+const corpo = 'Siamo una azienda storica che produce componenti meccanici di precisione per il settore automotive e per l\'industria. '.repeat(5);
+const paginaVecchia = `<html lang="it"><head><meta name="generator" content="WordPress 5.2.4"></head><body><p>${corpo}</p><footer>© 2019 Vecchio Srl</footer></body></html>`;
+const paginaModerna = `<html lang="it"><head><meta name="viewport" content="width=device-width"><link rel="alternate" hreflang="en" href="/en/"></head><body><p>${corpo}</p><footer>© ${new Date().getFullYear()} Moderno</footer></body></html>`;
+const [controllo] = run(codice('09-valuta-siti.js'), {
+  nodes: { 'Siti da controllare': siti, 'Controllo HTTPS': [{ error: { message: 'connect ECONNREFUSED 1.2.3.4:443' } }, { https_body: paginaModerna }, { error: { message: 'timeout' } }] },
+  input: [{ html: paginaVecchia }, { html: paginaModerna }, { error: { code: 'ENOTFOUND' } }]
+});
+const esitoDi = (dom, code) => controllo.items.find(x => x.company.domain === dom).checks.find(c => c.code === code)?.status;
+assert.equal(controllo.items.length, 3, 'tutte salvate, anche il sito spento');
+assert.deepEqual(['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright'].map(c => esitoDi('vecchio.it', c)), ['pass', 'pass', 'pass', 'pass', 'pass']);
+assert.deepEqual(['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright'].map(c => esitoDi('moderno.it', c)), ['fail', 'fail', 'undetermined', 'fail', 'fail']);
+assert.ok(controllo.items.find(x => x.company.domain === 'spento.it').checks.every(c => c.status === 'undetermined'), 'sito spento: niente prove');
+assert.deepEqual(controllo.items[0].company.technologies, ['wordpress']);
+assert.ok(controllo.items[0].checks.find(c => c.code === 'outdated_cms').evidence.detail.startsWith('WordPress 5.2.4'));
+assert.equal(controllo.stats.unreachable, 1);
+console.log('Test controllo siti superati.');

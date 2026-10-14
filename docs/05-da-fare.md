@@ -66,7 +66,8 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Annunci: sito delle aziende, livello 2 gratuito (domini probabili verificati sulla pagina): migrazione 023, workflow «Annunci | Siti aziende». Misura 14/10: 67 aziende su 150 (45%), 127 annunci collegati, costo zero
 - [x] Annunci: sito delle aziende, livello 3 (14/10): ricerca web con Claude Haiku per le aziende non trovate dal livello 2, massimo 40 al giorno (~0,50 $), sito verificato con le stesse regole
 - [ ] Accordo commerciale con Adzuna; TheirStack rimandato
-- [ ] Fase 4 – popolamento iniziale (una regione, budget concordato) e ricontrollo notturno delle prove in scadenza
+- [x] Fase 4 – controllo dei siti del database: workflow «Aziende | Controllo siti» (ogni ora 60 aziende mai controllate o da più di 25 giorni, gratis, stesse regole del motore grazie a `lib-controlli-sito.js` condiviso), migrazione 027, endpoint `/api/engine/site-checks`. Le prove restano sempre fresche (valgono 30 giorni)
+- [ ] Fase 4 – nuove aziende per i segnali dal sito: oggi il controllo copre solo le aziende già nel database (target, annunci); per allargarlo servono elenchi di aziende (es. registro imprese / fonti aperte)
 - [ ] Fase 5 – togliere dal workflow Target i rami opportunità; prezzi definitivi sui costi misurati
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
 - [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale

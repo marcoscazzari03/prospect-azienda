@@ -26,7 +26,9 @@ AI_PROVIDER = "anthropic"
 
 
 def js(name, **subs):
-    s = (NODES / name).read_text(encoding="utf-8")
+    # I controlli sul sito sono condivisi con il workflow «Aziende | Controllo siti».
+    s = (NODES / name).read_text(encoding="utf-8").replace(
+        "__CONTROLLI_SITO__", (NODES / "lib-controlli-sito.js").read_text(encoding="utf-8"))
     for k, v in subs.items():
         s = s.replace(k, v)
     return json.dumps(s, ensure_ascii=True)

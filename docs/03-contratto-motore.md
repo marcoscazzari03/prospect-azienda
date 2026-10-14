@@ -212,6 +212,16 @@ segreto. Ogni 2 ore legge la homepage di 40 aziende e la fa classificare a Claud
   `{ ok, classified, unknown }`. Il settore va in `companies.industry` (se vuoto), settore e parole chiave
   nelle etichette `tags` usate da magazzino e riserva.
 
+## Controllo dei siti del database (`/api/engine/site-checks`)
+
+Workflow n8n «Aziende | Controllo siti» (generato da `n8n/annunci/build.mjs` in `controllo.sdk.ts`), stesso
+segreto. Ogni ora 60 aziende: richiesta HTTPS stretta (per `no_https`) e homepage, poi gli stessi controlli
+del motore (`n8n/engine/nodes/lib-controlli-sito.js`).
+
+- `GET ?limit=60` → `{ companies: [{ company_id, domain, name, website }] }`: mai controllate prima, poi
+  controllate da più di 25 giorni (le prove valgono 30); escluse opposizioni e aziende chiuse.
+- `POST { items: [{ company, checks }] }` → `{ ok, saved }`, salvati da `store_company_checks` (origine `seed`).
+
 ## Riserva dal database (ricerche opportunità)
 
 Per le ricerche con segnali il backend aggiunge alla `reserve` del payload (dopo quella dei giri
