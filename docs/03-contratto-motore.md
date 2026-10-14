@@ -199,3 +199,12 @@ Workflow n8n «Annunci | Siti aziende» (generato da `n8n/annunci/build.mjs` in 
 - `POST { results: [{ company_key, company_name, city, domain, method }] }` (domain vuoto = non trovato) →
   `{ ok, found, not_found, linked_ads }`. Le trovate entrano in `companies` (origine `adzuna`, paese Italia)
   e i loro annunci vengono collegati; ogni esito resta in `company_resolutions`.
+
+## Riserva dal database (ricerche opportunità)
+
+Per le ricerche con segnali il backend aggiunge alla `reserve` del payload (dopo quella dei giri
+precedenti, massimo 40 in tutto) le aziende restituite da `opportunity_reserve(search, esclusi, n)`:
+prova recente dei segnali richiesti (annuncio Adzuna degli ultimi 60 giorni della famiglia scelta,
+segnali dal sito controllati negli ultimi 30), paese, zona (anche città e regione degli annunci) e
+settore della ricerca, escluse aziende già consegnate, già controllate nella ricerca e in opposizione.
+Il motore le tratta come la riserva: niente ricerca AI se bastano, referente dal sito, poi email.

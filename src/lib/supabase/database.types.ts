@@ -820,6 +820,9 @@ isOneToOne: false
 "normalize_email":
 { Args: { "p": string }; Returns: string
                            },
+"opportunity_reserve":
+{ Args: { "p_exclude": (string)[],"p_limit": number,"p_search": string }; Returns: Json
+                           },
 "org_available_credits":
 { Args: { "p_org": string }; Returns: number
                            },

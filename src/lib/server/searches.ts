@@ -78,6 +78,28 @@ async function loadRunMemory(searchId: string) {
   return { checked: [...checked], reserve: reserve.slice(0, 40) };
 }
 
+// Ricerca opportunità «database first»: aziende del database con una prova recente dei
+// segnali richiesti (annunci raccolti dalle API, segnali dal sito), nella zona e nel
+// settore della ricerca. Vanno nella riserva dopo quelle dei giri precedenti: il motore
+// ricontrolla il sito e cerca il referente, e l'AI parte solo per i lead mancanti.
+const RESERVE_MAX = 40;
+async function loadDatabaseReserve(search: SearchRow, exclude: string[], reserve: Record<string, unknown>[]) {
+  const free = RESERVE_MAX - reserve.length;
+  if (!search.target.signals?.codes?.length || free <= 0) return [];
+  const { data, error } = await createAdminClient().rpc("opportunity_reserve", {
+    p_search: search.id,
+    p_exclude: exclude,
+    p_limit: free,
+  });
+  if (error) {
+    console.error("opportunity_reserve", error.message);
+    return [];
+  }
+  const host = (u: unknown) => String(u ?? "").trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split(/[/?#:]/)[0];
+  const taken = new Set(reserve.map((r) => host(r.website)));
+  return ((data ?? []) as Record<string, unknown>[]).filter((r) => !taken.has(host(r.website))).slice(0, free);
+}
+
 // Verifiche a pagamento ancora disponibili per un giro: il minimo tra quanto
 // resta alla ricerca e quanto resta del budget mensile impostato dall'admin.
 async function loadEnrichmentBudget(search: SearchRow) {
@@ -133,6 +155,7 @@ export async function dispatchRun(searchId: string) {
     loadRunMemory(searchId),
   ]);
   exclusions.domains = [...new Set([...memory.checked, ...exclusions.domains])];
+  const fromDatabase = await loadDatabaseReserve(search, exclusions.domains, memory.reserve);
   const payload = buildEnginePayload({
     search,
     plan,
@@ -141,10 +164,11 @@ export async function dispatchRun(searchId: string) {
     callbackUrl: `${env.appUrl()}/api/engine/callback`,
     exclusions,
     enrichmentBudget,
-    reserve: memory.reserve,
+    reserve: [...memory.reserve, ...fromDatabase],
   });
   // Il tetto concesso a questo giro conta subito nel budget del mese.
   await db.from("search_runs").update({ enrichment_cap: payload.limits.enrichment_cap }).eq("id", runId);
+  if (fromDatabase.length) console.info(`Ricerca ${searchId}: ${fromDatabase.length} aziende dal database nella riserva`);
 
   try {
     const res = await fetch(webhook, {

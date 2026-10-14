@@ -47,9 +47,11 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Collaudo dei due passaggi (14/10): 31 lead per 6,76 $ (0,22 $/lead); il 46% del costo per trovare aziende con l'AI (65% senza segnale), il 46% per il titolare via web
 - [x] Decisione (14/10): ricerca opportunità «database first + API first», due workflow separati (Target / Opportunità), popolamento iniziale per i segnali dal sito, prove di Adzuna e TheirStack
 - [x] Fase 1 – fondamenta: ogni azienda controllata salvata con l'esito di ogni controllo (`company_checks`, migrazione `20261027000021_company_checks.sql`); controlli tecnici gratuiti anche nella ricerca in target
-- [ ] Fase 2 – workflow «Lead Engine | Opportunità»: database → ricontrollo gratuito → referente dal sito → email → AI solo per i lead mancanti
+- [x] Fase 2a – ricerca opportunità «database first»: le aziende del database con prova recente (annunci Adzuna 60 gg, segnali dal sito 30 gg) entrano nella riserva del motore; l'AI parte solo per i lead mancanti (migrazione 024, `opportunity_reserve`)
+- [ ] Fase 2b – collaudo con una ricerca reale (sistemisti, Emilia-Romagna) e misura del costo per lead; poi separare il workflow «Opportunità» dal Target (fase 5)
 - [x] Fase 3 – annunci da API: piano Adzuna (8 $/mese, chiave su n8n), tabella `job_ads` (migrazione 022), endpoint `/api/engine/job-ads`, workflow «Annunci | Raccolta Adzuna» (ogni mattina, Emilia-Romagna, una ricerca nel titolo per ogni figura del catalogo, 67 chiamate; sorgenti in `n8n/annunci/`). Primo riempimento 14/10: 363 annunci tenuti su 1.633 (703 di agenzie, 341 fuori tema)
-- [ ] Annunci: pubblicare il workflow; estendere all'Italia (stesse ~67 ricerche senza filtro regione, più pagine: verificare il limite di 5.000 chiamate al mese)
+- [x] Annunci: workflow «Raccolta Adzuna» e «Siti aziende» pubblicati (14/10)
+- [ ] Annunci: estendere all'Italia (stesse ~67 ricerche senza filtro regione, più pagine: verificare il limite di 5.000 chiamate al mese)
 - [x] Annunci: sito delle aziende, livello 2 gratuito (domini probabili verificati sulla pagina): migrazione 023, workflow «Annunci | Siti aziende». Misura 14/10: 67 aziende su 150 (45%), 127 annunci collegati, costo zero
 - [ ] Annunci: sito delle aziende, livello 3 (ricerca web con Claude Haiku, ~1,2 cent/azienda, tetto di spesa giornaliero es. 0,50 $). Rimandato il 14/10 per costruire prima «Opportunità», ma è la soluzione da attivare appena servono più volumi: il livello 2 manca soprattutto i nomi grandi (TechnoGym, Ducati, Capgemini, Reply, Unipol, Chiesi…)
 - [ ] Accordo commerciale con Adzuna; TheirStack rimandato
