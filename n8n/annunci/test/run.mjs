@@ -245,9 +245,9 @@ console.log('Test controllo siti superati.');
 const richiesteOsm = run(codice('10-prepara-osm.js'), {});
 assert.equal(richiesteOsm.length, 1, 'a mano: Modena');
 assert.deepEqual([richiesteOsm[0].sigla, richiesteOsm[0].regione], ['MO', 'Emilia-Romagna']);
-assert.ok(richiesteOsm[0].data.includes('[bbox:44.2,10.4,45.0,11.4]') && richiesteOsm[0].data.includes('nwr["website"]["office"]') && richiesteOsm[0].data.includes('out tags;'));
+assert.ok(richiesteOsm[0].data.includes('area["ISO3166-2"="IT-MO"]') && richiesteOsm[0].data.includes('nwr(area.a)["website"]["office"]') && richiesteOsm[0].data.includes('out tags;'));
 const giornoOsm = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'] });
-assert.ok(giornoOsm.length >= 1 && giornoOsm.every(r => r.url.startsWith('https://')), 'alcune province al giorno');
+assert.ok(giornoOsm.length === 4 && new Set(giornoOsm.map(r => r.sigla)).size === 4 && giornoOsm.every(r => r.url.startsWith('https://')), '4 province diverse al giorno');
 const el = (tags) => ({ type: 'node', id: Math.random(), tags });
 const [osm] = run(codice('11-normalizza-osm.js'), {
   nodes: { 'Prepara richieste OSM': [{ sigla: 'MO', provincia: 'Modena', regione: 'Emilia-Romagna' }, { sigla: 'XX', provincia: 'Altrove', regione: 'Altrove' }] },

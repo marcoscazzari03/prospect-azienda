@@ -92,8 +92,7 @@ const pulisci = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0,
 const trovate = [];
 const stats = { provinces: richieste.map(r => r.provincia), elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, foreign: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0, failed_provinces: [] };
 const TIPI = ['office', 'craft', 'industrial', 'healthcare', 'tourism', 'shop', 'amenity'];
-// Sigla della provincia scritta nell'indirizzo (addr:province = «BO»): più precisa del riquadro,
-// che sui confini prende anche attività delle province vicine.
+// Sigla della provincia scritta nell'indirizzo (addr:province = «BO»): se c'è, vale quella.
 const PROVINCE = Object.fromEntries((__PROVINCE__).map(([sigla, nome, regione]) => [sigla, [nome, regione]]));
 $input.all().forEach((item, i) => {
   const { regione, provincia } = richieste[item.pairedItem?.item ?? i] || {};
@@ -111,7 +110,7 @@ $input.all().forEach((item, i) => {
     const sito = String(t.website || t['contact:website'] || '').split(/[;\s]/)[0];
     const dom = dominio(sito);
     if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,24}$/.test(dom) || NON_AZIENDALI.test(dom)) { stats.not_company_site++; continue; }
-    // Riquadri di confine: niente attività estere (paese o dominio straniero).
+    // Niente attività estere (paese o dominio straniero).
     if ((t['addr:country'] && t['addr:country'].toUpperCase() !== 'IT') || /\.(ch|fr|at|si|de|hr|sm|va|mt|li|mc)$/.test(dom)) { stats.foreign++; continue; }
     const mappa = SETTORI[tipo]?.[valore];
     if (!mappa) stats.unmapped++;
