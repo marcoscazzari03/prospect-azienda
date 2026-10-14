@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
-import { buildEnginePayload, enrichmentCap, enrichmentSearchBudget, maxAttemptsFor, nextStep } from "@/lib/domain/engine";
+import { buildEnginePayload, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep } from "@/lib/domain/engine";
 import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
 import { flattenDelivery } from "@/lib/domain/leads";
@@ -148,5 +148,19 @@ describe("ricerche ricorrenti", () => {
     expect(nextRepeatAt("weekly", new Date("2026-10-13T03:00:00Z"), now).toISOString()).toBe("2026-10-27T03:00:00.000Z");
     expect(nextRepeatAt("weekly", new Date("2026-09-01T03:00:00Z"), now).toISOString()).toBe("2026-10-27T03:00:00.000Z");
     expect(nextRepeatAt("monthly", new Date("2026-10-20T03:00:00Z"), now).toISOString()).toBe("2026-11-20T03:00:00.000Z");
+  });
+});
+
+describe("ricerche con annunci di lavoro", () => {
+  const target = (codes: string[], match: "any" | "all" = "any") =>
+    ({ countries: ["IT"], industry: "", roles: [], signals: { codes, match } }) as unknown as Parameters<typeof jobAdFromDatabaseOnly>[0];
+  it("annuncio decisivo: solo database", () => {
+    expect(jobAdFromDatabaseOnly(target(["job_ad"]))).toBe(true);
+    expect(jobAdFromDatabaseOnly(target(["job_ad", "outdated_cms"], "all"))).toBe(true);
+  });
+  it("annuncio o segnale dal sito, oppure nessun annuncio: resta la ricerca AI", () => {
+    expect(jobAdFromDatabaseOnly(target(["job_ad", "outdated_cms"], "any"))).toBe(false);
+    expect(jobAdFromDatabaseOnly(target(["outdated_cms"]))).toBe(false);
+    expect(jobAdFromDatabaseOnly(target([]))).toBe(false);
   });
 });

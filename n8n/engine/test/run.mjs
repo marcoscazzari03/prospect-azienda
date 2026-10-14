@@ -169,7 +169,7 @@ const bodyAnnunci = (fam, extra = {}) => ({ ...body, today: '2026-10-13', target
 const [jobA] = run(src('01-valida-richiesta.js'), { input: [{ body: bodyAnnunci('it_systems') }] }).map(i => i.json);
 assert.deepEqual(jobA.target.signals.codes, ['job_ad']);
 assert.equal(jobA.today, '2026-10-13');
-assert.ok(jobA.lotti_previsti >= 1);
+assert.equal(jobA.lotti_previsti, 0, 'annuncio decisivo: solo database, niente ricerca AI');
 assert.equal(jobA.limits.candidates_per_lot, 30, 'due passaggi: solo aziende, tante per lotto');
 assert.equal(jobA.limits.referenti_max, Math.ceil(jobA.quantity * (jobA.email_mode === 'personal_only' ? 2.2 : 1.5)) + 1, 'tetto ai referenti');
 assert.equal(jobA.ai.max_searches, 8);
@@ -181,7 +181,10 @@ assert.equal(conRiserva.reserve[0].signals[0].status, 'pass');
 const [saltato] = run(src('02-prepara-lotti.js'), { nodes: { 'Valida richiesta': [conRiserva] }, input: [{ output: '' }] }).map(i => i.json);
 assert.equal(saltato._salta, true);
 // Collaudo 14/10: 7 aziende in riserva per 5 lead (email miste) bastano; con solo nominative ne servono 10.
-const lottiCon = (n, extra) => run(src('01-valida-richiesta.js'), { input: [{ body: { ...bodyAnnunci('it_systems'), quantity: 5, reserve: riserva.slice(0, n), ...extra } }] })[0].json.lotti_previsti;
+const sitoBody = { ...body, target: { ...body.target, signals: { codes: ['outdated_cms'], match: 'any' } } };
+const lottiCon = (n, extra) => run(src('01-valida-richiesta.js'), { input: [{ body: { ...sitoBody, quantity: 5, reserve: riserva.slice(0, n).map(r => ({ ...r, signals: [{ code: 'outdated_cms', evidence: {} }] })), ...extra } }] })[0].json.lotti_previsti;
+// Annuncio decisivo: mai ricerca AI, anche senza riserva.
+assert.equal(run(src('01-valida-richiesta.js'), { input: [{ body: { ...bodyAnnunci('it_systems'), quantity: 5 } }] })[0].json.lotti_previsti, 0, 'annunci: solo database');
 assert.equal(lottiCon(7, { email_mode: 'mixed' }), 0, 'riserva 1,4 volte i lead: niente AI');
 assert.ok(lottiCon(6, { email_mode: 'mixed' }) > 0, 'riserva scarsa: ricerca AI');
 assert.equal(lottiCon(10, { email_mode: 'personal_only' }), 0);
@@ -193,7 +196,7 @@ assert.ok(!dedR.some(p => p.domain === 'r1.it'), 'riserva già acquistata esclus
 assert.match(jobA.planner_prompt, /ANNUNCI DI LAVORO/);
 const [senzaFam] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, target: { ...body.target, signals: { codes: ['job_ad', 'inventato'] } } } }] }).map(i => i.json);
 assert.deepEqual(senzaFam.target.signals.codes, [], 'job_ad senza figure e codici sconosciuti ignorati');
-const [lotto1] = run(src('02-prepara-lotti.js'), { nodes: { 'Valida richiesta': [jobA] }, input: [{ output: '{"lotti":[{"paese":"Italia","focus":"Brescia","query":["offerta lavoro sistemista Brescia"]}]}' }] }).map(i => i.json);
+const [lotto1] = run(src('02-prepara-lotti.js'), { nodes: { 'Valida richiesta': [{ ...jobA, lotti_previsti: 1 }] }, input: [{ output: '{"lotti":[{"paese":"Italia","focus":"Brescia","query":["offerta lavoro sistemista Brescia"]}]}' }] }).map(i => i.json);
 assert.match(lotto1.prompt, /job_ad_url/);
 assert.match(lotto1.prompt, /Sistemista \/ tecnico IT/);
 console.log('ok  segnali nella richiesta e nei lotti (annunci di lavoro)');

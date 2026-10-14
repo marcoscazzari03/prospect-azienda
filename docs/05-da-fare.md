@@ -51,6 +51,8 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Fase 2b – collaudo 14/10 (sistemisti, Emilia-Romagna, 5 lead): 5/5 lead, tutti dal database, 0,88 $ (0,37 $ di ricerca AI inutile, 0,43 $ di referente via web). Corretto: niente AI se la riserva è almeno 1,4 volte i lead (2 con solo nominative); email col cognome dell'azienda (maggiolispa@) ora generiche
 - [x] Referente via web con Claude Haiku (prova 14/10 sulle 7 aziende del collaudo: 5 referenti come Sonnet, 4 identici, 1 in meno e 1 in più; 0,023 $ invece di 0,061 $ a chiamata). Token Haiku registrati a prezzo Sonnet equivalente (× 0,05) nei costi del giro
 - [ ] Da valutare: referente dal sito e ricerca aziende con Haiku (prima una prova di confronto)
+- [x] Ricerche con annuncio di lavoro decisivo: solo aziende del database, niente ricerca AI (14/10: 3 tentativi AI per ~0,9 $ senza lead). Finite le aziende, la ricerca si chiude e i crediti tornano
+- [ ] Dopo ogni modifica al motore: ricordarsi di far PUBBLICARE il workflow su n8n (le modifiche restano in bozza)
 - [ ] Settore delle aziende degli annunci (oggi vuoto: entrano solo nelle ricerche «tutti i settori»)
 - [ ] Separare il workflow «Opportunità» dal Target (fase 5)
 - [x] Fase 3 – annunci da API: piano Adzuna (8 $/mese, chiave su n8n), tabella `job_ads` (migrazione 022), endpoint `/api/engine/job-ads`, workflow «Annunci | Raccolta Adzuna» (ogni mattina, Emilia-Romagna, una ricerca nel titolo per ogni figura del catalogo, 67 chiamate; sorgenti in `n8n/annunci/`). Primo riempimento 14/10: 363 annunci tenuti su 1.633 (703 di agenzie, 341 fuori tema)

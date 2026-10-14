@@ -133,7 +133,10 @@ if (job.target.signals.codes.length) {
   // per 2 aziende mancanti è costata 0,37 $ e non ha dato lead. Se mancano lead, il giro
   // successivo la usa comunque.
   const bastaRiserva = job.reserve.length >= Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2 : 1.4));
-  const daCercare = bastaRiserva ? 0 : Math.max(0, job.limits.referenti_max - job.reserve.length);
+  // Annuncio di lavoro decisivo: solo aziende del database (collaudi del 14/10: la ricerca
+  // AI di aziende con annunci, 3 tentativi per ~0,9 $, non ha dato un solo lead).
+  const soloDatabase = conAnnunci && (job.target.signals.codes.length === 1 || job.target.signals.match === 'all');
+  const daCercare = bastaRiserva || soloDatabase ? 0 : Math.max(0, job.limits.referenti_max - job.reserve.length);
   lotti = daCercare === 0 ? 0 : Math.min(job.limits.max_lots, Math.max(1, Math.ceil(daCercare / Math.max(quota, 0.1) / job.limits.candidates_per_lot)));
   job.ai = { ...AI, max_searches: 8 };
 } else {

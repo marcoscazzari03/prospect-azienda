@@ -81,6 +81,14 @@ export function buildEnginePayload(args: {
   };
 }
 
+// Ricerche in cui l'annuncio di lavoro decide (da solo, o con «servono tutti»): solo
+// aziende del database con annuncio raccolto dalle API. Collaudi del 14/10: la ricerca
+// AI di aziende con annunci ha fatto 3 tentativi (~0,9 $) senza un solo lead.
+export function jobAdFromDatabaseOnly(target: SearchTarget) {
+  const codes = target.signals?.codes ?? [];
+  return codes.includes("job_ad") && (codes.length === 1 || target.signals?.match === "all");
+}
+
 export type ApplyResult = {
   ok: boolean;
   reason?: string;

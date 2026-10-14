@@ -5,6 +5,7 @@ import { SEARCH_RULES } from "@/lib/config";
 import {
   buildEnginePayload,
   enrichmentSearchBudget,
+  jobAdFromDatabaseOnly,
   maxAttemptsFor,
   nextStep,
   type ApplyResult,
@@ -142,13 +143,7 @@ export async function dispatchRun(searchId: string) {
   const webhook = env.engineWebhookUrl();
   if (!webhook) return finalizeSearch(searchId, "Motore di ricerca non configurato");
 
-  const token = randomToken();
-  const { data: run, error } = await db
-    .rpc("start_run", { p_search: searchId, p_token_hash: sha256Hex(token), p_requested: remaining })
-    .single();
-  if (error || !run) return finalizeSearch(searchId, "Impossibile avviare il giro di ricerca");
-  const runId = (run as { id: string }).id;
-
+  // Prima il database: esclusioni, memoria dei giri e aziende con prova recente.
   const [exclusions, enrichmentBudget, memory] = await Promise.all([
     loadExclusions(search.org_id, search.contacts_per_company),
     loadEnrichmentBudget(search),
@@ -156,6 +151,23 @@ export async function dispatchRun(searchId: string) {
   ]);
   exclusions.domains = [...new Set([...memory.checked, ...exclusions.domains])];
   const fromDatabase = await loadDatabaseReserve(search, exclusions.domains, memory.reserve);
+  const reserve = [...memory.reserve, ...fromDatabase];
+  // Annunci di lavoro: solo aziende del database (la ricerca AI non trovava annunci
+  // verificabili). Finite le aziende, la ricerca si chiude e i crediti tornano.
+  if (jobAdFromDatabaseOnly(search.target) && !reserve.length) {
+    return finalizeSearch(
+      searchId,
+      search.delivered > 0 ? undefined : "Per ora nessuna azienda con un annuncio recente in questa zona: crediti restituiti",
+    );
+  }
+
+  const token = randomToken();
+  const { data: run, error } = await db
+    .rpc("start_run", { p_search: searchId, p_token_hash: sha256Hex(token), p_requested: remaining })
+    .single();
+  if (error || !run) return finalizeSearch(searchId, "Impossibile avviare il giro di ricerca");
+  const runId = (run as { id: string }).id;
+
   const payload = buildEnginePayload({
     search,
     plan,
@@ -164,7 +176,7 @@ export async function dispatchRun(searchId: string) {
     callbackUrl: `${env.appUrl()}/api/engine/callback`,
     exclusions,
     enrichmentBudget,
-    reserve: [...memory.reserve, ...fromDatabase],
+    reserve,
   });
   // Il tetto concesso a questo giro conta subito nel budget del mese.
   await db.from("search_runs").update({ enrichment_cap: payload.limits.enrichment_cap }).eq("id", runId);
