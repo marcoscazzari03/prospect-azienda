@@ -76,6 +76,7 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Nuova grafica del wizard «Nuova ricerca» (esempi di settore, paesi con bandiere, filtri avanzati chiusi, riepilogo con icone); nessuna dimensione preselezionata (con la dimensione la ricerca in target non usa il database); suggerimenti del settore dai settori del database (migrazione 030, `industry_suggestions`)
 - [x] Nuova pagina Ricerche: schede di sintesi (totali, completate, lead, crediti), ricerca per nome o zona, filtri per tipo, stato e periodo, colonna Tipo, zona sotto il nome, stati con icona, menu con Ripeti / Esporta CSV / Ferma la ripetizione. Confronti con il mese scorso rimandati a quando ci saranno almeno due mesi di dati
 - [x] Settori bloccati nel wizard e sul server (attività per adulti, gioco d'azzardo, armi, droghe): `src/lib/domain/blocked-sectors.ts`
+- [ ] Collaudo del 15/10: misurare quanti lead nominativi arrivano da Icypeas rispetto al sito (se pochi, piano Icypeas più piccolo). MillionVerifier da attivare con la beta solo se i rimbalzi segnalati superano 2-3 ogni 100 lead
 - [ ] Più avanti: servizi «Sito nuovo» (segnale «in costruzione») e «Prenotazioni online per hotel» (nessun booking engine, solo strutture ricettive), entrambi solo dal database; serve rendere decisivi i due segnali solo per quei servizi
 - [ ] OSM: citare la fonte («© OpenStreetMap contributors», licenza ODbL) nell'informativa / pagina fonti
 - [ ] Ricontrollo gratuito delle persone del magazzino ogni 90 giorni (il nome è ancora sul sito?)
