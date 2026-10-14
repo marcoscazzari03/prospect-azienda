@@ -253,6 +253,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"job_ads": {
+                  Row: {
+                    "city": string,"company_id": string | null,"company_key": string,"company_name": string,"contract": string,"country": string,"description": string,"external_id": string,"family": string,"first_seen_at": string,"id": string,"last_seen_at": string,"posted_at": string,"region": string,"source": string,"title": string,"url": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "city"?: string,"company_id"?: string | null,"company_key": string,"company_name": string,"contract"?: string,"country"?: string,"description"?: string,"external_id": string,"family": string,"first_seen_at"?: string,"id"?: string,"last_seen_at"?: string,"posted_at": string,"region"?: string,"source": string,"title": string,"url": string
+                  }
+                  Update: {
+                    "city"?: string,"company_id"?: string | null,"company_key"?: string,"company_name"?: string,"contract"?: string,"country"?: string,"description"?: string,"external_id"?: string,"family"?: string,"first_seen_at"?: string,"id"?: string,"last_seen_at"?: string,"posted_at"?: string,"region"?: string,"source"?: string,"title"?: string,"url"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "job_ads_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"lead_list_items": {
                   Row: {
                     "added_at": string,"delivery_id": string,"list_id": string
@@ -686,6 +706,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"company_name_key":
+{ Args: { "p_name": string }; Returns: string
+                           },
 "create_search":
 { Args: { "p_contacts_per_company"?: number,"p_mode": string,"p_name": string,"p_org": string,"p_quantity": number,"p_target": Json,"p_user": string }; Returns: {
               "attempts": number,
@@ -872,6 +895,9 @@ isOneToOne: false
                            },
 "store_company_checks":
 { Args: { "p_items": Json,"p_origin": string,"p_target": Json }; Returns: number
+                           },
+"store_job_ads":
+{ Args: { "p_ads": Json,"p_source": string }; Returns: Json
                            },
 "tag_company":
 { Args: { "p_company": string,"p_target": Json }; Returns: undefined

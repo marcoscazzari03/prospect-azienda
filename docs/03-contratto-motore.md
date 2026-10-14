@@ -173,3 +173,19 @@ fanno sulla homepage già scaricata per le email (nodo «Controlli tecnici sito�
 
 Watchdog: un cron ogni 5 minuti marca `failed` i run senza eventi da oltre 30 minuti e rilascia
 i crediti riservati; il cliente riceve una notifica.
+
+## Annunci di lavoro (`POST /api/engine/job-ads`)
+
+Workflow n8n «Annunci | Raccolta Adzuna» (sorgenti in `n8n/annunci/`, generato da `build.mjs`).
+Stesso segreto del callback (`x-engine-secret`). Corpo:
+
+```json
+{ "source": "adzuna", "ads": [{ "external_id": "123", "family": "it_systems", "title": "Sistemista",
+  "company_name": "Meccanica Emiliana Srl", "country": "IT", "region": "Emilia-Romagna", "city": "Modena",
+  "posted_at": "2026-10-12T08:00:00Z", "url": "https://www.adzuna.it/land/ad/123", "description": "…", "contract": "permanent full_time" }] }
+```
+
+Massimo 2.000 annunci per chiamata. `store_job_ads` scarta gli annunci senza link https, data o
+nome azienda, aggiorna `last_seen_at` di quelli già visti, collega l'annuncio all'azienda del
+database quando il nome normalizzato (`company_name_key`) corrisponde a una sola azienda e cancella
+gli annunci più vecchi di 180 giorni. Risposta: `{ ok, received, saved, new, linked, deleted }`.

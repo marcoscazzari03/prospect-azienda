@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:sql": "supabase/tests/run.sh",
-    "test:engine": "node n8n/engine/test/run.mjs",
+    "test:engine": "node n8n/engine/test/run.mjs && node n8n/annunci/test/run.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "db:types": "npx --yes supabase@2.120.0 gen types typescript --db-url \"$DATABASE_URL\" --schema public > src/lib/supabase/database.types.ts"
   },
