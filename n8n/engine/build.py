@@ -348,7 +348,7 @@ add("""const riunisciHttps = merge({
   config: { name: 'Riunisci controllo HTTPS', parameters: { mode: 'append', numberInputs: 2 } }
 });
 """)
-add(code("valutaSito", "Valuta segnali sito", js("14-valuta-segnali-sito.js", __CMS_RELEASES__=CMS_RELEASES), mode="runOnceForEachItem",
+add(code("valutaSito", "Valuta segnali sito", js("14-valuta-segnali-sito.js", __CMS_RELEASES__=CMS_RELEASES, __MODO__="DECIDI"), mode="runOnceForEachItem",
          output="{ company_name: 'Acme Srl', signals: [], technologies: ['wordpress'] }"))
 add(if_node("segnaliSitoOk", "Segnali sito ok?", "{{ $json._scarto_segnale ?? '' }}", "string", "empty"))
 add("""const riunisciSegnali = merge({
@@ -398,6 +398,9 @@ add(http_page("homepage", "HTTP - Homepage", "{{ $json.website }}"))
 add(code("estraiHome", "Estrai email homepage",
          estrai("HOMEPAGE", "Referente ok?", "$('Referente ok?').item.json.website"),
          mode="runOnceForEachItem", output="{ email_site: 'info@acme.it', email_site_type: 'generic', page_1: 'https://acme.it/contatti', page_2: '' }"))
+# Ricerca in target: controlli tecnici gratuiti sulla homepage già scaricata, salvati nel database.
+add(code("controlliTecnici", "Controlli tecnici sito", js("14-valuta-segnali-sito.js", __CMS_RELEASES__=CMS_RELEASES, __MODO__="SCANSIONA"),
+         mode="runOnceForEachItem", output="{ company_name: 'Acme Srl', signals: [], technologies: ['wordpress'] }"))
 add(if_node("servePagina2", "Serve pagina 2?", "{{ $json.page_1 }}", "string", "notEmpty"))
 add(http_page("pagina2", "HTTP - Pagina 2", "{{ $json.page_1 }}"))
 add(code("estraiP2", "Estrai email pagina 2",
@@ -571,6 +574,7 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
     .onFalse(riunisciEsiti.input(4)))
   .add(homepage)
   .to(estraiHome)
+  .to(controlliTecnici)
   .to(servePagina2
     .onTrue(pagina2)
     .onFalse(riunisciEmail.input(0)))
@@ -601,7 +605,7 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, """ + RICERCA_GROUP + """, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
   .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk, serveControlloSito, sitoSegnali, serveHttps, controlloHttps, riunisciHttps, valutaSito, segnaliSitoOk, riunisciSegnali], { description: 'Annuncio di lavoro verificato e segnali controllati sul sito PRIMA di cercare il referente.' })
   .group('2c - Referente', [scegliRef, serveReferente, servePaginaRef, paginaRef, riunisciPaginaRef, preparaRefSito, refSitoPossibile, claudeRefSito, esitoRefSito, serveRefWeb, riunisciRefWeb, preparaRef, claudeRef, esitoRef, riunisciRef, referenteOk], { description: 'Referente solo per chi ha il segnale, entro un tetto: prima dal testo del sito, poi con la ricerca web.' })
-  .group('3 - Email dal sito', [homepage, estraiHome, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
+  .group('3 - Email dal sito', [homepage, estraiHome, controlliTecnici, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
   .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })
   .group('5 - Consegna', [classifica, inviaRisultati], { description: 'Classifica per modalita email, calcola qualita e invia i risultati al backend con retry.' });
 """)

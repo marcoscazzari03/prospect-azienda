@@ -35,17 +35,37 @@ export type Database = {
                   ]
                 },"companies": {
                   Row: {
-                    "city": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"last_verified_at": string,"name": string,"places": (string)[],"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
+                    "city": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"last_verified_at": string,"name": string,"origin": string,"places": (string)[],"site_checked_at": string | null,"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name": string,"places"?: (string)[],"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
+                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name": string,"origin"?: string,"places"?: (string)[],"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
                   }
                   Update: {
-                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name"?: string,"places"?: (string)[],"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
+                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name"?: string,"origin"?: string,"places"?: (string)[],"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
                   }
                   Relationships: [
                     
+                  ]
+                },"company_checks": {
+                  Row: {
+                    "checked_at": string,"code": string,"company_id": string,"detail": string,"evidence": NonNullable<Json>,"source": string,"status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "checked_at"?: string,"code": string,"company_id": string,"detail"?: string,"evidence"?: NonNullable<Json>,"source"?: string,"status": string
+                  }
+                  Update: {
+                    "checked_at"?: string,"code"?: string,"company_id"?: string,"detail"?: string,"evidence"?: NonNullable<Json>,"source"?: string,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "company_checks_company_id_fkey"
+      columns: ["company_id"]
+isOneToOne: false
+      referencedRelation: "companies"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"company_signals": {
                   Row: {
@@ -772,6 +792,9 @@ isOneToOne: false
 "purge_suppressed":
 { Args: { "p_domain_hash": string,"p_email_hash": string }; Returns: number
                            },
+"record_company_checks":
+{ Args: { "p_items": Json,"p_run": string,"p_token_hash": string }; Returns: number
+                           },
 "record_engine_progress":
 { Args: { "p_counters": Json,"p_message": string,"p_run": string,"p_stage": string,"p_token_hash": string }; Returns: boolean
                            },
@@ -816,6 +839,9 @@ isOneToOne: false
 "signals_satisfy":
 { Args: { "p_passed": (string)[],"p_target": Json }; Returns: boolean
                            },
+"site_check_codes":
+{ Args: Record<PropertyKey, never>; Returns: (string)[]
+                           },
 "start_run":
 { Args: { "p_requested": number,"p_search": string,"p_token_hash": string }; Returns: {
               "attempt": number,
@@ -843,6 +869,9 @@ isOneToOne: false
 { Args: { "p_lead": Json,"p_target": Json }; Returns: {
               "company_id": string,"email_id": string,"person_id": string
             }[]
+                           },
+"store_company_checks":
+{ Args: { "p_items": Json,"p_origin": string,"p_target": Json }; Returns: number
                            },
 "tag_company":
 { Args: { "p_company": string,"p_target": Json }; Returns: undefined

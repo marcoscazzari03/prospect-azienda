@@ -4,20 +4,28 @@
 // e la pagina «chi siamo» per cercare il referente sul sito. Ogni segnale ha un esito:
 //   pass -> presente (con la prova), fail -> assente, undetermined -> non dimostrabile.
 // "Non determinabile" non conta mai come superato.
+// Modo DECIDI (ricerca opportunità): controlla i segnali richiesti e scarta chi non li ha.
+// Modo SCANSIONA (ricerca in target): sulla homepage già scaricata per le email fa TUTTI
+// i controlli (tranne HTTPS, che richiede un'altra chiamata) e non scarta nessuno: gli
+// esiti finiscono nel database delle aziende, riusabili dalle ricerche opportunità.
+const MODO = '__MODO__';
+const SCANSIONE = MODO === 'SCANSIONA';
 const job = $('Valida richiesta').first().json;
-const base = $('Serve controllo sito?').item.json;
+const base = SCANSIONE ? $('Estrai email homepage').item.json : $('Serve controllo sito?').item.json;
 const sg = job.target.signals;
 const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
 const DECISIVI = ['job_ad', 'no_https', 'no_mobile', 'outdated_cms', 'single_language']; // gli indicativi non decidono mai
-const richiesti = base._riserva ? [] : sg.codes.filter(c => SITO.includes(c));
+// In una ricerca opportunità i controlli sono già stati fatti prima del referente.
+if (SCANSIONE && sg.codes.length) return { json: base };
+const richiesti = SCANSIONE ? SITO.filter(c => c !== 'no_https') : base._riserva ? [] : sg.codes.filter(c => SITO.includes(c));
 
-const html = String($('HTTP - Sito (segnali)').item.json.html ?? '');
+const html = String((SCANSIONE ? $('HTTP - Homepage') : $('HTTP - Sito (segnali)')).item.json.html ?? '');
 const testo = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<noscript[\s\S]*?<\/noscript>/gi, ' ')
   .replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&#160;/gi, ' ').replace(/&copy;|&#169;/gi, '©').replace(/\s+/g, ' ').trim();
 
 // Per il referente: testo della homepage e la pagina più adatta (chi siamo, team, note legali, contatti).
 let paginaReferente = '';
-if (base._serve_referente) {
+if (base._serve_referente && !SCANSIONE) {
   const dom = String(base.domain || '');
   const origine = (String(base.website).match(/^(https?:\/\/[^\/?#]+)/i) || [])[1] || '';
   const assoluto = (h) => /^https?:\/\//i.test(h) ? h : h.startsWith('//') ? 'https:' + h : h.startsWith('/') ? origine + h : origine + '/' + h.replace(/^\.\//, '');
@@ -30,7 +38,7 @@ if (base._serve_referente) {
   for (const re of PRIORITA) { paginaReferente = link.find(u => re.test(u)) || ''; if (paginaReferente) break; }
   if (!paginaReferente && base.contact_page) paginaReferente = base.contact_page;
 }
-const aux = base._serve_referente ? { _testo_home: testo.slice(0, 6000), _pagina_referente: paginaReferente } : {};
+const aux = base._serve_referente && !SCANSIONE ? { _testo_home: testo.slice(0, 6000), _pagina_referente: paginaReferente } : {};
 const p = { ...base, ...aux };
 if (!richiesti.length) return { json: p };
 const leggibile = html.length > 200 && /<html|<body|<head/i.test(html);
@@ -143,6 +151,8 @@ if (richiesti.includes('no_https')) {
 
 const segnali = [...(Array.isArray(p.signals) ? p.signals : []), ...Object.values(esiti)];
 const out = { ...p, signals: segnali, technologies: tecnologie };
+
+if (SCANSIONE) return { json: out };
 
 // Decisione: solo sui segnali verificati richiesti (annuncio compreso, se c'è).
 const decisivi = sg.codes.filter(c => DECISIVI.includes(c));

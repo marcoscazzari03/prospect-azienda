@@ -379,5 +379,32 @@ const httpsBoh = valutaFile('site-modern.html', ['no_https'], { error: { message
 assert.equal(httpsBoh.signals[0].status, 'undetermined');
 const senzaSegnali = run(valuta, { nodes: { 'Valida richiesta': [job], 'Serve controllo sito?': [prospettoSito], 'HTTP - Sito (segnali)': [{ html: '' }] }, json: prospettoSito }).json;
 assert.deepEqual(senzaSegnali, prospettoSito, 'ricerche senza segnali: nessun cambiamento');
+
+// Ricerca in target: scansione completa della homepage già scaricata, senza scarti.
+const scansiona = src('14-valuta-segnali-sito.js', { __CMS_RELEASES__: cmsJson, __MODO__: 'SCANSIONA' });
+const jobTarget = { ...job, today: '2026-10-13' };
+const scan = run(scansiona, { nodes: { 'Valida richiesta': [jobTarget], 'Estrai email homepage': [{ ...prospettoSito, page_1: 'https://prova.it/contatti' }],
+  'HTTP - Homepage': [{ html: readFileSync(join(fx, 'site-old-wp.html'), 'utf8') }] }, json: {} }).json;
+assert.equal(scan._scarto_segnale, undefined, 'la scansione non scarta mai');
+assert.equal(scan.page_1, 'https://prova.it/contatti', 'il resto del prospect passa invariato');
+assert.deepEqual(scan.signals.map(x => x.code).sort(), SITO.filter(c => c !== 'no_https').sort(), 'tutti i controlli tranne HTTPS');
+assert.equal(scan.signals.find(x => x.code === 'outdated_cms').status, 'pass');
+assert.ok(scan.technologies.includes('wordpress'));
+const giaControllato = run(scansiona, { nodes: { 'Valida richiesta': [jobSito(['no_mobile'])], 'Estrai email homepage': [prospettoSito],
+  'HTTP - Homepage': [{ html: '' }] }, json: {} }).json;
+assert.deepEqual(giaControllato, prospettoSito, 'ricerca opportunità: controlli già fatti prima del referente');
+
+// Risultati: tutti i controlli (anche degli scartati) per il database; sul lead solo i segnali richiesti.
+const conControlli = run(classifica, { nodes: { 'Valida richiesta': [{ ...job, email_mode: 'mixed' }], 'Normalizza output AI': [{ stato_lotto: 'OK' }] }, input: [
+  { company_name: 'Lead', domain: 'lead.it', website: 'https://lead.it', full_name: 'Mario Rossi', role_match: 'exact', source_url: 'https://lead.it',
+    email_site: 'info@lead.it', email_site_type: 'generic', technologies: ['wordpress'], signals: scan.signals },
+  { company_name: 'Scartata', domain: 'scartata.it', website: 'https://scartata.it', _scarto_segnale: 'segnale_assente',
+    signals: [{ code: 'no_mobile', status: 'fail', evidence: {} }] }
+] })[0].json;
+assert.equal(conControlli.company_checks.length, 2, 'anche l azienda scartata finisce nel database');
+assert.equal(conControlli.company_checks[0].company.domain, 'lead.it');
+assert.equal(conControlli.company_checks[1].checks[0].status, 'fail');
+assert.deepEqual(conControlli.leads[0].signals, [], 'ricerca in target: nessun segnale sul lead (non richiesto né pagato)');
+console.log('ok  database aziende: scansione in target, controlli di tutte le aziende nei risultati');
 console.log('ok  segnali dal sito: viewport, CMS, lingue, copyright, costruzione, booking, HTTPS, decisione');
 console.log('\nTutti i test superati.');

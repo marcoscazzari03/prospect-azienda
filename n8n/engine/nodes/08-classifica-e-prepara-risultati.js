@@ -27,6 +27,11 @@ const pattern = (p) => {
 
 const leads = [];
 const rejected = [];
+// Database delle aziende: esito di ogni controllo tecnico sul sito (positivo, negativo,
+// non determinabile) di TUTTE le aziende controllate, anche quelle scartate.
+const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
+const companyChecks = [];
+const richiesti = job.target.signals.codes;
 let lookups = 0;
 let pagine = 0;
 // Consumo reale di Claude (token e ricerche web): ricerca dei candidati e referenti.
@@ -90,9 +95,13 @@ for (const p of prospects) {
     },
     sources: { discovery_url: p.source_url, contact_page: p.contact_page || '' },
     keys: { person_key: p.person_key, company_key: p.company_key },
-    // Segnali verificati con la loro prova (solo se la ricerca li ha richiesti).
-    signals: (Array.isArray(p.signals) ? p.signals : []).filter(s => s.status === 'pass').map(s => ({ code: s.code, evidence: s.evidence }))
+    // Segnali verificati con la loro prova (solo quelli richiesti dalla ricerca).
+    signals: (Array.isArray(p.signals) ? p.signals : []).filter(s => s.status === 'pass' && richiesti.includes(s.code)).map(s => ({ code: s.code, evidence: s.evidence }))
   };
+  const controlli = (Array.isArray(p.signals) ? p.signals : []).filter(s => SITO.includes(s.code) && s.status);
+  if (p.domain && (controlli.length || (Array.isArray(p.technologies) && p.technologies.length))) {
+    companyChecks.push({ company: base.company, checks: controlli.map(s => ({ code: s.code, status: s.status, evidence: s.evidence || {} })) });
+  }
 
   // Scartato per segnale mancante: nessuna ricerca email è stata fatta.
   if (p._scarto_segnale) {
@@ -163,6 +172,7 @@ return [{
     requested: job.quantity,
     leads,
     rejected,
+    company_checks: companyChecks.slice(0, 500),
     stats: {
       lots: lotti.length,
       lots_failed: lotti.filter(l => l.stato_lotto === 'ERRORE' || l.stato_lotto === 'JSON NON VALIDO').length,
@@ -177,7 +187,8 @@ return [{
       signal_discards: Object.fromEntries(Object.entries(motivi).filter(([k]) => /^(annuncio_|segnale_|referente_)/.test(k))),
       reserve_count: motivi.riserva || 0,
       from_reserve: prospects.filter(p => p._riserva).length,
-      leads_with_signals: leads.filter(l => l.signals.length).length
+      leads_with_signals: leads.filter(l => l.signals.length).length,
+      companies_checked: companyChecks.length
     },
     usage: {
       ai_search_calls: lotti.length,

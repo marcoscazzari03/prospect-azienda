@@ -44,7 +44,13 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Prova completa "solo nominative" (4/5, 3 da Icypeas) e "mista" (10/10)
 - [x] Ritocchi grafici: bianco e grigi al posto del crema, verde smeraldo più chiaro, riepilogo "Dall'ultimo accesso" in panoramica (migrazione `20261015000009_activity.sql`)
 - [x] Collaudo 14/10 (3 ricerche opportunità): costo quasi tutto nella lettura delle pagine web; ricerca in due passaggi, tetto ai referenti, riserva tra i giri, referente prima dal sito
-- [ ] Ripetere le 3 ricerche di collaudo dopo i due passaggi e confrontare lead per giro e costo per lead
+- [x] Collaudo dei due passaggi (14/10): 31 lead per 6,76 $ (0,22 $/lead); il 46% del costo per trovare aziende con l'AI (65% senza segnale), il 46% per il titolare via web
+- [x] Decisione (14/10): ricerca opportunità «database first + API first», due workflow separati (Target / Opportunità), popolamento iniziale per i segnali dal sito, prove di Adzuna e TheirStack
+- [x] Fase 1 – fondamenta: ogni azienda controllata salvata con l'esito di ogni controllo (`company_checks`, migrazione `20261027000021_company_checks.sql`); controlli tecnici gratuiti anche nella ricerca in target
+- [ ] Fase 2 – workflow «Lead Engine | Opportunità»: database → ricontrollo gratuito → referente dal sito → email → AI solo per i lead mancanti
+- [ ] Fase 3 – annunci da API: prove Adzuna e TheirStack (chiavi su n8n), accordo commerciale con Adzuna, tabella annunci, raccolta periodica
+- [ ] Fase 4 – popolamento iniziale (una regione, budget concordato) e ricontrollo notturno delle prove in scadenza
+- [ ] Fase 5 – togliere dal workflow Target i rami opportunità; prezzi definitivi sui costi misurati
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni
 - [ ] Lancio a pagamento: partita IVA, Stripe live, revisione legale
 

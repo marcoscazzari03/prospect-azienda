@@ -140,9 +140,16 @@ Il backend segna il giro come fallito (`fail_engine_run`), chiude la ricerca e r
              "leads": 31, "leads_personal": 12, "leads_generic": 19, "rejected": 15, "rejected_reasons": {…} },
   "usage": { "ai_search_calls": 4, "ai_planner_calls": 1, "enrichment_lookups": 18, "pages_fetched": 97,
              "claude_input_tokens": 41000, "claude_output_tokens": 5200, "claude_web_searches": 9 },
+  "company_checks": [{ "company": { "domain": "acme.it", "name": "Acme", "website": "https://acme.it", "technologies": ["wordpress"] },
+                      "checks": [{ "code": "outdated_cms", "status": "pass | fail | undetermined", "evidence": { "detail": "WordPress 5.2" } }] }],
   "n8n_execution_id": "12345"
 }
 ```
+
+`company_checks`: esito dei controlli tecnici di TUTTE le aziende controllate nel giro (anche
+scartate). Il backend li salva nel database delle aziende (`company_checks`, `record_company_checks`)
+prima della consegna; un errore qui non blocca la consegna. Nella ricerca in target i controlli si
+fanno sulla homepage già scaricata per le email (nodo «Controlli tecnici sito», nessuno scarto).
 
 ## Cosa fa il backend alla ricezione di `results`
 

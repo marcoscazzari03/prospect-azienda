@@ -89,6 +89,19 @@ export async function POST(request: Request) {
     payload.stats = { ...payload.stats, mailbox_rejected: rejected, mailbox_checked: checked.results.size };
   }
 
+  // Database delle aziende: esito dei controlli tecnici di tutte le aziende viste nel giro,
+  // anche di quelle scartate. Un errore qui non deve bloccare la consegna dei lead.
+  const companyChecks = (body as { company_checks?: unknown }).company_checks;
+  if (Array.isArray(companyChecks) && companyChecks.length) {
+    const { error: checksError } = await db.rpc("record_company_checks", {
+      p_run: evt.run_id,
+      p_token_hash: tokenHash,
+      p_items: companyChecks.slice(0, 500) as Json,
+    });
+    if (checksError) console.error("record_company_checks", checksError);
+    delete (payload as { company_checks?: unknown }).company_checks;
+  }
+
   const { data, error } = await db.rpc("apply_engine_results", {
     p_run: evt.run_id,
     p_token_hash: tokenHash,
