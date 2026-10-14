@@ -185,3 +185,35 @@ const [yepponLiv2] = run(scegliSito(2), {
 });
 assert.equal(yepponLiv2.results[0].domain, '', 'livello 2 (domini indovinati): resta severo');
 console.log('Test siti aziende superati.');
+
+// 7. Settore: homepage -> lotti per Claude Haiku -> esiti.
+const homepage = (titolo, descrizione, corpo) => ({ html: `<html><head><title>${titolo}</title><meta name="description" content="${descrizione}"></head>`
+  + `<body><nav>Home Chi siamo Contatti</nav><h1>${titolo}</h1><p>${corpo}</p>${' '.repeat(500)}</body></html>` });
+const daLeggere = Array.from({ length: 23 }, (_, i) => ({ company_id: `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`, company_name: `Azienda ${i}`, url: `https://a${i}.it` }));
+const pagineSettore = daLeggere.map((_, i) => i === 5 ? { error: { code: 'ECONNREFUSED' } }
+  : homepage(`Azienda ${i} - Macchine per il packaging`, 'Progettiamo e costruiamo macchine automatiche &amp; linee di confezionamento', 'Dal 1975 al servizio dell\'industria alimentare.'));
+const lottiSettore = run(codice('07-prepara-settore.js'), { nodes: { 'Homepage da leggere': daLeggere }, input: pagineSettore });
+assert.equal(lottiSettore.length, 2, 'lotti da 20');
+assert.equal(lottiSettore[0].aziende.length, 20);
+assert.deepEqual(lottiSettore[0].senza_testo, [daLeggere[5].company_id], 'homepage illeggibile');
+assert.deepEqual(lottiSettore[1].senza_testo, []);
+const promptSettore = lottiSettore[0]._claude.messages[0].content;
+assert.ok(lottiSettore[0]._claude.model.includes('haiku') && !lottiSettore[0]._claude.tools, 'Haiku senza ricerca web');
+assert.ok(promptSettore.includes('### 1. Azienda 0') && promptSettore.includes('macchine automatiche & linee') && !promptSettore.includes('Chi siamo'));
+const rispostaSettore = (elenco) => ({ content: [{ type: 'text', text: JSON.stringify({ aziende: elenco }) }], usage: { input_tokens: 5000, output_tokens: 900 } });
+const [esitoSettore] = run(codice('08-esito-settore.js'), {
+  nodes: { 'Prepara settore': lottiSettore },
+  input: [
+    rispostaSettore([{ n: 1, industry: ' Produzione di macchine per il packaging ', keywords: ['Manifattura', 'packaging', 'packaging', ''] },
+      { n: 2, industry: '', keywords: ['x'] }]),
+    { error: { message: 'overloaded' } }
+  ]
+});
+assert.deepEqual(esitoSettore.results.slice(0, 3), [
+  { company_id: daLeggere[5].company_id, industry: '', keywords: [] },
+  { company_id: daLeggere[0].company_id, industry: 'Produzione di macchine per il packaging', keywords: ['manifattura', 'packaging'] },
+  { company_id: daLeggere[1].company_id, industry: '', keywords: [] }
+]);
+assert.equal(esitoSettore.results.length, 3, 'risposte mancanti: nessun salvataggio, si riprova');
+assert.deepEqual([esitoSettore.stats.classified, esitoSettore.stats.unknown, esitoSettore.stats.failed], [1, 2, 20]);
+console.log('Test settore aziende superati.');

@@ -2,7 +2,7 @@
 // I Code node vivono in nodes/*.js (testati da test/run.mjs); le figure da cercare
 // vengono dal catalogo del sito (src/lib/domain/signals.ts, JOB_FAMILIES): una sola
 // fonte di verità per motore, sito e raccolta annunci.
-// Uso: node n8n/annunci/build.mjs  ->  n8n/annunci/workflow.sdk.ts e siti.sdk.ts
+// Uso: node n8n/annunci/build.mjs  ->  n8n/annunci/workflow.sdk.ts, siti.sdk.ts e settore.sdk.ts
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -398,8 +398,174 @@ export default workflow('annunci-siti', 'Annunci | Siti aziende', {
   .to(aziende);
 `;
 
+const settore = `import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
+
+// GENERATO da n8n/annunci/build.mjs: non modificare a mano.
+// Settore delle aziende degli annunci: legge la homepage delle aziende ancora senza
+// settore e la fa classificare a Claude Haiku (settore e parole chiave in italiano), così
+// escono anche nelle ricerche con un settore. Esiti in companies (industry, tags).
+
+const ogniDueOre = trigger({
+  type: 'n8n-nodes-base.scheduleTrigger',
+  version: 1.3,
+  config: {
+    name: 'Ogni 2 ore',
+    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 2, triggerAtMinute: 10 }] } }
+  }
+});
+
+const aMano = trigger({
+  type: 'n8n-nodes-base.manualTrigger',
+  version: 1,
+  config: { name: 'A mano' }
+});
+
+const aziende = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Aziende senza settore',
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
+    parameters: {
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=40',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      options: { timeout: 30000 }
+    },
+    credentials: { httpHeaderAuth: ${CALLBACK} }
+  },
+  output: [{ companies: [{ company_id: '00000000-0000-4000-8000-000000000000', company_name: 'Var Group', website: 'https://vargroup.it', city: 'Bologna', ads: 2 }] }]
+});
+
+const daLeggere = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Homepage da leggere',
+    parameters: { jsCode: "return ($input.first().json.companies || []).map(c => ({ json: { company_id: c.company_id, company_name: c.company_name, url: c.website } }));" }
+  },
+  output: [{ company_id: '00000000-0000-4000-8000-000000000000', company_name: 'Var Group', url: 'https://vargroup.it' }]
+});
+
+const apri = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Apri homepage',
+    parameters: {
+      url: expr('{{ $json.url }}'),
+      sendHeaders: true,
+      headerParameters: { parameters: [
+        { name: 'User-Agent', value: '${UA}' },
+        { name: 'Accept', value: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
+        { name: 'Accept-Language', value: 'it,en;q=0.8' }
+      ] },
+      options: {
+        batching: { batch: { batchSize: 2, batchInterval: 500 } },
+        redirect: { redirect: { followRedirects: true, maxRedirects: 5 } },
+        response: { response: { neverError: true, responseFormat: 'text', outputPropertyName: 'html' } },
+        allowUnauthorizedCerts: true,
+        timeout: 10000
+      }
+    },
+    onError: 'continueRegularOutput'
+  },
+  output: [{ html: '<html></html>' }]
+});
+
+const prepara = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Prepara settore',
+    parameters: { jsCode: ${JSON.stringify(codice('07-prepara-settore.js'))} }
+  },
+  output: [{ aziende: [], senza_testo: [], _claude: {} }]
+});
+
+const claude = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'HTTP - Claude settore',
+    onError: 'continueRegularOutput',
+    parameters: {
+      method: 'POST',
+      url: 'https://api.anthropic.com/v1/messages',
+      authentication: 'predefinedCredentialType',
+      nodeCredentialType: 'anthropicApi',
+      sendHeaders: true,
+      headerParameters: { parameters: [{ name: 'anthropic-version', value: '2023-06-01' }] },
+      sendBody: true,
+      specifyBody: 'json',
+      jsonBody: expr('{{ JSON.stringify($json._claude) }}'),
+      options: {
+        batching: { batch: { batchSize: 1, batchInterval: 1000 } },
+        response: { response: { neverError: true } },
+        timeout: 120000
+      }
+    },
+    credentials: { anthropicApi: ${ANTHROPIC} }
+  },
+  output: [{ content: [], usage: {} }]
+});
+
+const esito = node({
+  type: 'n8n-nodes-base.code',
+  version: 2,
+  config: {
+    name: 'Esito settore',
+    parameters: { jsCode: ${JSON.stringify(codice('08-esito-settore.js'))} }
+  },
+  output: [{ results: [], stats: {} }]
+});
+
+const salva = node({
+  type: 'n8n-nodes-base.httpRequest',
+  version: 4.5,
+  config: {
+    name: 'Salva settori',
+    retryOnFail: true,
+    maxTries: 3,
+    waitBetweenTries: 5000,
+    parameters: {
+      method: 'POST',
+      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries',
+      authentication: 'genericCredentialType',
+      genericAuthType: 'httpHeaderAuth',
+      sendBody: true,
+      contentType: 'json',
+      specifyBody: 'json',
+      jsonBody: expr('{{ JSON.stringify({ results: $json.results }) }}'),
+      options: { timeout: 60000 }
+    },
+    credentials: { httpHeaderAuth: ${CALLBACK} }
+  },
+  output: [{ ok: true, classified: 0, unknown: 0 }]
+});
+
+export default workflow('annunci-settore', 'Annunci | Settore aziende', {
+  timezone: 'Europe/Rome',
+  errorWorkflow: '${ERRORI}',
+  executionOrder: 'v1'
+})
+  .add(ogniDueOre)
+  .to(aziende)
+  .to(daLeggere)
+  .to(apri)
+  .to(prepara)
+  .to(claude)
+  .to(esito)
+  .to(salva)
+  .add(aMano)
+  .to(aziende);
+`;
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   writeFileSync(join(dir, 'workflow.sdk.ts'), sdk);
   writeFileSync(join(dir, 'siti.sdk.ts'), siti);
-  console.log('workflow.sdk.ts e siti.sdk.ts generati');
+  writeFileSync(join(dir, 'settore.sdk.ts'), settore);
+  console.log('workflow.sdk.ts, siti.sdk.ts e settore.sdk.ts generati');
 }

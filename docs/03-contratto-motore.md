@@ -200,6 +200,18 @@ Workflow n8n «Annunci | Siti aziende» (generato da `n8n/annunci/build.mjs` in 
   `{ ok, found, not_found, linked_ads }`. Le trovate entrano in `companies` (origine `adzuna`, paese Italia)
   e i loro annunci vengono collegati; ogni esito resta in `company_resolutions`.
 
+## Settore delle aziende degli annunci (`/api/engine/job-ads/industries`)
+
+Workflow n8n «Annunci | Settore aziende» (generato da `n8n/annunci/build.mjs` in `settore.sdk.ts`), stesso
+segreto. Ogni 2 ore legge la homepage di 40 aziende e la fa classificare a Claude Haiku a lotti di 20
+(senza ricerca web, circa 0,1 centesimi per azienda).
+
+- `GET ?limit=40` → `{ companies: [{ company_id, company_name, website, city, ads }] }`: aziende con annunci
+  e senza settore, mai classificate o non classificabili da più di 60 giorni, le più attive per prime.
+- `POST { results: [{ company_id, industry, keywords }] }` (industry vuoto = non classificabile) →
+  `{ ok, classified, unknown }`. Il settore va in `companies.industry` (se vuoto), settore e parole chiave
+  nelle etichette `tags` usate da magazzino e riserva.
+
 ## Riserva dal database (ricerche opportunità)
 
 Per le ricerche con segnali il backend aggiunge alla `reserve` del payload (dopo quella dei giri

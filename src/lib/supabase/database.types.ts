@@ -35,14 +35,14 @@ export type Database = {
                   ]
                 },"companies": {
                   Row: {
-                    "city": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"last_verified_at": string,"name": string,"origin": string,"places": (string)[],"site_checked_at": string | null,"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
+                    "city": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"industry_checked_at": string | null,"last_verified_at": string,"name": string,"origin": string,"places": (string)[],"site_checked_at": string | null,"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name": string,"origin"?: string,"places"?: (string)[],"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
+                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name": string,"origin"?: string,"places"?: (string)[],"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
                   }
                   Update: {
-                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"last_verified_at"?: string,"name"?: string,"origin"?: string,"places"?: (string)[],"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
+                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name"?: string,"origin"?: string,"places"?: (string)[],"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
                   }
                   Relationships: [
                     
@@ -831,6 +831,11 @@ isOneToOne: false
               "ads": number,"city": string,"company_key": string,"company_name": string
             }[]
                            },
+"pending_industry_companies":
+{ Args: { "p_limit": number }; Returns: {
+              "ads": number,"city": string,"company_id": string,"company_name": string,"website": string
+            }[]
+                           },
 "purge_stale_warehouse":
 { Args: { "p_months"?: number }; Returns: Json
                            },
@@ -917,6 +922,9 @@ isOneToOne: false
                            },
 "store_company_checks":
 { Args: { "p_items": Json,"p_origin": string,"p_target": Json }; Returns: number
+                           },
+"store_company_industries":
+{ Args: { "p_items": Json }; Returns: Json
                            },
 "store_company_resolutions":
 { Args: { "p_items": Json }; Returns: Json
