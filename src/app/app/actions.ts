@@ -130,6 +130,22 @@ export async function searchAvailability(form: FormData): Promise<Availability> 
   return { count: data ?? 0, databaseOnly: jobAdFromDatabaseOnly(target), kind: opportunity ? "opportunity" : "target" };
 }
 
+export type IndustrySuggestion = { industry: string; companies: number };
+
+// Wizard: settori presenti nel database (aziende con il sito controllato di recente) che
+// contengono il testo scritto, così il cliente sceglie parole che il database riconosce.
+export async function industrySuggestions(query: string): Promise<IndustrySuggestion[]> {
+  await requireViewer();
+  const q = String(query ?? "").trim().slice(0, 80);
+  if (q.length < 2) return [];
+  const { data, error } = await createAdminClient().rpc("industry_suggestions", { p_query: q, p_limit: 6 });
+  if (error) {
+    console.error("industry_suggestions", error.message);
+    return [];
+  }
+  return (data ?? []).map((r) => ({ industry: r.industry, companies: r.companies }));
+}
+
 const reportSchema = z.object({
   deliveryId: z.string().uuid(),
   reason: z.enum(["bounce", "wrong_role", "company_closed", "out_of_target", "duplicate", "wrong_signal", "other"]),

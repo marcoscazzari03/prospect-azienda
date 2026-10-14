@@ -808,6 +808,11 @@ isOneToOne: false
 "grant_credits":
 { Args: { "p_actor"?: string,"p_delta": number,"p_description": string,"p_expires_at"?: string,"p_external_ref"?: string,"p_kind": string,"p_org": string }; Returns: boolean
                            },
+"industry_suggestions":
+{ Args: { "p_limit"?: number,"p_query": string }; Returns: {
+              "companies": number,"industry": string
+            }[]
+                           },
 "is_org_member":
 { Args: { "p_org": string }; Returns: boolean
                            },

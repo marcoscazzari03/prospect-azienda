@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Button, Card, Field, Input, Select, Textarea, cx } from "@/components/ui";
 import { COMPANY_SIZES, COUNTRIES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
 import { estimateCredits } from "@/lib/domain/pricing";
@@ -16,7 +16,7 @@ import {
   type OfferArea,
   type SignalPrices,
 } from "@/lib/domain/signals";
-import { createSearch, searchAvailability, type ActionState, type Availability } from "../../actions";
+import { createSearch, industrySuggestions, searchAvailability, type ActionState, type Availability, type IndustrySuggestion } from "../../actions";
 
 export type WizardDefaults = {
   name?: string;
@@ -43,23 +43,91 @@ const STEPS = {
   opportunity: [["offer", "Cosa vendi"], ["target", "In quali aziende"], ["roles", "Chi contattare"], ["email", "Che email"], ["quantity", "Quanti"]],
 } as const;
 
-const KINDS: { kind: SearchKind; title: string; text: string; example: string }[] = [
+const KINDS: { kind: SearchKind; title: string; text: string; example: string; icon: keyof typeof ICONS }[] = [
   {
     kind: "standard",
     title: "Trova aziende in target",
     text: "Aziende e decisori in base a settore, zona e ruolo.",
     example: "Es. titolari di studi dentistici in Lombardia",
+    icon: "target",
   },
   {
     kind: "opportunity",
     title: "Trova aziende con opportunità",
     text: "Parti da quello che vendi: aziende con un segnale concreto legato al tuo servizio, con la prova.",
     example: "Es. aziende che assumono un sistemista, siti con software vecchio",
+    icon: "bars",
   },
 ];
 
-const AREA_PATHS: Record<OfferArea["icon"], string> = {
+// Esempi rapidi sotto il settore: riempiono il campo con parole che il database riconosce.
+const POPULAR_INDUSTRIES = ["Software house", "Agenzie di marketing", "Studi dentistici", "Studi legali", "Aziende manifatturiere"];
+
+// Paesi sempre visibili (gli altri sotto «Altri paesi»).
+const MAIN_COUNTRIES = ["IT", "ES", "FR", "DE", "CH"] as const;
+
+const ICONS = {
+  target: "M10 17.5a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15zM10 13.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM10 10.5a.5.5 0 1 0 0-1M10 10l5.5-5.5M13.5 4.5h2v2",
+  bars: "M4 16.5V11M8 16.5V6M12 16.5V9M16 16.5V3.5",
+  check: "M5.5 10.5l3 3 6-7",
+  building: "M4 17.5V3.5h8v14M12 7.5h4v10M2.5 17.5h15M6.5 6.5h3M6.5 9.5h3M6.5 12.5h3M14 10.5h.5M14 13.5h.5",
   globe: "M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM2 10h16M10 2c2.2 2.2 3.2 5 3.2 8s-1 5.8-3.2 8c-2.2-2.2-3.2-5-3.2-8s1-5.8 3.2-8z",
+  pin: "M10 17.5s5.5-5 5.5-9.5a5.5 5.5 0 0 0-11 0c0 4.5 5.5 9.5 5.5 9.5zM10 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  filter: "M3 4h14l-5.5 6.5v5l-3 1.5v-6.5z",
+  chevron: "M5.5 8l4.5 4.5L14.5 8",
+  search: "M9 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM13.5 13.5 17 17",
+  arrow: "M4 10h12M11.5 5.5 16 10l-4.5 4.5",
+  play: "M6.5 4.5v11l9-5.5z",
+  shield: "M10 2.5 4 5v4.5c0 3.8 2.6 6.9 6 8 3.4-1.1 6-4.2 6-8V5zM7.5 10l2 2 3.5-4",
+  doc: "M5 2.5h6.5l3.5 3.5v11.5H5zM11.5 2.5V6H15M7.5 10h5M7.5 13h5",
+  coins: "M8 8.5c3 0 5.5-1 5.5-2.25S11 4 8 4 2.5 5 2.5 6.25 5 8.5 8 8.5zM2.5 6.25v3.5C2.5 11 5 12 8 12s5.5-1 5.5-2.25v-3.5M7 15.5c.3 0 .7.1 1 .1 3 0 5.5-1 5.5-2.3M11 11.8c.6-.1 1.1-.1 1.5-.1 3 0 5 1 5 2.2s-2.5 2.3-5 2.3c-1 0-2-.1-2.8-.4",
+} as const;
+
+function Icon({ name, className = "h-5 w-5" }: { name: keyof typeof ICONS; className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={ICONS[name]} />
+    </svg>
+  );
+}
+
+// Bandiere disegnate (le emoji delle bandiere su Windows diventano lettere).
+function Flag({ code }: { code: string }) {
+  const stripes: Record<string, { dir: "v" | "h"; colors: string[]; weights?: number[] }> = {
+    IT: { dir: "v", colors: ["#009246", "#ffffff", "#ce2b37"] },
+    FR: { dir: "v", colors: ["#0055a4", "#ffffff", "#ef4135"] },
+    DE: { dir: "h", colors: ["#000000", "#dd0000", "#ffce00"] },
+    ES: { dir: "h", colors: ["#aa151b", "#f1bf00", "#aa151b"], weights: [1, 2, 1] },
+  };
+  const f = stripes[code];
+  if (code === "CH") {
+    return (
+      <svg viewBox="0 0 3 2" className="h-3.5 w-5 shrink-0 rounded-[2px] ring-1 ring-black/10" aria-hidden>
+        <rect width="3" height="2" fill="#da291c" />
+        <rect x="1.3" y="0.4" width="0.4" height="1.2" fill="#ffffff" />
+        <rect x="0.9" y="0.8" width="1.2" height="0.4" fill="#ffffff" />
+      </svg>
+    );
+  }
+  if (!f) return null;
+  const weights = f.weights ?? f.colors.map(() => 1);
+  const total = weights.reduce((a, b) => a + b, 0);
+  const span = f.dir === "v" ? 3 : 2;
+  const starts = weights.map((_, i) => (weights.slice(0, i).reduce((a, b) => a + b, 0) / total) * span);
+  return (
+    <svg viewBox="0 0 3 2" className="h-3.5 w-5 shrink-0 rounded-[2px] ring-1 ring-black/10" aria-hidden>
+      {f.colors.map((c, i) => {
+        const size = (weights[i] / total) * span;
+        return f.dir === "v"
+          ? <rect key={i} x={starts[i]} y="0" width={size} height="2" fill={c} />
+          : <rect key={i} x="0" y={starts[i]} width="3" height={size} fill={c} />;
+      })}
+    </svg>
+  );
+}
+
+const AREA_PATHS: Record<OfferArea["icon"], string> = {
+  globe: ICONS.globe,
   cpu: "M6 6h8v8H6zM8 2.5V6M12 2.5V6M8 14v3.5M12 14v3.5M2.5 8H6M2.5 12H6M14 8h3.5M14 12h3.5",
   megaphone: "M3 8.5v3h3l6 4v-11l-6 4zM14.5 7.5a3.5 3.5 0 0 1 0 5M6 11.5l1 4.5",
   users: "M7 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM13.5 8.5a2 2 0 1 0 0-4M2.5 16c0-2.6 2-4.5 4.5-4.5s4.5 1.9 4.5 4.5M13.5 11.5c2.2 0 4 1.7 4 4.5",
@@ -72,6 +140,21 @@ function AreaIcon({ name }: { name: OfferArea["icon"] }) {
     <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d={AREA_PATHS[name]} />
     </svg>
+  );
+}
+
+// Intestazione di una sezione del modulo: icona, titolo, spiegazione.
+function SectionTitle({ icon, title, text, htmlFor }: { icon: keyof typeof ICONS; title: string; text?: ReactNode; htmlFor?: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ledger-soft text-ledger">
+        <Icon name={icon} className="h-[18px] w-[18px]" />
+      </span>
+      <div>
+        {htmlFor ? <label htmlFor={htmlFor} className="block font-semibold">{title}</label> : <p className="font-semibold">{title}</p>}
+        {text && <p className="mt-0.5 text-xs text-muted">{text}</p>}
+      </div>
+    </div>
   );
 }
 
@@ -96,17 +179,25 @@ export function SearchWizard({
   const [industry, setIndustry] = useState(defaults.industry ?? "");
   // Ricerca opportunità: di default tutti i settori (più resa per il cliente, magazzino più ampio).
   const [allSectors, setAllSectors] = useState(!defaults.industry);
-  const [regions, setRegions] = useState(defaults.regions?.join("\n") ?? "");
+  const [regions, setRegions] = useState(defaults.regions?.join(", ") ?? "");
   const [offer, setOffer] = useState(defaults.offer ?? "");
   const [area, setArea] = useState(offerByCode(defaults.offer ?? "", offers)?.area ?? "");
   const [mode, setMode] = useState<EmailMode>(defaults.emailMode ?? "mixed");
   const [quantity, setQuantity] = useState(Math.min(defaults.quantity ?? 10, maxQuantity));
   const [countries, setCountries] = useState<string[]>(defaults.countries ?? ["IT"]);
+  // Nessuna dimensione preselezionata: con la dimensione la ricerca in target non può usare il database.
+  const [sizes, setSizes] = useState<string[]>(defaults.companySizes ?? []);
   const [roles, setRoles] = useState<string[]>((defaults.roles ?? ["Titolare / CEO"]).filter((r) => (ROLE_PRESETS as readonly string[]).includes(r)));
   const customRoles = (defaults.roles ?? []).filter((r) => !(ROLE_PRESETS as readonly string[]).includes(r));
+  const [moreCountries, setMoreCountries] = useState(countries.some((c) => !(MAIN_COUNTRIES as readonly string[]).includes(c)));
+  const [advanced, setAdvanced] = useState(
+    Boolean(defaults.revenueRange || defaults.keywords?.length || defaults.excludeKeywords?.length || defaults.notes || defaults.industryKeywords?.length),
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const [formTick, setFormTick] = useState(0);
   const [availability, setAvailability] = useState<{ key: string; value: Availability } | null>(null);
+  const [suggestions, setSuggestions] = useState<IndustrySuggestion[]>([]);
+  const [suggestOpen, setSuggestOpen] = useState(false);
 
   const info = MODE_INFO[mode];
   const opportunity = kind === "opportunity";
@@ -117,6 +208,7 @@ export function SearchWizard({
   const reserve = estimate.reserve;
   const enough = credits >= reserve;
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+  const countryName = (c: string) => COUNTRIES.find(([k]) => k === c)?.[1] ?? c;
 
   const steps = STEPS[kind];
   const current = steps[Math.min(step, steps.length - 1)][0];
@@ -125,13 +217,34 @@ export function SearchWizard({
     setKind(k);
     setStep(0);
   };
+  const chooseIndustry = (v: string) => {
+    setIndustry(v);
+    setSuggestOpen(false);
+    setFormTick((n) => n + 1);
+  };
+
+  // Settori del database che contengono il testo scritto (dopo una breve pausa).
+  useEffect(() => {
+    const q = industry.trim();
+    if (!suggestOpen || q.length < 2) return;
+    let alive = true;
+    const t = setTimeout(async () => {
+      const found = await industrySuggestions(q).catch(() => []);
+      if (alive) setSuggestions(found);
+    }, 250);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
+  }, [industry, suggestOpen]);
+  const shownSuggestions = suggestOpen && industry.trim().length >= 2
+    ? suggestions.filter((s) => s.industry.toLowerCase() !== industry.trim().toLowerCase())
+    : [];
 
   // Opportunità: il cliente sceglie il servizio, i segnali li sceglie la regola del servizio.
   const jobAdCountriesOk = countries.every((c) => (JOB_AD_COUNTRIES as readonly string[]).includes(c));
-  const where = [
-    regions.split(/[\n,]/).map((r) => r.trim()).filter(Boolean).join(", "),
-    countries.map((c) => COUNTRIES.find(([k]) => k === c)?.[1]).join(", "),
-  ].filter(Boolean)[0] ?? "";
+  const regionList = regions.split(/[\n,]/).map((r) => r.trim()).filter(Boolean);
+  const where = [regionList.join(", "), countries.map(countryName).join(", ")].filter(Boolean)[0] ?? "";
   const signalProblem = !opportunity
     ? ""
     : !chosen
@@ -161,6 +274,19 @@ export function SearchWizard({
   const noneAvailable = Boolean(opportunity && available?.kind === "opportunity" && available.databaseOnly && available.count === 0);
   const targetReady = !opportunity && available?.kind === "target" && available.count > 0 ? available.count : 0;
   const howMany = (n: number) => (n > 500 ? "oltre 500" : String(n));
+  const showIndustry = !(opportunity && allSectors);
+
+  const summary: [string, ReactNode][] = [
+    ["Tipologia", opportunity ? "Aziende con opportunità" : "Aziende in target"],
+    ...(opportunity ? [["Servizio", chosen?.label ?? <em key="s" className="text-muted">Da scegliere</em>] as [string, ReactNode]] : []),
+    ["Settore", showIndustry ? industry.trim() || <em key="i" className="text-muted">Non specificato</em> : "Tutti i settori"],
+    ["Paesi", countries.length ? countries.map(countryName).join(", ") : <em key="c" className="text-muted">Nessuno</em>],
+    ["Regioni", regionList.length ? regionList.join(", ") : <em key="r" className="text-muted">Tutto il paese</em>],
+    ["Dimensione", sizes.length ? `${sizes.join(", ")} dipendenti` : <em key="d" className="text-muted">Qualsiasi</em>],
+    ["Ruoli", roles.length || customRoles.length ? [...roles, ...customRoles].join(", ") : <em key="o" className="text-muted">Non specificato</em>],
+    ["Tipo email", info.label],
+    ["Numero lead", <span key="q" className="font-mono">{quantity}</span>],
+  ];
 
   return (
     <form ref={formRef} action={action} onChange={() => setFormTick((n) => n + 1)} className="grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -174,34 +300,54 @@ export function SearchWizard({
               aria-checked={kind === k.kind}
               onClick={() => chooseKind(k.kind)}
               className={cx(
-                "flex flex-col gap-1 rounded-xl border bg-card p-4 text-left transition-colors",
+                "relative flex items-start gap-4 rounded-xl border bg-card p-5 text-left transition-colors",
                 kind === k.kind ? "border-ledger shadow-[0_0_0_1px_var(--color-ledger)]" : "border-line hover:border-ink-2",
               )}
             >
-              <span className="flex items-center gap-2 font-display text-lg font-semibold">
-                {k.title}
-                {k.kind === "opportunity" && <span className="rounded-full bg-stamp-soft px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-stamp-ink">Nuovo</span>}
+              <span className={cx("grid h-12 w-12 shrink-0 place-items-center rounded-full", kind === k.kind ? "bg-ledger-soft text-ledger" : "bg-paper-2 text-ink-2")}>
+                <Icon name={k.icon} className="h-6 w-6" />
               </span>
-              <span className="text-sm text-ink-2">{k.text}</span>
-              <span className="font-mono text-xs text-muted">{k.example}</span>
+              <span className="flex flex-col gap-1 pr-6">
+                <span className="flex flex-wrap items-center gap-2 font-display text-lg font-semibold">
+                  {k.title}
+                  {k.kind === "opportunity" && <span className="rounded-full bg-stamp-soft px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-stamp-ink">Nuovo</span>}
+                </span>
+                <span className="text-sm text-ink-2">{k.text}</span>
+                <span className="text-xs text-muted">{k.example}</span>
+              </span>
+              <span
+                className={cx(
+                  "absolute right-4 top-4 grid h-5 w-5 place-items-center rounded-full border",
+                  kind === k.kind ? "border-ledger bg-ledger text-white" : "border-line bg-card",
+                )}
+                aria-hidden
+              >
+                {kind === k.kind && <Icon name="check" className="h-3.5 w-3.5" />}
+              </span>
             </button>
           ))}
         </div>
 
-        <ol className="flex flex-wrap gap-2" aria-label="Passi">
+        <ol className="flex items-center gap-2" aria-label="Passi">
           {steps.map(([key, s], i) => (
-            <li key={key}>
+            <li key={key} className={cx("flex min-w-0 items-center gap-2", i > 0 && "flex-1")}>
+              {i > 0 && <span className="h-px min-w-3 flex-1 bg-line" aria-hidden />}
               <button
                 type="button"
                 onClick={() => setStep(i)}
                 aria-current={step === i ? "step" : undefined}
-                className={cx(
-                  "flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
-                  step === i ? "border-ink bg-ink text-paper" : i < step ? "border-ledger/30 bg-ledger-soft text-ledger" : "border-line text-ink-2",
-                )}
+                title={s}
+                className="group flex shrink-0 items-center gap-2 text-sm"
               >
-                <span className="font-mono text-xs">{String(i + 1).padStart(2, "0")}</span>
-                {s}
+                <span
+                  className={cx(
+                    "grid h-9 w-9 place-items-center rounded-full border font-mono text-xs transition-colors",
+                    step === i ? "border-ledger bg-ledger text-white" : i < step ? "border-ledger/30 bg-ledger-soft text-ledger" : "border-line bg-card text-ink-2 group-hover:border-ink-2",
+                  )}
+                >
+                  {i < step ? <Icon name="check" className="h-4 w-4" /> : String(i + 1).padStart(2, "0")}
+                </span>
+                <span className={cx("whitespace-nowrap", step === i ? "font-semibold text-ink" : cx("hidden text-ink-2", steps.length > 4 ? "2xl:inline" : "xl:inline"))}>{s}</span>
               </button>
             </li>
           ))}
@@ -214,8 +360,7 @@ export function SearchWizard({
           <Card className={cx("flex flex-col gap-6 p-6", current !== "offer" && "hidden")}>
             <input type="hidden" name="offer" value={chosen?.code ?? ""} />
             <div>
-              <p className="text-sm font-medium">Che servizio vendi?</p>
-              <p className="mt-1 text-xs text-muted">Scegli l&apos;area, poi il servizio: cerchiamo le aziende con un segnale concreto collegato, e su ogni lead trovi la prova.</p>
+              <SectionTitle icon="bars" title="Che servizio vendi?" text="Scegli l'area, poi il servizio: cerchiamo le aziende con un segnale concreto collegato, e su ogni lead trovi la prova." />
               <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="radiogroup" aria-label="Area del servizio">
                 {OFFER_AREAS.filter((a) => offersOfArea(a.code, offers).length).map((a) => (
                   <button
@@ -278,11 +423,11 @@ export function SearchWizard({
         )}
 
         {/* Passo: target */}
-        <Card className={cx("flex flex-col gap-5 p-6", current !== "target" && "hidden")}>
+        <Card className={cx("flex flex-col gap-7 p-6", current !== "target" && "hidden")}>
           {opportunity && (
             <div>
-              <p className="mb-2 text-sm font-medium">In quali aziende?</p>
-              <div className="grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Settore">
+              <SectionTitle icon="building" title="In quali aziende?" />
+              <div className="mt-3 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Settore">
                 {([[true, "Tutti i settori", "Consigliato: più aziende con il segnale, risultati più rapidi."], [false, "Solo un settore", "Se il tuo servizio è pensato per un settore preciso."]] as const).map(([v, l, d]) => (
                   <label key={l} className={cx("flex cursor-pointer gap-3 rounded-lg border px-4 py-3 text-sm", allSectors === v ? "border-ledger bg-ledger-soft" : "border-line hover:border-ink-2")}>
                     <input type="radio" name="sectorScope" checked={allSectors === v} onChange={() => setAllSectors(v)} className="mt-0.5 accent-[var(--color-ledger)]" />
@@ -292,69 +437,176 @@ export function SearchWizard({
               </div>
             </div>
           )}
-          {opportunity && allSectors ? (
-            <input type="hidden" name="industry" value="" />
+
+          {showIndustry ? (
+            <div>
+              <SectionTitle
+                icon="building"
+                htmlFor="industry"
+                title={opportunity ? "Quale settore?" : "Che tipo di aziende cerchi?"}
+                text="Descrivi il settore come lo spiegheresti a un collega: «studi dentistici», «produttori di macchine per il packaging»."
+              />
+              <div className="relative mt-3">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">
+                  <Icon name="search" className="h-4 w-4" />
+                </span>
+                <Input
+                  id="industry"
+                  name="industry"
+                  value={industry}
+                  autoComplete="off"
+                  role="combobox"
+                  aria-expanded={shownSuggestions.length > 0}
+                  aria-controls="industry-suggestions"
+                  onChange={(e) => {
+                    setIndustry(e.target.value);
+                    setSuggestOpen(true);
+                  }}
+                  onFocus={() => setSuggestOpen(true)}
+                  onBlur={() => setSuggestOpen(false)}
+                  onKeyDown={(e) => e.key === "Escape" && setSuggestOpen(false)}
+                  placeholder="Es. software house, studi dentistici, produttori di packaging"
+                  className="h-11 pl-9"
+                />
+                {shownSuggestions.length > 0 && (
+                  <ul id="industry-suggestions" role="listbox" className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-line bg-card py-1 shadow-lg">
+                    <li className="px-3 pb-1 pt-1.5 text-[11px] uppercase tracking-wider text-muted">Settori nel nostro database</li>
+                    {shownSuggestions.map((s) => (
+                      <li key={s.industry} role="option" aria-selected={false}>
+                        <button
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            chooseIndustry(s.industry);
+                          }}
+                          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-ledger-soft"
+                        >
+                          <span>{s.industry}</span>
+                          <span className="shrink-0 font-mono text-xs text-ledger">{s.companies > 500 ? "500+" : s.companies} aziende</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <p className="mt-3 text-xs text-muted">Esempi popolari</p>
+              <div className="mt-1.5 flex flex-wrap gap-2">
+                {POPULAR_INDUSTRIES.map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => chooseIndustry(p)}
+                    className={cx(
+                      "rounded-full border px-3 py-1 text-sm transition-colors",
+                      industry.trim().toLowerCase() === p.toLowerCase() ? "border-ledger bg-ledger-soft text-ledger" : "border-line bg-card hover:border-ink-2",
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
           ) : (
-            <Field label="Settore o tipo di azienda" htmlFor="industry" hint="Scrivilo come lo spiegheresti a un collega: «agenzie di marketing digitale», «studi dentistici», «produttori di macchine per il packaging».">
-              <Input id="industry" name="industry" value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="es. Software house che sviluppano gestionali" />
-            </Field>
+            <input type="hidden" name="industry" value="" />
           )}
+
           <div>
-            <p className="mb-2 text-sm font-medium">Paesi</p>
-            <div className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">
-              {COUNTRIES.map(([code, name]) => (
-                <label key={code} className={cx("cursor-pointer rounded-full border px-3 py-1 text-sm", countries.includes(code) ? "border-ledger bg-ledger-soft text-ledger" : "border-line hover:border-ink-2")}>
-                  <input type="checkbox" name="countries" value={code} checked={countries.includes(code)} onChange={() => setCountries(toggle(countries, code))} className="sr-only" />
-                  {name}
-                </label>
-              ))}
+            <SectionTitle icon="globe" title="Paesi" text="Seleziona i paesi in cui cercare le aziende." />
+            <div className="mt-3 flex flex-wrap gap-2">
+              {COUNTRIES.map(([code, name]) => {
+                const main = (MAIN_COUNTRIES as readonly string[]).includes(code);
+                return (
+                  <label
+                    key={code}
+                    className={cx(
+                      "flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                      countries.includes(code) ? "border-ledger bg-ledger-soft text-ledger" : "border-line bg-card hover:border-ink-2",
+                      !main && !moreCountries && "hidden",
+                    )}
+                  >
+                    <input type="checkbox" name="countries" value={code} checked={countries.includes(code)} onChange={() => setCountries(toggle(countries, code))} className="sr-only" />
+                    {main && <Flag code={code} />}
+                    {name}
+                  </label>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setMoreCountries(!moreCountries)}
+                aria-expanded={moreCountries}
+                className="rounded-full border border-dashed border-line px-3 py-1.5 text-sm text-ink-2 hover:border-ink-2"
+              >
+                {moreCountries ? "Meno paesi" : `+ Altri paesi${countries.filter((c) => !(MAIN_COUNTRIES as readonly string[]).includes(c)).length ? ` (${countries.filter((c) => !(MAIN_COUNTRIES as readonly string[]).includes(c)).length})` : ""}`}
+              </button>
             </div>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Regioni o città (facoltativo)" htmlFor="regions" hint="Una per riga o separate da virgola.">
-              <Textarea id="regions" name="regions" value={regions} onChange={(e) => setRegions(e.target.value)} placeholder={"Milano\nTorino"} className="min-h-20" />
-            </Field>
-            {!(opportunity && allSectors) && (
-              <Field label="Parole chiave del settore (facoltativo)" htmlFor="industryKeywords" hint="Termini usati dalle aziende, anche in lingua locale.">
-                <Textarea id="industryKeywords" name="industryKeywords" defaultValue={defaults.industryKeywords?.join("\n")} placeholder={"software gestionale\nERP"} className="min-h-20" />
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <SectionTitle icon="pin" htmlFor="regions" title="Regione o città" text="Facoltativo. Più zone separate da virgola." />
+              <Input id="regions" name="regions" value={regions} onChange={(e) => setRegions(e.target.value)} placeholder="Es. Milano, Torino, Lombardia" className="mt-3" />
+            </div>
+            <div>
+                <SectionTitle icon="building" title="Dimensione aziendale" text="Facoltativa: senza scelta, qualsiasi dimensione." />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {COMPANY_SIZES.map((s) => (
+                    <label
+                      key={s}
+                      className={cx(
+                        "cursor-pointer rounded-lg border px-3 py-1.5 text-sm transition-colors",
+                        sizes.includes(s) ? "border-ledger bg-ledger-soft text-ledger" : "border-line bg-card hover:border-ink-2",
+                      )}
+                    >
+                      <input type="checkbox" name="companySizes" value={s} checked={sizes.includes(s)} onChange={() => setSizes(toggle(sizes, s))} className="sr-only" />
+                      {s}
+                    </label>
+                  ))}
+                </div>
+                {sizes.length > 0 && !opportunity && (
+                  <p className="mt-2 text-xs text-stamp-ink">La dimensione la verifichiamo sul web: la ricerca può richiedere qualche minuto in più.</p>
+                )}
+              </div>
+          </div>
+
+          <div className="border-t border-line pt-5">
+            <button type="button" onClick={() => setAdvanced(!advanced)} aria-expanded={advanced} className="flex w-full items-center justify-between gap-3 text-left">
+              <SectionTitle icon="filter" title="Filtri avanzati (facoltativi)" text="Fatturato, parole chiave, esclusioni e note per affinare la ricerca." />
+              <Icon name="chevron" className={cx("h-5 w-5 shrink-0 text-muted transition-transform", advanced && "rotate-180")} />
+            </button>
+            <div className={cx("mt-4 grid gap-4 rounded-xl bg-paper-2/60 p-4 sm:grid-cols-2", !advanced && "hidden")}>
+              {showIndustry && (
+                <Field label="Parole chiave del settore" htmlFor="industryKeywords" hint="Termini usati dalle aziende, anche in lingua locale. Allargano la ricerca.">
+                  <Input id="industryKeywords" name="industryKeywords" defaultValue={defaults.industryKeywords?.join(", ")} placeholder="Es. software gestionale, ERP" />
+                </Field>
+              )}
+              <Field label="Da escludere" htmlFor="excludeKeywords" hint="Aziende con queste parole non entrano nella ricerca.">
+                <Input id="excludeKeywords" name="excludeKeywords" defaultValue={defaults.excludeKeywords?.join(", ")} placeholder="Es. franchising, multinazionali" />
               </Field>
-            )}
-          </div>
-          <div>
-            <p className="mb-2 text-sm font-medium">Dimensione (dipendenti)</p>
-            <div className="flex flex-wrap gap-2">
-              {COMPANY_SIZES.map((s) => (
-                <label key={s} className="flex items-center gap-2 rounded-lg border border-line px-3 py-1.5 text-sm has-[:checked]:border-ledger has-[:checked]:bg-ledger-soft">
-                  <input type="checkbox" name="companySizes" value={s} defaultChecked={defaults.companySizes?.includes(s)} className="accent-[var(--color-ledger)]" />
-                  {s}
-                </label>
-              ))}
+              <Field label="Fatturato indicativo" htmlFor="revenueRange" hint="Usato quando il dato è pubblico.">
+                <Input id="revenueRange" name="revenueRange" defaultValue={defaults.revenueRange} placeholder="Es. 1-10 milioni €" />
+              </Field>
+              <Field label="Parole chiave aggiuntive" htmlFor="keywords">
+                <Input id="keywords" name="keywords" defaultValue={defaults.keywords?.join(", ")} placeholder="Es. e-commerce, export" />
+              </Field>
+              <div className="sm:col-span-2">
+                <Field label="Note per la ricerca" htmlFor="notes" hint="Qualsiasi dettaglio utile: tipo di clienti che servono, tecnologie che usano, ecc.">
+                  <Textarea id="notes" name="notes" maxLength={600} defaultValue={defaults.notes} className="min-h-20" />
+                </Field>
+              </div>
+              {!opportunity && (
+                <p className="text-xs text-muted sm:col-span-2">Fatturato, parole chiave aggiuntive e note li verifichiamo sul web: la ricerca può richiedere qualche minuto in più.</p>
+              )}
             </div>
-            <p className="mt-1 text-xs text-muted">Nessuna selezione = qualsiasi dimensione.</p>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Fatturato indicativo (facoltativo)" htmlFor="revenueRange" hint="Usato quando il dato è pubblico.">
-              <Input id="revenueRange" name="revenueRange" defaultValue={defaults.revenueRange} placeholder="es. 1-10 milioni €" />
-            </Field>
-            <Field label="Da escludere (facoltativo)" htmlFor="excludeKeywords" hint="Es. franchising, multinazionali.">
-              <Input id="excludeKeywords" name="excludeKeywords" defaultValue={defaults.excludeKeywords?.join(", ")} />
-            </Field>
-          </div>
-          <Field label="Parole chiave aggiuntive (facoltativo)" htmlFor="keywords">
-            <Input id="keywords" name="keywords" defaultValue={defaults.keywords?.join(", ")} placeholder="es. e-commerce, export" />
-          </Field>
-          <Field label="Note per la ricerca (facoltativo)" htmlFor="notes" hint="Qualsiasi dettaglio utile: tipo di clienti che servono, tecnologie che usano, ecc.">
-            <Textarea id="notes" name="notes" maxLength={600} defaultValue={defaults.notes} />
-          </Field>
         </Card>
 
         {/* Passo: ruoli */}
         <Card className={cx("flex flex-col gap-5 p-6", current !== "roles" && "hidden")}>
           <div>
-            <p className="mb-2 text-sm font-medium">Ruoli da contattare</p>
-            <div className="flex flex-wrap gap-2">
+            <SectionTitle icon="target" title="Ruoli da contattare" text="Le persone a cui vuoi scrivere." />
+            <div className="mt-3 flex flex-wrap gap-2">
               {ROLE_PRESETS.map((r) => (
-                <label key={r} className={cx("cursor-pointer rounded-full border px-3 py-1 text-sm", roles.includes(r) ? "border-ledger bg-ledger-soft text-ledger" : "border-line hover:border-ink-2")}>
+                <label key={r} className={cx("cursor-pointer rounded-full border px-3 py-1.5 text-sm transition-colors", roles.includes(r) ? "border-ledger bg-ledger-soft text-ledger" : "border-line bg-card hover:border-ink-2")}>
                   <input type="checkbox" name="roles" value={r} checked={roles.includes(r)} onChange={() => setRoles(toggle(roles, r))} className="sr-only" />
                   {r}
                 </label>
@@ -421,19 +673,24 @@ export function SearchWizard({
           </Field>
         </Card>
 
-        <div className="flex justify-between">
+        <div className="flex items-center justify-between">
           <Button type="button" variant="ghost" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}>Indietro</Button>
-          {step < last && <Button type="button" variant="secondary" onClick={() => setStep(step + 1)}>Avanti</Button>}
+          {step < last && (
+            <Button type="button" onClick={() => setStep(step + 1)} className="gap-2">
+              Avanti <Icon name="arrow" className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
       <aside className="lg:sticky lg:top-10 lg:self-start">
-        <Card className="ruled flex flex-col gap-4 p-5">
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted">Riepilogo</p>
+        <Card className="flex flex-col gap-4 p-5">
+          <p className="flex items-center gap-2 font-semibold">
+            <Icon name="doc" className="h-5 w-5 text-ink-2" /> Riepilogo ricerca
+          </p>
           {opportunity && (
             <div className="rounded-lg border border-ledger/30 bg-ledger-soft/60 p-3 text-sm">
               <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ledger">Anteprima della ricerca</p>
-              {chosen && <p className="mb-1 text-sm font-medium">{chosen.label}</p>}
               <p className="text-ink-2">{preview || "Scegli il servizio che vendi."}</p>
               {chosen && (
                 <p className={cx("mt-2 border-t border-ledger/20 pt-2 text-xs", noneAvailable ? "text-brick" : "text-ink-2")} aria-live="polite">
@@ -450,39 +707,44 @@ export function SearchWizard({
               )}
             </div>
           )}
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 border-t border-line pt-4 text-sm">
+            {summary.map(([label, value]) => (
+              <div key={label} className="contents">
+                <dt className="text-muted">{label}</dt>
+                <dd className="min-w-0 break-words">{value}</dd>
+              </div>
+            ))}
+          </dl>
           {targetReady > 0 && (
             <p className="rounded-lg border border-ledger/30 bg-ledger-soft/60 p-3 text-xs text-ink-2" aria-live="polite">
               <strong className="font-mono">{howMany(targetReady)}</strong> aziende già pronte nel database; le altre le cerchiamo sul web.
             </p>
           )}
-          <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
-            <dt className="text-muted">Paesi</dt>
-            <dd>{countries.length ? countries.map((c) => COUNTRIES.find(([k]) => k === c)?.[1]).join(", ") : "—"}</dd>
-            <dt className="text-muted">Ruoli</dt>
-            <dd>{roles.length || customRoles.length ? [...roles, ...customRoles].join(", ") : "—"}</dd>
-            <dt className="text-muted">Email</dt>
-            <dd>{info.label}</dd>
-            <dt className="text-muted">Lead</dt>
-            <dd className="font-mono">{quantity}</dd>
-          </dl>
-          <div className="border-t border-line pt-4">
-            <p className="text-sm text-muted">Crediti stimati</p>
-            <p className="font-mono text-2xl font-semibold">{estimate.min}–{reserve}</p>
-            <p className="mt-1 text-xs text-muted">
-              {withSignal && <>Ogni lead con opportunità: {extraCreditsLabel(signalPrices)}. </>}
-              Riserviamo {reserve} crediti e addebitiamo solo i lead consegnati. Disponibili: {credits}.
+          <div className="rounded-xl bg-ledger-soft p-4">
+            <p className="flex items-center gap-2 text-sm font-medium text-ledger">
+              <Icon name="coins" className="h-4 w-4" /> Crediti stimati
             </p>
-            {withSignal && (
-              <p className="mt-2 text-xs text-muted">
-                Le ricerche con segnali scartano le aziende senza prova: possono richiedere più tempo e trovare meno lead del previsto. I crediti non usati tornano disponibili.
-              </p>
-            )}
+            <p className="mt-1 font-mono text-3xl font-semibold">{estimate.min}–{reserve}</p>
+            <p className="mt-1 text-xs text-ink-2">
+              {withSignal && <>Ogni lead con opportunità: {extraCreditsLabel(signalPrices)}. </>}
+              Riserviamo {reserve} crediti e addebitiamo solo i lead consegnati. Disponibili: <strong>{credits}</strong>.
+            </p>
           </div>
+          {withSignal && (
+            <p className="text-xs text-muted">
+              Le ricerche con segnali scartano le aziende senza prova: possono richiedere più tempo e trovare meno lead del previsto. I crediti non usati tornano disponibili.
+            </p>
+          )}
           {!enough && <Alert>Crediti insufficienti per questa quantità. Riduci i lead o acquista crediti.</Alert>}
           {signalProblem && <p className="text-xs text-brick">{signalProblem}</p>}
-          <Button type="submit" size="lg" disabled={pending || !enough || countries.length === 0 || Boolean(signalProblem) || noneAvailable}>
+          <Button type="submit" size="lg" className="gap-2" disabled={pending || !enough || countries.length === 0 || Boolean(signalProblem) || noneAvailable}>
+            {!pending && <Icon name="play" className="h-4 w-4" />}
             {pending ? "Avvio in corso…" : "Avvia la ricerca"}
           </Button>
+          <p className="flex items-start gap-2 text-xs text-ink-2">
+            <Icon name="shield" className="mt-px h-4 w-4 shrink-0 text-ledger" />
+            Paghi solo i lead consegnati: i crediti non usati tornano disponibili.
+          </p>
           <p className="text-xs text-muted">Puoi chiudere la pagina: ti avvisiamo via email quando i lead sono pronti.</p>
         </Card>
       </aside>
