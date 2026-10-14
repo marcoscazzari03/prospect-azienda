@@ -35,12 +35,12 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Workflow pubblicato e piano Icypeas acquistato (budget mensile ~900 in Prezzi e costi)
 - [x] Workflow "TEST | Icypeas email finder" archiviato
 - [x] Motore AI: Claude Sonnet 5.5 (pianificazione + ricerca web lato server) al posto di OpenAI; modello in `01-valida-richiesta.js`, nodi OpenAI disattivati nel workflow per tornare indietro
-- [ ] Costo del lotto di ricerca in *Prezzi e costi* da aggiornare dopo il test con Claude
+- [x] Costo reale di Claude dai token (input/output) e dalle ricerche web, in *Prezzi e costi* (migrazione `20261026000020_engine_costs_errors.sql`)
 - [ ] Chiave Anthropic dedicata a Webora Leads (oggi si usa la credenziale «US VIRAL - Anthropic»)
-- [ ] Motore: classificazione di email tipo segreteria.cognome@gmail.com come generiche
+- [x] Motore: email d'ufficio (segreteria.cognome@gmail.com, studiodentisticorossi@…, info-rossi@…) classificate come generiche
 - [ ] Budget mensile di arricchimento da rivedere
 - [ ] Testo dell'invito per la beta
-- [ ] Motore: workflow di errore n8n che avvisa il backend se un'esecuzione si interrompe (oggi la ricerca si chiude dopo 45 minuti senza notizie)
+- [x] Motore: workflow di errore n8n «Lead Engine | Errori» → `POST /api/engine/error`: la ricerca si chiude subito e i crediti tornano (da pubblicare e impostare come errorWorkflow del motore)
 - [x] Prova completa "solo nominative" (4/5, 3 da Icypeas) e "mista" (10/10)
 - [x] Ritocchi grafici: bianco e grigi al posto del crema, verde smeraldo più chiaro, riepilogo "Dall'ultimo accesso" in panoramica (migrazione `20261015000009_activity.sql`)
 - [ ] Beta gratuita su invito (5-10 aziende, crediti regalati dall'admin): misurare rimbalzi e segnalazioni

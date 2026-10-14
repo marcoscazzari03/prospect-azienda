@@ -103,7 +103,12 @@ const r3 = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, js
 assert.equal(r3.page_1, 'https://www.acme.it/it/home', 'homepage con meta refresh: si segue il rimando');
 const r4 = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: '<meta http-equiv="refresh" content="0;url=https://altro.it/">' } }).json;
 assert.notEqual(r4.page_1, 'https://altro.it/', 'rimando verso un altro dominio: ignorato');
-console.log('ok  estrazione email, offuscamento, PEC/noreply scartate, pagine successive');
+const tipoDi = (h) => run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: h } }).json.email_site_type;
+assert.equal(tipoDi('<a href="mailto:segreteria.rossi@gmail.com">x</a>'), 'generic', 'segreteria.cognome su gmail: casella di ufficio');
+assert.equal(tipoDi('<a href="mailto:studiodentisticorossi@gmail.com">x</a>'), 'generic');
+assert.equal(tipoDi('<a href="mailto:info-rossi@acme.it">x</a>'), 'generic');
+assert.equal(tipoDi('<a href="mailto:mario.rossi@gmail.com">x</a>'), 'personal');
+console.log('ok  estrazione email, offuscamento, PEC/noreply scartate, pagine successive, caselle di ufficio');
 
 // 4. Classificazione finale per modalità
 const classifica = src('08-classifica-e-prepara-risultati.js');

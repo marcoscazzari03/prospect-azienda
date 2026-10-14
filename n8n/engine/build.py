@@ -214,7 +214,7 @@ add("""const rifiuta = node({
 """)
 
 add(callback("notificaAvvio", "Notifica: ricerca avviata",
-             progress("planning", "'Pianificazione della ricerca'", "{ lots_planned: $('Valida richiesta').first().json.lotti_previsti }")))
+             progress("planning", "'Pianificazione della ricerca'", "{ lots_planned: $('Valida richiesta').first().json.lotti_previsti, n8n_execution_id: $execution.id }")))
 
 if AI_PROVIDER == "openai":
     add(f"""const modelloPlanner = languageModel({{

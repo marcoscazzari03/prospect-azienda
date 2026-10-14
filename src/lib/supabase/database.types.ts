@@ -715,6 +715,9 @@ isOneToOne: false
 "expire_credits":
 { Args: { "p_org"?: string }; Returns: number
                            },
+"fail_engine_run":
+{ Args: { "p_error": string,"p_execution": string }; Returns: string
+                           },
 "finalize_search":
 { Args: { "p_error"?: string,"p_search": string }; Returns: {
               "attempts": number,

@@ -28,7 +28,14 @@ try {
 } catch { dati = null; }
 const persona = dati && typeof dati.person === 'object' ? dati.person : null;
 
-const out = { ...p, _serve_referente: false, enrichment_lookups: p.enrichment_lookups || 0 };
+// Consumo di Claude per questa ricerca del referente (sommato in «Classifica e prepara risultati»).
+const u = r.usage || {};
+const out = {
+  ...p, _serve_referente: false, enrichment_lookups: p.enrichment_lookups || 0,
+  ai_input_tokens: Number(u.input_tokens) || 0,
+  ai_output_tokens: Number(u.output_tokens) || 0,
+  ai_web_searches: Number(u.server_tool_use?.web_search_requests) || 0
+};
 const nome = pulito(persona?.full_name, 120);
 const parti = norm(nome).split(' ').filter(x => x.length > 1);
 const fonte = urlPulito(persona?.source_url);

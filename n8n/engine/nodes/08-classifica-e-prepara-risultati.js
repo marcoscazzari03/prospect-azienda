@@ -29,10 +29,19 @@ const leads = [];
 const rejected = [];
 let lookups = 0;
 let pagine = 0;
+// Consumo reale di Claude (token e ricerche web): ricerca dei candidati e referenti.
+const consumi = (nome) => { try { return $(nome).all().map(i => i.json.usage || {}); } catch { return []; } };
+const usiAI = [...consumi('Esito ricerca Claude'), ...consumi('Esito ricerca Claude (seguito)')];
+let tokIn = usiAI.reduce((n, u) => n + (Number(u.input_tokens) || 0), 0);
+let tokOut = usiAI.reduce((n, u) => n + (Number(u.output_tokens) || 0), 0);
+let ricercheWeb = usiAI.reduce((n, u) => n + (Number(u.web_search_requests) || 0), 0);
 
 for (const p of prospects) {
   lookups += Number(p.enrichment_lookups) || 0;
   pagine += Number(p.pages_fetched) || 0;
+  tokIn += Number(p.ai_input_tokens) || 0;
+  tokOut += Number(p.ai_output_tokens) || 0;
+  ricercheWeb += Number(p.ai_web_searches) || 0;
 
   const sito = p.email_site
     ? {
@@ -171,7 +180,10 @@ return [{
       ai_search_calls: lotti.length,
       ai_planner_calls: 1,
       enrichment_lookups: lookups,
-      pages_fetched: pagine
+      pages_fetched: pagine,
+      claude_input_tokens: tokIn,
+      claude_output_tokens: tokOut,
+      claude_web_searches: ricercheWeb
     },
     n8n_execution_id: $execution.id
   }

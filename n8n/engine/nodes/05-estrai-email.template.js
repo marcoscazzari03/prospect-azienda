@@ -95,23 +95,28 @@ const conNome = (local) => {
   return parti.slice(1, -1).some(p => p.length >= 4 && l.includes(p));
 };
 
+// Caselle di ufficio anche se contengono un nome: segreteria.rossi@, studiodentisticorossi@, info-rossi@.
+const PREFISSI_UFFICIO = ['segreteria', 'studio', 'ufficio', 'amministrazione', 'reception', 'info', 'contatti', 'office', 'direzione'];
+const diUfficio = (local) => local.split(/[._-]+/).some(t => GENERICHE.has(t.replace(/[0-9]+$/, '')))
+  || PREFISSI_UFFICIO.some(x => local.startsWith(x));
+
 const punteggio = (email) => {
   const [local, dom] = email.split('@');
   if (!local || !dom || SCARTA_LOCALI.test(local) || SCARTA_DOMINI.test(dom) || ESTENSIONI.test(email)) return 0;
   if (dom.startsWith('www.') || SEGNAPOSTO.test(local) || PEC.test(dom)) return 0;
   const delDominio = dominio && (dom === dominio || dom.endsWith('.' + dominio));
   if (delDominio) {
+    if (diUfficio(local)) return 4;
     if (conNome(local)) {
       // Stesso cognome ma un altro nome (es. un familiare in azienda): non è la persona.
       const altroNome = local.split(/[._-]+/).some(t =>
         /^[a-z]{3,}$/.test(t) && !parti.some(p => p === t || t.includes(p) || p.includes(t)));
       return altroNome ? 3 : 5;
     }
-    if (GENERICHE.has(local.replace(/[0-9]+$/, ''))) return 4;
     if (PRIVACY.test(local)) return 1;
     return 3;
   }
-  if (GRATUITE.test(dom) && sicure.has(email)) return conNome(local) ? 4.5 : 2;
+  if (GRATUITE.test(dom) && sicure.has(email)) return conNome(local) && !diUfficio(local) ? 4.5 : 2;
   return 0;
 };
 

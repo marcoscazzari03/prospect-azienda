@@ -74,6 +74,19 @@ Risposta immediata: `200 {"accepted": true}`. Il lavoro prosegue in background.
 ```
 
 Errori di consegna degli eventi `progress` sono ignorati (non bloccano la ricerca).
+Il primo evento (`planning`) porta in `counters.n8n_execution_id` l'ID dell'esecuzione:
+il backend lo salva sul giro per riconoscerlo se l'esecuzione si interrompe.
+
+## Esecuzione interrotta: `POST /api/engine/error`
+
+Inviato dal workflow di errore «Lead Engine | Errori» (impostato come errorWorkflow del motore),
+con lo stesso header `x-engine-secret` del callback:
+
+```json
+{ "execution_id": "12345", "error": "messaggio", "node": "HTTP - Claude ricerca" }
+```
+
+Il backend segna il giro come fallito (`fail_engine_run`), chiude la ricerca e restituisce i crediti non usati.
 
 ## Evento `results` (uno per giro)
 
@@ -108,7 +121,8 @@ Errori di consegna degli eventi `progress` sono ignorati (non bloccano la ricerc
   "stats": { "lots": 4, "lots_failed": 0, "ai_candidates": 80, "valid_candidates": 46,
              "dedup_discards": { "sito_non_ufficiale": 12, "azienda_gia_acquistata": 5 },
              "leads": 31, "leads_personal": 12, "leads_generic": 19, "rejected": 15, "rejected_reasons": {…} },
-  "usage": { "ai_search_calls": 4, "ai_planner_calls": 1, "enrichment_lookups": 18, "pages_fetched": 97 },
+  "usage": { "ai_search_calls": 4, "ai_planner_calls": 1, "enrichment_lookups": 18, "pages_fetched": 97,
+             "claude_input_tokens": 41000, "claude_output_tokens": 5200, "claude_web_searches": 9 },
   "n8n_execution_id": "12345"
 }
 ```
