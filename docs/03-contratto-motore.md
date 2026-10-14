@@ -220,3 +220,5 @@ prova recente dei segnali richiesti (annuncio Adzuna degli ultimi 60 giorni dell
 segnali dal sito controllati negli ultimi 30), paese, zona (anche città e regione degli annunci) e
 settore della ricerca, escluse aziende già consegnate, già controllate nella ricerca e in opposizione.
 Il motore le tratta come la riserva: niente ricerca AI se bastano, referente dal sito, poi email.
+La selezione è `opportunity_pool(org, target, contatti, esclusi)`: il wizard la usa tramite
+`opportunity_availability` per mostrare quante aziende sono disponibili prima di avviare.

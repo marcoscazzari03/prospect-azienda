@@ -54,6 +54,7 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Ricerche con annuncio di lavoro decisivo: solo aziende del database, niente ricerca AI (14/10: 3 tentativi AI per ~0,9 $ senza lead). Finite le aziende, la ricerca si chiude e i crediti tornano
 - [x] Collaudo 3 (14/10, sviluppo software, Lombardia, 3 lead, motore nuovo): 3/3 lead in 2 giri, tutti dal database (37 aziende in riserva), nessuna ricerca AI di aziende. Costo misurato dai token ~0,16 $ (saldo -0,24 $): ~0,05-0,08 $ a lead. Voce principale: ricerche web del referente (0,01 $ l'una, 2 per azienda). Corretto: caselle privacy composte (contact.dataprivacy@) ora mai vendute
 - [ ] Da valutare: 1 sola ricerca web per il referente invece di 2 (dimezza la voce principale; prima misurare quanti referenti si perdono)
+- [x] Wizard opportunità: contatore delle aziende disponibili nel database (stesso calcolo della riserva, `opportunity_pool` / `opportunity_availability`, migrazione 026). Offerte solo annunci: con zero aziende la ricerca non si può avviare
 - [ ] Dopo ogni modifica al motore: ricordarsi di far PUBBLICARE il workflow su n8n (le modifiche restano in bozza)
 - [x] Settore delle aziende degli annunci: workflow «Annunci | Settore aziende» (homepage → Claude Haiku a lotti di 20: settore e parole chiave nelle etichette), migrazione 025. Nel settore scritto dal cliente le parole di collegamento («che», «sono»...) ora vengono ignorate
 - [ ] Settore: controllare i primi giri (qualità dei settori, costo) e la disponibilità nelle ricerche con un settore

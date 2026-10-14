@@ -74,4 +74,14 @@ create temp table s10e as
     '{"industry":"Software house","countries":["IT"],"regions":["Emilia-Romagna"],"roles":["Titolare"]}', 'mixed', 5, 1);
 select pg_temp.check((select opportunity_reserve((select id from s10e), '{}', 40) = '[]'::jsonb), 'ricerca target: niente riserva dal database');
 
+-- Disponibilità nel wizard: stesso calcolo della riserva, senza creare la ricerca.
+select pg_temp.check(opportunity_availability((select org from o10),
+  '{"industry":"","countries":["IT"],"regions":["Emilia-Romagna"],"signals":{"codes":["job_ad"],"match":"any","job_families":[{"code":"it_systems"}]}}', 1) = 1,
+  'disponibilità: un''azienda con annuncio in zona');
+select pg_temp.check(opportunity_availability((select org from o10),
+  '{"industry":"","countries":["IT"],"regions":[],"signals":{"codes":["job_ad"],"match":"any","job_families":[{"code":"it_systems"}]}}', 1) = 3,
+  'disponibilità: tutta Italia (anche Var Group del test annunci)');
+select pg_temp.check(opportunity_availability((select org from o10), '{"industry":"","countries":["IT"]}', 1) = 0,
+  'disponibilità: senza segnali nessuna azienda');
+
 select 'superati tutti i test riserva opportunità';

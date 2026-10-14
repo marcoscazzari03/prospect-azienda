@@ -820,6 +820,14 @@ isOneToOne: false
 "normalize_email":
 { Args: { "p": string }; Returns: string
                            },
+"opportunity_availability":
+{ Args: { "p_contacts": number,"p_org": string,"p_target": Json }; Returns: number
+                           },
+"opportunity_pool":
+{ Args: { "p_contacts": number,"p_exclude": (string)[],"p_org": string,"p_target": Json }; Returns: {
+              "ad_url": string,"city": string,"country": string,"domain": string,"id": string,"industry": string,"latest": string,"name": string,"signals": Json,"size_hint": string,"technologies": (string)[],"website": string
+            }[]
+                           },
 "opportunity_reserve":
 { Args: { "p_exclude": (string)[],"p_limit": number,"p_search": string }; Returns: Json
                            },

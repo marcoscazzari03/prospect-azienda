@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Alert, Button, Card, Field, Input, Select, Textarea, cx } from "@/components/ui";
 import { COMPANY_SIZES, COUNTRIES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
 import { estimateCredits } from "@/lib/domain/pricing";
@@ -16,7 +16,7 @@ import {
   type OfferArea,
   type SignalPrices,
 } from "@/lib/domain/signals";
-import { createSearch, type ActionState } from "../../actions";
+import { createSearch, searchAvailability, type ActionState, type Availability } from "../../actions";
 
 export type WizardDefaults = {
   name?: string;
@@ -104,6 +104,9 @@ export function SearchWizard({
   const [countries, setCountries] = useState<string[]>(defaults.countries ?? ["IT"]);
   const [roles, setRoles] = useState<string[]>((defaults.roles ?? ["Titolare / CEO"]).filter((r) => (ROLE_PRESETS as readonly string[]).includes(r)));
   const customRoles = (defaults.roles ?? []).filter((r) => !(ROLE_PRESETS as readonly string[]).includes(r));
+  const formRef = useRef<HTMLFormElement>(null);
+  const [formTick, setFormTick] = useState(0);
+  const [availability, setAvailability] = useState<{ key: string; value: Availability } | null>(null);
 
   const info = MODE_INFO[mode];
   const opportunity = kind === "opportunity";
@@ -138,8 +141,26 @@ export function SearchWizard({
         : "";
   const preview = chosen ? describeOffer({ offer: chosen.code, industry: allSectors ? "" : industry, where, offers }) : "";
 
+  // Disponibilità dal database (stesso calcolo della riserva del motore), ricalcolata
+  // quando cambiano servizio, zona, settore o esclusioni.
+  const chosenCode = chosen?.code ?? "";
+  const availabilityKey = `${chosenCode}|${formTick}`;
+  useEffect(() => {
+    if (!opportunity || !chosenCode) return;
+    const t = setTimeout(async () => {
+      if (!formRef.current) return;
+      const value = await searchAvailability(new FormData(formRef.current)).catch(() => null);
+      setAvailability({ key: availabilityKey, value });
+    }, 600);
+    return () => clearTimeout(t);
+  }, [opportunity, chosenCode, availabilityKey]);
+  const available = opportunity && chosen && availability?.key === availabilityKey ? availability.value : null;
+  const checking = Boolean(opportunity && chosen && availability?.key !== availabilityKey);
+  const noneAvailable = Boolean(available?.databaseOnly && available.count === 0);
+  const howMany = (n: number) => (n > 500 ? "oltre 500" : String(n));
+
   return (
-    <form action={action} className="grid gap-8 lg:grid-cols-[1fr_320px]">
+    <form ref={formRef} action={action} onChange={() => setFormTick((n) => n + 1)} className="grid gap-8 lg:grid-cols-[1fr_320px]">
       <div className="flex flex-col gap-6">
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Tipo di ricerca">
           {KINDS.map((k) => (
@@ -411,6 +432,19 @@ export function SearchWizard({
               <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ledger">Anteprima della ricerca</p>
               {chosen && <p className="mb-1 text-sm font-medium">{chosen.label}</p>}
               <p className="text-ink-2">{preview || "Scegli il servizio che vendi."}</p>
+              {chosen && (
+                <p className={cx("mt-2 border-t border-ledger/20 pt-2 text-xs", noneAvailable ? "text-brick" : "text-ink-2")} aria-live="polite">
+                  {checking || !available
+                    ? checking ? "Controllo le aziende disponibili…" : ""
+                    : available.databaseOnly
+                      ? available.count === 0
+                        ? "Per ora nessuna azienda con un annuncio recente per questa ricerca: prova ad allargare la zona o a scegliere tutti i settori."
+                        : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> aziende con un annuncio recente.{available.count < quantity && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
+                      : available.count > 0
+                        ? <><strong className="font-mono">{howMany(available.count)}</strong> aziende già pronte con la prova; le altre le cerchiamo sul web.</>
+                        : "Cerchiamo le aziende sul web: può richiedere qualche minuto in più."}
+                </p>
+              )}
             </div>
           )}
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
@@ -438,7 +472,7 @@ export function SearchWizard({
           </div>
           {!enough && <Alert>Crediti insufficienti per questa quantità. Riduci i lead o acquista crediti.</Alert>}
           {signalProblem && <p className="text-xs text-brick">{signalProblem}</p>}
-          <Button type="submit" size="lg" disabled={pending || !enough || countries.length === 0 || Boolean(signalProblem)}>
+          <Button type="submit" size="lg" disabled={pending || !enough || countries.length === 0 || Boolean(signalProblem) || noneAvailable}>
             {pending ? "Avvio in corso…" : "Avvia la ricerca"}
           </Button>
           <p className="text-xs text-muted">Puoi chiudere la pagina: ti avvisiamo via email quando i lead sono pronti.</p>

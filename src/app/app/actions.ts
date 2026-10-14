@@ -5,7 +5,9 @@ import { z } from "zod";
 import { requireViewer, type Plan } from "@/lib/server/dal";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { defaultSearchName, nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
+import { defaultSearchName, nextRepeatAt, searchInputSchema, toTarget, type SearchInput } from "@/lib/domain/search-input";
+import { jobAdFromDatabaseOnly } from "@/lib/domain/engine";
+import type { Json } from "@/lib/supabase/database.types";
 import { startSearch } from "@/lib/server/searches";
 import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
 import { RATE_LIMITS, SEARCH_RULES } from "@/lib/config";
@@ -27,10 +29,10 @@ const ERRORS: [RegExp, (m: string) => string][] = [
   [/ORG_SUSPENDED/, () => "Account sospeso: contatta l'assistenza."],
 ];
 
-export async function createSearch(_: ActionState, form: FormData): Promise<ActionState> {
-  const viewer = await requireViewer();
-  // Ricerca opportunità: il cliente sceglie il servizio, la regola dei segnali è la nostra
-  // (catalogo + modifiche dell'admin); quello che arriva dal browser oltre al servizio è ignorato.
+// Dati del wizard -> input della ricerca. Ricerca opportunità: il cliente sceglie il servizio,
+// la regola dei segnali è la nostra (catalogo + modifiche dell'admin); quello che arriva dal
+// browser oltre al servizio è ignorato.
+async function parseSearchForm(form: FormData): Promise<{ input: SearchInput } | { error: string }> {
   const offerCode = String(form.get("offer") ?? "");
   const offerRule = offerCode ? offerChoice(offerCode, await getEnabledOffers()) : null;
   if (offerCode && !offerRule) return { error: "Questo servizio non è al momento disponibile: scegline un altro." };
@@ -53,7 +55,14 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
     signals: offerRule ?? { codes: [], match: "any", jobFamilies: [] },
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dati non validi" };
-  const input = parsed.data;
+  return { input: parsed.data };
+}
+
+export async function createSearch(_: ActionState, form: FormData): Promise<ActionState> {
+  const viewer = await requireViewer();
+  const parsed = await parseSearchForm(form);
+  if ("error" in parsed) return { error: parsed.error };
+  const { input } = parsed;
 
   const db = createAdminClient();
   const since = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
@@ -94,6 +103,28 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
   await startSearch(searchId);
   revalidatePath("/app", "layout");
   redirect(`/app/ricerche/${searchId}`);
+}
+
+export type Availability = { count: number; databaseOnly: boolean } | null;
+
+// Wizard opportunità: quante aziende del database hanno già la prova per questa ricerca
+// (stesso calcolo della riserva del motore). Con le offerte basate solo sugli annunci è
+// tutto quello che la ricerca può trovare.
+export async function searchAvailability(form: FormData): Promise<Availability> {
+  const viewer = await requireViewer();
+  const parsed = await parseSearchForm(form);
+  if ("error" in parsed || !parsed.input.signals.codes.length) return null;
+  const target = toTarget(parsed.input);
+  const { data, error } = await createAdminClient().rpc("opportunity_availability", {
+    p_org: viewer.org.id,
+    p_target: target as Json,
+    p_contacts: parsed.input.contactsPerCompany,
+  });
+  if (error) {
+    console.error("opportunity_availability", error);
+    return null;
+  }
+  return { count: data ?? 0, databaseOnly: jobAdFromDatabaseOnly(target) };
 }
 
 const reportSchema = z.object({
