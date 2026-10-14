@@ -41,6 +41,9 @@ const valuta = (c, p) => {
   const parole = c.nucleo.split(' ').filter(Boolean);
   const attaccato = parole.join('');
   if (c.dominio_nel_nome) return 'ok';
+  // Livello 3: il sito l'ha già scelto la ricerca web; basta che il dominio contenga il nome
+  // («Yeppon» -> yeppon.it) e che la pagina risponda (e non sia parcheggiata, vedi sopra).
+  if (METODO === 'web' && attaccato.length >= 4 && c.domain.split('.')[0].replace(/-/g, '').includes(attaccato)) return 'ok';
   if (parole.length === 1) {
     const nome = String(c.nome || attaccato);
     if (nome !== attaccato) return tutto.includes(` ${nome} `) || tutto.includes(` ${nome.replace(/ /g, '')} `) ? 'ok' : 'nome_assente';

@@ -174,4 +174,14 @@ const [verificaWeb] = run(scegliSito(3), {
   input: [pagina('Alfa Meccanica - Modena', 'Alfa Meccanica Srl, lavorazioni meccaniche')]
 });
 assert.deepEqual(verificaWeb.results, [{ company_key: 'a', company_name: 'Alfa Meccanica Srl', city: 'Modena', domain: 'alfameccanica.it', method: 'web' }]);
+const [yeppon] = run(scegliSito(3), {
+  nodes: { 'Esito ricerca web': [{ company_key: 'yeppon', company_name: 'Yeppon', city: 'Paderno Dugnano', nucleo: 'yeppon', nome: 'yeppon', domain: 'yeppon.it', ordine: 0, url: 'https://yeppon.it' }] },
+  input: [pagina('Elettronica e informatica online', 'Negozio online')]
+});
+assert.equal(yeppon.results[0].domain, 'yeppon.it', 'livello 3: nome nel dominio basta');
+const [yepponLiv2] = run(scegliSito(2), {
+  nodes: { 'Domini candidati': [{ company_key: 'yeppon', company_name: 'Yeppon', city: 'Paderno Dugnano', nucleo: 'yeppon', nome: 'yeppon', domain: 'yeppon.it', ordine: 0 }], 'Aziende senza sito': [{ companies: [] }] },
+  input: [pagina('Elettronica e informatica online', 'Negozio online')]
+});
+assert.equal(yepponLiv2.results[0].domain, '', 'livello 2 (domini indovinati): resta severo');
 console.log('Test siti aziende superati.');
