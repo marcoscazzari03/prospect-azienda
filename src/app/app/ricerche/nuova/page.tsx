@@ -34,13 +34,11 @@ export default async function NewSearchPage({ searchParams }: PageProps<"/app/ri
         emailMode: data.email_mode as EmailMode,
         quantity: data.quantity,
         contactsPerCompany: data.contacts_per_company,
-        signals: t.signals?.codes.length
-          ? { codes: t.signals.codes, match: t.signals.match, jobFamilies: t.signals.job_families.map((f) => f.code) }
-          : undefined,
+        offer: t.signals?.offer,
       };
     }
   }
-  const kind: SearchKind = tipo === "opportunita" || defaults.signals ? "opportunity" : "standard";
+  const kind: SearchKind = tipo === "opportunita" || defaults.offer ? "opportunity" : "standard";
   return (
     <>
       <PageHeader

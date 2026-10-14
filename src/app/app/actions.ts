@@ -44,11 +44,10 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
     quantity: form.get("quantity"),
     contactsPerCompany: form.get("contactsPerCompany") ?? 1,
     repeat: form.get("repeat") ?? "none",
-    signals: {
-      codes: form.getAll("signalCodes").map(String),
-      match: form.get("signalMatch") === "all" ? "all" : "any",
-      jobFamilies: form.getAll("jobFamilies").map(String),
-    },
+    // Ricerca opportunità: il cliente sceglie il servizio, la regola dei segnali è nostra.
+    signals: form.get("offer")
+      ? { offer: String(form.get("offer")), codes: [], match: "any", jobFamilies: [] }
+      : { codes: [], match: "any", jobFamilies: [] },
   });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dati non validi" };
   const input = parsed.data;

@@ -226,23 +226,116 @@ export const JOB_FAMILIES: JobFamily[] = [
   },
 ];
 
-// "Cosa offri?": servizi del cliente -> segnali consigliati. L'AI (fase 4)
-// può proporre solo combinazioni presenti qui.
-export type ServiceDef = { code: string; label: string; jobFamilies: string[]; signals: string[] };
+// "Che servizio vendi?": aree e servizi della ricerca opportunità. Il cliente
+// sceglie il servizio; i segnali li scegliamo noi con la regola del servizio
+// (quali segnali, quali figure negli annunci, "basta uno" o "servono tutti").
+// Un servizio esiste solo se ha almeno un segnale VERIFICATO che lo distingue.
+export type OfferArea = { code: string; label: string; description: string; icon: "globe" | "cpu" | "megaphone" | "users" | "handshake" | "calculator" };
 
-export const SERVICES: ServiceDef[] = [
-  { code: "it_services", label: "Sistemistica e assistenza IT", jobFamilies: ["it_systems"], signals: ["job_ad"] },
-  { code: "software", label: "Sviluppo software", jobFamilies: ["software_dev"], signals: ["job_ad"] },
-  { code: "security", label: "Sicurezza informatica", jobFamilies: ["cybersecurity", "it_systems"], signals: ["job_ad", "no_https", "outdated_cms"] },
-  { code: "websites", label: "Siti web e restyling", jobFamilies: ["design"], signals: ["no_mobile", "no_https", "stale_copyright", "under_construction"] },
-  { code: "wp_maintenance", label: "Manutenzione WordPress / WooCommerce", jobFamilies: [], signals: ["outdated_cms", "no_https"] },
-  { code: "marketing", label: "Marketing digitale", jobFamilies: ["digital_marketing"], signals: ["job_ad"] },
-  { code: "sales_outsourcing", label: "Consulenza commerciale / vendite", jobFamilies: ["sales"], signals: ["job_ad"] },
-  { code: "hr_consulting", label: "Consulenza HR e selezione", jobFamilies: ["hr"], signals: ["job_ad"] },
-  { code: "accounting_services", label: "Contabilità e consulenza amministrativa", jobFamilies: ["accounting"], signals: ["job_ad"] },
-  { code: "translation", label: "Traduzioni ed export", jobFamilies: [], signals: ["single_language"] },
-  { code: "hotel_booking", label: "Prenotazioni online per hotel", jobFamilies: [], signals: ["no_booking_engine", "no_mobile"] },
+export const OFFER_AREAS: OfferArea[] = [
+  { code: "web", label: "Siti web", description: "Siti nuovi, rifacimenti, manutenzione e sicurezza", icon: "globe" },
+  { code: "it", label: "IT e sistemistica", description: "Assistenza, sviluppo, sicurezza informatica", icon: "cpu" },
+  { code: "marketing", label: "Marketing e comunicazione", description: "Marketing digitale, grafica, traduzioni", icon: "megaphone" },
+  { code: "hr", label: "HR e selezione", description: "Ricerca del personale, consulenza HR", icon: "users" },
+  { code: "sales", label: "Commerciale", description: "Rete vendita, consulenza commerciale", icon: "handshake" },
+  { code: "admin", label: "Amministrazione", description: "Contabilità e consulenza amministrativa", icon: "calculator" },
 ];
+
+export type OfferDef = {
+  code: string;
+  area: string;
+  label: string;
+  description: string; // per il cliente: a chi serve
+  lookFor: string; // cosa cerchiamo, in parole semplici (riepilogo e anteprima)
+  signals: string[]; // al massimo 3
+  jobFamilies: string[]; // solo se tra i segnali c'è "job_ad"
+  match: "any" | "all";
+};
+
+export const OFFERS: OfferDef[] = [
+  {
+    code: "web_redesign", area: "web", label: "Rifacimento del sito",
+    description: "Per chi realizza siti e restyling.",
+    lookFor: "un sito datato: software non aggiornato o pagine non adatte ai cellulari",
+    signals: ["outdated_cms", "no_mobile", "stale_copyright"], jobFamilies: [], match: "any",
+  },
+  {
+    code: "wp_maintenance", area: "web", label: "Manutenzione WordPress",
+    description: "Per chi gestisce e aggiorna siti WordPress, Joomla o WooCommerce.",
+    lookFor: "un sito WordPress, Joomla o WooCommerce con una versione uscita da più di 2 anni",
+    signals: ["outdated_cms"], jobFamilies: [], match: "any",
+  },
+  {
+    code: "site_security", area: "web", label: "Sicurezza del sito",
+    description: "Per chi mette in sicurezza siti e server.",
+    lookFor: "un sito senza connessione sicura (HTTPS) o con software non aggiornato",
+    signals: ["no_https", "outdated_cms"], jobFamilies: [], match: "any",
+  },
+  {
+    code: "it_support", area: "it", label: "Assistenza IT e sistemistica",
+    description: "Per sistemisti, tecnici e aziende di assistenza informatica.",
+    lookFor: "un annuncio di lavoro recente per sistemista o tecnico IT",
+    signals: ["job_ad"], jobFamilies: ["it_systems"], match: "any",
+  },
+  {
+    code: "software_dev", area: "it", label: "Sviluppo software",
+    description: "Per software house e sviluppatori.",
+    lookFor: "un annuncio di lavoro recente per sviluppatore",
+    signals: ["job_ad"], jobFamilies: ["software_dev"], match: "any",
+  },
+  {
+    code: "cybersecurity", area: "it", label: "Sicurezza informatica",
+    description: "Per consulenti e aziende di cybersecurity.",
+    lookFor: "un annuncio per figure di sicurezza o IT, oppure un sito senza HTTPS o con software non aggiornato",
+    signals: ["job_ad", "no_https", "outdated_cms"], jobFamilies: ["cybersecurity", "it_systems"], match: "any",
+  },
+  {
+    code: "digital_marketing", area: "marketing", label: "Marketing digitale",
+    description: "Per agenzie e consulenti di marketing.",
+    lookFor: "un annuncio di lavoro recente per marketing digitale o social media",
+    signals: ["job_ad"], jobFamilies: ["digital_marketing"], match: "any",
+  },
+  {
+    code: "graphic_design", area: "marketing", label: "Grafica e comunicazione",
+    description: "Per grafici, studi creativi e web designer.",
+    lookFor: "un annuncio di lavoro recente per grafico o web designer",
+    signals: ["job_ad"], jobFamilies: ["design"], match: "any",
+  },
+  {
+    code: "translation", area: "marketing", label: "Traduzioni ed export",
+    description: "Per traduttori e consulenti per l'estero.",
+    lookFor: "un sito disponibile in una sola lingua",
+    signals: ["single_language"], jobFamilies: [], match: "any",
+  },
+  {
+    code: "recruiting", area: "hr", label: "Selezione del personale",
+    description: "Per agenzie e consulenti di selezione.",
+    lookFor: "annunci di lavoro recenti per figure commerciali, amministrative o tecniche",
+    signals: ["job_ad"], jobFamilies: ["sales", "accounting", "it_systems"], match: "any",
+  },
+  {
+    code: "hr_consulting", area: "hr", label: "Consulenza HR",
+    description: "Per consulenti HR, paghe e organizzazione.",
+    lookFor: "un annuncio di lavoro recente per risorse umane o paghe",
+    signals: ["job_ad"], jobFamilies: ["hr"], match: "any",
+  },
+  {
+    code: "sales_consulting", area: "sales", label: "Rete vendita e consulenza commerciale",
+    description: "Per consulenti commerciali e agenzie di vendita.",
+    lookFor: "un annuncio di lavoro recente per commerciali o account",
+    signals: ["job_ad"], jobFamilies: ["sales"], match: "any",
+  },
+  {
+    code: "accounting", area: "admin", label: "Contabilità e amministrazione",
+    description: "Per commercialisti, consulenti e servizi amministrativi.",
+    lookFor: "un annuncio di lavoro recente per contabilità o amministrazione",
+    signals: ["job_ad"], jobFamilies: ["accounting"], match: "any",
+  },
+];
+
+export const offerByCode = (code: string) => OFFERS.find((o) => o.code === code);
+export const offersOfArea = (area: string) => OFFERS.filter((o) => o.area === area);
+export const offerUsesJobAds = (o: OfferDef) => o.signals.includes("job_ad");
 
 // Date di rilascio (per "outdated_cms": più di 2 anni). Regola prudente: una
 // versione V è vecchia se la sua data nota è oltre i 2 anni, oppure se esiste
@@ -274,7 +367,7 @@ export const VERIFIED_SIGNAL_CODES = SIGNALS.filter((s) => s.level === "verified
 
 // Segnali scelti dal cliente -> target per motore e database (target.signals).
 // I titoli degli annunci vanno al motore in tutte le lingue: confronta per parole.
-export type SignalsChoice = { codes: string[]; match: "any" | "all"; jobFamilies: string[] };
+export type SignalsChoice = { codes: string[]; match: "any" | "all"; jobFamilies: string[]; offer?: string };
 
 export function toSignalsTarget(choice: SignalsChoice) {
   const codes = [...new Set(choice.codes)].filter((c) => signalByCode(c)).slice(0, SIGNAL_RULES.maxSignalsPerSearch);
@@ -282,6 +375,7 @@ export function toSignalsTarget(choice: SignalsChoice) {
     ? [...new Set(choice.jobFamilies)].map(jobFamilyByCode).filter((f): f is JobFamily => Boolean(f)).slice(0, 3)
     : [];
   return {
+    ...(choice.offer && offerByCode(choice.offer) ? { offer: choice.offer } : {}),
     codes,
     match: choice.match,
     job_families: families.map((f) => ({
@@ -291,6 +385,21 @@ export function toSignalsTarget(choice: SignalsChoice) {
     })),
     max_age_days: SIGNAL_RULES.jobAdMaxAgeDays,
   };
+}
+
+// Il servizio scelto dal cliente -> regola dei segnali (decisa da noi).
+export function offerChoice(code: string): SignalsChoice | null {
+  const o = offerByCode(code);
+  return o ? { offer: o.code, codes: o.signals, match: o.match, jobFamilies: o.jobFamilies } : null;
+}
+
+// Anteprima della ricerca opportunità per servizio: cosa cerchiamo, in parole semplici.
+export function describeOffer(args: { offer: string; industry: string; where: string }) {
+  const o = offerByCode(args.offer);
+  if (!o) return "";
+  const sector = args.industry.trim().replace(/^\p{Lu}(?=\p{Ll})/u, (c) => c.toLowerCase());
+  const who = `${sector || "aziende del settore scelto"}${args.where ? ` in ${args.where}` : ""}`;
+  return `Cercheremo ${who} con ${o.lookFor}. Ogni lead ha la prova (link e data): le aziende senza prova vengono escluse.`;
 }
 
 // Il lead con questi segnali costa crediti in più? (solo segnali verificati)

@@ -5,14 +5,14 @@ import { COMPANY_SIZES, COUNTRIES, MODE_INFO, ROLE_PRESETS, type EmailMode } fro
 import { estimateCredits } from "@/lib/domain/pricing";
 import {
   JOB_AD_COUNTRIES,
-  JOB_FAMILIES,
-  SERVICES,
-  SIGNALS,
-  SIGNAL_RULES,
-  chargesSignal,
-  describeOpportunity,
+  OFFER_AREAS,
+  describeOffer,
   extraCreditsLabel,
+  offerByCode,
+  offerUsesJobAds,
+  offersOfArea,
   signalExtraRange,
+  type OfferArea,
   type SignalPrices,
 } from "@/lib/domain/signals";
 import { createSearch, type ActionState } from "../../actions";
@@ -32,14 +32,14 @@ export type WizardDefaults = {
   emailMode?: EmailMode;
   quantity?: number;
   contactsPerCompany?: number;
-  signals?: { codes: string[]; match: "any" | "all"; jobFamilies: string[] };
+  offer?: string;
 };
 
 export type SearchKind = "standard" | "opportunity";
 
 const STEPS = {
   standard: [["target", "Chi cerchi"], ["roles", "Chi contattare"], ["email", "Che email"], ["quantity", "Quanti"]],
-  opportunity: [["signals", "Opportunità"], ["target", "Chi cerchi"], ["roles", "Chi contattare"], ["email", "Che email"], ["quantity", "Quanti"]],
+  opportunity: [["offer", "Cosa vendi"], ["target", "In quali aziende"], ["roles", "Chi contattare"], ["email", "Che email"], ["quantity", "Quanti"]],
 } as const;
 
 const KINDS: { kind: SearchKind; title: string; text: string; example: string }[] = [
@@ -52,10 +52,27 @@ const KINDS: { kind: SearchKind; title: string; text: string; example: string }[
   {
     kind: "opportunity",
     title: "Trova aziende con opportunità",
-    text: "Aziende con un segnale concreto legato al tuo servizio, con la prova.",
-    example: "Es. aziende che assumono un sistemista, siti non adatti ai cellulari",
+    text: "Parti da quello che vendi: aziende con un segnale concreto legato al tuo servizio, con la prova.",
+    example: "Es. aziende che assumono un sistemista, siti con software vecchio",
   },
 ];
+
+const AREA_PATHS: Record<OfferArea["icon"], string> = {
+  globe: "M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM2 10h16M10 2c2.2 2.2 3.2 5 3.2 8s-1 5.8-3.2 8c-2.2-2.2-3.2-5-3.2-8s1-5.8 3.2-8z",
+  cpu: "M6 6h8v8H6zM8 2.5V6M12 2.5V6M8 14v3.5M12 14v3.5M2.5 8H6M2.5 12H6M14 8h3.5M14 12h3.5",
+  megaphone: "M3 8.5v3h3l6 4v-11l-6 4zM14.5 7.5a3.5 3.5 0 0 1 0 5M6 11.5l1 4.5",
+  users: "M7 8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM13.5 8.5a2 2 0 1 0 0-4M2.5 16c0-2.6 2-4.5 4.5-4.5s4.5 1.9 4.5 4.5M13.5 11.5c2.2 0 4 1.7 4 4.5",
+  handshake: "M2.5 9 6 5.5l3 1.5 3-1.5L17.5 9M6 5.5 2.5 12l4 3.5 2-1.5M17.5 9 13 14.5l-2 1-2.5-2M9 7l-2.5 3 2 1 3-2",
+  calculator: "M5 2.5h10v15H5zM7.5 5.5h5v2.5h-5zM7.5 11h.5M10 11h.5M12.5 11h.5M7.5 14h.5M10 14h.5M12.5 14h.5",
+};
+
+function AreaIcon({ name }: { name: OfferArea["icon"] }) {
+  return (
+    <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={AREA_PATHS[name]} />
+    </svg>
+  );
+}
 
 export function SearchWizard({
   credits,
@@ -75,10 +92,8 @@ export function SearchWizard({
   const [step, setStep] = useState(0);
   const [industry, setIndustry] = useState(defaults.industry ?? "");
   const [regions, setRegions] = useState(defaults.regions?.join("\n") ?? "");
-  const [service, setService] = useState("");
-  const [codes, setCodes] = useState<string[]>(defaults.signals?.codes ?? []);
-  const [match, setMatch] = useState<"any" | "all">(defaults.signals?.match ?? "any");
-  const [families, setFamilies] = useState<string[]>(defaults.signals?.jobFamilies ?? []);
+  const [offer, setOffer] = useState(defaults.offer ?? "");
+  const [area, setArea] = useState(offerByCode(defaults.offer ?? "")?.area ?? "");
   const [mode, setMode] = useState<EmailMode>(defaults.emailMode ?? "mixed");
   const [quantity, setQuantity] = useState(Math.min(defaults.quantity ?? 10, maxQuantity));
   const [countries, setCountries] = useState<string[]>(defaults.countries ?? ["IT"]);
@@ -87,8 +102,9 @@ export function SearchWizard({
 
   const info = MODE_INFO[mode];
   const opportunity = kind === "opportunity";
-  const withSignal = opportunity && chargesSignal(codes);
-  const extra = withSignal ? signalExtraRange(signalPrices, codes) : 0;
+  const chosen = opportunity ? offerByCode(offer) : undefined;
+  const withSignal = Boolean(chosen);
+  const extra = chosen ? signalExtraRange(signalPrices, chosen.signals) : 0;
   const estimate = estimateCredits(mode, quantity, extra);
   const reserve = estimate.reserve;
   const enough = credits >= reserve;
@@ -102,19 +118,7 @@ export function SearchWizard({
     setStep(0);
   };
 
-  // Opportunità: servizio -> segnali consigliati (modificabili), con le regole del catalogo.
-  const chosenService = SERVICES.find((x) => x.code === service);
-  const recommended = chosenService?.signals ?? [];
-  const pickService = (code: string) => {
-    setService(code);
-    const svc = SERVICES.find((x) => x.code === code);
-    if (!svc) return;
-    setCodes(svc.signals.slice(0, SIGNAL_RULES.maxSignalsPerSearch));
-    setFamilies(svc.jobFamilies.slice(0, 3));
-  };
-  const orderedSignals = [...SIGNALS].sort((a, b) => Number(recommended.includes(b.code)) - Number(recommended.includes(a.code)));
-  const verifiedCount = codes.filter((c) => SIGNALS.find((x) => x.code === c)?.level === "verified").length;
-  const jobAd = codes.includes("job_ad");
+  // Opportunità: il cliente sceglie il servizio, i segnali li sceglie la regola del servizio.
   const jobAdCountriesOk = countries.every((c) => (JOB_AD_COUNTRIES as readonly string[]).includes(c));
   const where = [
     regions.split(/[\n,]/).map((r) => r.trim()).filter(Boolean).join(", "),
@@ -122,16 +126,12 @@ export function SearchWizard({
   ].filter(Boolean)[0] ?? "";
   const signalProblem = !opportunity
     ? ""
-    : !codes.length
-      ? "Scegli almeno un segnale."
-      : !withSignal
-        ? "I segnali indicativi non si possono usare da soli: aggiungi un segnale verificato."
-        : jobAd && !families.length
-          ? "Scegli la figura cercata negli annunci."
-          : jobAd && !jobAdCountriesOk
-            ? "Gli annunci di lavoro sono disponibili solo in alcuni paesi: togli i paesi non coperti o il segnale «annuncio»."
-            : "";
-  const preview = opportunity ? describeOpportunity({ codes, match, jobFamilies: families, industry, where }) : "";
+    : !chosen
+      ? "Scegli il servizio che vendi."
+      : offerUsesJobAds(chosen) && !jobAdCountriesOk
+        ? "Per questo servizio usiamo gli annunci di lavoro, disponibili solo in alcuni paesi: togli i paesi non coperti."
+        : "";
+  const preview = chosen ? describeOffer({ offer: chosen.code, industry, where }) : "";
 
   return (
     <form action={action} className="grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -180,78 +180,71 @@ export function SearchWizard({
 
         {state.error && <Alert tone="brick">{state.error}</Alert>}
 
-        {/* Opportunità: che servizio vendi e quali segnali cercare. Tutti i passi restano nel DOM, così il form invia tutto. */}
+        {/* Opportunità: che servizio vendi. Tutti i passi restano nel DOM, così il form invia tutto. */}
         {opportunity && (
-          <Card className={cx("flex flex-col gap-5 p-6", current !== "signals" && "hidden")}>
-            <Field label="Che servizio vendi?" htmlFor="service" hint="Ti proponiamo i segnali che possiamo verificare per quel servizio. Puoi cambiarli.">
-              <Select id="service" value={service} onChange={(e) => pickService(e.target.value)}>
-                <option value="">Scelgo io i segnali</option>
-                {SERVICES.map((x) => <option key={x.code} value={x.code}>{x.label}</option>)}
-              </Select>
-            </Field>
+          <Card className={cx("flex flex-col gap-6 p-6", current !== "offer" && "hidden")}>
+            <input type="hidden" name="offer" value={chosen?.code ?? ""} />
             <div>
-              <p className="mb-1 text-sm font-medium">Quali segnali vuoi trovare?</p>
-              <p className="mb-3 text-xs text-muted">Fino a {SIGNAL_RULES.maxSignalsPerSearch}. Descriviamo sempre il fatto osservato, con la prova: non deduciamo bisogni.</p>
-              <div className="grid gap-2">
-                {orderedSignals.map((sg) => {
-                  const checked = codes.includes(sg.code);
-                  const full = !checked && codes.length >= SIGNAL_RULES.maxSignalsPerSearch;
-                  return (
-                    <label key={sg.code} className={cx("flex cursor-pointer gap-3 rounded-lg border px-3 py-2.5 text-sm", checked ? "border-ledger bg-ledger-soft" : "border-line hover:border-ink-2", full && "cursor-not-allowed opacity-50")}>
-                      <input type="checkbox" name="signalCodes" value={sg.code} checked={checked} disabled={full} onChange={() => setCodes(toggle(codes, sg.code))} className="mt-0.5 accent-[var(--color-ledger)]" />
-                      <span className="flex-1">
-                        <span className="flex flex-wrap items-center gap-2 font-medium">
-                          {sg.label}
-                          {recommended.includes(sg.code) && <span className="font-mono text-[10px] uppercase tracking-wider text-ledger">Consigliato</span>}
-                          <span className={cx("font-mono text-[10px] uppercase tracking-wider", sg.level === "verified" ? "text-ink-2" : "text-muted")}>
-                            {sg.level === "verified" ? "Verificato" : "Indicativo"}
-                          </span>
-                        </span>
-                        <span className="block text-xs text-ink-2">{sg.description}</span>
-                      </span>
-                    </label>
-                  );
-                })}
+              <p className="text-sm font-medium">Che servizio vendi?</p>
+              <p className="mt-1 text-xs text-muted">Scegli l&apos;area, poi il servizio: cerchiamo le aziende con un segnale concreto collegato, e su ogni lead trovi la prova.</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3" role="radiogroup" aria-label="Area del servizio">
+                {OFFER_AREAS.map((a) => (
+                  <button
+                    key={a.code}
+                    type="button"
+                    role="radio"
+                    aria-checked={area === a.code}
+                    onClick={() => {
+                      setArea(a.code);
+                      if (offerByCode(offer)?.area !== a.code) setOffer(offersOfArea(a.code).length === 1 ? offersOfArea(a.code)[0].code : "");
+                    }}
+                    className={cx(
+                      "flex items-start gap-3 rounded-xl border bg-card p-4 text-left transition-colors",
+                      area === a.code ? "border-ledger shadow-[0_0_0_1px_var(--color-ledger)]" : "border-line hover:border-ink-2",
+                    )}
+                  >
+                    <span className={cx("grid h-10 w-10 shrink-0 place-items-center rounded-full", area === a.code ? "bg-ledger text-white" : "bg-ledger-soft text-ledger")}>
+                      <AreaIcon name={a.icon} />
+                    </span>
+                    <span>
+                      <span className="block font-semibold">{a.label}</span>
+                      <span className="mt-0.5 block text-xs text-ink-2">{a.description}</span>
+                    </span>
+                  </button>
+                ))}
               </div>
-              <p className="mt-2 text-xs text-muted">
-                I segnali <span className="font-medium">indicativi</span> si mostrano come informazione in più: da soli non filtrano le aziende e non costano crediti in più.
-              </p>
             </div>
-            {jobAd && (
-              <div>
-                <p className="mb-2 text-sm font-medium">Quale figura cercano negli annunci?</p>
-                <div className="flex flex-wrap gap-2">
-                  {JOB_FAMILIES.map((f) => {
-                    const checked = families.includes(f.code);
-                    return (
-                      <label key={f.code} className={cx("cursor-pointer rounded-full border px-3 py-1 text-sm", checked ? "border-ledger bg-ledger-soft text-ledger" : "border-line hover:border-ink-2", !checked && families.length >= 3 && "pointer-events-none opacity-50")}>
-                        <input type="checkbox" name="jobFamilies" value={f.code} checked={checked} onChange={() => setFamilies(toggle(families, f.code))} className="sr-only" />
-                        {f.label}
-                      </label>
-                    );
-                  })}
-                </div>
-                <p className="mt-2 text-xs text-muted">
-                  Annunci pubblicati negli ultimi {SIGNAL_RULES.jobAdMaxAgeDays} giorni sul sito dell&apos;azienda o su pagine pubbliche, esclusi quelli delle agenzie per il lavoro.
-                  Chi assume cerca un dipendente: per te è il momento giusto per proporti, non una richiesta di fornitori.
-                </p>
-              </div>
-            )}
-            {verifiedCount > 1 && (
-              <div>
-                <p className="mb-2 text-sm font-medium">Come combinarli?</p>
-                <div className="flex flex-wrap gap-2">
-                  {([["any", "Basta un segnale"], ["all", "Servono tutti"]] as const).map(([v, l]) => (
-                    <label key={v} className={cx("cursor-pointer rounded-full border px-3 py-1 text-sm", match === v ? "border-ledger bg-ledger-soft text-ledger" : "border-line hover:border-ink-2")}>
-                      <input type="radio" name="signalMatch" value={v} checked={match === v} onChange={() => setMatch(v)} className="sr-only" />
-                      {l}
+
+            {area && (
+              <div className="animate-row-in">
+                <p className="text-sm font-medium">Più nello specifico</p>
+                <div className="mt-3 grid gap-2" role="radiogroup" aria-label="Servizio">
+                  {offersOfArea(area).map((o) => (
+                    <label
+                      key={o.code}
+                      className={cx(
+                        "flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 text-sm transition-colors",
+                        offer === o.code ? "border-ledger bg-ledger-soft" : "border-line hover:border-ink-2",
+                      )}
+                    >
+                      <input type="radio" name="offerChoice" value={o.code} checked={offer === o.code} onChange={() => setOffer(o.code)} className="mt-1 accent-[var(--color-ledger)]" />
+                      <span className="flex-1">
+                        <span className="block font-medium">{o.label}</span>
+                        <span className="block text-xs text-ink-2">{o.description}</span>
+                        <span className="mt-1 block text-xs text-muted">Cerchiamo aziende con {o.lookFor}.</span>
+                        {offerUsesJobAds(o) && (
+                          <span className="mt-1 block text-xs text-stamp-ink">Basato sugli annunci di lavoro: la disponibilità cresce man mano che ampliamo le fonti.</span>
+                        )}
+                      </span>
                     </label>
                   ))}
                 </div>
-                <p className="mt-1 text-xs text-muted">«Servono tutti» trova meno aziende, ma più mirate.</p>
               </div>
             )}
-            {signalProblem && codes.length > 0 && <Alert>{signalProblem}</Alert>}
+            {signalProblem && chosen && <Alert>{signalProblem}</Alert>}
+            <p className="text-xs text-muted">
+              I segnali descrivono fatti pubblici osservati (annunci di lavoro, caratteristiche del sito): non garantiscono che l&apos;azienda abbia bisogno del tuo servizio, ma ti dicono quando proporlo.
+            </p>
           </Card>
         )}
 
@@ -392,7 +385,8 @@ export function SearchWizard({
           {opportunity && (
             <div className="rounded-lg border border-ledger/30 bg-ledger-soft/60 p-3 text-sm">
               <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ledger">Anteprima della ricerca</p>
-              <p className="text-ink-2">{preview || "Scegli il servizio o i segnali da cercare."}</p>
+              {chosen && <p className="mb-1 text-sm font-medium">{chosen.label}</p>}
+              <p className="text-ink-2">{preview || "Scegli il servizio che vendi."}</p>
             </div>
           )}
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-sm">
@@ -409,7 +403,7 @@ export function SearchWizard({
             <p className="text-sm text-muted">Crediti stimati</p>
             <p className="font-mono text-2xl font-semibold">{estimate.min}–{reserve}</p>
             <p className="mt-1 text-xs text-muted">
-              {withSignal && <>Lead con segnale: {extraCreditsLabel(signalPrices)} ciascuno. </>}
+              {withSignal && <>Ogni lead con opportunità: {extraCreditsLabel(signalPrices)}. </>}
               Riserviamo {reserve} crediti e addebitiamo solo i lead consegnati. Disponibili: {credits}.
             </p>
             {withSignal && (

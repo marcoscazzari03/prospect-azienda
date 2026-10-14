@@ -163,6 +163,16 @@ manifatturiere in Lombardia con annunci per ruoli IT negli ultimi 60 giorni»).
   rimborso automatico entro il tetto del 10%; se approvato, la prova contestata viene cancellata.
 - Export: colonne «Perché è in target» e «Prova del segnale».
 
+## Ricerca opportunità per servizio (14/10)
+- Il cliente non sceglie più i segnali: sceglie l'**area** e il **servizio** che vende (`OFFER_AREAS`,
+  `OFFERS` in `signals.ts`). Ogni servizio ha la sua regola interna: segnali (max 3), figure degli
+  annunci, «basta uno»/«servono tutti», e la frase `lookFor` mostrata nel riepilogo.
+- Regola del catalogo: un servizio esiste solo se ha almeno un segnale **verificato** che lo distingue.
+  Nuovi servizi arrivano con nuove fonti (Adzuna per gli annunci) o nuovi controlli sulla homepage.
+- Il backend ricava i segnali dal servizio (`offerChoice`): quelli inviati dal browser vengono ignorati.
+  `target.signals.offer` resta sulla ricerca (riepilogo, «Ripeti con nuovi lead»).
+- Sul lead restano visibili le prove («Perché è in target»).
+
 ## App (fase 4)
 - Nuova ricerca con due modalità in cima al form: «Trova aziende in target» (invariata) e «Trova
   aziende con opportunità» (`/app/ricerche/nuova?tipo=opportunita`, anche dalla dashboard e da

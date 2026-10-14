@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
-import { SERVICES, VERIFIED_SIGNAL_CODES, describeOpportunity, extraCreditsLabel, signalExtraRange, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
+import { OFFERS, VERIFIED_SIGNAL_CODES, describeOffer, describeOpportunity, extraCreditsLabel, signalExtraRange, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
 import { flattenDelivery } from "@/lib/domain/leads";
 
 const base = {
@@ -95,10 +95,30 @@ describe("segnali nella ricerca (fase 3)", () => {
     expect(describeOpportunity({ codes: ["stale_copyright"], match: "any", jobFamilies: [], industry: "x", where: "" })).toBe("");
   });
 
-  it("ogni servizio, scelto così com'è, produce una ricerca valida in Italia", () => {
-    for (const svc of SERVICES) {
-      const r = searchInputSchema.safeParse({ ...base, signals: { codes: svc.signals.slice(0, 3), jobFamilies: svc.jobFamilies.slice(0, 3) } });
-      expect(r.success, svc.code).toBe(svc.code !== "hotel_booking" || svc.signals.includes("no_mobile"));
+  it("servizio venduto: la regola dei segnali è la nostra, non quella inviata dal browser", () => {
+    const input = searchInputSchema.parse({ ...base, signals: { offer: "translation", codes: ["no_https"], match: "all", jobFamilies: [] } });
+    const t = toTarget(input).signals!;
+    expect(t.offer).toBe("translation");
+    expect(t.codes).toEqual(["single_language"]);
+    expect(t.match).toBe("any");
+    expect(searchInputSchema.safeParse({ ...base, signals: { offer: "inventato", codes: [] } }).success).toBe(false);
+  });
+
+  it("ogni servizio produce una ricerca valida in Italia", () => {
+    for (const o of OFFERS) {
+      const r = searchInputSchema.safeParse({ ...base, signals: { offer: o.code, codes: [], match: "any", jobFamilies: [] } });
+      expect(r.success, o.code).toBe(true);
     }
+  });
+
+  it("servizi con annunci: solo nei paesi coperti", () => {
+    expect(searchInputSchema.safeParse({ ...base, countries: ["PL"], signals: { offer: "it_support", codes: [] } }).success).toBe(false);
+    expect(searchInputSchema.safeParse({ ...base, countries: ["PL"], signals: { offer: "translation", codes: [] } }).success).toBe(true);
+  });
+
+  it("anteprima del servizio in parole semplici", () => {
+    expect(describeOffer({ offer: "wp_maintenance", industry: "Studi dentistici", where: "Lombardia" })).toBe(
+      "Cercheremo studi dentistici in Lombardia con un sito WordPress, Joomla o WooCommerce con una versione uscita da più di 2 anni. Ogni lead ha la prova (link e data): le aziende senza prova vengono escluse.",
+    );
   });
 });

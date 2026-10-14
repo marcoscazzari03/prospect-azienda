@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ProvenanceStamp, cx } from "./ui";
-import { SERVICES, SIGNALS, SIGNAL_RULES, SIGNAL_SHORT, VERIFIED_SIGNAL_CODES, describeOpportunity, extraCreditsLabel, type SignalPrices } from "@/lib/domain/signals";
+import { OFFER_AREAS, SIGNAL_SHORT, VERIFIED_SIGNAL_CODES, describeOffer, extraCreditsLabel, offerByCode, offersOfArea, type SignalPrices } from "@/lib/domain/signals";
 
 // Demo interattiva della homepage: simula una ricerca interamente nel browser.
 // Nessuna chiamata al server, al database o al motore: i "risultati" sono
@@ -38,9 +38,8 @@ const QUANTITIES = [10, 25, 50] as const;
 type Kind = "standard" | "opportunity";
 type Config = {
   kind: Kind;
-  service: string;
-  codes: string[];
-  match: "any" | "all";
+  area: string;
+  offer: string;
   country: string;
   region: string;
   sector: string;
@@ -75,8 +74,11 @@ function buildResults(cfg: Config) {
   const country = COUNTRIES.find((c) => c.id === cfg.country) ?? COUNTRIES[0];
   const rand = rng(JSON.stringify(cfg));
   const opportunity = cfg.kind === "opportunity";
-  const decisive = cfg.codes.filter((c) => VERIFIED_SIGNAL_CODES.includes(c));
-  const extra = cfg.codes.filter((c) => !VERIFIED_SIGNAL_CODES.includes(c));
+  const rule = offerByCode(cfg.offer);
+  const codes = rule?.signals ?? [];
+  const match = rule?.match ?? "any";
+  const decisive = codes.filter((c) => VERIFIED_SIGNAL_CODES.includes(c));
+  const extra = codes.filter((c) => !VERIFIED_SIGNAL_CODES.includes(c));
   // Con i segnali il mercato si restringe: a volte si trovano meno lead di quelli chiesti.
   const shortfall = rand() < (opportunity ? 0.6 : 0.35) ? Math.ceil(cfg.qty * (opportunity ? 0.18 : 0.08) * rand()) : 0;
   const found = Math.max(1, cfg.qty - shortfall);
@@ -87,7 +89,7 @@ function buildResults(cfg: Config) {
     const dom = scramble(rand, 6, 11);
     const signals = !opportunity
       ? []
-      : cfg.match === "all"
+      : match === "all"
         ? [...decisive]
         : decisive.filter(() => rand() < 0.5);
     if (opportunity && !signals.length && decisive.length) signals.push(decisive[Math.floor(rand() * decisive.length)]);
@@ -142,9 +144,8 @@ const TICK = (
 export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
   const [cfg, setCfg] = useState<Config>({
     kind: "opportunity",
-    service: "websites",
-    codes: ["no_mobile", "outdated_cms"],
-    match: "any",
+    area: "web",
+    offer: "web_redesign",
     country: "IT",
     region: "Lombardia",
     sector: "software",
@@ -171,7 +172,8 @@ export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
   const country = COUNTRIES.find((c) => c.id === cfg.country) ?? COUNTRIES[0];
   const sector = SECTORS.find((s) => s.id === cfg.sector) ?? SECTORS[0];
   const results = useMemo(() => buildResults(cfg), [cfg]);
-  const decisive = cfg.codes.filter((c) => VERIFIED_SIGNAL_CODES.includes(c));
+  const rule = offerByCode(cfg.offer);
+  const decisive = (rule?.signals ?? []).filter((c) => VERIFIED_SIGNAL_CODES.includes(c));
   const valid = !opportunity || decisive.length > 0;
 
   const t = tick ?? 0;
@@ -212,15 +214,8 @@ export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
     setCfg((c) => ({ ...c, ...patch }));
     setTick(null);
   };
-  const pickService = (code: string) => {
-    const svc = SERVICES.find((x) => x.code === code);
-    update({ service: code, codes: (svc?.signals ?? []).filter((c) => c !== "job_ad").slice(0, SIGNAL_RULES.maxSignalsPerSearch) });
-  };
-  const available = SIGNALS.filter((s) => s.code !== "job_ad" && !cfg.codes.includes(s.code));
-
   const preview = opportunity
-    ? describeOpportunity({ codes: cfg.codes, match: cfg.match, jobFamilies: [], industry: sector.who, where: cfg.region }) ||
-      "Aggiungi almeno un segnale verificato: gli indicativi da soli non filtrano."
+    ? describeOffer({ offer: cfg.offer, industry: sector.who, where: cfg.region })
     : `Cercheremo ${sector.who} in ${cfg.region} (${cfg.size}) e il referente giusto: ${cfg.role}. Ogni lead con la fonte e lo stato dell'email.`;
 
   return (
@@ -265,43 +260,20 @@ export function LeadDemo({ signalPrices }: { signalPrices: SignalPrices }) {
           {opportunity && (
             <>
               <Row label="Che servizio vendi?">
-                <select className={selectCls} value={cfg.service} onChange={(e) => pickService(e.target.value)}>
-                  {SERVICES.filter((s) => s.signals.some((c) => c !== "job_ad")).map((s) => (
-                    <option key={s.code} value={s.code}>{s.label}</option>
-                  ))}
+                <select className={selectCls} value={cfg.area} onChange={(e) => update({ area: e.target.value, offer: offersOfArea(e.target.value)[0]?.code ?? "" })}>
+                  {OFFER_AREAS.map((a) => <option key={a.code} value={a.code}>{a.label}</option>)}
                 </select>
               </Row>
-              <Row label={`Segnali (max ${SIGNAL_RULES.maxSignalsPerSearch})`}>
-                <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-lg border border-line px-2 py-1.5">
-                  {cfg.codes.map((c) => (
-                    <span key={c} className="inline-flex items-center gap-1 rounded-md bg-ledger-soft px-2 py-0.5 text-xs text-ledger">
-                      {SIGNAL_SHORT[c]}
-                      <button type="button" onClick={() => update({ codes: cfg.codes.filter((x) => x !== c) })} aria-label={`Togli ${SIGNAL_SHORT[c]}`} className="opacity-70 hover:opacity-100">×</button>
-                    </span>
-                  ))}
-                  {cfg.codes.length < SIGNAL_RULES.maxSignalsPerSearch && (
-                    <select
-                      className="h-7 min-w-0 flex-1 bg-transparent text-xs text-muted outline-none"
-                      value=""
-                      onChange={(e) => e.target.value && update({ codes: [...cfg.codes, e.target.value] })}
-                      aria-label="Aggiungi un segnale"
-                    >
-                      <option value="">+ Aggiungi</option>
-                      {available.map((s) => <option key={s.code} value={s.code}>{s.label}{s.level === "indicative" ? " (indicativo)" : ""}</option>)}
-                    </select>
-                  )}
-                </div>
+              <Row label="Più nello specifico">
+                <select className={selectCls} value={cfg.offer} onChange={(e) => update({ offer: e.target.value })}>
+                  {offersOfArea(cfg.area).map((o) => <option key={o.code} value={o.code}>{o.label}</option>)}
+                </select>
               </Row>
-              <Row label="Condizione">
-                <div className="flex gap-5 text-sm">
-                  {([["any", "Basta uno"], ["all", "Servono tutti"]] as const).map(([v, l]) => (
-                    <label key={v} className="flex cursor-pointer items-center gap-2">
-                      <input type="radio" name="demo-match" checked={cfg.match === v} onChange={() => update({ match: v })} className="accent-[var(--color-ledger)]" />
-                      {l}
-                    </label>
-                  ))}
-                </div>
-              </Row>
+              {rule && (
+                <Row label="Cosa cerchiamo">
+                  <p className="text-xs leading-relaxed text-ink-2">Aziende con {rule.lookFor}.</p>
+                </Row>
+              )}
               <hr className="my-1 border-line" />
             </>
           )}

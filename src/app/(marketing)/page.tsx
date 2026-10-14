@@ -84,11 +84,11 @@ const faq = (prices: SignalPrices) => [
   },
   {
     q: "Come funzionano le opportunità?",
-    a: `Scegli il servizio che vendi e i segnali da cercare: annunci di lavoro recenti per una figura (es. sistemista) o caratteristiche del sito (non adatto ai cellulari, senza HTTPS, software non aggiornato, in una sola lingua). Controlliamo ogni segnale prima di cercare i contatti e lo consegniamo con la prova: link e data. Le aziende senza prova vengono escluse. Ogni lead con segnale costa ${extraCreditsLabel(prices)} e, se il segnale non è corretto, puoi segnalarlo entro 14 giorni.`,
+    a: `Scegli il servizio che vendi (es. rifacimento del sito, assistenza IT, selezione del personale): cerchiamo noi i segnali collegati, come annunci di lavoro recenti per una figura o caratteristiche del sito (software non aggiornato, senza HTTPS, in una sola lingua). Controlliamo ogni segnale prima di cercare i contatti e lo consegniamo con la prova: link e data. Le aziende senza prova vengono escluse. Ogni lead con segnale costa ${extraCreditsLabel(prices)} e, se il segnale non è corretto, puoi segnalarlo entro 14 giorni.`,
   },
   {
-    q: "Cosa significa «servono tutti»?",
-    a: "Con «basta uno» consegniamo le aziende che hanno almeno uno dei segnali scelti; con «servono tutti» solo quelle che li hanno tutti. «Servono tutti» trova meno aziende, ma più mirate. I segnali indicativi (es. sito fermo da tempo) sono un'informazione in più e non filtrano da soli.",
+    q: "Che servizi posso scegliere?",
+    a: "Siti web (rifacimento, manutenzione WordPress, sicurezza del sito), IT e sistemistica, marketing e comunicazione, HR e selezione, commerciale, amministrazione. Aggiungiamo un servizio solo quando abbiamo un segnale verificabile che lo distingue: per questo l'elenco cresce nel tempo.",
   },
 ];
 
@@ -397,30 +397,33 @@ export default async function HomePage() {
       <Section tone="paper">
         <Heading title="Come funziona la ricerca opportunità" text="Solo aziende con una prova verificabile del segnale. Nessuna supposizione: link e data su ogni lead." />
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StepCard n={1} title="Scegli il servizio" text="Indica il servizio che offri.">
+          <StepCard n={1} title="Scegli cosa vendi" text="Indica l'area del tuo servizio.">
             <div className="flex flex-wrap gap-2 rounded-xl bg-paper/70 p-3 text-xs">
               <span className="rounded-full border border-ledger bg-ledger-soft px-3 py-1 font-medium text-ledger">Siti web</span>
-              <span className="rounded-full border border-line bg-card px-3 py-1 text-ink-2">Sicurezza IT</span>
-              <span className="rounded-full border border-line bg-card px-3 py-1 text-ink-2">Sviluppo software</span>
-              <span className="rounded-full border border-line bg-card px-3 py-1 text-ink-2">Marketing digitale</span>
+              <span className="rounded-full border border-line bg-card px-3 py-1 text-ink-2">IT e sistemistica</span>
+              <span className="rounded-full border border-line bg-card px-3 py-1 text-ink-2">Marketing</span>
+              <span className="rounded-full border border-line bg-card px-3 py-1 text-ink-2">HR e selezione</span>
             </div>
           </StepCard>
-          <StepCard n={2} title="Seleziona i segnali" text="Scegli quali segnali indicano un'opportunità per te.">
+          <StepCard n={2} title="Più nello specifico" text="Scegli il servizio esatto che vuoi proporre.">
             <ul className="flex flex-col gap-2 rounded-xl bg-paper/70 p-3 text-xs">
-              {([["Non adatto ai cellulari", true], ["Software non aggiornato", true], ["Annunci di lavoro attivi", true], ["Sito in una sola lingua", false]] as const).map(([l, on]) => (
+              {([["Rifacimento del sito", true], ["Manutenzione WordPress", false], ["Sicurezza del sito", false]] as const).map(([l, on]) => (
                 <li key={l} className="flex items-center gap-2">
-                  <span className={cx("grid h-4 w-4 place-items-center rounded", on ? "bg-ledger text-white" : "border border-line bg-card")}>{on && <Ico name="tick" className="h-3 w-3" />}</span>
-                  {l}
+                  <span className={cx("grid h-4 w-4 place-items-center rounded-full", on ? "border-2 border-ledger" : "border border-line bg-card")}>{on && <span className="h-1.5 w-1.5 rounded-full bg-ledger" />}</span>
+                  <span className={on ? "font-medium" : "text-ink-2"}>{l}</span>
                 </li>
               ))}
             </ul>
           </StepCard>
-          <StepCard n="bolt" title="Imposta la regola" text="Decidi quanti segnali devono essere presenti.">
-            <div className="flex flex-col gap-2 rounded-xl bg-paper/70 p-3 text-xs">
-              <span className="flex items-center gap-2 font-medium"><span className="grid h-4 w-4 place-items-center rounded-full border-2 border-ledger"><span className="h-1.5 w-1.5 rounded-full bg-ledger" /></span>Basta uno</span>
-              <span className="flex items-center gap-2 text-ink-2"><span className="h-4 w-4 rounded-full border border-line bg-card" />Servono tutti</span>
-            </div>
-            <p className="mt-3 text-xs text-muted">Con «servono tutti» trovi meno aziende, ma più mirate.</p>
+          <StepCard n="bolt" title="Cerchiamo i segnali" text="Scegliamo noi i segnali più adatti al servizio e li verifichiamo sito per sito.">
+            <ul className="flex flex-col gap-2 rounded-xl bg-paper/70 p-3 text-xs">
+              {["Software non aggiornato", "Non adatto ai cellulari", "Sito fermo da tempo"].map((l) => (
+                <li key={l} className="flex items-center gap-2">
+                  <span className="grid h-4 w-4 place-items-center rounded bg-ledger text-white"><Ico name="tick" className="h-3 w-3" /></span>
+                  {l}
+                </li>
+              ))}
+            </ul>
           </StepCard>
           <StepCard n="bolt" title="Ricevi lead con prova" text="Ottieni solo aziende con la prova verificabile del segnale.">
             <div className="rounded-xl bg-paper/70 p-3"><ProofList /></div>

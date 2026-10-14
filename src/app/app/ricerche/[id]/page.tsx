@@ -10,7 +10,7 @@ import { closeStaleRuns } from "@/lib/server/searches";
 import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
 import type { DeliveryRow } from "@/lib/domain/leads";
 import { REPEAT_LABEL, type Repeat, type SearchTarget } from "@/lib/domain/search-input";
-import { describeOpportunity, signalByCode } from "@/lib/domain/signals";
+import { describeOffer, describeOpportunity, offerByCode, signalByCode } from "@/lib/domain/signals";
 import { stopRepeat } from "../../actions";
 
 export const metadata: Metadata = { title: "Ricerca" };
@@ -76,7 +76,8 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
         <div className="mb-6 rounded-xl border border-ledger/30 bg-ledger-soft/60 px-5 py-4 text-sm">
           <p className="mb-1 font-mono text-[10px] uppercase tracking-wider text-ledger">Ricerca opportunità</p>
           <p className="text-ink-2">
-            {describeOpportunity({
+            {t.signals.offer && offerByCode(t.signals.offer) && <span className="mb-1 block font-medium text-ink">{offerByCode(t.signals.offer)!.label}</span>}
+            {t.signals.offer ? describeOffer({ offer: t.signals.offer, industry: t.industry, where: t.regions?.join(", ") || t.country_names?.join(", ") || "" }) : describeOpportunity({
               codes: t.signals.codes,
               match: t.signals.match,
               jobFamilies: t.signals.job_families.map((f) => f.code),
@@ -133,6 +134,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
           <dt className="text-muted">Ruoli</dt><dd>{t.roles?.join(", ")}</dd>
           {!!t.keywords?.length && (<><dt className="text-muted">Parole chiave</dt><dd>{t.keywords.join(", ")}</dd></>)}
           {!!t.exclude_keywords?.length && (<><dt className="text-muted">Escluse</dt><dd>{t.exclude_keywords.join(", ")}</dd></>)}
+          {t.signals?.offer && offerByCode(t.signals.offer) && (<><dt className="text-muted">Servizio</dt><dd>{offerByCode(t.signals.offer)!.label}</dd></>)}
           {!!t.signals?.codes.length && (
             <>
               <dt className="text-muted">Segnali</dt>
