@@ -48,7 +48,10 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Decisione (14/10): ricerca opportunità «database first + API first», due workflow separati (Target / Opportunità), popolamento iniziale per i segnali dal sito, prove di Adzuna e TheirStack
 - [x] Fase 1 – fondamenta: ogni azienda controllata salvata con l'esito di ogni controllo (`company_checks`, migrazione `20261027000021_company_checks.sql`); controlli tecnici gratuiti anche nella ricerca in target
 - [x] Fase 2a – ricerca opportunità «database first»: le aziende del database con prova recente (annunci Adzuna 60 gg, segnali dal sito 30 gg) entrano nella riserva del motore; l'AI parte solo per i lead mancanti (migrazione 024, `opportunity_reserve`)
-- [ ] Fase 2b – collaudo con una ricerca reale (sistemisti, Emilia-Romagna) e misura del costo per lead; poi separare il workflow «Opportunità» dal Target (fase 5)
+- [x] Fase 2b – collaudo 14/10 (sistemisti, Emilia-Romagna, 5 lead): 5/5 lead, tutti dal database, 0,88 $ (0,37 $ di ricerca AI inutile, 0,43 $ di referente via web). Corretto: niente AI se la riserva è almeno 1,4 volte i lead (2 con solo nominative); email col cognome dell'azienda (maggiolispa@) ora generiche
+- [ ] Referente via web: 0,06 $ a chiamata con Sonnet; provare Claude Haiku (token 20 volte più economici) su un campione e confrontare la qualità
+- [ ] Settore delle aziende degli annunci (oggi vuoto: entrano solo nelle ricerche «tutti i settori»)
+- [ ] Separare il workflow «Opportunità» dal Target (fase 5)
 - [x] Fase 3 – annunci da API: piano Adzuna (8 $/mese, chiave su n8n), tabella `job_ads` (migrazione 022), endpoint `/api/engine/job-ads`, workflow «Annunci | Raccolta Adzuna» (ogni mattina, Emilia-Romagna, una ricerca nel titolo per ogni figura del catalogo, 67 chiamate; sorgenti in `n8n/annunci/`). Primo riempimento 14/10: 363 annunci tenuti su 1.633 (703 di agenzie, 341 fuori tema)
 - [x] Annunci: workflow «Raccolta Adzuna» e «Siti aziende» pubblicati (14/10)
 - [ ] Annunci: estendere all'Italia (stesse ~67 ricerche senza filtro regione, più pagine: verificare il limite di 5.000 chiamate al mese)

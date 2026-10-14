@@ -111,6 +111,12 @@ assert.equal(tipoDi('<a href="mailto:mario.rossi@gmail.com">x</a>'), 'personal')
 assert.equal(tipoDi('<a href="mailto:rossicostruzionisrl@libero.it">x</a>'), 'generic', 'casella aziendale col cognome');
 assert.equal(tipoDi('<a href="mailto:rossicostruzioni@acme.it">x</a>'), 'generic');
 assert.equal(tipoDi('<a href="mailto:mrossi74@gmail.com">x</a>'), 'personal');
+const famiglia = { ...dedup[0], website: 'https://www.maggioli.it', full_name: 'Paolo Maggioli', first_name: 'Paolo', last_name: 'Maggioli' };
+const tipoFam = (h) => run(estrai, { nodes: { P: [famiglia], 'Valida richiesta': [job] }, json: { html: h } }).json.email_site_type;
+assert.equal(tipoFam('<a href="mailto:maggiolispa@maggioli.it">x</a>'), 'generic', 'cognome = azienda: casella dell\'azienda');
+assert.equal(tipoFam('<a href="mailto:maggioli@maggioli.it">x</a>'), 'generic');
+assert.equal(tipoFam('<a href="mailto:paolo.maggioli@maggioli.it">x</a>'), 'personal', 'con il nome resta nominativa');
+assert.equal(tipoFam('<a href="mailto:pmaggioli@maggioli.it">x</a>'), 'personal');
 console.log('ok  estrazione email, offuscamento, PEC/noreply scartate, pagine successive, caselle di ufficio');
 
 // 4. Classificazione finale per modalità
@@ -174,6 +180,12 @@ assert.equal(conRiserva.lotti_previsti, 0);
 assert.equal(conRiserva.reserve[0].signals[0].status, 'pass');
 const [saltato] = run(src('02-prepara-lotti.js'), { nodes: { 'Valida richiesta': [conRiserva] }, input: [{ output: '' }] }).map(i => i.json);
 assert.equal(saltato._salta, true);
+// Collaudo 14/10: 7 aziende in riserva per 5 lead (email miste) bastano; con solo nominative ne servono 10.
+const lottiCon = (n, extra) => run(src('01-valida-richiesta.js'), { input: [{ body: { ...bodyAnnunci('it_systems'), quantity: 5, reserve: riserva.slice(0, n), ...extra } }] })[0].json.lotti_previsti;
+assert.equal(lottiCon(7, { email_mode: 'mixed' }), 0, 'riserva 1,4 volte i lead: niente AI');
+assert.ok(lottiCon(6, { email_mode: 'mixed' }) > 0, 'riserva scarsa: ricerca AI');
+assert.equal(lottiCon(10, { email_mode: 'personal_only' }), 0);
+assert.ok(lottiCon(9, { email_mode: 'personal_only' }) > 0);
 const dedR = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [{ ...conRiserva, exclusions: { domains: ['r1.it'], person_keys: [] } }] }, input: [{ candidates: [], lotto: 1 }] }).map(i => i.json);
 assert.equal(dedR[0].company_name, 'R0');
 assert.equal(dedR[0]._riserva, true);

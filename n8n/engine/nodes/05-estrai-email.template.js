@@ -115,6 +115,12 @@ const punteggio = (email) => {
   const delDominio = dominio && (dom === dominio || dom.endsWith('.' + dominio));
   if (delDominio) {
     if (diUfficio(local)) return 4;
+    // Cognome che è anche il nome dell'azienda (Paolo Maggioli, maggioli.it): senza il nome
+    // o l'iniziale è la casella dell'azienda (maggiolispa@, maggioli@), non della persona.
+    const l = local.replace(/[^a-z]/g, '');
+    const cognomeAzienda = ultimo.length >= 3 && String(dominio).replace(/[^a-z]/g, '').includes(ultimo);
+    const conIlNome = (primo.length >= 3 && l.includes(primo)) || (primo && (l.startsWith(primo[0] + ultimo) || local.startsWith(primo[0] + '.')));
+    if (cognomeAzienda && !conIlNome) return 4;
     if (conNome(local)) {
       // Stesso cognome ma un altro nome (es. un familiare in azienda): non è la persona.
       const altroNome = local.split(/[._-]+/).some(t =>

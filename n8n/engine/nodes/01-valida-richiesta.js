@@ -126,8 +126,12 @@ if (job.target.signals.codes.length) {
   const quota = job.target.signals.match === 'all'
     ? quote.reduce((a, q) => a * q, 1)
     : Math.min(0.8, 1 - quote.reduce((a, q) => a * (1 - q), 1));
-  const daCercare = Math.max(0, job.limits.referenti_max - job.reserve.length);
-  // Riserva sufficiente: nessuna nuova ricerca AI in questo giro.
+  // Riserva sufficiente (dal database o dai giri precedenti): nessuna ricerca AI in questo
+  // giro. Collaudo del 14/10: 7 aziende in riserva -> 5 lead su 5; la ricerca AI partita
+  // per 2 aziende mancanti è costata 0,37 $ e non ha dato lead. Se mancano lead, il giro
+  // successivo la usa comunque.
+  const bastaRiserva = job.reserve.length >= Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2 : 1.4));
+  const daCercare = bastaRiserva ? 0 : Math.max(0, job.limits.referenti_max - job.reserve.length);
   lotti = daCercare === 0 ? 0 : Math.min(job.limits.max_lots, Math.max(1, Math.ceil(daCercare / Math.max(quota, 0.1) / job.limits.candidates_per_lot)));
   job.ai = { ...AI, max_searches: 8 };
 } else {
