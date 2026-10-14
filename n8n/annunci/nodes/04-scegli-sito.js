@@ -2,8 +2,9 @@
 // essere un dominio parcheggiato o in vendita e contenere il nome dell'azienda (tutte le
 // parole distintive, o il nome scritto attaccato). Con una sola parola distintiva serve
 // il nome intero se ha parole generiche («Var Group»: var.it di «Var Sport» non va),
-// altrimenti il nome nel titolo o nella descrizione («Digital», «ENG»: nel testo
-// comparirebbero per caso).
+// altrimenti il nome nel titolo o nella descrizione («Digital»: nel testo comparirebbe
+// per caso) e una conferma che sia l'azienda italiana dell'annuncio: la città o una
+// partita IVA sulla pagina (canonical.it non è Canonical di Bologna).
 // Un'azienda senza dominio valido viene salvata come «non trovata» (si riprova tra 30 giorni).
 const candidati = $('Domini candidati').all().map(i => i.json);
 const pagine = $input.all().map(i => i.json);
@@ -16,6 +17,9 @@ const PARCHEGGIATO = /\b((domain|dominio) (is )?(for sale|in vendita|acquistabil
 
 // Pagine di parcheggio riconoscibili dal codice (anche in tedesco: «steht zum Verkauf»).
 const PARCHEGGIO_HTML = /sedoparking|data-adblockkey|parkingcrew|bodis\.com|afternic|hugedomains|dan\.com\/buy|steht zum verkauf|est a vendre|se vende este dominio/i;
+
+// Partita IVA italiana (11 cifre) vicino a «IVA» / «VAT»: per legge è sul sito delle aziende italiane.
+const PARTITA_IVA = /\b(iva|vat)( [a-z]+){0,4} (it ?)?\d{11}\b/;
 
 const errori = {};
 const valuta = (c, p) => {
@@ -37,7 +41,10 @@ const valuta = (c, p) => {
   if (parole.length === 1) {
     const nome = String(c.nome || attaccato);
     if (nome !== attaccato) return tutto.includes(` ${nome} `) || tutto.includes(` ${nome.replace(/ /g, '')} `) ? 'ok' : 'nome_assente';
-    return `${titolo}${meta}`.includes(` ${attaccato} `) ? 'ok' : 'nome_assente';
+    if (!`${titolo}${meta}`.includes(` ${attaccato} `)) return 'nome_assente';
+    const citta = norm(String(c.city || '').replace(/^provincia di /i, '')).trim();
+    const conferma = (citta.length >= 3 && corpo.includes(` ${citta} `)) || PARTITA_IVA.test(corpo);
+    return conferma ? 'ok' : 'non_confermato';
   }
   if (parole.every(w => tutto.includes(` ${w} `))) return 'ok';
   if (tutto.replace(/ /g, '').includes(attaccato)) return 'ok';
@@ -49,13 +56,14 @@ const esiti = new Map();
 for (const a of $('Aziende senza sito').first().json.companies || []) {
   esiti.set(a.company_key, { company_key: a.company_key, company_name: a.company_name, city: a.city || '', domain: '', method: 'guess', ordine: 99 });
 }
-const stats = { companies: 0, tried: candidati.length, found: 0, not_found: 0, unreachable: 0, parked: 0, name_missing: 0 };
+const stats = { companies: 0, tried: candidati.length, found: 0, not_found: 0, unreachable: 0, parked: 0, name_missing: 0, unconfirmed: 0 };
 candidati.forEach((c, i) => {
   const e = esiti.get(c.company_key) || { company_key: c.company_key, company_name: c.company_name, city: c.city, domain: '', method: 'guess', ordine: 99 };
   const v = valuta(c, pagine[i]);
   if (v === 'irraggiungibile') stats.unreachable++;
   else if (v === 'parcheggiato') stats.parked++;
   else if (v === 'nome_assente') stats.name_missing++;
+  else if (v === 'non_confermato') stats.unconfirmed++;
   if (v === 'ok' && c.ordine < e.ordine) { e.domain = c.domain; e.ordine = c.ordine; }
   esiti.set(c.company_key, e);
 });

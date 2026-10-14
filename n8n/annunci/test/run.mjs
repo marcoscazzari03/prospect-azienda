@@ -87,6 +87,8 @@ const aziende = [
   { company_key: 'max mara fashion', company_name: 'Max Mara Fashion Group', city: 'Reggio Emilia' },
   { company_key: 'eng', company_name: 'ENG', city: 'Bologna' },
   { company_key: 'joinrs', company_name: 'Joinrs Italia', city: 'Bologna' },
+  { company_key: 'canonical', company_name: 'Canonical', city: 'Bologna' },
+  { company_key: 'archimede', company_name: 'Archimede S.p.A.', city: 'Provincia di Ferrara' },
   { company_key: 'gruppo', company_name: 'Gruppo Italia S.r.l.', city: '' }
 ];
 const cand = run(codice('03-domini-candidati.js'), { input: [{ companies: aziende }] });
@@ -106,7 +108,9 @@ const paginaDi = {
   'vargroup.it': pagina('Var Group | Digital Integrator', 'Var Group spa, Empoli'),
   'maggioli.it': pagina('Maggioli Editore', 'Gruppo Maggioli'),
   'maxmara.it': pagina('Max Mara Official Site', 'Max Mara fashion house'),
-  'joinrs.com': pagina('Joinrs - lavoro per giovani', 'Joinrs'),
+  'joinrs.com': pagina('Joinrs - lavoro per giovani', 'Joinrs, Milano'),
+  'canonical.it': pagina('Canonical - studio legale', 'Studio a Roma'),
+  'archimede.it': pagina('Archimede', 'Archimede S.p.A. - P.IVA 01234567890'),
   'joinrs.it': { html: '', error: { code: 'ENOTFOUND' } }
 };
 const [scelta] = run(codice('04-scegli-sito.js'), {
@@ -119,15 +123,18 @@ assert.equal(sito('var'), 'vargroup.it', '«var» da solo nel testo non basta');
 assert.equal(sito('maggioli'), 'maggioli.it');
 assert.equal(sito('max mara fashion'), 'maxmara.it', 'tutte le parole nella pagina');
 assert.equal(sito('eng'), '', 'nome breve: non provato');
-assert.equal(sito('joinrs'), 'joinrs.com', '«Italia» non serve sulla pagina');
+assert.equal(sito('joinrs'), '', 'una parola: nome nel titolo ma senza città né partita IVA');
+assert.equal(sito('canonical'), '', 'canonical.it di Roma non è Canonical di Bologna');
+assert.equal(sito('archimede'), 'archimede.it', 'confermata dalla partita IVA');
+assert.ok(scelta.stats.unconfirmed >= 2);
 assert.equal(scelta.stats.errors.ENOTFOUND, 1, 'errori contati per tipo');
 assert.equal(sito('gruppo'), '', 'azienda senza domini registrata come non trovata');
-assert.equal(scelta.stats.companies, 6);
+assert.equal(scelta.stats.companies, 8);
 assert.equal(scelta.stats.found, 4);
 assert.ok(scelta.stats.parked >= 1);
 const parcheggio = run(codice('04-scegli-sito.js'), {
   nodes: { 'Domini candidati': [{ company_key: 'k', company_name: 'Possedono Srl', city: '', nucleo: 'possedono', nome: 'possedono', domain: 'possedono.it', ordine: 0 }], 'Aziende senza sito': [{ companies: [] }] },
-  input: [pagina('Possedono', 'Le aziende che possedono un sito')]
+  input: [pagina('Possedono', 'Le aziende che possedono un sito. Partita IVA 01234567890')]
 })[0];
 assert.equal(parcheggio.results[0].domain, 'possedono.it', '«possedono» non è «sedo»');
 

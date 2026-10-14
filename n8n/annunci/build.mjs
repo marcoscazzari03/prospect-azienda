@@ -211,7 +211,9 @@ const apriSito = node({
         { name: 'Accept-Language', value: 'it,en;q=0.8' }
       ] },
       options: {
-        batching: { batch: { batchSize: 10, batchInterval: 300 } },
+        // Poche richieste insieme: n8n non aspetta la fine di un gruppo prima del successivo,
+        // con gruppi grandi centinaia di richieste partono insieme e vanno in timeout.
+        batching: { batch: { batchSize: 2, batchInterval: 500 } },
         redirect: { redirect: { followRedirects: true, maxRedirects: 5 } },
         response: { response: { neverError: true, responseFormat: 'text', outputPropertyName: 'html' } },
         // Si legge solo la pagina pubblica: molti siti hanno il certificato solo su www.
