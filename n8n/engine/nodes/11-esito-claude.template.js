@@ -20,7 +20,9 @@ const out = {
   output: testo,
   stop_reason: String(r.stop_reason ?? ''),
   usage: {
-    input_tokens: Number(usage.input_tokens) || 0,
+    // Token di input equivalenti al prezzo pieno: scrittura in cache 1,25×, lettura 0,1×.
+    input_tokens: Math.round((Number(usage.input_tokens) || 0) + 1.25 * (Number(usage.cache_creation_input_tokens) || 0)
+      + 0.1 * (Number(usage.cache_read_input_tokens) || 0)),
     output_tokens: Number(usage.output_tokens) || 0,
     web_search_requests: Number(usage.server_tool_use?.web_search_requests) || 0
   }

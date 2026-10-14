@@ -29,6 +29,7 @@ return {
       model: ai.model,
       max_tokens: 2000,
       output_config: { effort: ai.effort },
+      cache_control: { type: 'ephemeral' },
       system: 'Sei un ricercatore B2B. Usi la ricerca web, citi la fonte e non inventi mai dati. Rispondi solo con JSON valido.',
       messages: [{ role: 'user', content: prompt }],
       tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: ai.max_ref_searches }]

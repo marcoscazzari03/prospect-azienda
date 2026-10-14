@@ -34,7 +34,9 @@ const persona = dati && typeof dati.person === 'object' ? dati.person : null;
 const u = r.usage || {};
 const out = {
   ...p, _serve_referente: false, _cerca_web: false, enrichment_lookups: p.enrichment_lookups || 0,
-  ai_input_tokens: (Number(p.ai_input_tokens) || 0) + (Number(u.input_tokens) || 0),
+  // Token di input equivalenti al prezzo pieno: scrittura in cache 1,25×, lettura 0,1×.
+  ai_input_tokens: (Number(p.ai_input_tokens) || 0) + Math.round((Number(u.input_tokens) || 0)
+    + 1.25 * (Number(u.cache_creation_input_tokens) || 0) + 0.1 * (Number(u.cache_read_input_tokens) || 0)),
   ai_output_tokens: (Number(p.ai_output_tokens) || 0) + (Number(u.output_tokens) || 0),
   ai_web_searches: (Number(p.ai_web_searches) || 0) + (Number(u.server_tool_use?.web_search_requests) || 0)
 };
