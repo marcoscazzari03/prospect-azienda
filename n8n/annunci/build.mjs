@@ -49,7 +49,7 @@ const preparaRichieste = node({
     name: 'Prepara richieste',
     parameters: { jsCode: ${JSON.stringify(codice('01-prepara-richieste.js'))} }
   },
-  output: [{ family: 'it_systems', region: 'Emilia-Romagna', page: 1, what_or: 'sistemista', max_days_old: 3 }]
+  output: [{ family: 'it_systems', region: 'Emilia-Romagna', what_or: 'sistemista', max_days_old: 2, max_pages: 6 }]
 });
 
 const adzuna = node({
@@ -58,7 +58,7 @@ const adzuna = node({
   config: {
     name: 'Adzuna - Annunci',
     parameters: {
-      url: expr('https://api.adzuna.com/v1/api/jobs/it/search/{{ $json.page }}'),
+      url: 'https://api.adzuna.com/v1/api/jobs/it/search/1',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpCustomAuth',
       sendQuery: true,
@@ -74,6 +74,16 @@ const adzuna = node({
       options: {
         // Piano Adzuna: massimo 50 chiamate al minuto.
         batching: { batch: { batchSize: 1, batchInterval: 1500 } },
+        // Pagina successiva finché la pagina è piena (50) e fino a max_pages.
+        pagination: { pagination: {
+          paginationMode: 'responseContainsNextURL',
+          nextURL: expr("{{ 'https://api.adzuna.com/v1/api/jobs/it/search/' + (Number($request.url.split('?')[0].split('/').pop()) + 1) }}"),
+          paginationCompleteWhen: 'other',
+          completeExpression: expr("{{ !Array.isArray($response.body.results) || $response.body.results.length < 50 || Number($request.url.split('?')[0].split('/').pop()) >= $json.max_pages }}"),
+          limitPagesFetched: true,
+          maxRequests: 10,
+          requestInterval: 1500
+        } },
         response: { response: { neverError: true } },
         timeout: 30000
       }

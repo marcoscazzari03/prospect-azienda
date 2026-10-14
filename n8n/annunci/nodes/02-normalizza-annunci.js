@@ -16,8 +16,22 @@ const titoli = FAMIGLIE.flatMap(f => f.titles.map(t => ({ fam: f.code, t: norm(t
   .sort((a, b) => b.t.length - a.t.length);
 const famigliaDi = (titolo) => { const n = norm(titolo); return titoli.find(x => n.includes(x.t))?.fam || ''; };
 
-const AGENZIE = /\b(randstad|adecco|manpower|gi group|synergie|openjobmetis|etjca|umana|lavoropiu|orienta|kelly services|hays|michael page|page personnel|robert half|spring professional|start people|quanta|eurointerim|ali spa|osm partners|indeed|jobrapido|infojobs|monster|stepstone|e work|trenkwalder|humangest|tempor|maw|jobtech|in job|generazione vincente|articolo1|cooperjob|men at work|lavoro doc|staffing|recruiting|head ?hunt\w*|executive search|agenzia per il lavoro|selezione del personale)\b/;
-const PER_CLIENTE = /(per (importante |nota |una )?(azienda|societa) cliente|per conto (di|del) (un |una |nostro |nostra )?client|nostro cliente|nostra azienda cliente|for (one of )?our client|pour (le compte d un|notre) client|para (una )?empresa cliente|fur unseren kunden|im auftrag unseres kunden|para (o nosso|um) cliente)/;
+// Agenzie per il lavoro, società di selezione e consulenza «presso cliente»: dal nome
+// dell'azienda o da come è scritto l'annuncio.
+const AGENZIE = /\b(randstad|adecco|manpower|experis|gi group|synergie|openjobmetis|etjca|umana|lavoropiu|orienta|kelly services|hays|michael page|page personnel|robert half|spring professional|start people|quanta|eurointerim|ali spa|osm partners|indeed|jobrapido|infojobs|monster|stepstone|e work|trenkwalder|humangest|tempor|tempus|tempi moderni|wintime|samsic|maw|jobtech|in job|unimpiego|generazione vincente|articolo1|cooperjob|men at work|staff spa|lavoro|staffing|recruiting|recruitment|head ?hunt\w*|executive search|selezione|outsourcing)\b/;
+const PER_CLIENTE = new RegExp([
+  'agenzia per il lavoro', 'ricerca e selezion', 'selezione del personale', 'autorizzazione ministeriale', 'albo informatico',
+  'somministrazione (di )?lavoro', 'contratto di somministrazione', 'career center',
+  // «ricerca per importante azienda», «seleziona per conto di una società», «per azienda specializzata»
+  '(ricerca|ricerchiamo|seleziona|selezioniamo|cerca|cerchiamo) per (conto di )?(un |una |l )?((importante|nota|notevole|primaria|solida|storica|affermata|prestigiosa|dinamica|strutturata) )*(azienda|societa|realta|gruppo|ente|struttura|multinazionale|cliente)\\b',
+  // «per importante cliente», «per un nostro cliente» (non «per il cliente»: lo scrive anche chi assume)
+  'per (un |una )?(nostro |nostra )?(importante|nota|notevole|primario|primaria) client',
+  // «per nostra importante azienda cliente», «gruppo ceramico cliente»
+  // (non «azienda attenta al cliente»: in mezzo niente preposizioni o articoli)
+  '(azienda|gruppo|realta|societa)( (?!(al|ai|del|dei|della|verso|con|il|la|le|i|di|e|per|nel|nei|sul|a)\\b)[a-z]+){0,3} cliente\\b',
+  'per conto (di|del) (un |una |nostro |nostra )?client', 'nostro cliente', 'for (one of )?our client', 'our client',
+  'pour (le compte d un|notre) client', 'para (una )?empresa cliente', 'fur unseren kunden', 'im auftrag unseres kunden', 'para (o nosso|um) cliente'
+].join('|'));
 const ANONIMA = /^ (azienda|societa|riservato|riservata|confidenziale|anonimo|anonima|cliente|privato|privata|n d|nd|na|company|confidential) /;
 
 const richieste = $('Prepara richieste').all().map(i => i.json);
