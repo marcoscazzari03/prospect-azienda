@@ -90,14 +90,17 @@ const dominio = (url) => String(url || '').trim().toLowerCase().replace(/^https?
 const pulisci = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
 const trovate = [];
-const stats = { provinces: richieste.map(r => r.provincia), elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, foreign: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0, failed_provinces: [] };
+const stats = { provinces: richieste.map(r => r.provincia), elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, foreign: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0, failed_provinces: [], retried: richieste.filter(r => r.riprova).map(r => r.provincia) };
+const fallite = [];
 const TIPI = ['office', 'craft', 'industrial', 'healthcare', 'tourism', 'shop', 'amenity'];
 // Sigla della provincia scritta nell'indirizzo (addr:province = «BO»): se c'è, vale quella.
 const PROVINCE = Object.fromEntries((__PROVINCE__).map(([sigla, nome, regione]) => [sigla, [nome, regione]]));
 $input.all().forEach((item, i) => {
-  const { regione, provincia } = richieste[item.pairedItem?.item ?? i] || {};
+  const { regione, provincia, sigla } = richieste[item.pairedItem?.item ?? i] || {};
   const elementi = item.json?.elements;
-  if (!Array.isArray(elementi)) { stats.errors++; stats.failed_provinces.push(provincia); return; }
+  if (!Array.isArray(elementi)) { stats.errors++; stats.failed_provinces.push(provincia); fallite.push(sigla); return; }
+  // Risposta interrotta dal server (timeout a metà): si salva quello che c'è e si riprova.
+  if (/runtime error|timed? ?out|too busy/i.test(String(item.json?.remark ?? ''))) { stats.errors++; stats.failed_provinces.push(provincia); fallite.push(sigla); }
   for (const el of elementi) {
     stats.elements++;
     const t = el.tags || {};
@@ -138,6 +141,17 @@ for (const a of trovate) {
   companies.push(azienda);
 }
 stats.saved = companies.length;
+
+// Province da riprovare nel giro di domani (al massimo 3 tentativi per provincia):
+// lo stato resta nei dati del workflow, salvati solo dalle esecuzioni programmate.
+try {
+  const statico = $getWorkflowStaticData('global');
+  const prima = Object.fromEntries((statico.osm_tentativi || []).map(([s, n]) => [s, n]));
+  const tentativi = [...new Set(fallite.filter(Boolean))].map(s => [s, (prima[s] || 0) + 1]).filter(([, n]) => n <= 3);
+  statico.osm_tentativi = tentativi;
+  statico.osm_riprova = tentativi.map(([s]) => s);
+  stats.retry_tomorrow = statico.osm_riprova;
+} catch { stats.retry_tomorrow = []; }
 
 // Blocchi da 2.000 aziende per il salvataggio.
 const blocchi = [];

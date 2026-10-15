@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { codice, scegliSito } from '../build.mjs';
 
-const run = (code, { nodes = {}, input = [], eseguiti = [], json = {} }) => {
+const run = (code, { nodes = {}, input = [], eseguiti = [], json = {}, statico = {} }) => {
   const $ = (name) => {
     const n = nodes[name];
     if (!n) {
@@ -13,7 +13,7 @@ const run = (code, { nodes = {}, input = [], eseguiti = [], json = {} }) => {
     return { first: () => ({ json: n[0] }), all: () => n.map(j => ({ json: j })), isExecuted: true };
   };
   const $input = { all: () => input.map((j, i) => ({ json: j, pairedItem: { item: i } })), first: () => (input.length ? { json: input[0] } : undefined) };
-  return new Function('$', '$input', '$execution', '$json', code)($, $input, { id: 'test', mode: 'test' }, json).map(i => i.json);
+  return new Function('$', '$input', '$execution', '$json', '$getWorkflowStaticData', code)($, $input, { id: 'test', mode: 'test' }, json, () => statico).map(i => i.json);
 };
 
 // 1. Richieste: una per titolo del catalogo, ogni mattina 2 giorni, a mano 30.
@@ -246,7 +246,7 @@ const richiesteOsm = run(codice('10-prepara-osm.js'), {});
 assert.equal(richiesteOsm.length, 1, 'a mano: Modena');
 assert.deepEqual([richiesteOsm[0].sigla, richiesteOsm[0].regione], ['MO', 'Emilia-Romagna']);
 assert.ok(richiesteOsm[0].data.includes('area["ISO3166-2"="IT-MO"]') && richiesteOsm[0].data.includes('nwr(area.a)["website"]["office"]') && richiesteOsm[0].data.includes('out tags;'));
-const giornoOsm = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'] });
+const giornoOsm = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico: { osm_tentativi: [] } });
 assert.ok(giornoOsm.length === 4 && new Set(giornoOsm.map(r => r.sigla)).size === 4 && giornoOsm.every(r => r.url.startsWith('https://')), '4 province diverse al giorno');
 const el = (tags) => ({ type: 'node', id: Math.random(), tags });
 const [osm] = run(codice('11-normalizza-osm.js'), {
@@ -279,6 +279,21 @@ assert.equal(osm.companies[1].website, 'https://meccanicarossi.it');
 assert.equal(osm.companies[3].industry, 'Abbigliamento');
 assert.deepEqual([osm.stats.excluded_category, osm.stats.no_name, osm.stats.not_company_site, osm.stats.foreign, osm.stats.chains, osm.stats.duplicates, osm.stats.errors], [2, 1, 2, 1, 2, 1, 1]);
 assert.deepEqual(osm.stats.failed_provinces, ['Altrove']);
+// Province fallite: riprovate il giorno dopo, al massimo 3 volte.
+assert.deepEqual(run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico: {} }).slice(0, 2).map(r => r.sigla), ['NA', 'BA'], 'primo giro: Napoli e Bari del 15/10');
+const statico = {};
+run(codice('11-normalizza-osm.js'), {
+  statico,
+  nodes: { 'Prepara richieste OSM': [{ sigla: 'NA', provincia: 'Napoli', regione: 'Campania' }, { sigla: 'SA', provincia: 'Salerno', regione: 'Campania' }, { sigla: 'BA', provincia: 'Bari', regione: 'Puglia' }] },
+  input: [{ data: '<html>too busy</html>' }, { elements: [] }, { elements: [], remark: 'runtime error: Query timed out' }]
+});
+assert.deepEqual(statico.osm_riprova, ['NA', 'BA'], 'fallite e interrotte da riprovare');
+const domani = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico });
+assert.deepEqual(domani.slice(0, 2).map(r => r.sigla), ['NA', 'BA'], 'prima le province da riprovare');
+assert.ok(domani.length >= 4 && domani.length <= 6 && new Set(domani.map(r => r.sigla)).size === domani.length && domani[0].riprova && domani[1].riprova, 'più la rotazione, senza doppioni');
+assert.deepEqual(run(codice('10-prepara-osm.js'), { statico }).map(r => r.sigla), ['MO'], 'a mano resta Modena');
+for (let k = 0; k < 3; k++) run(codice('11-normalizza-osm.js'), { statico, nodes: { 'Prepara richieste OSM': [{ sigla: 'NA', provincia: 'Napoli', regione: 'Campania', riprova: true }] }, input: [{ data: 'busy' }] });
+assert.deepEqual(statico.osm_riprova, [], 'dopo 3 tentativi si aspetta la rotazione');
 console.log('Test popolamento OSM superati.');
 
 // 10. Settore: risposta troncata dal limite di token, si salvano le aziende complete.

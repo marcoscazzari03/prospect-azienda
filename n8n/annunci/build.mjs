@@ -779,8 +779,9 @@ const overpass = node({
       contentType: 'form-urlencoded',
       bodyParameters: { parameters: [{ name: 'data', value: expr('{{ $json.data }}') }] },
       options: {
-        // Uso corretto del servizio pubblico: una richiesta alla volta, con una pausa.
-        batching: { batch: { batchSize: 1, batchInterval: 10000 } },
+        // Uso corretto del servizio pubblico: una richiesta alla volta, un minuto tra l'una e
+        // l'altra (con 10 secondi il server era spesso «too busy»).
+        batching: { batch: { batchSize: 1, batchInterval: 60000 } },
         response: { response: { neverError: true } },
         timeout: 280000
       }
