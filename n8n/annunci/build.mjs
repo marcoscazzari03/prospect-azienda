@@ -786,9 +786,10 @@ const overpass = node({
         timeout: 280000
       }
     },
-    // Il server è a volte sovraccarico: fino a 3 tentativi.
+    // Il server è a volte sovraccarico: 2 tentativi (un timeout di 5 minuti al terzo
+    // tentativo non passa quasi mai; le province fallite si riprovano il giorno dopo).
     retryOnFail: true,
-    maxTries: 3,
+    maxTries: 2,
     waitBetweenTries: 5000,
     onError: 'continueRegularOutput'
   },

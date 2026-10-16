@@ -90,7 +90,7 @@ const dominio = (url) => String(url || '').trim().toLowerCase().replace(/^https?
 const pulisci = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
 const trovate = [];
-const stats = { provinces: richieste.map(r => r.provincia), elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, foreign: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0, failed_provinces: [], retried: richieste.filter(r => r.riprova).map(r => r.provincia) };
+const stats = { provinces: [...new Set(richieste.map(r => r.provincia))], elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, foreign: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0, failed_provinces: [], retried: [...new Set(richieste.filter(r => r.riprova).map(r => r.provincia))] };
 const fallite = [];
 const TIPI = ['office', 'craft', 'industrial', 'healthcare', 'tourism', 'shop', 'amenity'];
 // Sigla della provincia scritta nell'indirizzo (addr:province = «BO»): se c'è, vale quella.
@@ -157,4 +157,5 @@ try {
 const blocchi = [];
 for (let k = 0; k < companies.length; k += 2000) blocchi.push(companies.slice(k, k + 2000));
 if (!blocchi.length) blocchi.push([]);
+stats.failed_provinces = [...new Set(stats.failed_provinces)];
 return blocchi.map((b, k) => ({ json: { source: 'osm', companies: b, ...(k === 0 ? { stats } : {}) } }));

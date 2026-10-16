@@ -247,7 +247,7 @@ assert.equal(richiesteOsm.length, 1, 'a mano: Modena');
 assert.deepEqual([richiesteOsm[0].sigla, richiesteOsm[0].regione], ['MO', 'Emilia-Romagna']);
 assert.ok(richiesteOsm[0].data.includes('area["ISO3166-2"="IT-MO"]') && richiesteOsm[0].data.includes('nwr(area.a)["website"]["office"]') && richiesteOsm[0].data.includes('out tags;'));
 const giornoOsm = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico: { osm_tentativi: [] } });
-assert.ok(giornoOsm.length === 4 && new Set(giornoOsm.map(r => r.sigla)).size === 4 && giornoOsm.every(r => r.url.startsWith('https://')), '4 province diverse al giorno');
+assert.ok(giornoOsm.length >= 4 && new Set(giornoOsm.map(r => r.sigla)).size === 4 && giornoOsm.every(r => r.url.startsWith('https://')), '4 province diverse al giorno');
 const el = (tags) => ({ type: 'node', id: Math.random(), tags });
 const [osm] = run(codice('11-normalizza-osm.js'), {
   nodes: { 'Prepara richieste OSM': [{ sigla: 'MO', provincia: 'Modena', regione: 'Emilia-Romagna' }, { sigla: 'XX', provincia: 'Altrove', regione: 'Altrove' }] },
@@ -280,7 +280,9 @@ assert.equal(osm.companies[3].industry, 'Abbigliamento');
 assert.deepEqual([osm.stats.excluded_category, osm.stats.no_name, osm.stats.not_company_site, osm.stats.foreign, osm.stats.chains, osm.stats.duplicates, osm.stats.errors], [2, 1, 2, 1, 2, 1, 1]);
 assert.deepEqual(osm.stats.failed_provinces, ['Altrove']);
 // Province fallite: riprovate il giorno dopo, al massimo 3 volte.
-assert.deepEqual(run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico: {} }).slice(0, 2).map(r => r.sigla), ['NA', 'BA'], 'primo giro: Napoli e Bari del 15/10');
+const primo = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico: {} });
+assert.deepEqual(primo.slice(0, 6).map(r => r.sigla + ' ' + r.parte), ['NA 1/3', 'NA 2/3', 'NA 3/3', 'BA 1/3', 'BA 2/3', 'BA 3/3'], 'primo giro: Napoli e Bari del 15/10, divise in 3');
+assert.ok(primo[0].data.includes('["office"]') && !primo[0].data.includes('["shop"]') && primo[1].data.includes('["shop"]') && primo[2].data.includes('["tourism"]'));
 const statico = {};
 run(codice('11-normalizza-osm.js'), {
   statico,
@@ -289,8 +291,8 @@ run(codice('11-normalizza-osm.js'), {
 });
 assert.deepEqual(statico.osm_riprova, ['NA', 'BA'], 'fallite e interrotte da riprovare');
 const domani = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico });
-assert.deepEqual(domani.slice(0, 2).map(r => r.sigla), ['NA', 'BA'], 'prima le province da riprovare');
-assert.ok(domani.length >= 4 && domani.length <= 6 && new Set(domani.map(r => r.sigla)).size === domani.length && domani[0].riprova && domani[1].riprova, 'più la rotazione, senza doppioni');
+assert.deepEqual([...new Set(domani.slice(0, 6).map(r => r.sigla))], ['NA', 'BA'], 'prima le province da riprovare, divise');
+assert.ok(domani.slice(0, 6).every(r => r.riprova) && new Set(domani.map(r => r.sigla + r.parte)).size === domani.length, 'più la rotazione, senza doppioni');
 assert.deepEqual(run(codice('10-prepara-osm.js'), { statico }).map(r => r.sigla), ['MO'], 'a mano resta Modena');
 for (let k = 0; k < 3; k++) run(codice('11-normalizza-osm.js'), { statico, nodes: { 'Prepara richieste OSM': [{ sigla: 'NA', provincia: 'Napoli', regione: 'Campania', riprova: true }] }, input: [{ data: 'busy' }] });
 assert.deepEqual(statico.osm_riprova, [], 'dopo 3 tentativi si aspetta la rotazione');
