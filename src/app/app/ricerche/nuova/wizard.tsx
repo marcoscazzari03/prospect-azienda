@@ -251,7 +251,7 @@ export function SearchWizard({
     : !chosen
       ? "Scegli il servizio che vendi."
       : offerUsesJobAds(chosen) && !jobAdCountriesOk
-        ? "Per questo servizio usiamo gli annunci di lavoro, disponibili solo in alcuni paesi: togli i paesi non coperti."
+        ? "Per questo servizio usiamo gli annunci di lavoro, per ora disponibili solo per l'Italia: togli gli altri paesi."
         : "";
   const preview = chosen ? describeOffer({ offer: chosen.code, industry: allSectors ? "" : industry, where, offers }) : "";
 
@@ -542,6 +542,9 @@ export function SearchWizard({
                 {moreCountries ? "Meno paesi" : `+ Altri paesi${countries.filter((c) => !(MAIN_COUNTRIES as readonly string[]).includes(c)).length ? ` (${countries.filter((c) => !(MAIN_COUNTRIES as readonly string[]).includes(c)).length})` : ""}`}
               </button>
             </div>
+            {countries.some((c) => c !== "IT") && (
+              <p className="mt-2 text-xs text-stamp-ink">Fuori dall&apos;Italia cerchiamo le aziende direttamente sul web: la ricerca può richiedere più tempo e trovare meno lead.</p>
+            )}
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">

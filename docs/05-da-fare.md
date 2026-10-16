@@ -141,6 +141,10 @@ Le stime della revisione non sono dati misurati.
 - [ ] Abbonamenti come monitoraggio continuo: ricerca salvata che segnala nuove aziende compatibili
 - [ ] Capacità: con circa 1.200 giri al mese per il motore, oltre 50-100 clienti attivi alzare il piano n8n; verso 300+ clienti coda e worker separati da n8n
 
+### Estero (deciso il 16/10: prima solo Italia)
+- [x] Ricerche con annunci di lavoro solo per l'Italia (la raccolta Adzuna è italiana); avviso nel wizard per i paesi esteri (solo ricerca AI)
+- [ ] Dopo il lancio: un paese alla volta nel database (OSM + Adzuna), probabilmente Spagna o Svizzera; prima il parere legale sul paese (in Germania serve di regola il consenso anche per le email B2B)
+
 ### Non da fare (valutati)
 - Overpass self-hosted: con 4 query al giorno siamo molto sotto i limiti d'uso dei server pubblici
 - Idempotenza callback e anti-SSRF del motore: già coperti (token monouso per giro, callback solo verso il nostro dominio)

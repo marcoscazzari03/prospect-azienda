@@ -117,8 +117,9 @@ export const TECHNOLOGY_LABEL: Record<Technology, string> = {
 export const JOB_AD_LANGUAGES = ["it", "en", "es", "fr", "de", "pt"] as const;
 export type JobLang = (typeof JOB_AD_LANGUAGES)[number];
 
-// Paesi in cui il segnale "annuncio" è disponibile al lancio (lingua coperta).
-export const JOB_AD_COUNTRIES = ["IT", "ES", "PT", "FR", "BE", "LU", "CH", "DE", "AT", "GB", "IE", "MT", "US", "CA", "AU"] as const;
+// Paesi con annunci di lavoro nel database: per ora solo l'Italia (la raccolta Adzuna è
+// italiana; gli altri paesi si aggiungono quando estendiamo la raccolta).
+export const JOB_AD_COUNTRIES = ["IT"] as const;
 
 export type JobFamily = {
   code: string;

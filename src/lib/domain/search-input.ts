@@ -51,7 +51,7 @@ export const searchInputSchema = z.object({
   BLOCKED_SECTORS_MESSAGE,
 ).refine(
   (i) => !i.signals.codes.includes("job_ad") || i.countries.every((c) => (JOB_AD_COUNTRIES as readonly string[]).includes(c)),
-  "Gli annunci di lavoro non sono ancora disponibili per uno dei paesi scelti",
+  "Per ora gli annunci di lavoro sono disponibili solo per l'Italia",
 );
 
 export const REPEAT_LABEL = { none: "Una volta", weekly: "Ogni settimana", monthly: "Ogni mese" } as const;
