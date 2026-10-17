@@ -35,3 +35,12 @@ returns jsonb language sql stable security definer set search_path = public as $
            limit least(greatest(coalesce(p_limit, 40), 0), 40)) p
 $$;
 revoke all on function public.opportunity_reserve(uuid, text[], integer) from public, anon, authenticated;
+
+-- Hotel già provati senza referente nei collaudi del 17/10.
+update public.companies set referente_missed_at = now()
+ where domain in ('torrecintola.it', 'abatemasseria.it', 'brahotel.com', 'lecarasse.it', 'hotelpalumbobari.it',
+                  'melograno.com', 'bbmaxxi.it', 'arasolishotel.com', 'leonbari.it', 'santantonioalbergo.com',
+                  'masseriaserritella.it', 'masseriaiazzoscagno.it', 'villasanarica.it', 'villamariacrispiano.it',
+                  'hotelsvevo.it', 'masseriatorrepietra.it', 'materiis.com', 'imagoplus.net', 'residencemoderno.com',
+                  'terranobile.it', 'matarrese1950.it', 'salinahotel.it', 'altapuglia.it', 'hotellabaiabari.it',
+                  'hotelauditorium.it');
