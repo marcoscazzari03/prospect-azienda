@@ -145,6 +145,8 @@ Le stime della revisione non sono dati misurati.
 - [x] Ricerche con annunci di lavoro solo per l'Italia (la raccolta Adzuna è italiana); avviso nel wizard per i paesi esteri (solo ricerca AI)
 - [ ] Dopo il lancio: un paese alla volta nel database (OSM + Adzuna), probabilmente Spagna o Svizzera; prima il parere legale sul paese (in Germania serve di regola il consenso anche per le email B2B)
 
+- [x] 17/10: controllo siti ogni ora (150 aziende a giro, 3.600 al giorno) perché OSM porta 2.000-3.000 aziende a notte; circa +360 esecuzioni al mese. Tornare a ogni 2 ore quando il popolamento OSM avrà finito l'Italia
+
 ### Non da fare (valutati)
 - Overpass self-hosted: con 4 query al giorno siamo molto sotto i limiti d'uso dei server pubblici
 - Idempotenza callback e anti-SSRF del motore: già coperti (token monouso per giro, callback solo verso il nostro dominio)

@@ -6,13 +6,15 @@ import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 // (HTTPS, CMS vecchio, mobile, lingue, copyright...) servono alle ricerche opportunità
 // senza ricerca AI e restano fresche (valgono 30 giorni).
 
-// Ogni 2 ore (non ogni ora): il piano n8n ha un tetto di esecuzioni al mese.
+// Ogni ora (dal 17/10): con le province grandi OSM porta 2.000-3.000 aziende a notte e ogni 2
+// ore (1.800 al giorno) non bastava. Finito il popolamento si può tornare a ogni 2 ore (tetto
+// di esecuzioni del piano n8n).
 const ogniDueOre = trigger({
   type: 'n8n-nodes-base.scheduleTrigger',
   version: 1.3,
   config: {
-    name: 'Ogni 2 ore',
-    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 2, triggerAtMinute: 25 }] } }
+    name: 'Ogni ora',
+    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 1, triggerAtMinute: 25 }] } }
   }
 });
 
