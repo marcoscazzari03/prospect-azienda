@@ -41,4 +41,11 @@ select pg_temp.check(search_cost_eur((select id from s16)) > 0.1 and search_cost
 select pg_temp.check(is_platform_domain('thefork.it') and is_platform_domain('all.accor.com') and is_platform_domain('booking.com'), 'piattaforme riconosciute');
 select pg_temp.check(not is_platform_domain('hotelbooking-puglia.it') and not is_platform_domain('pugliainpizza.it'), 'siti aziendali non toccati');
 
+select pg_temp.check(is_hosted_page('https://www.creoadv.com/menudigitale/la-chicca/', 'La Chicca'), 'menù su sito di un''agenzia: pagina ospitata');
+select pg_temp.check(not is_hosted_page('https://www.terranobile.it/hotel/', 'Terranobile Metaresort'), 'percorso sul proprio dominio: sito ufficiale');
+select pg_temp.check(not is_hosted_page('https://masseriachiancone.it/it/home/', 'Masseria Chiancone Torricella'), 'percorso con lingua sul proprio dominio');
+select pg_temp.check(not is_hosted_page('https://www.hotelsvevo.it/it/', 'Hotel Svevo') and not is_hosted_page('https://www.my-vets.it/', 'My Vets'), 'radice o sola lingua: sito ufficiale');
+select pg_temp.check(not is_hosted_page('https://www.caffe-tiffany.it/contatti', 'Caffè Tiffany'), 'accenti e trattini nel nome e nel dominio');
+select pg_temp.check(is_platform_domain('aiportici.vorreiordinare.it'), 'piattaforma di ordinazione');
+
 select 'superati tutti i test nome facoltativo';
