@@ -152,6 +152,14 @@ Le stime della revisione non sono dati misurati.
 - Idempotenza callback e anti-SSRF del motore: già coperti (token monouso per giro, callback solo verso il nostro dominio)
 - Distinzione fatto / esigenza: già presente (segnali verificati e indicativi, avviso nel wizard, prova su ogni lead)
 
+## Collaudo del 17/10 (hotel in Puglia, 5 lead, Mista)
+
+- [x] Ricerca A: 2/5. Referente trovato in 2 hotel su 15; la ricerca si chiudeva dopo un giro senza lead con 34 hotel ancora da provare. Corretto: più referenti per giro dalla riserva e niente chiusura con aziende da provare.
+- [x] Ricerca A bis: 3/5 in 3 giri. 14 dei primi 15 hotel erano gli stessi già falliti nella A. Corretto: memoria dei referenti non trovati (`companies.referente_missed_at`, migrazione 031), queste aziende vanno in fondo alla riserva per 90 giorni.
+- [ ] Hotel: referente trovato nel ~10% delle aziende (titolare quasi mai sul sito; uno trovato da visura su ufficiocamerale.it). Decidere: consegnare nella modalità «Email generiche incluse» anche lead senza nome (solo info@ verificata) e/o un prezzo diverso per i settori «difficili».
+- [ ] Pianificatore AI chiamato anche quando i lotti sono 0 (risponde vuoto, ~1 centesimo a giro): saltarlo.
+- [ ] Referente trovato ma nessuna email (Echi di Puglia: Icypeas NOT_FOUND e nessuna generica sul sito): capire perché la generica non c'era.
+
 ## Legale e fiscale
 - [ ] Apertura partita IVA (prima di incassare) e scelta del regime con un commercialista
 - [ ] Validazione di informativa privacy, termini, LIA/DPIA con un consulente

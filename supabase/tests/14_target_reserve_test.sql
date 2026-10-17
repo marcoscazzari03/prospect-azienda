@@ -47,4 +47,15 @@ select pg_temp.check(target_availability((select org from o14),
 -- Settore diverso: niente.
 select pg_temp.check(target_availability((select org from o14), '{"industry":"Commercialisti","countries":["IT"]}', 1) = 0, 'settore diverso');
 
+-- Referente non trovato di recente (anche in un'altra ricerca): in fondo alla riserva.
+create temp table s14b as
+  select * from create_search('a0a0a0a0-0000-4000-8000-000000000014', (select org from o14), 'Dentisti Italia',
+    '{"industry":"Studi dentistici","countries":["IT"],"regions":[],"roles":["Titolare"],"company_size":[],"revenue_range":"","keywords":[],"exclude_keywords":[],"notes":""}', 'mixed', 5, 1);
+update companies set referente_missed_at = now() - interval '1 day' where domain = 'dentistavivo14.it';
+select pg_temp.check((select jsonb_array_length(r) = 2 and r -> 1 ->> 'website' = 'https://dentistavivo14.it'
+                        from (select target_reserve((select id from s14b), '{}', 40) as r) x), 'referente mancato: in fondo');
+update companies set referente_missed_at = now() - interval '120 days' where domain = 'dentistavivo14.it';
+select pg_temp.check((select r -> 0 ->> 'website' = 'https://dentistavivo14.it' or r -> 1 ->> 'website' = 'https://dentistavivo14.it'
+                        from (select target_reserve((select id from s14b), '{}', 40) as r) x), 'referente mancato da più di 90 giorni: ancora in riserva');
+
 select 'superati tutti i test riserva target';

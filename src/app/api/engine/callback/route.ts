@@ -102,6 +102,18 @@ export async function POST(request: Request) {
     delete (payload as { company_checks?: unknown }).company_checks;
   }
 
+  // Referenti non trovati: le ricerche successive (anche di altri clienti) mettono queste
+  // aziende in fondo alla riserva invece di pagare di nuovo le stesse ricerche web.
+  const missed = [...new Set((payload.rejected ?? [])
+    .map((r) => r as { reason?: string; company?: { domain?: string } })
+    .filter((r) => r?.reason === "referente_non_trovato")
+    .map((r) => String(r.company?.domain ?? "").trim().toLowerCase())
+    .filter(Boolean))].slice(0, 200);
+  if (open && missed.length) {
+    const { error: missedError } = await db.from("companies").update({ referente_missed_at: new Date().toISOString() }).in("domain", missed);
+    if (missedError) console.error("referente_missed_at", missedError.message);
+  }
+
   const { data, error } = await db.rpc("apply_engine_results", {
     p_run: evt.run_id,
     p_token_hash: tokenHash,
