@@ -330,7 +330,7 @@ assert.equal(senzaPersona[0].source_url, 'https://brugola.com/posizione-aperta-i
 assert.equal(senzaPersona[0].person_key, '|brugola.com');
 const reqRef = run(src('12-prepara-referente.js'), { nodes: { 'Valida richiesta': [jobA] }, json: senzaPersona[0] }).json._claude_ref;
 assert.match(reqRef.messages[0].content, /Brugola Spa/);
-assert.equal(reqRef.tools[0].max_uses, 2);
+assert.equal(reqRef.tools[0].max_uses, 1, 'una sola ricerca web mirata');
 assert.equal(reqRef.model, 'claude-haiku-5-5', 'referente via web con Haiku');
 const esitoRef = (testoRisposta, extra = {}) => run(src('13-esito-referente.template.js', { __FASE__: 'WEB', __ORIGINE__: 'Prepara ricerca referente' }), {
   nodes: { 'Valida richiesta': [jobA], 'Prepara ricerca referente': [{ ...senzaPersona[0], _claude_ref: {} }] },
@@ -382,6 +382,28 @@ assert.equal(esitoSito('{"person":{"full_name":"Marco Brugola","job_title":"CEO"
 const nonTrovato = esitoSito('{"person":null}');
 assert.equal(nonTrovato._cerca_web, true);
 assert.equal(nonTrovato._scarto_segnale, undefined);
+assert.match(reqSito._claude_sito.messages[0].content, /anche senza la parola esatta del ruolo/, 'regola ampia: chi guida l azienda');
+
+// Il nome è un valore aggiunto (17/10): per modalità, cosa succede senza referente.
+const esitoModo = (fase, mode, testoRisposta = '{"person":null}') => run(src('13-esito-referente.template.js',
+  fase === 'SITO' ? { __FASE__: 'SITO', __ORIGINE__: 'Prepara referente dal sito' } : { __FASE__: 'WEB', __ORIGINE__: 'Prepara ricerca referente' }), {
+  nodes: { 'Valida richiesta': [{ ...jobA, email_mode: mode }], 'Prepara referente dal sito': [reqSito], 'Prepara ricerca referente': [{ ...senzaPersona[0], _claude_ref: {} }] },
+  json: { content: [{ type: 'text', text: testoRisposta }] }
+}).json;
+assert.equal(esitoModo('SITO', 'generic_ok')._senza_referente, true, 'generiche: niente web, lead senza nome');
+assert.equal(esitoModo('SITO', 'generic_ok')._cerca_web, false);
+assert.equal(esitoModo('SITO', 'mixed')._cerca_web, true, 'mista: prima prova il web');
+assert.equal(esitoModo('WEB', 'mixed')._senza_referente, true, 'mista: poi lead senza nome');
+assert.equal(esitoModo('WEB', 'mixed')._scarto_segnale, undefined);
+assert.equal(esitoModo('WEB', 'personal_only')._scarto_segnale, 'referente_non_trovato', 'solo nominative: nome obbligatorio');
+assert.equal(esitoModo('SITO', 'personal_only')._cerca_web, true);
+const senzaTesto = run(src('16-prepara-referente-sito.js'), { nodes: { 'Valida richiesta': [{ ...jobA, email_mode: 'generic_ok' }], 'Serve pagina referente?': [{ ...senzaPersona[0], _testo_home: '' }] },
+  json: {} }).json;
+assert.equal(senzaTesto._referente_sito, false);
+assert.equal(senzaTesto._senza_referente, true, 'generiche senza testo: nessuna ricerca web');
+const senzaTestoMista = run(src('16-prepara-referente-sito.js'), { nodes: { 'Valida richiesta': [{ ...jobA, email_mode: 'mixed' }], 'Serve pagina referente?': [{ ...senzaPersona[0], _testo_home: '' }] },
+  json: {} }).json;
+assert.equal(senzaTestoMista._senza_referente, undefined, 'mista senza testo: ricerca web');
 
 // Tetto ai referenti: oltre il tetto le aziende restano in riserva (prima la riserva già pagata).
 const scegli = src('15-scegli-referenti.js');

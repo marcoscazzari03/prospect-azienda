@@ -1,6 +1,8 @@
 // Esito della ricerca del referente (__FASE__): controlla la risposta e completa il prospect.
-// SITO: letto dal testo del sito; se non c'è si passa alla ricerca web (_cerca_web).
-// WEB: ricerca web; senza una persona valida l'azienda esce dal flusso (nessuna ricerca email).
+// SITO: letto dal testo del sito; se non c'è si passa alla ricerca web (_cerca_web), tranne
+// con «Email generiche incluse». WEB: una ricerca mirata (registri imprese).
+// Senza referente: «Solo nominative» scarta l'azienda; le altre modalità consegnano l'azienda
+// con la sua email generica, senza nome (il nome è un valore aggiunto, deciso il 17/10).
 const FASE = '__FASE__';
 const job = $('Valida richiesta').first().json;
 const { _claude_ref, _claude_sito, ...p } = $('__ORIGINE__').item.json;
@@ -54,14 +56,14 @@ const fonte = FASE === 'SITO'
 const NOTE_AI = /\b(non|nd|cognome|nome|surname|name|unknown|anonim[oa]|indicat\w*|specificat\w*|disponibil\w*|sconosciut\w*)\b/i;
 
 const valido = persona && parti.length >= 2 && parti.length <= 5 && !/[()\[\]{}0-9@:;?!/]/.test(nome) && !NOTE_AI.test(nome) && fonte;
-if (FASE === 'SITO' && (r.type === 'error' || r.error || !valido)) {
+const errore = r.type === 'error' || r.error;
+const soloNominative = job.email_mode === 'personal_only';
+if ((errore || !valido) && FASE === 'SITO' && job.email_mode !== 'generic_ok') {
   out._cerca_web = true;
-} else if (r.type === 'error' || r.error) {
-  out._scarto_segnale = 'referente_errore_ricerca';
-} else if (!valido && job.email_mode === 'generic_ok') {
-  // «Email generiche incluse»: senza referente si consegna l'azienda con la sua email
-  // generica (collaudo del 17/10: negli hotel il titolare si trova in ~1 azienda su 10).
+} else if ((errore || !valido) && !soloNominative) {
   out._senza_referente = true;
+} else if (errore) {
+  out._scarto_segnale = 'referente_errore_ricerca';
 } else if (!valido) {
   out._scarto_segnale = 'referente_non_trovato';
 } else {

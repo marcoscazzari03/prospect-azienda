@@ -24,6 +24,7 @@ type Lead = {
 // Applica gli esiti ai lead: scarta quelli non consegnabili e annota gli altri.
 export function applyMailboxChecks(leads: unknown[], checks: Map<string, MailboxCheck>) {
   const kept: unknown[] = [];
+  const rejectedDomains: string[] = [];
   let rejected = 0;
   for (const raw of leads) {
     const lead = raw as Lead;
@@ -35,9 +36,11 @@ export function applyMailboxChecks(leads: unknown[], checks: Map<string, Mailbox
     }
     if (MAILBOX_REJECTED.has(check)) {
       rejected++;
+      const domain = String((lead.company as { domain?: string } | undefined)?.domain ?? "").trim().toLowerCase();
+      if (domain) rejectedDomains.push(domain);
       continue;
     }
     kept.push({ ...lead, quality: { ...lead.quality, checks: { ...lead.quality?.checks, mailbox: check } } });
   }
-  return { leads: kept, rejected };
+  return { leads: kept, rejected, rejectedDomains };
 }

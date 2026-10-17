@@ -78,7 +78,7 @@ create temp table res as select apply_engine_results((select id from r), sha256_
      "keys":{"person_key":"mario rossi|acme.it","company_key":"acme.it"},
      "sources":{"discovery_url":"https://acme.it/team"}, "quality":{"score":90}},
     {"company":{"name":"Beta","domain":"beta.it","website":"https://beta.it"},
-     "person":{"full_name":"Luca Verdi","job_title":"Founder"},
+     "person":{"full_name":"","job_title":""},
      "email":{"address":"info@beta.it","type":"generic","status":"found_public","source":"website"},
      "keys":{"person_key":"luca verdi|beta.it"}, "quality":{"score":70}},
     {"company":{"name":"Gamma","domain":"gamma.it"},
@@ -108,7 +108,7 @@ select pg_temp.check((select (v #>> '{skipped,suppressed}')::int = 1 from res), 
 select pg_temp.check((select (v #>> '{skipped,duplicates}')::int = 1 from res), 'duplicato scartato');
 select pg_temp.check((select (v #>> '{skipped,invalid}')::int = 1 from res), 'email ipotizzata mai consegnata');
 select pg_temp.check((select (v #>> '{skipped,company_full}')::int = 1 from res), 'un solo contatto per azienda');
-select pg_temp.check((select credits_charged = 3 from searches where id = (select id from s)), 'addebito 2 (nominativa) + 1 (generica)');
+select pg_temp.check((select credits_charged = 3 from searches where id = (select id from s)), 'addebito 2 (nominativa) + 1 (generica senza nome)');
 select pg_temp.check((select count(*) = 4 from run_costs where run_id = (select id from r)), 'costi del giro registrati per 4 fornitori');
 select pg_temp.check((select sum(total_eur) > 0 from run_costs where run_id = (select id from r)), 'costi > 0');
 
@@ -119,7 +119,7 @@ select pg_temp.check((select apply_engine_results((select id from r), sha256_hex
 create temp table r2 as select * from start_run((select id from s), sha256_hex('token-2'), 4);
 select apply_engine_results((select id from r2), sha256_hex('token-2'), $json$
 {"leads":[
-  {"company":{"name":"Beta","domain":"beta.it"},"person":{"full_name":"Luca Verdi"},
+  {"company":{"name":"Beta","domain":"beta.it"},"person":{"full_name":""},
    "email":{"address":"info@beta.it","type":"generic","status":"found_public"},"keys":{"person_key":"luca verdi|beta.it"}},
   {"company":{"name":"Epsilon","domain":"epsilon.it"},"person":{"full_name":"Ivo Rosa"},
    "email":{"address":"ivo@epsilon.it","type":"personal","status":"validated","source":"enrichment"},"keys":{"person_key":"ivo rosa|epsilon.it"}}

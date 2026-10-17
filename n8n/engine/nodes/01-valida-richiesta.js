@@ -13,7 +13,7 @@ const CALLBACK_AMMESSI = [
 // Il ritorno a OpenAI si fa ricollegando i nodi OpenAI rimasti nel workflow.
 // Referente via web con Claude Haiku: prova del 14/10 sulle 7 aziende del collaudo,
 // 5 referenti come Sonnet (4 identici) a 0,023 $ invece di 0,061 $ a chiamata.
-const AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', ref_model: 'claude-haiku-5-5', effort: 'medium', max_searches: 12, max_ref_searches: 2 };
+const AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', ref_model: 'claude-haiku-5-5', effort: 'medium', max_searches: 12, max_ref_searches: 1 };
 
 const raw = $input.first().json;
 const b = raw.body && typeof raw.body === 'object' ? raw.body : raw;

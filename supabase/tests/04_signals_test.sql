@@ -63,8 +63,8 @@ select apply_engine_results((select id from ri), sha256_hex('tok-i'), $json$
 ], "usage":{"ai_search_calls":1}}
 $json$::jsonb);
 
-select pg_temp.check((select delivered = 2 and credits_charged = 5 from searches where id = (select id from si)),
-                     'consegnati solo i lead con il segnale: (2 + 1) + (1 + 1) crediti');
+select pg_temp.check((select delivered = 2 and credits_charged = 6 from searches where id = (select id from si)),
+                     'consegnati solo i lead con il segnale: (2 + 1) + (2 + 1) crediti, generica con il nome del referente');
 select pg_temp.check(not exists (select 1 from deliveries where person_key = 'bruno beta|beta.it'),
                      'segnale indicativo da solo: lead non consegnato');
 select pg_temp.check((select credits = 3 and jsonb_array_length(data -> 'signals') = 2
@@ -154,11 +154,11 @@ create temp table rp as select * from start_run((select id from sp), sha256_hex(
 select apply_engine_results((select id from rp), sha256_hex('tok-p'), $json$
 {"leads": [
   {"company":{"name":"Zeta","domain":"zeta-p.it","website":"https://zeta-p.it","country":"Italia"},
-   "person":{"full_name":"Zoe Zeta","job_title":"Titolare"},
+   "person":{"full_name":"","job_title":""},
    "email":{"address":"info@zeta-p.it","type":"generic","status":"found_public","source":"website"},
    "keys":{"person_key":"zoe zeta|zeta-p.it"}, "signals":[{"code":"no_mobile","evidence":{}}]},
   {"company":{"name":"Eta","domain":"eta-p.it","website":"https://eta-p.it","country":"Italia"},
-   "person":{"full_name":"Ezio Eta","job_title":"Titolare"},
+   "person":{"full_name":"","job_title":""},
    "email":{"address":"info@eta-p.it","type":"generic","status":"found_public","source":"website"},
    "keys":{"person_key":"ezio eta|eta-p.it"}, "signals":[{"code":"job_ad","evidence":{"date":"2026-10-01"}}]}
 ]}

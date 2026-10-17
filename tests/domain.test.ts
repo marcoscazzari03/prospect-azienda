@@ -94,6 +94,8 @@ describe("motore", () => {
     expect(nextStep({ ok: true, remaining: 4, attempts: 2, new: 0 }, 3)).toBe("finalize");
     expect(nextStep({ ok: true, remaining: 3, attempts: 2, new: 0, reserve_left: 34 }, 3)).toBe("topup");
     expect(nextStep({ ok: true, remaining: 3, attempts: 3, new: 0, reserve_left: 34 }, 3)).toBe("finalize");
+    expect(nextStep({ ok: true, remaining: 3, attempts: 2, new: 1, spent_eur: 1.2, budget_eur: 1 }, 5)).toBe("finalize");
+    expect(nextStep({ ok: true, remaining: 3, attempts: 3, new: 1, spent_eur: 0.4, budget_eur: 1 }, 5)).toBe("topup");
     expect(nextStep({ ok: true, remaining: 4, attempts: 3, new: 2 }, 3)).toBe("finalize");
     expect(nextStep({ ok: false, reason: "already_processed" }, 3)).toBe("none");
   });
@@ -133,12 +135,13 @@ describe("controllo caselle", () => {
   it("scarta le caselle non consegnabili e annota le altre", () => {
     const leads = [
       { email: { address: "A@x.it" }, quality: { score: 80 } },
-      { email: { address: "b@morto.it" } },
+      { company: { domain: "Morto.it" }, email: { address: "b@morto.it" } },
       { email: { address: "c@y.it" } },
     ];
     const checks = new Map([["a@x.it", "ok" as const], ["b@morto.it", "no_mx" as const]]);
     const out = applyMailboxChecks(leads, checks);
     expect(out.rejected).toBe(1);
+    expect(out.rejectedDomains).toEqual(["morto.it"]);
     expect(out.leads).toHaveLength(2);
     expect((out.leads[0] as { quality: { score: number; checks: { mailbox: string } } }).quality).toEqual({ score: 80, checks: { mailbox: "ok" } });
     expect(out.leads[1]).toBe(leads[2]);

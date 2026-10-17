@@ -111,6 +111,8 @@ export type ApplyResult = {
   remaining?: number;
   attempts?: number;
   reserve_left?: number; // aziende rimaste in riserva senza referente cercato (dal giro appena chiuso)
+  spent_eur?: number; // spesa del motore per la ricerca fino a questo giro
+  budget_eur?: number; // budget del motore per la ricerca
 };
 
 // Dopo un giro: nuovo giro (top-up) o chiusura della ricerca.
@@ -118,6 +120,7 @@ export function nextStep(result: ApplyResult, maxAttempts: number): "topup" | "f
   if (!result.ok) return "none";
   if ((result.remaining ?? 0) <= 0) return "finalize";
   if ((result.attempts ?? 0) >= maxAttempts) return "finalize";
+  if (result.budget_eur !== undefined && (result.spent_eur ?? 0) >= result.budget_eur) return "finalize";
   // Un top-up che non trova nulla di nuovo non ne merita un altro, a meno che restino
   // aziende in riserva ancora da provare (il giro successivo costa solo i referenti).
   if ((result.attempts ?? 0) > 1 && (result.new ?? 0) === 0 && !(result.reserve_left ?? 0)) return "finalize";

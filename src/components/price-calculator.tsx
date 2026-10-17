@@ -48,7 +48,7 @@ export function PriceCalculator() {
         <p className="font-mono text-xl">
           {eur(min * RATE_GROWTH)}–{eur(max * RATE_PACK)}
         </p>
-        <p className="mt-3 text-xs text-muted">Paghi in base all&apos;email effettivamente consegnata: generica 1 credito, nominativa 2, nominativa verificata 3.</p>
+        <p className="mt-3 text-xs text-muted">Paghi in base all&apos;email effettivamente consegnata: generica 1 credito (2 con il nome del referente), nominativa 2, nominativa verificata 3.</p>
       </div>
     </div>
   );

@@ -215,6 +215,8 @@ add("""const rifiuta = node({
 });
 """)
 
+# Giro coperto dalla riserva (0 lotti): il pianificatore AI non serve.
+add(if_node("servePiano", "Serve pianificazione?", "{{ $('Valida richiesta').first().json.lotti_previsti > 0 }}", "boolean", "true"))
 add(callback("notificaAvvio", "Notifica: ricerca avviata",
              progress("planning", "'Pianificazione della ricerca'", "{ lots_planned: $('Valida richiesta').first().json.lotti_previsti, n8n_execution_id: $execution.id }")))
 
@@ -384,6 +386,8 @@ add("""const riunisciRefWeb = merge({
   config: { name: 'Riunisci ricerca web referente', parameters: { mode: 'append', numberInputs: 2 } }
 });
 """)
+# Con «Email generiche incluse» e senza testo del sito: nessuna ricerca web del referente.
+add(if_node("cercaRefWeb", "Cerca referente sul web?", "{{ $json._senza_referente !== true }}", "boolean", "true"))
 add(code("preparaRef", "Prepara ricerca referente", js("12-prepara-referente.js"), mode="runOnceForEachItem",
          output="{ company_name: 'Acme Srl', _claude_ref: {} }"))
 add(claude_http("claudeRef", "HTTP - Claude referente", "{{ JSON.stringify($json._claude_ref) }}"))
@@ -392,7 +396,7 @@ add(code("esitoRef", "Esito ricerca referente",
          output="{ company_name: 'Acme Srl', full_name: 'Mario Rossi' }"))
 add("""const riunisciRef = merge({
   version: 3.2,
-  config: { name: 'Riunisci referenti', parameters: { mode: 'append', numberInputs: 3 } }
+  config: { name: 'Riunisci referenti', parameters: { mode: 'append', numberInputs: 4 } }
 });
 """)
 add(if_node("referenteOk", "Referente ok?", "{{ $json._scarto_segnale ?? '' }}", "string", "empty"))
@@ -521,7 +525,9 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .add(webhook)
   .to(valida)
   .to(richiestaValida
-    .onTrue(notificaAvvio.to(planner))
+    .onTrue(notificaAvvio.to(servePiano
+      .onTrue(planner)
+      .onFalse(prepara)))
     .onFalse(rifiuta))
   .add(planner)
   .to(prepara)
@@ -567,7 +573,10 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
     .onTrue(riunisciRefWeb.input(0))
     .onFalse(riunisciRef.input(1)))
   .add(riunisciRefWeb)
-  .to(preparaRef)
+  .to(cercaRefWeb
+    .onTrue(preparaRef)
+    .onFalse(riunisciRef.input(3)))
+  .add(preparaRef)
   .to(claudeRef)
   .to(esitoRef)
   .to(riunisciRef.input(2))
@@ -604,10 +613,10 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .to(classifica)
   .to(inviaRisultati)
   .add(nota)
-  .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
+  .group('1 - Richiesta', [valida, richiestaValida, rifiuta, notificaAvvio, servePiano], { description: 'Valida il payload del backend, blocca callback non ammessi e prepara il brief per l AI.' })
   .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, """ + RICERCA_GROUP + """, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
   .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk, serveControlloSito, sitoSegnali, serveHttps, controlloHttps, riunisciHttps, valutaSito, segnaliSitoOk, riunisciSegnali], { description: 'Annuncio di lavoro verificato e segnali controllati sul sito PRIMA di cercare il referente.' })
-  .group('2c - Referente', [scegliRef, serveReferente, servePaginaRef, paginaRef, riunisciPaginaRef, preparaRefSito, refSitoPossibile, claudeRefSito, esitoRefSito, serveRefWeb, riunisciRefWeb, preparaRef, claudeRef, esitoRef, riunisciRef, referenteOk], { description: 'Referente solo per chi ha il segnale, entro un tetto: prima dal testo del sito, poi con la ricerca web.' })
+  .group('2c - Referente', [scegliRef, serveReferente, servePaginaRef, paginaRef, riunisciPaginaRef, preparaRefSito, refSitoPossibile, claudeRefSito, esitoRefSito, serveRefWeb, riunisciRefWeb, cercaRefWeb, preparaRef, claudeRef, esitoRef, riunisciRef, referenteOk], { description: 'Referente solo per chi ha il segnale, entro un tetto: prima dal testo del sito, poi con la ricerca web.' })
   .group('3 - Email dal sito', [homepage, estraiHome, controlliTecnici, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
   .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })
   .group('5 - Consegna', [classifica, inviaRisultati], { description: 'Classifica per modalita email, calcola qualita e invia i risultati al backend con retry.' });

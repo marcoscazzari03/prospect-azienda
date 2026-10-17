@@ -816,6 +816,9 @@ isOneToOne: false
 "is_org_member":
 { Args: { "p_org": string }; Returns: boolean
                            },
+"is_platform_domain":
+{ Args: { "p_domain": string }; Returns: boolean
+                           },
 "is_platform_admin":
 { Args: Record<PropertyKey, never>; Returns: boolean
                            },
@@ -946,6 +949,9 @@ isOneToOne: false
                            },
 "store_company_resolutions":
 { Args: { "p_items": Json }; Returns: Json
+                           },
+"search_cost_eur":
+{ Args: { "p_search": string }; Returns: number
                            },
 "store_imported_companies":
 { Args: { "p_items": Json,"p_source": string }; Returns: Json

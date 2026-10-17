@@ -84,9 +84,17 @@ export async function POST(request: Request) {
     // Entro ~20-25 s: n8n attende la risposta per 30 s (le caselle non controllate in tempo restano valide).
     const checked = await checkMailboxes(fromSites, 18_000);
     apiCalls = checked.apiCalls;
-    const { leads, rejected } = applyMailboxChecks(payload.leads, checked.results);
+    const { leads, rejected, rejectedDomains } = applyMailboxChecks(payload.leads, checked.results);
     payload.leads = leads;
-    payload.stats = { ...payload.stats, mailbox_rejected: rejected, mailbox_checked: checked.results.size };
+    // Email scartata alla verifica: l'azienda conta come già controllata, i giri successivi
+    // non la ripropongono (collaudo del 17/10: la stessa azienda ripagata in tre giri).
+    const checkedDomains = Array.isArray(payload.stats?.checked_domains) ? (payload.stats.checked_domains as string[]) : [];
+    payload.stats = {
+      ...payload.stats,
+      checked_domains: [...new Set([...checkedDomains, ...rejectedDomains])].slice(0, 500),
+      mailbox_rejected: rejected,
+      mailbox_checked: checked.results.size,
+    };
   }
 
   // Database delle aziende: esito dei controlli tecnici di tutte le aziende viste nel giro,

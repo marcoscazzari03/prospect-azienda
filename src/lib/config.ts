@@ -10,7 +10,12 @@ export const BRAND = {
 
 // Regole operative della ricerca.
 export const SEARCH_RULES = {
-  maxAttempts: 3, // primo giro + 2 top-up (di più per le ricerche grandi, vedi maxAttemptsFor)
+  maxAttempts: 5, // primo giro + 4 top-up (di più per le ricerche grandi, vedi maxAttemptsFor)
+  // Budget del motore per ricerca (AI, arricchimento, verifiche): oltre, niente altri giri.
+  // Collaudi del 17/10: con il limite fisso di 3 giri le ricerche chiudevano a 3/5 con
+  // centinaia di aziende ancora da provare; il limite giusto è la spesa, non i giri.
+  engineBudgetPerLeadEur: 0.2,
+  engineBudgetMinEur: 1,
   staleRunMinutes: 45, // un giro senza eventi da più di così è considerato fallito
   autoRefundWindowDays: 14,
   bounceRefundWindowDays: 30,

@@ -250,7 +250,9 @@ export async function afterResults(result: ApplyResult) {
   const maxAttempts = search
     ? maxAttemptsFor(search.quantity, search.email_mode as EngineSearch["email_mode"], SEARCH_RULES.maxAttempts)
     : SEARCH_RULES.maxAttempts;
-  const step = nextStep(result, maxAttempts);
+  const { data: spent } = await createAdminClient().rpc("search_cost_eur", { p_search: result.search_id });
+  const budget = Math.max(SEARCH_RULES.engineBudgetMinEur, (search?.quantity ?? 0) * SEARCH_RULES.engineBudgetPerLeadEur);
+  const step = nextStep({ ...result, spent_eur: Number(spent ?? 0), budget_eur: budget }, maxAttempts);
   if (step === "topup") await dispatchRun(result.search_id);
   else if (step === "finalize") await finalizeSearch(result.search_id);
 }

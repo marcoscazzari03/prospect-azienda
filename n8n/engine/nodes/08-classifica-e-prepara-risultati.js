@@ -64,7 +64,7 @@ for (const p of prospects) {
 
   // Nominativa: dal sito (con nome) o validata. Generica: solo dal dominio aziendale
   // o in un mailto del sito. "other_person" e "privacy" non si vendono mai.
-  // Senza referente (solo «Email generiche incluse») si consegna solo la generica.
+  // Senza referente (non in «Solo nominative») si consegna solo la generica.
   const nominativa = p._senza_referente ? null : (sito && sito.type === 'personal' ? sito : arricchita);
   const generica = sito && sito.type === 'generic' ? sito : null;
 
@@ -183,6 +183,7 @@ return [{
       leads: leads.length,
       leads_personal: leads.filter(l => l.email.type === 'personal').length,
       leads_generic: leads.filter(l => l.email.type === 'generic').length,
+      leads_without_name: leads.filter(l => !l.person.full_name).length,
       rejected: rejected.length,
       rejected_reasons: motivi,
       signal_discards: Object.fromEntries(Object.entries(motivi).filter(([k]) => /^(annuncio_|segnale_|referente_)/.test(k))),
@@ -193,7 +194,7 @@ return [{
     },
     usage: {
       ai_search_calls: lotti.length,
-      ai_planner_calls: 1,
+      ai_planner_calls: job.lotti_previsti > 0 ? 1 : 0,
       enrichment_lookups: lookups,
       pages_fetched: pagine,
       claude_input_tokens: tokIn,

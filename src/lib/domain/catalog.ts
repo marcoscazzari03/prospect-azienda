@@ -6,17 +6,17 @@ export type EmailMode = (typeof EMAIL_MODES)[number];
 export const MODE_INFO: Record<EmailMode, { label: string; short: string; maxCredits: number; minCredits: number; example: string }> = {
   generic_ok: {
     label: "Email generiche incluse",
-    short: "Nominative quando le troviamo, altrimenti info@ o sales@ dell'azienda, anche senza il nome del referente.",
+    short: "Email aziendali verificate come info@ o sales@. Il nome del referente quando è sul sito (+1 credito).",
     minCredits: 1,
     maxCredits: 2,
-    example: "info@azienda.it · mario.rossi@azienda.it",
+    example: "info@azienda.it · Mario Rossi, info@azienda.it",
   },
   mixed: {
     label: "Mista",
-    short: "Insistiamo sulle nominative (anche con verifica tecnica), poi accettiamo le generiche.",
+    short: "Cerchiamo il referente sul sito e nei registri delle imprese; se non c'è, l'azienda con la sua email generica.",
     minCredits: 1,
     maxCredits: 3,
-    example: "mario.rossi@azienda.it, se manca info@azienda.it",
+    example: "mario.rossi@azienda.it · Mario Rossi, info@azienda.it · info@azienda.it",
   },
   personal_only: {
     label: "Solo nominative",

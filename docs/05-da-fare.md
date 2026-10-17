@@ -159,7 +159,10 @@ Le stime della revisione non sono dati misurati.
 - [x] Deciso il 17/10 (opzione 1): in «Email generiche incluse» senza referente si consegna l'azienda con l'email generica, senza nome (niente Icypeas, niente email ipotizzate). Mista e Solo nominative invariate.
 - [ ] Costo collaudi hotel: 1,58 $ di Claude (6,48 → 4,90, compreso il lavoro di fondo) e 2 crediti Icypeas per 5 lead.
 - [ ] Hotel: referente trovato nel ~10% delle aziende (titolare quasi mai sul sito; uno trovato da visura su ufficiocamerale.it). Decidere: consegnare nella modalità «Email generiche incluse» anche lead senza nome (solo info@ verificata) e/o un prezzo diverso per i settori «difficili».
-- [ ] Pianificatore AI chiamato anche quando i lotti sono 0 (risponde vuoto, ~1 centesimo a giro): saltarlo.
+- [x] Pianificatore AI saltato quando i lotti sono 0 (bivio «Serve pianificazione?»).
+- [x] Diagnosi completa (ricerca B, 17/10): sui siti di 56 micro-imprese il decisore è nominato in 7 (12%); 32 non hanno nessun nome. Il passaggio dal sito trovava 0 referenti su 20 per una regola troppo stretta sul ruolo; la ricerca web (2 a tentativo) era ~70% della spesa; un'azienda scartata alla verifica email veniva ripagata a ogni giro; il limite di 3 giri chiudeva le ricerche con centinaia di aziende disponibili.
+- [x] Soluzione (approvata il 17/10): nome del referente come valore aggiunto (+1 credito sulle generiche con il nome); «Mista» e «Generiche incluse» consegnano anche senza nome; regola ampia sul sito (titolare, fondatore, gestore… anche senza la parola esatta); 1 sola ricerca web mirata ai registri imprese (niente web in «Generiche incluse»); email scartate alla verifica ricordate nel giro; stop sul budget della ricerca (0,20 € a lead, minimo 1 €, fino a 5 giri) invece che dopo 3 giri; piattaforme (thefork, booking, accor…) escluse dalla riserva. Migrazione 032.
+- [ ] Verificare con una ricerca reale da 5 lead: costo per lead e quota con il nome.
 - [ ] Referente trovato ma nessuna email (Echi di Puglia: Icypeas NOT_FOUND e nessuna generica sul sito): capire perché la generica non c'era.
 
 ## Legale e fiscale
