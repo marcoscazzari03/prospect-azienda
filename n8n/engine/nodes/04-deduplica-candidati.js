@@ -46,7 +46,7 @@ const chiaveAzienda = (sito) => {
   return ['sites.google.com', 'linktr.ee', 'business.site'].includes(h) && primo ? `${h}/${primo}` : h;
 };
 
-const NON_UFFICIALI = /(^|\.)(linkedin|facebook|instagram|twitter|x|youtube|tiktok|google|goo|bing|yelp|trustpilot|tripadvisor|glassdoor|indeed|crunchbase|zoominfo|rocketreach|apollo|dnb|bloomberg|wikipedia|kompass|europages|infobel|paginegialle|paginebianche|paginasamarillas|yellowpages|gelbeseiten|pagesjaunes|herold|panoramafirm|firmy|zlatestranky|cylex|hotfrog|yell|192|houzz|clutch|g2|capterra|amazon|ebay|etsy|medium|wordpress|blogspot|wixsite|reddit|quora|ufficiocamerale|registroimprese|reportaziende|informazione-aziende|atoka|companieshouse|northdata|opencorporates)\.[a-z.]+$/;
+const NON_UFFICIALI = /(^|\.)(linkedin|facebook|instagram|twitter|x|youtube|tiktok|google|goo|bing|yelp|trustpilot|tripadvisor|glassdoor|indeed|crunchbase|zoominfo|rocketreach|apollo|dnb|bloomberg|wikipedia|kompass|europages|infobel|paginegialle|paginebianche|paginasamarillas|yellowpages|gelbeseiten|pagesjaunes|herold|panoramafirm|firmy|zlatestranky|cylex|hotfrog|yell|192|houzz|clutch|g2|capterra|amazon|ebay|etsy|medium|wordpress|blogspot|wixsite|reddit|quora|ufficiocamerale|registroimprese|reportaziende|informazione-aziende|atoka|companieshouse|northdata|opencorporates|thefork|booking|airbnb|expedia|trivago|agoda|justeat|deliveroo|glovoapp|ubereats|vorreiordinare)\.[a-z.]+$/;
 
 const parti = (nome) => norm(nome).split(' ').filter(p => p.length > 1);
 // Nome di una persona reale: niente note dell'AI («cognome non indicato»), parentesi o numeri.
@@ -70,7 +70,7 @@ const VERTICE = ['ceo', 'founder', 'co founder', 'cofounder', 'owner', 'titolare
 // ognuna conta da sola, con i sinonimi più comuni in italiano e inglese.
 const SINONIMI = {
   ceo: ['ceo', 'chief executive', 'amministratore delegato', 'ad'],
-  titolare: ['titolare', 'owner', 'proprietario', 'imprenditore'],
+  titolare: ['titolare', 'owner', 'proprietario', 'imprenditore', 'legale rappresentante', 'amministratore unico', 'gestore', 'socio unico'],
   fondatore: ['fondatore', 'founder', 'co founder', 'cofounder', 'co fondatore', 'cofondatore'],
   founder: ['founder', 'co founder', 'cofounder', 'fondatore', 'co fondatore'],
   'managing director': ['managing director', 'direttore generale', 'general manager', 'amministratore unico'],
@@ -99,9 +99,9 @@ const coerenzaRuolo = (titolo) => {
 
 // Annuncio di lavoro (segnale job_ad): l'URL passa dagli stessi controlli anti-SSRF.
 const annunciRichiesti = job.target.signals.codes.includes('job_ad');
-// Con i segnali la ricerca va in due passaggi: prima le aziende, poi il referente
-// solo per chi ha il segnale (si paga la ricerca del referente solo quando serve).
-const dueFasi = job.target.signals.codes.length > 0;
+// Due passaggi per tutte le ricerche (17/10): prima le aziende, poi il referente solo per
+// le aziende che servono (con i segnali: solo per chi ha il segnale).
+const dueFasi = true;
 const annuncioObbligatorio = annunciRichiesti && (job.target.signals.codes.length === 1 || job.target.signals.match === 'all');
 
 const visti = new Set();
@@ -145,8 +145,10 @@ for (const item of $input.all()) {
     const chiave = chiaveAzienda(sito);
     const fonte = /^https?:\/\//i.test(String(c?.source_url ?? '').trim()) ? urlPulito(c.source_url) : '';
 
-    // Con i segnali il referente arriva in un secondo passaggio, solo per chi ha il segnale.
-    const senzaReferente = dueFasi && (!nome || parti(nome).length < 2);
+    // Il referente arriva in un secondo passaggio; un nome dell'AI con un ruolo non coerente
+    // non scarta l'azienda (es. «Legale rappresentante» per «Titolare / CEO»): lo cerchiamo noi.
+    const ruoloAI = nome && parti(nome).length >= 2 ? coerenzaRuolo(c?.job_title) : 'unknown';
+    const senzaReferente = dueFasi && (!nome || parti(nome).length < 2 || ruoloAI === 'mismatch');
     const annuncio = annunciRichiesti && /^https?:\/\//i.test(String(c?.job_ad_url ?? '').trim()) ? urlPulito(c.job_ad_url) : '';
 
     if (!azienda || (!senzaReferente && !nomeValido(nome))) { scarta('dati_persona_incompleti'); continue; }
@@ -170,7 +172,7 @@ for (const item of $input.all()) {
     visti.add(kp);
     perAzienda[chiave] = (perAzienda[chiave] || 0) + 1;
 
-    const p = parti(nome);
+    const p = senzaReferente ? [] : parti(nome);
     out.push({
       json: {
         company_name: azienda,
@@ -181,10 +183,10 @@ for (const item of $input.all()) {
         city: pulito(c?.city, 80),
         industry: pulito(c?.industry, 120) || job.target.industry,
         size_hint: pulito(c?.size_hint, 60),
-        full_name: nome,
-        first_name: pulito(c?.first_name, 60) || p[0],
-        last_name: pulito(c?.last_name, 80) || p.slice(1).join(' '),
-        job_title: pulito(c?.job_title, 120),
+        full_name: senzaReferente ? '' : nome,
+        first_name: senzaReferente ? '' : pulito(c?.first_name, 60) || p[0],
+        last_name: senzaReferente ? '' : pulito(c?.last_name, 80) || p.slice(1).join(' '),
+        job_title: senzaReferente ? '' : pulito(c?.job_title, 120),
         role_match: ruolo,
         person_key: kp,
         linkedin_url: /linkedin\.com\/in\//i.test(String(c?.linkedin_url ?? '')) ? pulito(c.linkedin_url, 300) : '',

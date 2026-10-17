@@ -180,7 +180,9 @@ function reserveOf(rejected: unknown[] | undefined) {
   };
   return (rejected ?? [])
     .map((r) => r as R)
-    .filter((r) => r?.reason === "riserva" && r.company?.website && Array.isArray(r.signals) && r.signals.length)
+    // Con i segnali la riserva li ha già verificati; nelle ricerche in target (anche le aziende
+    // trovate dall'AI oltre il tetto del giro) i segnali sono vuoti.
+    .filter((r) => r?.reason === "riserva" && r.company?.website && Array.isArray(r.signals))
     .slice(0, 40)
     .map((r) => ({
       company_name: r.company?.name ?? "",

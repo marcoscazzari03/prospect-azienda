@@ -145,8 +145,9 @@ if (job.target.signals.codes.length) {
 } else {
   const SOVRACAMPIONAMENTO = job.email_mode === 'personal_only' ? 2.6 : 1.8;
   // Riserva dal database (ricerche in target semplici): il motore cerca solo referente ed
-  // email; l'AI cerca aziende solo per la parte che la riserva non copre.
-  if (job.reserve.length) job.limits.referenti_max = Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2.2 : 1.5)) + 1;
+  // email; l'AI cerca solo aziende (molte per lotto) per la parte che la riserva non copre.
+  job.limits.referenti_max = Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2.2 : 1.5)) + 1;
+  job.limits.candidates_per_lot = 30;
   const bastaRiserva = job.reserve.length >= Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2 : 1.4));
   // Giro solo dalla riserva: niente ricerca AI, quindi si prova il referente su più aziende.
   // Collaudo del 17/10 (hotel in Puglia): referente trovato in 2 aziende su 15, con il tetto

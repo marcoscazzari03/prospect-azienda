@@ -343,7 +343,7 @@ add(if_node("segnaleOk", "Segnale ok?", "{{ $json._scarto_segnale ?? '' }}", "st
 # Riserva delle ricerche in target: homepage scaricata per cercare il referente sul sito.
 CMS_RELEASES = json.dumps(json.loads((ROOT.parent.parent / "src" / "lib" / "domain" / "cms-releases.json").read_text(encoding="utf-8")), separators=(",", ":"))
 add(if_node("serveControlloSito", "Serve controllo sito?",
-            "{{ $('Valida richiesta').first().json.target.signals.codes.length > 0 || $json._riserva === true }}", "boolean", "true"))
+            "{{ $('Valida richiesta').first().json.target.signals.codes.length > 0 || $json._riserva === true || $json._serve_referente === true }}", "boolean", "true"))
 add(http_page("sitoSegnali", "HTTP - Sito (segnali)", "{{ $json.website }}"))
 add(if_node("serveHttps", "Serve controllo HTTPS?",
             "{{ $('Valida richiesta').first().json.target.signals.codes.includes('no_https') }}", "boolean", "true"))

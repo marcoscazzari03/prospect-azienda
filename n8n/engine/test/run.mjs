@@ -53,11 +53,15 @@ const cands = [
   { company_name: 'Dev Spa', website: 'https://dev.it', full_name: 'Sara Blu', job_title: 'Office manager', source_url: 'https://dev.it' }
 ];
 const dedup = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [job] }, input: [{ candidates: cands, lotto: 1 }] }).map(i => i.json);
-assert.equal(dedup.length, 1);
+assert.equal(dedup.length, 2);
 assert.equal(dedup[0].person_key, 'mario rossi|acme.it');
 assert.deepEqual(dedup[0]._stats_deduplica.scarti, {
-  limite_contatti_azienda: 1, azienda_gia_acquistata: 1, sito_non_ufficiale: 1, senza_fonte: 1, ruolo_non_coerente: 1
+  limite_contatti_azienda: 1, azienda_gia_acquistata: 1, sito_non_ufficiale: 1, senza_fonte: 1
 });
+// Due passaggi per tutte le ricerche: ruolo non coerente -> l'azienda resta, il referente lo cerchiamo noi.
+assert.equal(dedup[1].person_key, '|dev.it');
+assert.equal(dedup[1].full_name, '');
+assert.equal(dedup[1]._serve_referente, true);
 const vuoto = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [job] }, input: [{ candidates: [] }] }).map(i => i.json);
 assert.equal(vuoto[0]._vuoto, true);
 console.log('ok  deduplica, esclusioni, limite per azienda, ruolo');
@@ -86,7 +90,8 @@ assert.equal(conRuoli(['Titolare / CEO'], 'Proprietario'), 'exact');
 assert.equal(conRuoli(['Titolare / CEO'], 'Co-Founder'), 'plausible');
 assert.equal(conRuoli(['Fondatore'], 'Co-Founder e Google Ads Expert'), 'exact');
 assert.equal(conRuoli(['Direttore marketing'], 'Head of Marketing'), 'plausible');
-assert.equal(conRuoli(['Responsabile IT / CTO'], 'Office manager'), undefined); // scartato: ruolo non coerente
+assert.equal(conRuoli(['Responsabile IT / CTO'], 'Office manager'), 'unknown', 'ruolo non coerente: referente da cercare');
+assert.equal(conRuoli(['Titolare / CEO'], 'Legale rappresentante'), 'exact', 'legale rappresentante = titolare');
 console.log('ok  ruoli con alternative e sinonimi (Titolare / CEO)');
 
 // 3. Estrazione email
@@ -210,7 +215,8 @@ assert.equal(target(7, { email_mode: 'mixed' }).lotti_previsti, 0, 'target: rise
 assert.equal(target(7, { email_mode: 'mixed' }).limits.referenti_max, 7, 'giro solo dalla riserva: tutte quelle disponibili');
 assert.equal(target(30, { email_mode: 'mixed' }).limits.referenti_max, Math.ceil(5 * 2.5) + 2, 'giro solo dalla riserva: tetto 2,5 volte i lead + 2');
 assert.ok(target(3, { email_mode: 'mixed' }).lotti_previsti >= 1, 'target: riserva scarsa, AI per il resto');
-assert.equal(target(0).limits.referenti_max, undefined, 'target senza riserva: come prima');
+assert.equal(target(0).limits.referenti_max, Math.ceil(5 * 2.2) + 1, 'target senza riserva: tetto ai referenti anche per le aziende dell AI');
+assert.equal(target(0).limits.candidates_per_lot, 30, 'l AI cerca solo aziende: molte per lotto');
 assert.equal(run(src('01-valida-richiesta.js'), { input: [{ body: { ...sitoBody, reserve: riservaTarget } }] })[0].json.reserve.length, 0, 'opportunità: riserva senza segnali scartata');
 const dedR = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [{ ...conRiserva, exclusions: { domains: ['r1.it'], person_keys: [] } }] }, input: [{ candidates: [], lotto: 1 }] }).map(i => i.json);
 assert.equal(dedR[0].company_name, 'R0');

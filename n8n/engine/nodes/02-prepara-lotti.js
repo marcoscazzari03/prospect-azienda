@@ -39,8 +39,10 @@ if (!job.lotti_previsti) {
 }
 
 const annunci = job.target.signals.codes.includes('job_ad');
-// Con i segnali l'AI cerca solo aziende: il referente lo cerchiamo noi, solo per chi ha il segnale.
-const soloAziende = job.target.signals.codes.length > 0;
+// L'AI cerca solo aziende: il referente lo cerchiamo noi (sito, poi registri), solo per le aziende
+// che servono. Collaudo del 17/10: chiedendo azienda e titolare insieme un lotto di ricerca target
+// costava ~0,5 $ e restituiva 1 azienda.
+const soloAziende = true;
 const figure = job.target.signals.job_families.map(f => f.label).join('; ');
 
 // Aziende da non riproporre (già acquistate dal cliente o già scartate in questa
