@@ -162,7 +162,9 @@ Le stime della revisione non sono dati misurati.
 - [x] Pianificatore AI saltato quando i lotti sono 0 (bivio «Serve pianificazione?»).
 - [x] Diagnosi completa (ricerca B, 17/10): sui siti di 56 micro-imprese il decisore è nominato in 7 (12%); 32 non hanno nessun nome. Il passaggio dal sito trovava 0 referenti su 20 per una regola troppo stretta sul ruolo; la ricerca web (2 a tentativo) era ~70% della spesa; un'azienda scartata alla verifica email veniva ripagata a ogni giro; il limite di 3 giri chiudeva le ricerche con centinaia di aziende disponibili.
 - [x] Soluzione (approvata il 17/10): nome del referente come valore aggiunto (+1 credito sulle generiche con il nome); «Mista» e «Generiche incluse» consegnano anche senza nome; regola ampia sul sito (titolare, fondatore, gestore… anche senza la parola esatta); 1 sola ricerca web mirata ai registri imprese (niente web in «Generiche incluse»); email scartate alla verifica ricordate nel giro; stop sul budget della ricerca (0,20 € a lead, minimo 1 €, fino a 5 giri) invece che dopo 3 giri; piattaforme (thefork, booking, accor…) escluse dalla riserva. Migrazione 032.
-- [ ] Verificare con una ricerca reale da 5 lead: costo per lead e quota con il nome.
+- [x] Verifica reale (17/10, Rifacimento del sito · Puglia, 5 lead, Mista): 5/5 in 1 giro (7 trovati, 2 nel magazzino), 4 nomi su 9 dal sito senza ricerca web, 5 ricerche web, ~32k token, pianificatore saltato. Costo Claude 0,12 $ (4,31 → 4,19, compreso il lavoro di fondo): ~0,02 $ a lead contro ~0,20 $ prima.
+- [ ] Creo ADV – Luca Cascione: nome preso da una pagina «menudigitale/la-chicca» (forse un cliente dell'agenzia). Se confermato: il nome deve stare su una pagina dell'azienda stessa (chi siamo, contatti, note legali), non su pagine di clienti o portfolio.
+- [ ] Email nominative su Gmail/iCloud pubblicate dal titolare: da valutare con il legale (privacy), insieme agli altri punti.
 - [ ] Referente trovato ma nessuna email (Echi di Puglia: Icypeas NOT_FOUND e nessuna generica sul sito): capire perché la generica non c'era.
 
 ## Legale e fiscale
