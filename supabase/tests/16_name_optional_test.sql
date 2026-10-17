@@ -48,4 +48,23 @@ select pg_temp.check(not is_hosted_page('https://www.hotelsvevo.it/it/', 'Hotel 
 select pg_temp.check(not is_hosted_page('https://www.caffe-tiffany.it/contatti', 'Caffè Tiffany'), 'accenti e trattini nel nome e nel dominio');
 select pg_temp.check(is_platform_domain('aiportici.vorreiordinare.it'), 'piattaforma di ordinazione');
 
+-- Ricerca con la ricerca AI (filtri che il database non verifica): 1 credito in più a lead.
+select pg_temp.check(search_ai_extra('{"industry":"Hotel","countries":["IT"]}') = 0, 'ricerca dal database: nessun sovrapprezzo');
+select pg_temp.check(search_ai_extra('{"industry":"Hotel","countries":["IT"],"company_size":["11-50"]}') = 1, 'dimensione: ricerca AI');
+select pg_temp.check(search_ai_extra('{"industry":"Hotel","countries":["ES"]}') = 1, 'fuori dall''Italia: ricerca AI');
+select pg_temp.check(search_ai_extra('{"industry":"","countries":["IT"],"signals":{"codes":["no_mobile"]}}') = 0, 'opportunità: prezzo del segnale, niente sovrapprezzo');
+create temp table s16b as
+  select * from create_search('a0a0a0a0-0000-4000-8000-000000000016', (select org from o16), 'Hotel 11-50',
+    '{"industry":"Hotel","countries":["IT"],"company_size":["11-50"],"roles":["Titolare"]}', 'mixed', 2, 1);
+select pg_temp.check((select credits_reserved = 8 from s16b), 'riserva: (3 + 1) x 2 lead');
+create temp table r16b as select * from start_run((select id from s16b), sha256_hex('tok-16b'), 2);
+select apply_engine_results((select id from r16b), sha256_hex('tok-16b'), $json$
+{"leads":[
+  {"company":{"name":"Hotel Quattro","domain":"hotelquattro16.it","website":"https://hotelquattro16.it","country":"Italia"},
+   "person":{"full_name":""},"keys":{"person_key":"|hotelquattro16.it"},
+   "email":{"address":"info@hotelquattro16.it","type":"generic","status":"found_public"}}
+]}
+$json$);
+select pg_temp.check((select credits = 2 from deliveries where company_domain = 'hotelquattro16.it'), 'generica senza nome in una ricerca AI: 1 + 1 crediti');
+
 select 'superati tutti i test nome facoltativo';

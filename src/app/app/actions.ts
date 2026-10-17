@@ -6,7 +6,7 @@ import { requireViewer, type Plan } from "@/lib/server/dal";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { defaultSearchName, nextRepeatAt, searchInputSchema, toTarget, type SearchInput } from "@/lib/domain/search-input";
-import { jobAdFromDatabaseOnly, targetIsSimple } from "@/lib/domain/engine";
+import { aiSearchExtra, jobAdFromDatabaseOnly, targetIsSimple } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 import { startSearch } from "@/lib/server/searches";
 import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
@@ -105,7 +105,8 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
   redirect(`/app/ricerche/${searchId}`);
 }
 
-export type Availability = { count: number; databaseOnly: boolean; kind: "opportunity" | "target" } | null;
+// aiExtra: crediti in più a lead se la ricerca usa la ricerca AI sul web (aiSearchExtra).
+export type Availability = { count: number; databaseOnly: boolean; kind: "opportunity" | "target"; aiExtra: number } | null;
 
 // Wizard: quante aziende del database sono già pronte per questa ricerca (stesso calcolo
 // della riserva del motore). Opportunità: con la prova dei segnali (con le offerte basate
@@ -117,7 +118,8 @@ export async function searchAvailability(form: FormData): Promise<Availability> 
   if ("error" in parsed) return null;
   const target = toTarget(parsed.input);
   const opportunity = parsed.input.signals.codes.length > 0;
-  if (!opportunity && !targetIsSimple(target)) return null;
+  const aiExtra = aiSearchExtra(target);
+  if (!opportunity && !targetIsSimple(target)) return { count: 0, databaseOnly: false, kind: "target", aiExtra };
   const { data, error } = await createAdminClient().rpc(opportunity ? "opportunity_availability" : "target_availability", {
     p_org: viewer.org.id,
     p_target: target as Json,
@@ -127,7 +129,7 @@ export async function searchAvailability(form: FormData): Promise<Availability> 
     console.error("availability", error);
     return null;
   }
-  return { count: data ?? 0, databaseOnly: jobAdFromDatabaseOnly(target), kind: opportunity ? "opportunity" : "target" };
+  return { count: data ?? 0, databaseOnly: jobAdFromDatabaseOnly(target), kind: opportunity ? "opportunity" : "target", aiExtra };
 }
 
 export type IndustrySuggestion = { industry: string; companies: number };

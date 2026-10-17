@@ -204,7 +204,9 @@ export function SearchWizard({
   const opportunity = kind === "opportunity";
   const chosen = opportunity ? offerByCode(offer, offers) : undefined;
   const withSignal = Boolean(chosen);
-  const extra = chosen ? signalExtraRange(signalPrices, chosen.signals) : 0;
+  // La disponibilità dal server dice anche se la ricerca userà la ricerca AI sul web (+1 credito a lead).
+  const [aiExtra, setAiExtra] = useState(0);
+  const extra = chosen ? signalExtraRange(signalPrices, chosen.signals) : aiExtra;
   const estimate = estimateCredits(mode, quantity, extra);
   const reserve = estimate.reserve;
   const enough = credits >= reserve;
@@ -267,6 +269,7 @@ export function SearchWizard({
       if (!formRef.current) return;
       const value = await searchAvailability(new FormData(formRef.current)).catch(() => null);
       setAvailability({ key: availabilityKey, value });
+      if (value) setAiExtra(value.aiExtra);
     }, 600);
     return () => clearTimeout(t);
   }, [wantsAvailability, availabilityKey]);
@@ -643,7 +646,7 @@ export function SearchWizard({
                 {(() => {
                   const e = estimateCredits(m, 1, extra);
                   return e.min === e.max ? e.min : `${e.min}–${e.max}`;
-                })()} crediti per lead{withSignal ? " (segnale compreso)" : ""}
+                })()} crediti per lead{withSignal ? " (segnale compreso)" : aiExtra ? " (ricerca sul web compresa)" : ""}
               </span>
             </label>
           ))}
@@ -733,6 +736,7 @@ export function SearchWizard({
             <p className="mt-1 font-mono text-3xl font-semibold">{estimate.min}–{reserve}</p>
             <p className="mt-1 text-xs text-ink-2">
               {withSignal && <>Ogni lead con opportunità: {extraCreditsLabel(signalPrices)}. </>}
+              {!withSignal && aiExtra > 0 && <>Con questi filtri cerchiamo le aziende sul web: {aiExtra} credito in più a lead. </>}
               Riserviamo {reserve} crediti e addebitiamo solo i lead consegnati. Disponibili: <strong>{credits}</strong>.
             </p>
           </div>

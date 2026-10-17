@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { blockedSector } from "@/lib/domain/blocked-sectors";
-import { buildEnginePayload, reserveCompaniesForDatabase, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
+import { aiSearchExtra, buildEnginePayload, reserveCompaniesForDatabase, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
 import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
 import { flattenDelivery } from "@/lib/domain/leads";
@@ -219,5 +219,15 @@ describe("aziende in riserva nel database", () => {
   it("fuori dall'Italia o con più regioni non inventa dati", () => {
     expect(reserveCompaniesForDatabase(rejected, { industry: "Hotel", countries: ["ES"] })).toEqual([]);
     expect(reserveCompaniesForDatabase(rejected, { industry: "Hotel", regions: ["Puglia", "Lazio"], countries: ["IT"] })[0].region).toBe("");
+  });
+});
+
+describe("sovrapprezzo della ricerca AI", () => {
+  const base = { industry: "Hotel", industry_keywords: [], countries: ["IT"], regions: ["Puglia"], company_size: [], revenue_range: "", roles: [], keywords: [], exclude_keywords: [], notes: "" };
+  it("solo per le ricerche target che il database non copre", () => {
+    expect(aiSearchExtra(base as never)).toBe(0);
+    expect(aiSearchExtra({ ...base, company_size: ["11-50"] } as never)).toBe(1);
+    expect(aiSearchExtra({ ...base, countries: ["ES"] } as never)).toBe(1);
+    expect(aiSearchExtra({ ...base, company_size: ["11-50"], signals: { codes: ["no_mobile"], match: "any", jobFamilies: [] } } as never)).toBe(0);
   });
 });

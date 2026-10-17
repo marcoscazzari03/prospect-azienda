@@ -15,7 +15,7 @@ export default async function PricingPage() {
       <PageHeader
         eyebrow="Prezzi"
         title="Paghi solo i lead che ricevi."
-        description="Una sola moneta, il credito. Un lead con email generica costa 1 credito (2 se c'è anche il nome del referente), con email nominativa 2, con nominativa verificata 3. I crediti riservati e non usati tornano sempre disponibili."
+        description="Una sola moneta, il credito. Un lead con email generica costa 1 credito (2 se c'è anche il nome del referente), con email nominativa 2, con nominativa verificata 3. Le ricerche con filtri che il nostro database non copre (dimensione, fatturato, parole chiave) costano 1 credito in più a lead. I crediti riservati e non usati tornano sempre disponibili."
       />
       {free && (
         <Card className="mb-12 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">

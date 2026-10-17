@@ -101,6 +101,14 @@ export function targetIsSimple(target: SearchTarget) {
     && !target.notes?.trim();
 }
 
+// Crediti in più a lead per le ricerche che usano la ricerca AI sul web (stessa regola di
+// search_ai_extra in SQL): in target con filtri che il database non verifica o fuori dall'Italia.
+export function aiSearchExtra(target: SearchTarget) {
+  if (target.signals?.codes?.length) return 0;
+  const abroad = (target.countries ?? []).some((c) => String(c).toUpperCase() !== "IT");
+  return !targetIsSimple(target) || abroad ? 1 : 0;
+}
+
 export type ApplyResult = {
   ok: boolean;
   reason?: string;
