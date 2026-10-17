@@ -58,6 +58,10 @@ if (FASE === 'SITO' && (r.type === 'error' || r.error || !valido)) {
   out._cerca_web = true;
 } else if (r.type === 'error' || r.error) {
   out._scarto_segnale = 'referente_errore_ricerca';
+} else if (!valido && job.email_mode === 'generic_ok') {
+  // «Email generiche incluse»: senza referente si consegna l'azienda con la sua email
+  // generica (collaudo del 17/10: negli hotel il titolare si trova in ~1 azienda su 10).
+  out._senza_referente = true;
 } else if (!valido) {
   out._scarto_segnale = 'referente_non_trovato';
 } else {

@@ -143,6 +143,15 @@ assert.equal(mista.leads[0].email_patterns[0].status, 'guessed');
 assert.equal(mista.leads[0].email_patterns[0].address, 'mario.rossi@acme.it');
 const validata = out('personal_only', { ...soloGenerica, email_enrichment: 'mario.rossi@acme.it', email_enrichment_status: 'VALIDATED' });
 assert.equal(validata.leads[0].email.status, 'validated');
+const senzaNome = { ...soloGenerica, _senza_referente: true, full_name: '', first_name: '', last_name: '', job_title: '', role_match: 'unknown' };
+const anonima = out('generic_ok', senzaNome);
+assert.equal(anonima.leads.length, 1, 'senza referente: consegnata la generica');
+assert.equal(anonima.leads[0].email.type, 'generic');
+assert.equal(anonima.leads[0].email_patterns.length, 0, 'nessuna email ipotizzata senza nome');
+assert.equal(out('generic_ok', { ...senzaNome, email_enrichment: 'x.y@acme.it', email_enrichment_status: 'VALIDATED' }).leads[0].email.type, 'generic');
+const decidi = run(src('06-decidi-arricchimento.js'), { nodes: { 'Valida richiesta': [{ ...job, email_mode: 'generic_ok', limits: { ...job.limits, enrichment_cap: 5 } }] },
+  input: [{ ...senzaNome, email_site_score: 0 }] });
+assert.equal(decidi[0].json.needs_enrichment, false, 'senza nome niente Icypeas');
 const nessuna = out('generic_ok', { _vuoto: true, stats: { candidati_ai: 0 } });
 assert.equal(nessuna.leads.length, 0);
 assert.equal(nessuna.event, 'results');
@@ -334,6 +343,13 @@ assert.equal(trovato.role_match, 'exact');
 assert.equal(trovato.contact_page, 'https://brugola.com/contatti');
 assert.equal(trovato.first_name, 'Marco');
 assert.equal(esitoRef('{"person":null}')._scarto_segnale, 'referente_non_trovato');
+const esitoGeneriche = run(src('13-esito-referente.template.js', { __FASE__: 'WEB', __ORIGINE__: 'Prepara ricerca referente' }), {
+  nodes: { 'Valida richiesta': [{ ...jobA, email_mode: 'generic_ok' }], 'Prepara ricerca referente': [{ ...senzaPersona[0], _claude_ref: {} }] },
+  json: { content: [{ type: 'text', text: '{"person":null}' }] }
+}).json;
+assert.equal(esitoGeneriche._scarto_segnale, undefined, 'generiche incluse: azienda senza referente ammessa');
+assert.equal(esitoGeneriche._senza_referente, true);
+assert.equal(esitoGeneriche.person_key, '|brugola.com');
 const haikuUso = esitoRef('{"person":null}', { model: 'claude-haiku-5-5', usage: { input_tokens: 24000, output_tokens: 200, server_tool_use: { web_search_requests: 2 } } });
 assert.equal(haikuUso.ai_input_tokens, 1200, 'token Haiku a prezzo Sonnet equivalente');
 assert.equal(haikuUso.ai_output_tokens, 10);

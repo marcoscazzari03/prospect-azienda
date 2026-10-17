@@ -7,6 +7,7 @@ const cap = job.limits.enrichment_cap;
 
 const priorita = (j) => {
   const s = Number(j.email_site_score) || 0;
+  if (j._senza_referente) return 0;                                 // senza nome non c'è nulla da cercare
   if (s >= 4.5) return 0;                                           // già nominativa
   if (job.email_mode === 'personal_only') return 3;
   if (s < 4) return 2;                                              // nessuna email utile

@@ -156,6 +156,8 @@ Le stime della revisione non sono dati misurati.
 
 - [x] Ricerca A: 2/5. Referente trovato in 2 hotel su 15; la ricerca si chiudeva dopo un giro senza lead con 34 hotel ancora da provare. Corretto: più referenti per giro dalla riserva e niente chiusura con aziende da provare.
 - [x] Ricerca A bis: 3/5 in 3 giri. 14 dei primi 15 hotel erano gli stessi già falliti nella A. Corretto: memoria dei referenti non trovati (`companies.referente_missed_at`, migrazione 031), queste aziende vanno in fondo alla riserva per 90 giorni.
+- [x] Deciso il 17/10 (opzione 1): in «Email generiche incluse» senza referente si consegna l'azienda con l'email generica, senza nome (niente Icypeas, niente email ipotizzate). Mista e Solo nominative invariate.
+- [ ] Costo collaudi hotel: 1,58 $ di Claude (6,48 → 4,90, compreso il lavoro di fondo) e 2 crediti Icypeas per 5 lead.
 - [ ] Hotel: referente trovato nel ~10% delle aziende (titolare quasi mai sul sito; uno trovato da visura su ufficiocamerale.it). Decidere: consegnare nella modalità «Email generiche incluse» anche lead senza nome (solo info@ verificata) e/o un prezzo diverso per i settori «difficili».
 - [ ] Pianificatore AI chiamato anche quando i lotti sono 0 (risponde vuoto, ~1 centesimo a giro): saltarlo.
 - [ ] Referente trovato ma nessuna email (Echi di Puglia: Icypeas NOT_FOUND e nessuna generica sul sito): capire perché la generica non c'era.

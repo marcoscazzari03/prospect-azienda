@@ -64,7 +64,8 @@ for (const p of prospects) {
 
   // Nominativa: dal sito (con nome) o validata. Generica: solo dal dominio aziendale
   // o in un mailto del sito. "other_person" e "privacy" non si vendono mai.
-  const nominativa = sito && sito.type === 'personal' ? sito : arricchita;
+  // Senza referente (solo «Email generiche incluse») si consegna solo la generica.
+  const nominativa = p._senza_referente ? null : (sito && sito.type === 'personal' ? sito : arricchita);
   const generica = sito && sito.type === 'generic' ? sito : null;
 
   let email = null;

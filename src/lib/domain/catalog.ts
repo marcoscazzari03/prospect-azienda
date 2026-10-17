@@ -6,7 +6,7 @@ export type EmailMode = (typeof EMAIL_MODES)[number];
 export const MODE_INFO: Record<EmailMode, { label: string; short: string; maxCredits: number; minCredits: number; example: string }> = {
   generic_ok: {
     label: "Email generiche incluse",
-    short: "Nominative quando le troviamo, altrimenti info@ o sales@ dell'azienda.",
+    short: "Nominative quando le troviamo, altrimenti info@ o sales@ dell'azienda, anche senza il nome del referente.",
     minCredits: 1,
     maxCredits: 2,
     example: "info@azienda.it · mario.rossi@azienda.it",

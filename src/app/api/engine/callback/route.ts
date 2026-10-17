@@ -104,9 +104,10 @@ export async function POST(request: Request) {
 
   // Referenti non trovati: le ricerche successive (anche di altri clienti) mettono queste
   // aziende in fondo alla riserva invece di pagare di nuovo le stesse ricerche web.
-  const missed = [...new Set((payload.rejected ?? [])
-    .map((r) => r as { reason?: string; company?: { domain?: string } })
-    .filter((r) => r?.reason === "referente_non_trovato")
+  // Anche i lead consegnati senza nome («Email generiche incluse»).
+  const missed = [...new Set([...(payload.rejected ?? []), ...(payload.leads ?? [])]
+    .map((r) => r as { reason?: string; company?: { domain?: string }; person?: { full_name?: string }; email?: unknown })
+    .filter((r) => r?.reason === "referente_non_trovato" || (r?.email && !String(r.person?.full_name ?? "").trim()))
     .map((r) => String(r.company?.domain ?? "").trim().toLowerCase())
     .filter(Boolean))].slice(0, 200);
   if (open && missed.length) {

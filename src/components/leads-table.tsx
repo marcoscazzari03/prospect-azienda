@@ -177,7 +177,7 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                     </td>
                   )}
                   <td className="px-4 py-3">
-                    <p className="font-medium">{d.person?.full_name}</p>
+                    {d.person?.full_name ? <p className="font-medium">{d.person.full_name}</p> : <p className="text-ink-2">Referente non indicato</p>}
                     <p className="text-xs text-ink-2">{d.person?.job_title || "—"}</p>
                   </td>
                   <td className="px-4 py-3">
