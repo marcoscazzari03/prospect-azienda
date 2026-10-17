@@ -3,7 +3,7 @@ import { z } from "zod";
 import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { safeEqual, sha256Hex } from "@/lib/server/crypto";
-import { afterResults } from "@/lib/server/searches";
+import { afterResults, saveReserveCompanies } from "@/lib/server/searches";
 import { checkMailboxes } from "@/lib/server/email-check";
 import { applyMailboxChecks } from "@/lib/domain/mailbox";
 import type { ApplyResult } from "@/lib/domain/engine";
@@ -143,6 +143,7 @@ export async function POST(request: Request) {
   // database (ricerche in target) non sono in stats.reserve, il giro dopo le riprende da lì.
   const reserveLeft = (payload.rejected ?? []).filter((r) => (r as { reason?: string })?.reason === "riserva").length;
   after(() => afterResults({ ...result, reserve_left: reserveLeft }));
+  if (result.ok && result.search_id) after(() => saveReserveCompanies(result.search_id!, payload.rejected));
   return NextResponse.json({ ok: result.ok, delivered: result.delivered, remaining: result.remaining });
 }
 

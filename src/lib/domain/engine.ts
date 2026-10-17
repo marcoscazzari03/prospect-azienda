@@ -130,3 +130,35 @@ export function nextStep(result: ApplyResult, maxAttempts: number): "topup" | "f
   if ((result.attempts ?? 0) >= 3 && (result.new ?? 0) < Math.ceil(requested * 0.05)) return "finalize";
   return "topup";
 }
+
+// Aziende rimaste in riserva a fine giro (soprattutto quelle trovate dall'AI e non usate):
+// vanno nel database delle aziende, così il controllo siti le verifica e le ricerche dopo le
+// usano senza pagare di nuovo la ricerca AI (prova del 17/10: 26 hotel trovati, 6 usati).
+// Settore e regione della ricerca diventano etichette, per ritrovarle con la stessa ricerca.
+export function reserveCompaniesForDatabase(
+  rejected: unknown[] | undefined,
+  target: { industry?: string; industry_keywords?: string[]; regions?: string[]; countries?: string[] },
+) {
+  const countries = (target.countries ?? []).map((c) => String(c).toUpperCase());
+  if (countries.length !== 1 || countries[0] !== "IT") return []; // l'importazione oggi è solo per l'Italia
+  const regions = target.regions ?? [];
+  const keywords = [target.industry ?? "", ...(target.industry_keywords ?? [])].map((k) => String(k).trim()).filter(Boolean).slice(0, 10);
+  const seen = new Set<string>();
+  const out: { domain: string; name: string; website: string; city: string; region: string; industry: string; keywords: string[] }[] = [];
+  for (const raw of rejected ?? []) {
+    const r = raw as { reason?: string; company?: { domain?: string; name?: string; website?: string; city?: string; industry?: string } };
+    const domain = String(r?.company?.domain ?? "").trim().toLowerCase();
+    if (r?.reason !== "riserva" || !domain || seen.has(domain)) continue;
+    seen.add(domain);
+    out.push({
+      domain,
+      name: String(r.company?.name ?? "").trim(),
+      website: String(r.company?.website ?? "").trim(),
+      city: String(r.company?.city ?? "").trim(),
+      region: regions.length === 1 ? String(regions[0]) : "",
+      industry: String(r.company?.industry ?? "").trim() || String(target.industry ?? "").trim(),
+      keywords,
+    });
+  }
+  return out.slice(0, 200);
+}

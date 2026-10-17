@@ -9,6 +9,7 @@ import {
   targetIsSimple,
   maxAttemptsFor,
   nextStep,
+  reserveCompaniesForDatabase,
   type ApplyResult,
   type EngineSearch,
 } from "@/lib/domain/engine";
@@ -16,6 +17,7 @@ import { roleMatcher } from "@/lib/domain/roles";
 import { nextRepeatAt } from "@/lib/domain/search-input";
 import { randomToken, sha256Hex } from "./crypto";
 import { sendEmail } from "./email";
+import type { Json } from "@/lib/supabase/database.types";
 
 // Orchestrazione delle ricerche lato server (service role).
 
@@ -237,6 +239,16 @@ export async function fillFromWarehouse(searchId: string) {
 export async function startSearch(searchId: string) {
   await fillFromWarehouse(searchId);
   return dispatchRun(searchId);
+}
+
+// Aziende rimaste in riserva: nel database delle aziende (vedi reserveCompaniesForDatabase).
+export async function saveReserveCompanies(searchId: string, rejected: unknown[] | undefined) {
+  const db = createAdminClient();
+  const { data: search } = await db.from("searches").select("target").eq("id", searchId).maybeSingle();
+  const items = search ? reserveCompaniesForDatabase(rejected, search.target as EngineSearch["target"]) : [];
+  if (!items.length) return;
+  const { error } = await db.rpc("store_imported_companies", { p_source: "ai", p_items: items as unknown as Json });
+  if (error) console.error("store_imported_companies (riserva)", error.message);
 }
 
 // Dopo i risultati di un giro: top-up o chiusura.

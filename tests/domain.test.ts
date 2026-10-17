@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { blockedSector } from "@/lib/domain/blocked-sectors";
-import { buildEnginePayload, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
+import { buildEnginePayload, reserveCompaniesForDatabase, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
 import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
 import { flattenDelivery } from "@/lib/domain/leads";
@@ -203,5 +203,21 @@ describe("settori bloccati", () => {
   it("la ricerca viene rifiutata", () => {
     const r = searchInputSchema.safeParse({ ...baseInput, industry: "Escort" });
     expect(r.success).toBe(false);
+  });
+});
+
+describe("aziende in riserva nel database", () => {
+  const rejected = [
+    { reason: "riserva", company: { domain: "Hotel-Uno.it", name: "Hotel Uno", website: "https://hotel-uno.it", city: "Lecce", industry: "" } },
+    { reason: "riserva", company: { domain: "hotel-uno.it", name: "Doppio" } },
+    { reason: "nessuna_email", company: { domain: "hoteldue.it", name: "Hotel Due" } },
+  ];
+  it("salva solo la riserva, con settore e regione della ricerca", () => {
+    const out = reserveCompaniesForDatabase(rejected, { industry: "Hotel", regions: ["Puglia"], countries: ["IT"] });
+    expect(out).toEqual([{ domain: "hotel-uno.it", name: "Hotel Uno", website: "https://hotel-uno.it", city: "Lecce", region: "Puglia", industry: "Hotel", keywords: ["Hotel"] }]);
+  });
+  it("fuori dall'Italia o con più regioni non inventa dati", () => {
+    expect(reserveCompaniesForDatabase(rejected, { industry: "Hotel", countries: ["ES"] })).toEqual([]);
+    expect(reserveCompaniesForDatabase(rejected, { industry: "Hotel", regions: ["Puglia", "Lazio"], countries: ["IT"] })[0].region).toBe("");
   });
 });
