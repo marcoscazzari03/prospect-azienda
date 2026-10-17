@@ -92,6 +92,8 @@ describe("motore", () => {
     expect(nextStep({ ok: true, remaining: 0, attempts: 1, new: 5 }, 3)).toBe("finalize");
     expect(nextStep({ ok: true, remaining: 4, attempts: 1, new: 0 }, 3)).toBe("topup");
     expect(nextStep({ ok: true, remaining: 4, attempts: 2, new: 0 }, 3)).toBe("finalize");
+    expect(nextStep({ ok: true, remaining: 3, attempts: 2, new: 0, reserve_left: 34 }, 3)).toBe("topup");
+    expect(nextStep({ ok: true, remaining: 3, attempts: 3, new: 0, reserve_left: 34 }, 3)).toBe("finalize");
     expect(nextStep({ ok: true, remaining: 4, attempts: 3, new: 2 }, 3)).toBe("finalize");
     expect(nextStep({ ok: false, reason: "already_processed" }, 3)).toBe("none");
   });

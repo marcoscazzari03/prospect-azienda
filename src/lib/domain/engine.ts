@@ -110,6 +110,7 @@ export type ApplyResult = {
   quantity?: number;
   remaining?: number;
   attempts?: number;
+  reserve_left?: number; // aziende rimaste in riserva senza referente cercato (dal giro appena chiuso)
 };
 
 // Dopo un giro: nuovo giro (top-up) o chiusura della ricerca.
@@ -117,8 +118,9 @@ export function nextStep(result: ApplyResult, maxAttempts: number): "topup" | "f
   if (!result.ok) return "none";
   if ((result.remaining ?? 0) <= 0) return "finalize";
   if ((result.attempts ?? 0) >= maxAttempts) return "finalize";
-  // Un top-up che non trova nulla di nuovo non ne merita un altro.
-  if ((result.attempts ?? 0) > 1 && (result.new ?? 0) === 0) return "finalize";
+  // Un top-up che non trova nulla di nuovo non ne merita un altro, a meno che restino
+  // aziende in riserva ancora da provare (il giro successivo costa solo i referenti).
+  if ((result.attempts ?? 0) > 1 && (result.new ?? 0) === 0 && !(result.reserve_left ?? 0)) return "finalize";
   // Ricerche lunghe: ci si ferma quando un giro rende meno del 5% di quanto
   // chiesto (il mercato è esaurito: escono quasi solo doppioni).
   const requested = (result.remaining ?? 0) + (result.new ?? 0);

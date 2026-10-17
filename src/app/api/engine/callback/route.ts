@@ -118,7 +118,10 @@ export async function POST(request: Request) {
   }
   if (result.ok && apiCalls > 0) await recordVerifierCost(evt.run_id, apiCalls);
   // Top-up o chiusura dopo aver risposto a n8n.
-  after(() => afterResults(result));
+  // Aziende rimaste senza referente cercato (oltre il tetto del giro): con la riserva dal
+  // database (ricerche in target) non sono in stats.reserve, il giro dopo le riprende da lì.
+  const reserveLeft = (payload.rejected ?? []).filter((r) => (r as { reason?: string })?.reason === "riserva").length;
+  after(() => afterResults({ ...result, reserve_left: reserveLeft }));
   return NextResponse.json({ ok: result.ok, delivered: result.delivered, remaining: result.remaining });
 }
 

@@ -148,6 +148,10 @@ if (job.target.signals.codes.length) {
   // email; l'AI cerca aziende solo per la parte che la riserva non copre.
   if (job.reserve.length) job.limits.referenti_max = Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2.2 : 1.5)) + 1;
   const bastaRiserva = job.reserve.length >= Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 2 : 1.4));
+  // Giro solo dalla riserva: niente ricerca AI, quindi si prova il referente su più aziende.
+  // Collaudo del 17/10 (hotel in Puglia): referente trovato in 2 aziende su 15, con il tetto
+  // a 9 e poi 6 la ricerca si è chiusa a 2 lead su 5 con 34 aziende ancora da provare.
+  if (bastaRiserva) job.limits.referenti_max = Math.min(job.reserve.length, Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 3 : 2.5)) + 2);
   const daCercare = Math.max(0, job.quantity * SOVRACAMPIONAMENTO - job.reserve.length);
   lotti = bastaRiserva ? 0 : Math.min(
     job.limits.max_lots,
