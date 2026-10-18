@@ -36,16 +36,17 @@ select pg_temp.check(is_large_company(c.id, c.domain, c.size_hint, c.name), 'da 
   from companies c where domain = 'grande20.it';
 select pg_temp.check(is_large_company(c.id, c.domain, c.size_hint, c.name), 'banca')
   from companies c where domain = 'banca20.it';
-select pg_temp.check(is_large_company(c.id, c.domain, c.size_hint, c.name), 'annunci in tre regioni')
+-- Dalla migrazione 039 gli annunci in tre regioni non escludono: priorità più bassa.
+select pg_temp.check(not is_large_company(c.id, c.domain, c.size_hint, c.name) and is_busy_hirer(c.id), 'annunci in tre regioni: non esclusa, priorità bassa')
   from companies c where domain = 'assume20.it';
 select pg_temp.check(not is_large_company(null, 'bancomat-shop.it', '51-200', 'Bancomat Shop'), 'parola simile a banca: resta');
 
 create temp table s20 as
   select * from create_search('a0a0a0a0-0000-4000-8000-000000000020', (select org from o20), 'Siti vecchi Liguria',
     '{"industry":"","countries":["IT"],"regions":["Liguria"],"signals":{"codes":["outdated_cms"],"match":"any"}}', 'company_only', 5, 1);
-select pg_temp.check((select jsonb_array_length(r) = 1 and r #>> '{0,website}' = 'https://piccola20.it'
-                        from (select opportunity_reserve((select id from s20), '{}', 40) as r) x), 'riserva con opportunità: solo la piccola impresa');
+select pg_temp.check((select jsonb_array_length(r) = 2 and r #>> '{0,website}' = 'https://piccola20.it' and r #>> '{1,website}' = 'https://assume20.it'
+                        from (select opportunity_reserve((select id from s20), '{}', 40) as r) x), 'riserva con opportunità: niente grandi aziende, chi assume molto per ultima');
 select pg_temp.check(opportunity_availability((select org from o20),
-  '{"industry":"","countries":["IT"],"regions":["Liguria"],"signals":{"codes":["outdated_cms"],"match":"any"}}', 1) = 1, 'disponibilità coerente con la riserva');
+  '{"industry":"","countries":["IT"],"regions":["Liguria"],"signals":{"codes":["outdated_cms"],"match":"any"}}', 1) = 2, 'disponibilità coerente con la riserva');
 
 select 'superati tutti i test grandi aziende';

@@ -122,6 +122,11 @@ const p3 = src('05-estrai-email.template.js', { __SORGENTE__: 'P', __FASE__: 'PA
 const fineP3 = p3.split("if (FASE !== 'HOMEPAGE') {")[0] + "if (basta) { out.page_2 = ''; out.page_3 = ''; }\nreturn { json: out };\n";
 const dopoP3 = run(fineP3, { nodes: { P: [{ ...dedup[0], page_3: 'https://www.acme.it/privacy' }], 'Valida richiesta': [{ ...job, email_mode: 'company_only' }] }, json: { html: '<a href="mailto:info@acme.it">x</a>' } }).json;
 assert.equal(dopoP3.page_3, '', 'email trovata a pagina 3: niente quarta pagina');
+// Modulo di contatto: textarea + email, non i moduli di ricerca o newsletter.
+const conModulo = (h) => run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: h } }).json.contact_form;
+assert.equal(conModulo('<form action="/invia"><input type="email" name="email"><textarea name="messaggio"></textarea></form>'), dedup[0].website, 'modulo di contatto: salvata la pagina');
+assert.equal(conModulo('<form><input type="email" name="email"><button>Iscriviti</button></form>'), '', 'newsletter: non è un modulo di contatto');
+assert.equal(conModulo('<form role="search"><textarea></textarea><input type="email"></form>'), '', 'ricerca: non è un modulo di contatto');
 const tipoDi = (h) => run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: h } }).json.email_site_type;
 assert.equal(tipoDi('<a href="mailto:segreteria.rossi@gmail.com">x</a>'), 'generic', 'segreteria.cognome su gmail: casella di ufficio');
 assert.equal(tipoDi('<a href="mailto:studiodentisticorossi@gmail.com">x</a>'), 'generic');
@@ -173,6 +178,10 @@ assert.equal(decidi[0].json.needs_enrichment, false, 'senza nome niente Icypeas'
 const nessuna = out('generic_ok', { _vuoto: true, stats: { candidati_ai: 0 } });
 assert.equal(nessuna.leads.length, 0);
 assert.equal(nessuna.event, 'results');
+const modClass = run(classifica, { nodes: { 'Valida richiesta': [{ ...job, email_mode: 'company_only' }], 'Normalizza output AI': [{ stato_lotto: 'OK' }] }, input: [
+  { company_name: 'Senza email', domain: 'senza.it', website: 'https://senza.it', contact_form: 'https://senza.it/contatti', _senza_referente: true }] })[0].json;
+assert.equal(modClass.rejected[0].reason, 'nessuna_email', 'senza email: per ora scartata');
+assert.equal(modClass.company_checks[0].company.contact_form, 'https://senza.it/contatti', 'il modulo va nel database aziende');
 console.log('ok  classificazione: personal_only / mixed / validated / ricerca vuota');
 // 5. Icypeas: solo email del dominio con certezza alta
 const icy = (results, status = 'DEBITED') => run(src('07-normalizza-icypeas.js'), {

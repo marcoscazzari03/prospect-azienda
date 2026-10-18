@@ -91,7 +91,8 @@ for (const p of prospects) {
     company: {
       name: p.company_name, domain: p.domain, website: p.website, country: p.country,
       city: p.city, industry: p.industry, size_hint: p.size_hint,
-      technologies: Array.isArray(p.technologies) ? p.technologies : []
+      technologies: Array.isArray(p.technologies) ? p.technologies : [],
+      contact_form: p.contact_form || ''
     },
     person: soloAzienda
       ? { full_name: '', first_name: '', last_name: '', job_title: '', role_match: 'unknown', linkedin_url: '' }
@@ -105,7 +106,7 @@ for (const p of prospects) {
     signals: (Array.isArray(p.signals) ? p.signals : []).filter(s => s.status === 'pass' && richiesti.includes(s.code)).map(s => ({ code: s.code, evidence: s.evidence }))
   };
   const controlli = (Array.isArray(p.signals) ? p.signals : []).filter(s => SITO.includes(s.code) && s.status);
-  if (p.domain && (controlli.length || (Array.isArray(p.technologies) && p.technologies.length))) {
+  if (p.domain && (controlli.length || (Array.isArray(p.technologies) && p.technologies.length) || p.contact_form)) {
     companyChecks.push({ company: base.company, checks: controlli.map(s => ({ code: s.code, status: s.status, evidence: s.evidence || {} })) });
   }
 

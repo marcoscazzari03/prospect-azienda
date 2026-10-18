@@ -201,4 +201,13 @@ Le stime della revisione non sono dati misurati.
       large_companies, 201+ dipendenti, banche e assicurazioni, 6+ annunci o annunci in 3+ regioni in 120 giorni);
       quarta pagina (note legali/privacy, cookie per ultimi) solo se le prime tre non bastano; in «Solo azienda» ci si
       ferma alla prima email generica del dominio.
+- [x] Seconda valutazione esterna (18/10, 8,2/10). Fatti: regola «annunci» delle grandi aziende diventata priorità
+      bassa (migrazione 039); moduli di contatto rilevati dal motore e salvati in companies.contact_form_url (per ora
+      non cambiano la consegna); riquadro «Database aziende» nell'admin (raccolte → sito e settore → contatto →
+      opportunità); caso Lusha segnato come non definitivo; «costo AI zero» al posto di «costo zero».
+- [ ] Test sulle aziende senza email ma con modulo: giudicarne 50 a mano, poi decidere se consegnarle
+      («Modulo di contatto disponibile», senza inventare recapiti) e a che prezzo.
+- [ ] Punteggio interno di opportunità (prova, attinenza al servizio, freschezza) e nomi «segnale verificato» /
+      «opportunità potenziale».
+- [ ] Coda del controllo siti: priorità ad aziende con segnali attivi, settori e zone più cercati, verifiche in scadenza.
 

@@ -71,6 +71,11 @@ dei dati delle persone in Italia e ordinato la cancellazione. Secondo il comunic
 legittimo interesse non è base giuridica adeguata; i dati professionali non sono leciti in
 sé; pesano la cessione a clienti terzi, l'origine eterogenea, l'imprevedibilità degli usi e
 l'aggiornamento nel tempo dei profili (considerato «tracciamento»).
+**Stato (verificato il 18/10):** il provvedimento risulta rimosso temporaneamente dal sito del
+Garante; non abbiamo trovato conferma ufficiale del motivo (si parla di un'opposizione davanti al
+Tribunale di Roma). Il caso non è definitivo: va trattato come indicazione di rischio, non come
+regola consolidata.
+- 0. Qual è lo stato del giudizio sul provvedimento n. 542/2026 e cosa cambia per noi?
 - A. In cosa il nostro modello si distingue (dimensioni, fonti solo pubbliche e citate per
   ogni lead, niente social né acquisto da altri broker, solo aziende e ruoli aziendali,
   opposizione permanente) e se basta a reggere il legittimo interesse.

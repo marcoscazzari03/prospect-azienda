@@ -35,14 +35,14 @@ export type Database = {
                   ]
                 },"companies": {
                   Row: {
-                    "city": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"industry_checked_at": string | null,"last_verified_at": string,"name": string,"origin": string,"places": (string)[],"referente_missed_at": string | null,"site_checked_at": string | null,"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
+                    "city": string,"contact_form_url": string,"country": string,"country_code": string | null,"domain": string,"first_seen_at": string,"id": string,"industry": string,"industry_checked_at": string | null,"last_verified_at": string,"name": string,"origin": string,"places": (string)[],"referente_missed_at": string | null,"site_checked_at": string | null,"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name": string,"origin"?: string,"places"?: (string)[],"referente_missed_at"?: string | null,"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
+                    "city"?: string,"contact_form_url"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name": string,"origin"?: string,"places"?: (string)[],"referente_missed_at"?: string | null,"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
                   }
                   Update: {
-                    "city"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name"?: string,"origin"?: string,"places"?: (string)[],"referente_missed_at"?: string | null,"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
+                    "city"?: string,"contact_form_url"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name"?: string,"origin"?: string,"places"?: (string)[],"referente_missed_at"?: string | null,"site_checked_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
                   }
                   Relationships: [
                     
@@ -757,6 +757,9 @@ isOneToOne: false
 { Args: { "p_org": string }; Returns: {
               "expired": number,"expires_at": string,"granted": number,"kind": string,"lot_id": number,"remaining": number
             }[]
+                           },
+"database_funnel":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "deliver_from_warehouse":
 { Args: { "p_max_age_days"?: number,"p_picks": Json,"p_search": string }; Returns: Json

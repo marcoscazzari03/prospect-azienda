@@ -12,7 +12,8 @@ opportunità ~0,022 €, ricerca AI ~0,135 €), listino deciso, migrazioni fino
 ## Fase 0 – Consulenze (da avviare subito: sono le più lunghe)
 
 **Bloccante anche per la beta** (deciso il 18/10, dopo il caso Lusha: provvedimento del Garante
-n. 542/2026, 2 milioni di euro a un data broker B2B, legittimo interesse respinto anche per i dati
+n. 542/2026, 2 milioni di euro a un data broker B2B, poi rimosso temporaneamente dal sito del Garante
+in attesa del giudizio: non definitivo; legittimo interesse respinto anche per i dati
 professionali). Finché non arriva il parere: beta solo con la modalità **«solo azienda»** (azienda,
 sito, settore, email generica, segnale; nessun nome di persona). I nomi si riattivano dopo il
 parere, se lo consente.

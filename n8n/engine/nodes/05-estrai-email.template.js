@@ -160,8 +160,14 @@ const migliore = trovate[0];
 const soglia = job.email_mode === 'generic_ok' || job.email_mode === 'company_only' ? 4 : 4.5;
 const basta = Boolean(migliore && migliore.p >= soglia);
 
+// Modulo di contatto: un <form> con un campo per il messaggio (textarea) e uno per l'email.
+// Si salva la prima pagina che lo ha (serve a valutare le aziende senza email pubblica).
+const moduloContatto = (html.match(/<form\b[\s\S]*?<\/form>/gi) || []).some(f =>
+  /<textarea\b/i.test(f) && /type\s*=\s*["']?email|name\s*=\s*["'][^"']*e-?mail/i.test(f) && !/role\s*=\s*["']?search/i.test(f));
+
 const out = {
   ...prospect,
+  contact_form: prospect.contact_form || (moduloContatto ? FONTE : ''),
   _emails: trovate.slice(0, 8),
   email_site: migliore ? migliore.email : '',
   email_site_type: migliore ? migliore.type : '',
