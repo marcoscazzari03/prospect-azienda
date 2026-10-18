@@ -212,8 +212,9 @@ Obiettivo: chiudere i blocchi e passare alla beta con 5–10 agenzie web. Nessun
 all'architettura; il resto si decide con i clienti.
 
 ### A. Blocchi prima della beta (obbligatori)
-- [ ] Nomi raccolti nei collaudi: contare i record con dati di persone (lead, magazzino, referenti) e cancellarli
-      dopo l'OK dell'utente. Disattivare people_enabled non equivale a cancellarli.
+- [x] Nomi raccolti nei collaudi (19/10): 152 referenti, 29 email nominative e 96 lead di prova con nome cancellati
+      (un solo account, quello di prova). Controllo finale: tre zeri. La tabella dei lead nasconde da sola la colonna
+      «Referente» quando nessun lead ha un nome.
 - [ ] Esecuzioni salvate su n8n: contengono nomi ed email dei collaudi con referenti. Cancellare le vecchie e
       ridurre il periodo di conservazione.
 - [ ] Adzuna: chiedere l'autorizzazione scritta per l'uso commerciale (dopo i 14 giorni di prova). Senza, niente
