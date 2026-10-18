@@ -212,7 +212,7 @@ Obiettivo: chiudere i blocchi e passare alla beta con 5–10 agenzie web. Nessun
 all'architettura; il resto si decide con i clienti.
 
 ### A. Blocchi prima della beta (obbligatori)
-- [x] Nomi raccolti nei collaudi (19/10): 152 referenti, 29 email nominative e 96 lead di prova con nome cancellati
+- [x] Nomi raccolti nei collaudi (18/10): 152 referenti, 29 email nominative e 96 lead di prova con nome cancellati
       (un solo account, quello di prova). Controllo finale: tre zeri. La tabella dei lead nasconde da sola la colonna
       «Referente» quando nessun lead ha un nome.
 - [ ] Esecuzioni salvate su n8n: contengono nomi ed email dei collaudi con referenti. Cancellare le vecchie e
