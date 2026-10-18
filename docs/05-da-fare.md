@@ -218,7 +218,7 @@ all'architettura; il resto si decide con i clienti.
 - [x] Esecuzioni salvate su n8n (18/10): cancellate le 53 del motore dal 13 al 17/10 (collaudi con referenti).
       Conservazione invariata: con i referenti spenti le nuove esecuzioni non contengono dati di persone.
 - [ ] Adzuna: piano «API Access» 8 £/mese (solo limiti di chiamate, nessuna clausola sull'uso commerciale nel pannello). Chiedere conferma scritta che copra il nostro uso (annunci come
-      segnale mostrato a clienti B2B, con link all'annuncio, senza ripubblicarli). Mail breve pronta (18/10).
+      segnale mostrato a clienti B2B, con link all'annuncio, senza ripubblicarli). Mail inviata il 18/10 ad api-partnerships@adzuna.com: in attesa di risposta.
       Conservare la risposta per il legale.
 - [ ] Testi del sito e dell'export: email pubblicata ≠ consenso alla pubblicità (Garante 2026). Controllare tutte
       le pagine e aggiungere un avviso chiaro dove si scaricano i risultati.
