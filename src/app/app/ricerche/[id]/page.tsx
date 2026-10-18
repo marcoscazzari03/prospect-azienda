@@ -95,7 +95,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
               <p className="text-sm text-muted">Lead consegnati</p>
               <p className="font-mono text-4xl font-semibold">{search.delivered}<span className="text-xl text-muted">/{search.quantity}</span></p>
             </div>
-            <p className="text-sm text-muted">{personal} nominative · {search.delivered - personal} generiche</p>
+            {search.email_mode !== "company_only" && <p className="text-sm text-muted">{personal} nominative · {search.delivered - personal} generiche</p>}
           </div>
           <div className="mt-4"><Progress value={search.delivered} max={search.quantity} /></div>
           <div className="mt-6 grid grid-cols-3 gap-4 border-t border-line pt-4 text-sm">
@@ -131,7 +131,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
           <dt className="text-muted">Paesi</dt><dd>{t.country_names?.join(", ")}</dd>
           {!!t.regions?.length && (<><dt className="text-muted">Aree</dt><dd>{t.regions.join(", ")}</dd></>)}
           {!!t.company_size?.length && (<><dt className="text-muted">Dimensione</dt><dd>{t.company_size.join(", ")}</dd></>)}
-          <dt className="text-muted">Ruoli</dt><dd>{t.roles?.join(", ")}</dd>
+          {!!t.roles?.length && (<><dt className="text-muted">Ruoli</dt><dd>{t.roles.join(", ")}</dd></>)}
           {!!t.keywords?.length && (<><dt className="text-muted">Parole chiave</dt><dd>{t.keywords.join(", ")}</dd></>)}
           {!!t.exclude_keywords?.length && (<><dt className="text-muted">Escluse</dt><dd>{t.exclude_keywords.join(", ")}</dd></>)}
           {t.signals?.offer && offerByCode(t.signals.offer) && (<><dt className="text-muted">Servizio</dt><dd>{offerByCode(t.signals.offer)!.label}</dd></>)}
@@ -154,10 +154,10 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
       ) : (
         <EmptyState title={running ? "Stiamo cercando…" : "Nessun lead in questa ricerca"}>
           {running
-            ? "Pianifichiamo la ricerca, visitiamo i siti ufficiali e verifichiamo le email. Di solito servono 5-20 minuti: puoi chiudere la pagina, ti avvisiamo via email."
+            ? "Pianifichiamo la ricerca, visitiamo i siti ufficiali e controlliamo i dati delle aziende. Di solito servono 5-20 minuti: puoi chiudere la pagina, ti avvisiamo via email."
             : t.signals?.codes.length
               ? "Nessuna azienda con la prova del segnale richiesto. Prova ad allargare l'area, a scegliere «basta un segnale» o ad aggiungere un altro segnale."
-              : "Prova ad allargare l'area geografica, i ruoli o ad accettare anche le email generiche."}
+              : "Prova ad allargare l'area geografica, a togliere qualche filtro o a scegliere un settore più ampio."}
         </EmptyState>
       )}
     </>

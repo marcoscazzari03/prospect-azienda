@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getViewer } from "@/lib/server/dal";
 import { toCsv } from "@/lib/domain/csv";
-import { EXPORT_COLUMNS, LEAD_STAGES, flattenDelivery, type DeliveryRow } from "@/lib/domain/leads";
+import { LEAD_STAGES, exportColumns, flattenDelivery, type DeliveryRow } from "@/lib/domain/leads";
 import { toXlsx } from "@/lib/server/xlsx";
 import { RATE_LIMITS } from "@/lib/config";
 
@@ -63,7 +63,7 @@ export async function GET(request: Request) {
 
   const date = new Date().toISOString().slice(0, 10);
   if (format === "xlsx") {
-    const file = await toXlsx(rows.map(flattenDelivery), EXPORT_COLUMNS);
+    const file = await toXlsx(rows.map(flattenDelivery), exportColumns(rows.map(flattenDelivery)));
     return new NextResponse(new Uint8Array(file), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
       },
     });
   }
-  const csv = toCsv(rows.map(flattenDelivery), EXPORT_COLUMNS);
+  const csv = toCsv(rows.map(flattenDelivery), exportColumns(rows.map(flattenDelivery)));
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",

@@ -30,7 +30,10 @@ parere, se lo consente.
       (le condizioni ammettono solo 14 giorni di prova)
 - [x] **Io** – Raccolta Adzuna ogni 2 giorni (annunci degli ultimi 3), una chiamata ogni 2,5 s:
       ~1.100 chiamate al mese invece di ~2.100
-- [ ] **Io** – Modalità «solo azienda» per la beta (nessun nome di persona consegnato né conservato)
+- [x] **Io** – Modalità «Solo azienda» (migrazione 037, motore, sito): nessun nome di persona consegnato né
+      conservato, solo email generiche del dominio aziendale, niente Icypeas né ricerca del referente.
+      Le modalità con i referenti restano nel codice, spente con `app_settings.people_enabled`
+- [ ] **Insieme** – Cancellare i nomi e le email nominative raccolti nei collaudi (con la pulizia della Fase 2)
 - [x] **Io** – Documento con le domande per il legale e per il commercialista (descrizione del
       servizio, dati trattati, fonti, flussi): `09-domande-consulenti.md`
 

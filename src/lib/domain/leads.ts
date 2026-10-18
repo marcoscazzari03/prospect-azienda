@@ -110,13 +110,19 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "tipo_email", label: "Tipo email" },
   { key: "stato_email", label: "Stato email" },
   { key: "fonte_email", label: "Fonte email" },
-  { key: "fonte_contatto", label: "Fonte contatto" },
+  { key: "fonte_contatto", label: "Fonte azienda" },
   { key: "linkedin", label: "LinkedIn" },
   { key: "email_ipotizzate", label: "Email ipotizzate (non verificate)" },
   { key: "segnali", label: "Perché è in target" },
   { key: "prove_segnali", label: "Prova del segnale" },
   { key: "qualita", label: "Qualità" },
   { key: "consegnato_il", label: "Consegnato il" },
-  { key: "stato_contatto", label: "Stato contatto" },
+  { key: "stato_contatto", label: "Fase commerciale" },
   { key: "note", label: "Note" },
 ];
+
+// Colonne della persona: solo se almeno un lead ha il referente (in «Solo azienda» mai).
+const PERSON_COLUMNS = new Set(["nome", "cognome", "ruolo", "linkedin", "email_ipotizzate"]);
+export function exportColumns(rows: ReturnType<typeof flattenDelivery>[]) {
+  return rows.some((r) => r.nome) ? EXPORT_COLUMNS : EXPORT_COLUMNS.filter((c) => !PERSON_COLUMNS.has(c.key));
+}

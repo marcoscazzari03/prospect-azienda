@@ -18,7 +18,7 @@ export type SearchListItem = {
   countries?: unknown; // target.countries
 };
 
-const MODE_SHORT: Record<string, string> = { generic_ok: "Generiche incluse", mixed: "Mista", personal_only: "Solo nominative" };
+const MODE_SHORT: Record<string, string> = { company_only: "Solo azienda", generic_ok: "Generiche incluse", mixed: "Mista", personal_only: "Solo nominative" };
 
 export const isOpportunity = (s: SearchListItem) => Array.isArray(s.signals) && s.signals.length > 0;
 

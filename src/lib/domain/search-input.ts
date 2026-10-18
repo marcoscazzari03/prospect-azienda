@@ -20,7 +20,8 @@ export const searchInputSchema = z.object({
   regions: list(10),
   companySizes: z.array(z.enum(COMPANY_SIZES)).max(COMPANY_SIZES.length).default([]),
   revenueRange: z.string().trim().max(60).optional().default(""),
-  roles: list(10).refine((a) => a.length > 0, "Indica almeno un ruolo"),
+  // Ruoli: solo per le modalità con i referenti (vedi il controllo sotto).
+  roles: list(10),
   keywords: list(15),
   excludeKeywords: list(15),
   notes: z.string().trim().max(600).optional().default(""),
@@ -44,6 +45,9 @@ export const searchInputSchema = z.object({
     .refine((s) => !s.codes.length || chargesSignal(s.codes), "I segnali indicativi non si possono usare da soli: aggiungi un segnale verificato")
     .refine((s) => !s.codes.includes("job_ad") || s.jobFamilies.length > 0, "Scegli la figura cercata negli annunci"),
 }).refine(
+  (i) => i.emailMode === "company_only" || i.roles.length > 0,
+  "Indica almeno un ruolo",
+).refine(
   (i) => i.industry.length >= 3 || (Boolean(i.signals.offer) && !i.industry.length),
   "Descrivi il settore (almeno 3 caratteri)",
 ).refine(
@@ -79,7 +83,7 @@ export function toTarget(input: SearchInput) {
     regions: input.regions,
     company_size: input.companySizes,
     revenue_range: input.revenueRange,
-    roles: input.roles,
+    roles: input.emailMode === "company_only" ? [] : input.roles,
     keywords: input.keywords,
     exclude_keywords: input.excludeKeywords,
     notes: input.notes,

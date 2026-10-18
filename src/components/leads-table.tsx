@@ -8,7 +8,7 @@ import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
 import { Alert, Badge, Button, ProvenanceStamp, Select, cx } from "./ui";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
 
-function ReportForm({ deliveryId, hasSignals }: { deliveryId: string; hasSignals: boolean }) {
+function ReportForm({ deliveryId, hasSignals, hasPerson }: { deliveryId: string; hasSignals: boolean; hasPerson: boolean }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(reportLead, {});
   if (state.info) return <Alert tone="ledger">{state.info}</Alert>;
   return (
@@ -16,7 +16,7 @@ function ReportForm({ deliveryId, hasSignals }: { deliveryId: string; hasSignals
       <input type="hidden" name="deliveryId" value={deliveryId} />
       <Select name="reason" className="sm:w-64" defaultValue="bounce" aria-label="Motivo">
         <option value="bounce">L&apos;email rimbalza</option>
-        <option value="wrong_role">Ruolo sbagliato</option>
+        {hasPerson && <option value="wrong_role">Ruolo sbagliato</option>}
         <option value="company_closed">Azienda chiusa o inesistente</option>
         <option value="out_of_target">Fuori dai filtri della ricerca</option>
         <option value="duplicate">Duplicato</option>
@@ -48,7 +48,7 @@ function StageSelect({ id, initial }: { id: string; initial: LeadStage }) {
     <Select
       value={stage}
       disabled={pending}
-      aria-label="Stato del contatto"
+      aria-label="Fase commerciale"
       className={cx("h-8 w-40 py-0 text-xs", error && "border-brick", stage === "won" && "text-ledger", stage === "lost" && "text-muted")}
       onChange={(e) => {
         const next = e.target.value as LeadStage;
@@ -85,7 +85,7 @@ function ListPicker({ ids, lists, onDone, label = "Aggiungi" }: { ids: string[];
   const [listId, setListId] = useState(lists[0]?.id ?? "");
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<LeadActionState>({});
-  if (!lists.length) return <p className="text-xs text-muted">Crea una lista in alto per organizzare i contatti.</p>;
+  if (!lists.length) return <p className="text-xs text-muted">Crea una lista in alto per organizzare i lead.</p>;
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Select value={listId} onChange={(e) => setListId(e.target.value)} className="h-8 w-48 py-0 text-xs" aria-label="Lista">
@@ -137,7 +137,9 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
     return n;
   });
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
-  const cols = manage ? 7 : 5;
+  // Colonna del referente solo se qualche lead ce l'ha (in «Solo azienda» non c'è mai).
+  const withPeople = rows.some((r) => Boolean(r.data.person?.full_name));
+  const cols = (manage ? 7 : 5) - (withPeople ? 0 : 1);
   return (
     <>
     {manage && selected.size > 0 && (
@@ -156,9 +158,9 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                 <input type="checkbox" checked={allSelected} onChange={() => setSelected(allSelected ? new Set() : new Set(rows.map((r) => r.id)))} aria-label="Seleziona tutti" />
               </th>
             )}
-            <th className="px-4 py-3 font-medium">Contatto</th>
+            {withPeople && <th className="px-4 py-3 font-medium">Referente</th>}
             <th className="px-4 py-3 font-medium">Azienda</th>
-            <th className="px-4 py-3 font-medium">Email</th>
+            <th className="px-4 py-3 font-medium">Email aziendale</th>
             <th className="px-4 py-3 text-right font-medium">Qualità</th>
             {manage && <th className="px-4 py-3 font-medium">Stato</th>}
             <th className="w-10 px-2 py-3"><span className="sr-only">Dettagli</span></th>
@@ -173,16 +175,18 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                 <tr className={cx("animate-row-in border-t border-line align-top", isOpen && "bg-paper/70")} style={{ animationDelay: `${Math.min(i, 20) * 25}ms` }}>
                   {manage && (
                     <td className="px-3 py-3">
-                      <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggle(r.id)} aria-label={`Seleziona ${d.person?.full_name ?? ""}`} />
+                      <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggle(r.id)} aria-label={`Seleziona ${d.person?.full_name || d.company?.name || ""}`} />
+                    </td>
+                  )}
+                  {withPeople && (
+                    <td className="px-4 py-3">
+                      {d.person?.full_name ? <p className="font-medium">{d.person.full_name}</p> : <p className="text-ink-2">Non indicato</p>}
+                      <p className="text-xs text-ink-2">{d.person?.job_title || "—"}</p>
                     </td>
                   )}
                   <td className="px-4 py-3">
-                    {d.person?.full_name ? <p className="font-medium">{d.person.full_name}</p> : <p className="text-ink-2">Referente non indicato</p>}
-                    <p className="text-xs text-ink-2">{d.person?.job_title || "—"}</p>
-                  </td>
-                  <td className="px-4 py-3">
                     <a href={safeHttpUrl(d.company?.website)} target="_blank" rel="noopener noreferrer nofollow" className="font-medium hover:text-ledger">{d.company?.name}</a>
-                    <p className="text-xs text-ink-2">{[d.company?.city, d.company?.country].filter(Boolean).join(", ")}</p>
+                    <p className="text-xs text-ink-2">{[d.company?.industry, d.company?.city, d.company?.country].filter(Boolean).join(" · ")}</p>
                     {!!d.signals?.length && (
                       <div className="mt-1 flex flex-wrap gap-1">
                         {d.signals.map((sg) => <Badge key={sg.code} tone="stamp">{signalByCode(sg.code)?.label ?? sg.code}</Badge>)}
@@ -227,13 +231,13 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                       <div className="grid gap-4 md:grid-cols-3">
                         <div className="text-xs">
                           <p className="mb-1 font-medium uppercase tracking-wider text-muted">Fonti</p>
-                          {safeHttpUrl(d.sources?.discovery_url) && <p>Contatto: <a className="text-ledger underline" href={safeHttpUrl(d.sources?.discovery_url)} target="_blank" rel="noopener noreferrer nofollow">{host(d.sources?.discovery_url ?? "")}</a></p>}
+                          {safeHttpUrl(d.sources?.discovery_url) && <p>Azienda: <a className="text-ledger underline" href={safeHttpUrl(d.sources?.discovery_url)} target="_blank" rel="noopener noreferrer nofollow">{host(d.sources?.discovery_url ?? "")}</a></p>}
                           {d.email?.source === "enrichment" ? <p>Email: verificata tecnicamente</p> : safeHttpUrl(d.email?.source_url) && <p>Email: <a className="text-ledger underline" href={safeHttpUrl(d.email?.source_url)} target="_blank" rel="noopener noreferrer nofollow">{host(d.email?.source_url ?? "")}</a></p>}
                           {safeHttpUrl(d.person?.linkedin_url) && <p>LinkedIn: <a className="text-ledger underline" href={safeHttpUrl(d.person?.linkedin_url)} target="_blank" rel="noopener noreferrer nofollow">profilo</a></p>}
                           {typeof d.quality?.checks?.mailbox === "string" && MAILBOX_LABEL[d.quality.checks.mailbox as MailboxCheck] && (
                             <p className="mt-2">{MAILBOX_LABEL[d.quality.checks.mailbox as MailboxCheck]}</p>
                           )}
-                          <p className="mt-2">{ROLE_MATCH_LABEL[d.person?.role_match ?? ""] ?? ""}</p>
+                          {d.person?.full_name && <p className="mt-2">{ROLE_MATCH_LABEL[d.person?.role_match ?? ""] ?? ""}</p>}
                         </div>
                         <div className="text-xs">
                           <p className="mb-1 font-medium uppercase tracking-wider text-muted">Altre email trovate</p>
@@ -270,7 +274,7 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                       )}
                       <div className="mt-4 border-t border-line pt-4">
                         <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">Qualcosa non va?</p>
-                        <ReportForm deliveryId={r.id} hasSignals={Boolean(r.data?.signals?.length)} />
+                        <ReportForm deliveryId={r.id} hasSignals={Boolean(r.data?.signals?.length)} hasPerson={Boolean(r.data?.person?.full_name)} />
                       </div>
                     </td>
                   </tr>

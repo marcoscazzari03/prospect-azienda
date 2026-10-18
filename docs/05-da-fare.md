@@ -181,3 +181,18 @@ Le stime della revisione non sono dati misurati.
       consulente se renderla automatica (crediti residui, fatture da conservare, lead acquistati)
 - [ ] Dati di fatturazione italiani (ragione sociale, P.IVA, codice SDI/PEC): oggi li raccoglie il portale
       Stripe. Verificare con il commercialista se bastano per la fattura elettronica o se servono campi nostri
+
+## 18/10 – Posizionamento: intelligence commerciale sulle aziende
+
+- [x] Deciso: «Trova aziende in target e scopri nuove opportunità commerciali verificate». La ricerca per
+      opportunità è l'elemento distintivo; l'email generica è un'informazione in più. I referenti si tolgono
+      per scelta di prodotto (non un altro database di contatti), non solo per risparmiare.
+- [x] Modalità «Solo azienda» (`company_only`, migrazione 037): 1 credito a lead (+segnale, +ricerca estesa),
+      nessun nome né email di persona né casella gratuita, consegna e magazzino senza persone. Motore: niente
+      ricerca del referente (Haiku sul sito e sul web) e niente Icypeas; Haiku resta per settore e siti.
+- [x] Interruttore `app_settings.people_enabled` (falso): il wizard mostra solo «Solo azienda», il database
+      rifiuta le altre modalità (MODE_DISABLED), le ricerche ricorrenti diventano «Solo azienda».
+      Per riaccendere i referenti dopo il parere legale: `update app_settings set value = 'true' where key = 'people_enabled'`
+      (e rivedere i testi del sito).
+- [x] Testi del sito riscritti (home, demo, prezzi, termini, informativa, wizard, lead, dashboard, export).
+

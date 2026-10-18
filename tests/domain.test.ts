@@ -4,7 +4,7 @@ import { blockedSector } from "@/lib/domain/blocked-sectors";
 import { aiSearchExtra, buildEnginePayload, reserveCompaniesForDatabase, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
 import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
-import { flattenDelivery } from "@/lib/domain/leads";
+import { exportColumns, flattenDelivery } from "@/lib/domain/leads";
 import { roleMatcher } from "@/lib/domain/roles";
 import { applyMailboxChecks } from "@/lib/domain/mailbox";
 
@@ -229,5 +229,31 @@ describe("sovrapprezzo della ricerca AI", () => {
     expect(aiSearchExtra({ ...base, company_size: ["11-50"] } as never)).toBe(1);
     expect(aiSearchExtra({ ...base, countries: ["ES"] } as never)).toBe(1);
     expect(aiSearchExtra({ ...base, company_size: ["11-50"], signals: { codes: ["no_mobile"], match: "any", jobFamilies: [] } } as never)).toBe(0);
+  });
+});
+
+describe("solo azienda", () => {
+  it("non chiede ruoli e non li passa al motore", () => {
+    const input = searchInputSchema.parse({ ...baseInput, emailMode: "company_only", roles: [] });
+    expect(toTarget(input).roles).toEqual([]);
+    expect(toTarget(searchInputSchema.parse({ ...baseInput, emailMode: "company_only" })).roles).toEqual([]);
+  });
+  it("costa 1 credito a lead e nessuna verifica a pagamento", () => {
+    expect(estimateCredits("company_only", 10)).toEqual({ min: 10, max: 10, reserve: 10 });
+    expect(estimateCredits("company_only", 10, 1).max).toBe(20);
+    expect(enrichmentCap("company_only", 50, { enrichment_per_run_max: 100 })).toBe(0);
+    expect(enrichmentSearchBudget("company_only", 50)).toBe(0);
+  });
+  it("export senza le colonne della persona", () => {
+    const row = flattenDelivery({
+      id: "d1", email_address: "info@acme.it", email_type: "generic", email_status: "found_public", credits: 1,
+      quality_score: 50, delivered_at: "2026-10-18T10:00:00Z",
+      data: { company: { name: "Acme", website: "https://acme.it" }, person: { full_name: "" }, email: { address: "info@acme.it" } },
+    } as never);
+    const keys = exportColumns([row]).map((c) => c.key);
+    expect(keys).not.toContain("nome");
+    expect(keys).not.toContain("linkedin");
+    expect(keys).toContain("email");
+    expect(exportColumns([{ ...row, nome: "Mario" }]).map((c) => c.key)).toContain("nome");
   });
 });

@@ -1,9 +1,19 @@
 // Opzioni del wizard di ricerca (testi per l'utente in italiano).
 
-export const EMAIL_MODES = ["generic_ok", "mixed", "personal_only"] as const;
+// «company_only» (Solo azienda): l'unica attiva finché i referenti sono spenti
+// (app_settings.people_enabled, migrazione 037). Le altre restano pronte per riaccenderle.
+export const EMAIL_MODES = ["company_only", "generic_ok", "mixed", "personal_only"] as const;
+export const COMPANY_MODES: readonly EmailMode[] = ["company_only"];
 export type EmailMode = (typeof EMAIL_MODES)[number];
 
 export const MODE_INFO: Record<EmailMode, { label: string; short: string; maxCredits: number; minCredits: number; example: string }> = {
+  company_only: {
+    label: "Solo azienda",
+    short: "Azienda in target con sito, settore, zona ed email aziendale (info@, commerciale@). Nessun dato di persone.",
+    minCredits: 1,
+    maxCredits: 1,
+    example: "TechSolutions S.r.l. · info@techsolutions.it",
+  },
   generic_ok: {
     label: "Email generiche incluse",
     short: "Email aziendali verificate come info@ o sales@. Il nome del referente quando è sul sito (+1 credito).",

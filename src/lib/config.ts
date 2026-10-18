@@ -2,7 +2,7 @@
 export const BRAND = {
   name: "Webora Leads",
   short: "Webora",
-  tagline: "Lead B2B con la fonte",
+  tagline: "Trova aziende in target e scopri nuove opportunità commerciali verificate",
   owner: "Webora Studio",
   supportEmail: "leads@weborastudio.it",
   domain: "leads.weborastudio.it",

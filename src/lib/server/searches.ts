@@ -1,4 +1,5 @@
 import "server-only";
+import { getPeopleEnabled } from "@/lib/server/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { env } from "@/lib/env";
 import { SEARCH_RULES } from "@/lib/config";
@@ -218,9 +219,10 @@ export async function fillFromWarehouse(searchId: string) {
     return 0;
   }
   const match = roleMatcher(search.target.roles ?? []);
-  // Solo ruoli certi: il magazzino deve essere più preciso del motore.
+  // Solo ruoli certi: il magazzino deve essere più preciso del motore. «Solo azienda»: nessun
+  // ruolo (la persona non si consegna, la toglie deliver_leads).
   const picks = (candidates ?? [])
-    .filter((c) => match(c.job_title) === "exact")
+    .filter((c) => search.email_mode === "company_only" || match(c.job_title) === "exact")
     .map((c) => ({ person_id: c.person_id, role_match: "exact" }));
   if (!picks.length) return 0;
   const { data, error: deliverError } = await db.rpc("deliver_from_warehouse", {
@@ -300,6 +302,8 @@ export async function runDueRepeats() {
     .lte("next_repeat_at", now.toISOString())
     .limit(50);
   let started = 0;
+  // Referenti spenti: le ripetizioni delle ricerche con i referenti diventano «Solo azienda».
+  const peopleEnabled = await getPeopleEnabled();
   for (const parent of due ?? []) {
     const repeat = parent.repeat as "weekly" | "monthly";
     // Prima si sposta la scadenza: un cron ripetuto non avvia due volte.
@@ -319,7 +323,7 @@ export async function runDueRepeats() {
         p_org: parent.org_id,
         p_name: `${baseName} · ${day}`.slice(0, 120),
         p_target: parent.target,
-        p_mode: parent.email_mode,
+        p_mode: peopleEnabled ? parent.email_mode : "company_only",
         p_quantity: parent.quantity,
         p_contacts_per_company: parent.contacts_per_company,
       })

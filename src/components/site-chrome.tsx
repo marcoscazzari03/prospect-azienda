@@ -34,7 +34,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-[2fr_1fr_1fr_1fr] sm:px-6">
         <div>
           <Logo />
-          <p className="mt-3 max-w-xs text-sm text-ink-2">Lead B2B con dati reali, contatti verificati e opportunità commerciali.</p>
+          <p className="mt-3 max-w-xs text-sm text-ink-2">Aziende in target e opportunità commerciali verificate, con la prova.</p>
         </div>
         {col("Prodotto", [["/#come-funziona", "Come funziona"], ["/prezzi", "Prezzi"], ["/registrati", "Prova gratis"], ["/accedi", "Accedi"]])}
         {col("Risorse", [["/#faq", "FAQ"], ["/opposizione", "Rimuovi i tuoi dati"]])}

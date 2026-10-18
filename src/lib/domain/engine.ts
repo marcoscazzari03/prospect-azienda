@@ -16,7 +16,8 @@ export type EnginePlan = { enrichment_per_run_max: number };
 
 // Tetto di arricchimento a pagamento: dipende da quante nominative servono
 // davvero e dal piano. È la leva che protegge il margine.
-const ENRICHMENT_SHARE: Record<EmailMode, number> = { personal_only: 1, mixed: 0.6, generic_ok: 0.2 };
+// «Solo azienda»: nessuna verifica a pagamento (niente persone da cercare).
+const ENRICHMENT_SHARE: Record<EmailMode, number> = { personal_only: 1, mixed: 0.6, generic_ok: 0.2, company_only: 0 };
 
 // `budget`: verifiche ancora disponibili (per la ricerca e nel mese), se noto.
 export function enrichmentCap(mode: EmailMode, remaining: number, plan: EnginePlan, budget = Infinity) {

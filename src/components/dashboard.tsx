@@ -201,7 +201,7 @@ export function PipelineCard({ pipeline }: { pipeline: Record<LeadStage, number>
   return (
     <Card className="h-full p-5 sm:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-xl font-semibold">I tuoi contatti</h2>
+        <h2 className="font-display text-xl font-semibold">Le tue trattative</h2>
         <Link href="/app/lead" className="flex items-center gap-1 text-sm font-medium text-ledger hover:text-ledger-2">
           Apri i lead <Icon name="arrow" className="h-4 w-4" />
         </Link>
@@ -227,7 +227,7 @@ export function PipelineCard({ pipeline }: { pipeline: Record<LeadStage, number>
         })}
       </ul>
       {total > 0 && pipeline.new === total && (
-        <p className="mt-4 text-xs text-muted">Aggiorna lo stato dei contatti dalla pagina Lead: qui vedrai i progressi.</p>
+        <p className="mt-4 text-xs text-muted">Aggiorna la fase dei lead dalla pagina Lead: qui vedrai i progressi.</p>
       )}
     </Card>
   );
@@ -235,9 +235,9 @@ export function PipelineCard({ pipeline }: { pipeline: Record<LeadStage, number>
 
 export function ToolsCard() {
   const tools = [
-    { href: "/api/export?format=xlsx", icon: "download" as const, title: "Esporta lead", text: "Tutti i contatti in Excel", download: true },
+    { href: "/api/export?format=xlsx", icon: "download" as const, title: "Esporta lead", text: "Tutti i lead in Excel", download: true },
     { href: "/app/ricerche/nuova", icon: "repeat" as const, title: "Ricerca ricorrente", text: "Nuovi lead ogni settimana o mese" },
-    { href: "/app/lead", icon: "list" as const, title: "Le mie liste", text: "Organizza e annota i contatti" },
+    { href: "/app/lead", icon: "list" as const, title: "Le mie liste", text: "Organizza e annota i lead" },
   ];
   return (
     <Card className="h-full p-5 sm:p-6">

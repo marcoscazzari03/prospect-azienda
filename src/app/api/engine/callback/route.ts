@@ -112,8 +112,10 @@ export async function POST(request: Request) {
 
   // Referenti non trovati: le ricerche successive (anche di altri clienti) mettono queste
   // aziende in fondo alla riserva invece di pagare di nuovo le stesse ricerche web.
-  // Anche i lead consegnati senza nome («Email generiche incluse»).
-  const missed = [...new Set([...(payload.rejected ?? []), ...(payload.leads ?? [])]
+  // Anche i lead consegnati senza nome («Email generiche incluse»). Non in «Solo azienda»:
+  // lì il referente non si cerca affatto.
+  const companyOnly = (payload as { email_mode?: string }).email_mode === "company_only";
+  const missed = companyOnly ? [] : [...new Set([...(payload.rejected ?? []), ...(payload.leads ?? [])]
     .map((r) => r as { reason?: string; company?: { domain?: string }; person?: { full_name?: string }; email?: unknown })
     .filter((r) => r?.reason === "referente_non_trovato" || (r?.email && !String(r.person?.full_name ?? "").trim()))
     .map((r) => String(r.company?.domain ?? "").trim().toLowerCase())

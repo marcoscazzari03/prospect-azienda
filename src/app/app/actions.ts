@@ -27,6 +27,7 @@ const ERRORS: [RegExp, (m: string) => string][] = [
   [/QUANTITY_LIMIT:(\d+)/, (n) => `Il tuo piano permette fino a ${n} lead per ricerca.`],
   [/ACTIVE_LIMIT:(\d+)/, (n) => `Hai già ${n} ricerca/e in corso: attendi che finiscano o passa a un piano superiore.`],
   [/ORG_SUSPENDED/, () => "Account sospeso: contatta l'assistenza."],
+  [/MODE_DISABLED/, () => "Per ora consegniamo solo dati delle aziende: scegli «Solo azienda»."],
 ];
 
 // Dati del wizard -> input della ricerca. Ricerca opportunità: il cliente sceglie il servizio,

@@ -52,7 +52,8 @@ const job = {
   run_id: str(b.run_id, 64),
   run_token: str(b.run_token, 128),
   callback_url: str(b.callback_url, 300),
-  email_mode: ['generic_ok', 'personal_only', 'mixed'].includes(b.email_mode) ? b.email_mode : 'mixed',
+  // «company_only» (solo azienda): nessun referente, nessuna email di persona, niente Icypeas.
+  email_mode: ['company_only', 'generic_ok', 'personal_only', 'mixed'].includes(b.email_mode) ? b.email_mode : 'mixed',
   quantity: clamp(b.quantity, 1, 500, 25),
   contacts_per_company: clamp(b.contacts_per_company, 1, 3, 1),
   language: str(b.language, 5) || 'it',
@@ -154,7 +155,7 @@ if (job.target.signals.codes.length) {
   // a 9 e poi 6 la ricerca si è chiusa a 2 lead su 5 con 34 aziende ancora da provare.
   // Con «Email generiche incluse» il lead si consegna anche senza nome (prova del 17/10:
   // 7 lead da 10 aziende provate per 3 richiesti), quindi basta un margine più piccolo.
-  const MARGINE_RISERVA = { personal_only: 3, mixed: 2.5, generic_ok: 1.6 }[job.email_mode];
+  const MARGINE_RISERVA = { personal_only: 3, mixed: 2.5, generic_ok: 1.6, company_only: 1.6 }[job.email_mode];
   if (bastaRiserva) job.limits.referenti_max = Math.min(job.reserve.length, Math.ceil(job.quantity * MARGINE_RISERVA) + 2);
   const daCercare = Math.max(0, job.quantity * SOVRACAMPIONAMENTO - job.reserve.length);
   lotti = bastaRiserva ? 0 : Math.min(
@@ -171,7 +172,7 @@ const brief = [
   job.target.regions.length ? `Aree / città: ${job.target.regions.join(', ')}` : '',
   job.target.company_size.length ? `Dimensione azienda (dipendenti): ${job.target.company_size.join(', ')}` : '',
   job.target.revenue_range ? `Fatturato indicativo: ${job.target.revenue_range}` : '',
-  `Ruoli da contattare: ${job.target.roles.length ? job.target.roles.join(', ') : 'titolare / CEO / fondatore'}`,
+  job.email_mode === 'company_only' ? '' : `Ruoli da contattare: ${job.target.roles.length ? job.target.roles.join(', ') : 'titolare / CEO / fondatore'}`,
   job.target.keywords.length ? `Parole chiave aggiuntive: ${job.target.keywords.join(', ')}` : '',
   job.target.exclude_keywords.length ? `Da escludere: ${job.target.exclude_keywords.join(', ')}` : '',
   job.target.notes ? `Note del cliente: ${job.target.notes}` : '',

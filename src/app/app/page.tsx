@@ -18,7 +18,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
   const since = await activitySince(viewer.user.id);
   const [activity, d] = await Promise.all([activitySummary(since), dashboardData(period)]);
   const firstName = viewer.fullName.split(" ")[0];
-  const quota = d.totalLeads ? Math.round((d.personalLeads / d.totalLeads) * 100) : null;
+  const quota = d.totalLeads ? Math.round((d.signalLeads / d.totalLeads) * 100) : null;
 
   return (
     <>
@@ -46,7 +46,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
           tone={d.activeSearches ? "stamp" : "ink"}
           hint={d.activeSearches ? `${formatNumber(d.reserved)} crediti riservati` : "Nessuna ricerca attiva"}
         />
-        <StatCard icon="target" label="Quota nominative" value={quota === null ? "—" : `${quota}%`} hint={`${formatNumber(d.personalLeads)} email nominative sul totale`} />
+        <StatCard icon="target" label="Con opportunità" value={quota === null ? "—" : `${quota}%`} hint={`${formatNumber(d.signalLeads)} lead con un segnale verificato`} />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
@@ -67,7 +67,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
         <SearchTable searches={d.searches as SearchListItem[]} />
       ) : (
         <EmptyState title="Nessuna ricerca, per ora" action={<ButtonLink href="/app/ricerche/nuova">Avvia la prima ricerca</ButtonLink>}>
-          Descrivi i clienti che cerchi: settore, paese, ruoli. Con i crediti gratuiti puoi ricevere i primi lead in pochi minuti.
+          Descrivi i clienti che cerchi (settore e zona) o scegli il servizio che vendi. Con i crediti gratuiti ricevi le prime aziende in pochi minuti.
         </EmptyState>
       )}
     </>

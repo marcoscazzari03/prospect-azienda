@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         <Logo />
         <blockquote className="max-w-md">
           <p className="font-display text-3xl font-semibold leading-tight">
-            «Ogni contatto con la sua fonte. Nessuna email inventata.»
+            «Ogni opportunità con la sua prova. Ogni dato con la sua fonte.»
           </p>
           <p className="mt-4 text-ink-2">Paghi solo i lead consegnati. I crediti non usati tornano a te.</p>
         </blockquote>

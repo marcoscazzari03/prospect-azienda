@@ -27,12 +27,6 @@ const SECTORS = [
 ] as const;
 
 const SIZES = ["1-10 dip.", "11-50 dip.", "51-200 dip.", "201-500 dip."] as const;
-const ROLES = ["Titolare / CEO", "CTO", "CFO", "Marketing", "Vendite", "HR"] as const;
-const MODES = [
-  ["generic_ok", "Generiche incluse"],
-  ["mixed", "Misto (generiche + nominative)"],
-  ["personal_only", "Solo nominative"],
-] as const;
 const QUANTITIES = [10, 25, 50] as const;
 
 type Kind = "standard" | "opportunity";
@@ -44,8 +38,6 @@ type Config = {
   region: string;
   sector: string;
   size: string;
-  role: string;
-  mode: string;
   qty: number;
 };
 
@@ -68,7 +60,7 @@ function scramble(rand: () => number, min: number, max: number) {
 }
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-type Row = { name: string; company: string; role: string; email: string; status: "validated" | "found_public"; type: "personal" | "generic"; signals: string[] };
+type Row = { company: string; city: string; email: string; status: "found_public"; type: "generic"; signals: string[] };
 
 function buildResults(cfg: Config, offers: OfferDef[]) {
   const country = COUNTRIES.find((c) => c.id === cfg.country) ?? COUNTRIES[0];
@@ -83,9 +75,6 @@ function buildResults(cfg: Config, offers: OfferDef[]) {
   const shortfall = rand() < (opportunity ? 0.6 : 0.35) ? Math.ceil(cfg.qty * (opportunity ? 0.18 : 0.08) * rand()) : 0;
   const found = Math.max(1, cfg.qty - shortfall);
   const rows: Row[] = Array.from({ length: found }, () => {
-    const personal = cfg.mode === "personal_only" || (cfg.mode === "mixed" ? rand() < 0.62 : rand() < 0.35);
-    const first = scramble(rand, 4, 7);
-    const last = scramble(rand, 5, 9);
     const dom = scramble(rand, 6, 11);
     const signals = !opportunity
       ? []
@@ -95,19 +84,17 @@ function buildResults(cfg: Config, offers: OfferDef[]) {
     if (opportunity && !signals.length && decisive.length) signals.push(decisive[Math.floor(rand() * decisive.length)]);
     if (opportunity) for (const c of extra) if (rand() < 0.4) signals.push(c);
     return {
-      name: `${cap(first)} ${cap(last)}`,
       company: `${cap(scramble(rand, 5, 10))} ${cap(scramble(rand, 3, 6))}`,
-      role: scramble(rand, 3, 10),
-      email: personal ? `${first}.${last}@${dom}.${country.tld}` : `${scramble(rand, 4, 5)}@${dom}.${country.tld}`,
-      status: rand() < 0.55 ? "validated" : "found_public",
-      type: personal ? "personal" : "generic",
+      city: cap(scramble(rand, 5, 9)),
+      email: `${scramble(rand, 4, 5)}@${dom}.${country.tld}`,
+      status: "found_public",
+      type: "generic",
       signals,
     };
   });
   return {
     rows,
     found,
-    personal: rows.filter((r) => r.type === "personal").length,
     companies: Math.round(found * (opportunity ? 4.2 : 2.6) + rand() * found),
     discarded: opportunity ? Math.round(found * (1.2 + rand())) : 0,
   };
@@ -118,8 +105,8 @@ function phasesFor(kind: Kind) {
     { label: "Pianificazione della ricerca", detail: "Suddividiamo il mercato in lotti per zona", ticks: 12 },
     { label: "Ricerca delle aziende", detail: "Cerchiamo sul web nella lingua del paese", ticks: 24 },
     ...(kind === "opportunity" ? [{ label: "Controllo dei segnali", detail: "Verifichiamo le prove sui siti e negli annunci", ticks: 20 }] : []),
-    { label: "Individuazione dei referenti", detail: "Controlliamo siti ufficiali e pagine team", ticks: 20 },
-    { label: "Verifica delle email", detail: "Email dal sito e verifica delle caselle", ticks: 18 },
+    { label: "Controllo dei siti", detail: "Sito ufficiale, settore e dati dell'azienda", ticks: 20 },
+    { label: "Email aziendali", detail: "Caselle del dominio trovate sul sito, con la fonte", ticks: 18 },
   ];
 }
 
@@ -150,8 +137,6 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
     region: "Lombardia",
     sector: "software",
     size: SIZES[1],
-    role: "CTO",
-    mode: "mixed",
     qty: 25,
   });
   const [tick, setTick] = useState<number | null>(null); // null = non avviata
@@ -184,7 +169,7 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
   const frac = (i: number) => Math.min(1, Math.max(0, (t - start(i)) / phases[i].ticks));
   const counters = opportunity
     ? [["Aziende analizzate", Math.round(results.companies * frac(1))], ["Con il segnale", Math.round(results.found * 1.2 * frac(2))], ["Lead pronti", Math.round(results.found * frac(4))]]
-    : [["Aziende analizzate", Math.round(results.companies * frac(1))], ["Referenti trovati", Math.round(results.found * 1.3 * frac(2))], ["Email pronte", Math.round(results.found * frac(3))]];
+    : [["Aziende analizzate", Math.round(results.companies * frac(1))], ["Siti controllati", Math.round(results.found * 1.3 * frac(2))], ["Lead pronti", Math.round(results.found * frac(3))]];
 
   const log = useMemo(() => {
     const rand = rng(`log${JSON.stringify(cfg)}`);
@@ -202,9 +187,9 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
             { at: 50, text: `Segnale trovato: ${sig(decisive[decisive.length - 1] ?? "no_mobile")} su ${masked()}` },
           ]
         : [{ at: 33, text: `Scartato: sito non ufficiale (directory)` }]),
-      { at: opportunity ? 60 : 44, text: `Referente trovato: ${cfg.role} su ${masked()}` },
-      { at: opportunity ? 70 : 58, text: `Email trovata sul sito: ••••@${masked()}` },
-      { at: opportunity ? 80 : 66, text: `Scartata: email ipotizzata (non la vendiamo)` },
+      { at: opportunity ? 60 : 44, text: `Settore confermato dal sito: ${masked()}` },
+      { at: opportunity ? 70 : 58, text: `Email aziendale trovata sul sito: info@${masked()}` },
+      { at: opportunity ? 80 : 66, text: `Scartata: solo casella gratuita (gmail), non la consegniamo` },
       { at: opportunity ? 90 : 74, text: `Duplicati rimossi, risultati pronti` },
     ];
   }, [cfg, country, sector, opportunity, decisive]);
@@ -216,7 +201,7 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
   };
   const preview = opportunity
     ? describeOffer({ offer: cfg.offer, industry: sector.who, where: cfg.region, offers })
-    : `Cercheremo ${sector.who} in ${cfg.region} (${cfg.size}) e il referente giusto: ${cfg.role}. Ogni lead con la fonte e lo stato dell'email.`;
+    : `Cercheremo ${sector.who} in ${cfg.region} (${cfg.size}), con sito ed email aziendale. Ogni lead con la sua fonte.`;
 
   return (
     <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-line bg-card shadow-[0_30px_70px_-40px_rgba(17,24,39,0.40)] lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
@@ -297,16 +282,6 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
               {SIZES.map((s) => <option key={s}>{s}</option>)}
             </select>
           </Row>
-          <Row label="Ruolo del contatto">
-            <select className={selectCls} value={cfg.role} onChange={(e) => update({ role: e.target.value })}>
-              {ROLES.map((r) => <option key={r}>{r}</option>)}
-            </select>
-          </Row>
-          <Row label="Modalità email">
-            <select className={selectCls} value={cfg.mode} onChange={(e) => update({ mode: e.target.value })}>
-              {MODES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-            </select>
-          </Row>
           <Row label="Numero di lead">
             <select className={cx(selectCls, "sm:w-28")} value={cfg.qty} onChange={(e) => update({ qty: Number(e.target.value) })}>
               {QUANTITIES.map((q) => <option key={q} value={q}>{q}</option>)}
@@ -353,7 +328,7 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
               </p>
               <ul className="mx-auto mt-6 flex max-w-xs flex-col gap-3 text-left text-sm text-ink-2">
                 <li className="flex items-center gap-3">{TICK}Aziende reali, non un database vecchio</li>
-                <li className="flex items-center gap-3">{TICK}Email trovate sul sito o verificate</li>
+                <li className="flex items-center gap-3">{TICK}Email aziendali trovate sul sito, con la fonte</li>
                 <li className="flex items-center gap-3">{TICK}Con la prova del segnale (se richiesto)</li>
                 <li className="flex items-center gap-3">{TICK}Pronto per l&apos;esportazione in Excel</li>
               </ul>
@@ -424,8 +399,7 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
                   {results.found < cfg.qty && <span className="text-base font-normal text-muted"> su {cfg.qty} richiesti</span>}
                 </p>
                 <p className="text-sm text-ink-2">
-                  {results.personal} nominative · {results.found - results.personal} generiche
-                  {opportunity ? ` · ${results.discarded} aziende scartate senza prova` : ` · ${results.companies} aziende analizzate`}
+                  {opportunity ? `${results.discarded} aziende scartate senza prova` : `${results.companies} aziende analizzate`}
                 </p>
               </div>
               <span className="rounded-full border border-stamp/40 bg-stamp-soft px-2.5 py-1 text-xs font-medium text-stamp-ink">Dati dimostrativi</span>
@@ -436,7 +410,7 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
                 <table className="w-full min-w-[420px] text-left text-xs">
                   <thead className="bg-paper/70 text-muted">
                     <tr>
-                      {["Contatto", "Azienda", opportunity ? "Opportunità" : "Stato"].map((h) => (
+                      {["Azienda", "Città", opportunity ? "Opportunità" : "Email aziendale"].map((h) => (
                         <th key={h} className="px-3 py-2 font-medium">{h}</th>
                       ))}
                     </tr>
@@ -445,10 +419,10 @@ export function LeadDemo({ signalPrices, offers = OFFERS }: { signalPrices: Sign
                     {results.rows.slice(0, 7).map((r, i) => (
                       <tr key={i} className="border-t border-line">
                         <td className="px-3 py-2.5">
-                          <span className="block font-medium blur-[5px]">{r.name}</span>
+                          <span className="block font-medium blur-[5px]">{r.company}</span>
                           <span className="block font-mono text-muted blur-[4px]">{r.email}</span>
                         </td>
-                        <td className="px-3 py-2.5 blur-[5px]">{r.company}</td>
+                        <td className="px-3 py-2.5 blur-[5px]">{r.city}</td>
                         <td className="px-3 py-2.5">
                           {opportunity ? (
                             <span className="flex flex-wrap gap-1">

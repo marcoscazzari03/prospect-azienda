@@ -81,7 +81,7 @@ export function ProvenanceStamp({ status, type, href }: { status: string; type?:
         {status !== "guessed" && <path d="M5 8.2l2 2 4-4.4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />}
       </svg>
       {label}
-      {type && <span className="opacity-70">· {type === "personal" ? "nominativa" : "generica"}</span>}
+      {type && <span className="opacity-70">· {type === "personal" ? "nominativa" : "aziendale"}</span>}
     </Badge>
   );
   const link = safeHttpUrl(href);

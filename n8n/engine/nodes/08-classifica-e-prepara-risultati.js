@@ -65,8 +65,11 @@ for (const p of prospects) {
   // Nominativa: dal sito (con nome) o validata. Generica: solo dal dominio aziendale
   // o in un mailto del sito. "other_person" e "privacy" non si vendono mai.
   // Senza referente (non in «Solo nominative») si consegna solo la generica.
-  const nominativa = p._senza_referente ? null : (sito && sito.type === 'personal' ? sito : arricchita);
-  const generica = sito && sito.type === 'generic' ? sito : null;
+  // «Solo azienda»: solo la casella generica del dominio aziendale (info@, commerciale@);
+  // mai nominative né caselle gratuite (gmail…), che in una ditta individuale sono della persona.
+  const soloAzienda = job.email_mode === 'company_only';
+  const nominativa = p._senza_referente || soloAzienda ? null : (sito && sito.type === 'personal' ? sito : arricchita);
+  const generica = sito && sito.type === 'generic' && !(soloAzienda && sito.free_provider) ? sito : null;
 
   let email = null;
   let motivo = '';
@@ -90,10 +93,12 @@ for (const p of prospects) {
       city: p.city, industry: p.industry, size_hint: p.size_hint,
       technologies: Array.isArray(p.technologies) ? p.technologies : []
     },
-    person: {
-      full_name: p.full_name, first_name: p.first_name, last_name: p.last_name,
-      job_title: p.job_title, role_match: p.role_match, linkedin_url: p.linkedin_url || ''
-    },
+    person: soloAzienda
+      ? { full_name: '', first_name: '', last_name: '', job_title: '', role_match: 'unknown', linkedin_url: '' }
+      : {
+          full_name: p.full_name, first_name: p.first_name, last_name: p.last_name,
+          job_title: p.job_title, role_match: p.role_match, linkedin_url: p.linkedin_url || ''
+        },
     sources: { discovery_url: p.source_url, contact_page: p.contact_page || '' },
     keys: { person_key: p.person_key, company_key: p.company_key },
     // Segnali verificati con la loro prova (solo quelli richiesti dalla ricerca).
@@ -129,7 +134,7 @@ for (const p of prospects) {
       (em.status === 'validated' ? 10 : em.status === 'found_public' ? 8 : 0));
     return { score, checks };
   };
-  const ipotesi = (em) => em.type === 'personal' ? [] : pattern(p).map(a => ({ address: a, status: 'guessed' }));
+  const ipotesi = (em) => em.type === 'personal' || soloAzienda ? [] : pattern(p).map(a => ({ address: a, status: 'guessed' }));
 
   if (!email) {
     // Generica in una ricerca «solo nominative»: non si consegna, ma il backend
@@ -142,7 +147,7 @@ for (const p of prospects) {
   }
 
   const altre = (p._emails || [])
-    .filter(e => e.email !== email.address && (e.type === 'personal' || e.type === 'generic'))
+    .filter(e => e.email !== email.address && (soloAzienda ? e.type === 'generic' && !e.free_provider : e.type === 'personal' || e.type === 'generic'))
     .slice(0, 3)
     .map(e => ({ address: e.email, type: e.type, status: 'found_public', source_url: e.source_url }));
 

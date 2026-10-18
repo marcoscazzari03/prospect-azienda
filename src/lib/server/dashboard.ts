@@ -18,10 +18,11 @@ export async function dashboardData(period: Period) {
   // Un giorno in più di margine per il fuso orario; il filtro esatto è per giorno.
   const since = new Date(Math.min(from.getTime(), new Date(`${monthKey}-01T00:00:00Z`).getTime()) - 86_400_000).toISOString();
 
-  const [{ data: recent }, { count: total }, { count: personal }, { data: stages }, { data: running }, { data: searches }] = await Promise.all([
+  const [{ data: recent }, { count: total }, { count: withSignals }, { data: stages }, { data: running }, { data: searches }] = await Promise.all([
     supabase.from("deliveries").select("delivered_at, credits").gte("delivered_at", since).limit(20000),
     supabase.from("deliveries").select("id", { count: "exact", head: true }),
-    supabase.from("deliveries").select("id", { count: "exact", head: true }).eq("email_type", "personal"),
+    // Lead con almeno un'opportunità verificata (data.signals presente).
+    supabase.from("deliveries").select("id", { count: "exact", head: true }).not("data->signals", "is", null),
     supabase.from("deliveries").select("stage").limit(20000),
     supabase.from("searches").select("credits_reserved, credits_charged").in("status", ["queued", "running"]),
     supabase
@@ -56,7 +57,7 @@ export async function dashboardData(period: Period) {
     monthLeads,
     monthCredits,
     totalLeads: total ?? 0,
-    personalLeads: personal ?? 0,
+    signalLeads: withSignals ?? 0,
     activeSearches: running?.length ?? 0,
     reserved: (running ?? []).reduce((s, r) => s + r.credits_reserved - r.credits_charged, 0),
     pipeline,

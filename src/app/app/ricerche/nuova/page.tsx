@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
 import { getSignalPrices } from "@/lib/server/signal-prices";
 import { getEnabledOffers } from "@/lib/server/offer-rules";
+import { getEnabledModes } from "@/lib/server/settings";
 import { createClient } from "@/lib/supabase/server";
 import { SearchWizard, type SearchKind, type WizardDefaults } from "./wizard";
 import type { SearchTarget } from "@/lib/domain/search-input";
@@ -15,7 +16,7 @@ export default async function NewSearchPage({ searchParams }: PageProps<"/app/ri
   const { da, tipo } = await searchParams;
   let defaults: WizardDefaults = {};
   if (typeof da === "string") {
-    // "Ripeti la ricerca": stessi filtri; i contatti già ricevuti sono esclusi in automatico.
+    // "Ripeti la ricerca": stessi filtri; le aziende già ricevute sono escluse in automatico.
     const supabase = await createClient();
     const { data } = await supabase.from("searches").select("name, target, email_mode, quantity, contacts_per_company").eq("id", da).maybeSingle();
     if (data) {
@@ -55,9 +56,9 @@ export default async function NewSearchPage({ searchParams }: PageProps<"/app/ri
       <PageHeader
         eyebrow="Nuova ricerca"
         title="Chi sono i tuoi clienti ideali?"
-        description="Scegli il tipo di ricerca. Più sei preciso, più i lead saranno pertinenti. I contatti che hai già ricevuto vengono esclusi in automatico."
+        description="Scegli il tipo di ricerca. Più sei preciso, più le aziende saranno pertinenti. Quelle che hai già ricevuto vengono escluse in automatico."
       />
-      <SearchWizard credits={viewer.credits} maxQuantity={viewer.plan?.max_quantity_per_search ?? 10} defaults={defaults} initialKind={kind} signalPrices={await getSignalPrices()} offers={await getEnabledOffers()} centsPerCredit={centsPerCredit} />
+      <SearchWizard credits={viewer.credits} maxQuantity={viewer.plan?.max_quantity_per_search ?? 10} defaults={defaults} initialKind={kind} signalPrices={await getSignalPrices()} offers={await getEnabledOffers()} centsPerCredit={centsPerCredit} modes={await getEnabledModes()} />
     </>
   );
 }

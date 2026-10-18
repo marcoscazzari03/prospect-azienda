@@ -499,4 +499,26 @@ assert.equal(conControlli.company_checks[1].checks[0].status, 'fail');
 assert.deepEqual(conControlli.leads[0].signals, [], 'ricerca in target: nessun segnale sul lead (non richiesto né pagato)');
 console.log('ok  database aziende: scansione in target, controlli di tutte le aziende nei risultati');
 console.log('ok  segnali dal sito: viewport, CMS, lingue, copyright, costruzione, booking, HTTPS, decisione');
+// «Solo azienda»: nessun referente, nessuna email di persona né casella gratuita.
+const [jobAz] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, email_mode: 'company_only' } }] }).map(i => i.json);
+assert.equal(jobAz.email_mode, 'company_only');
+assert.ok(!jobAz.brief.includes('Ruoli da contattare'), 'solo azienda: nessun ruolo nel brief');
+const dedAz = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [{ ...jobAz, reserve: [{ company_name: 'R', website: 'https://r.it', signals: [] }] }] },
+  input: [{ candidates: [{ company_name: 'Acme', website: 'https://acme.it', source_url: 'https://acme.it', full_name: 'Mario Rossi', job_title: 'CEO', linkedin_url: 'https://linkedin.com/in/mr' }], lotto: 1 }] }).map(i => i.json);
+assert.equal(dedAz.length, 2);
+assert.ok(dedAz.every(x => x._serve_referente === false && x._senza_referente === true), 'solo azienda: nessuna ricerca del referente');
+assert.ok(dedAz.every(x => !x.full_name && !x.linkedin_url && x.person_key.startsWith('|')), 'solo azienda: il nome indicato dall AI non si tiene');
+const azienda = out('company_only', { ...soloGenerica, _senza_referente: true });
+assert.equal(azienda.leads.length, 1);
+assert.equal(azienda.leads[0].email.type, 'generic');
+assert.equal(azienda.leads[0].person.full_name, '', 'solo azienda: mai il nome');
+assert.equal(azienda.leads[0].email_patterns.length, 0, 'solo azienda: nessuna email ipotizzata');
+assert.equal(out('company_only', { ...soloGenerica, email_site: 'mario.rossi@acme.it', email_site_type: 'personal' }).leads.length, 0, 'solo azienda: niente nominative');
+assert.equal(out('company_only', { ...soloGenerica, email_site: 'acme.srl@gmail.com', email_site_free_provider: true }).leads.length, 0, 'solo azienda: niente caselle gratuite');
+assert.equal(out('company_only', { ...soloGenerica, email_enrichment: 'mario.rossi@acme.it', email_enrichment_status: 'VALIDATED' }).leads[0].email.type, 'generic', 'solo azienda: Icypeas ignorato');
+const conAltre = out('company_only', { ...soloGenerica, _emails: [{ email: 'info@acme.it', type: 'generic' }, { email: 'mario.rossi@acme.it', type: 'personal' }, { email: 'vendite@acme.it', type: 'generic' }, { email: 'acme@gmail.com', type: 'generic', free_provider: true }] });
+assert.deepEqual(conAltre.leads[0].email.alternatives.map(e => e.address).filter(a => a !== conAltre.leads[0].email.address).sort(), ['info@acme.it', 'vendite@acme.it'].filter(a => a !== conAltre.leads[0].email.address).sort(), 'solo azienda: alternative solo generiche del dominio');
+const decidiAz = run(src('06-decidi-arricchimento.js'), { nodes: { 'Valida richiesta': [{ ...jobAz, limits: { ...jobAz.limits, enrichment_cap: 5 } }] }, input: dedAz.map(x => ({ ...x, email_site_score: 0 })) });
+assert.ok(decidiAz.every(x => x.json.needs_enrichment === false), 'solo azienda: mai Icypeas');
+console.log('ok  solo azienda: niente referente, niente Icypeas, solo generiche del dominio');
 console.log('\nTutti i test superati.');

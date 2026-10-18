@@ -3,19 +3,21 @@ import { PricingTable } from "@/components/pricing-table";
 import { PriceCalculator } from "@/components/price-calculator";
 import { ButtonLink, Card, PageHeader } from "@/components/ui";
 import { getPublicPlans } from "@/lib/server/catalog";
+import { getSignalPrices } from "@/lib/server/signal-prices";
+import { extraCreditsLabel } from "@/lib/domain/signals";
 
 export const metadata: Metadata = { title: "Prezzi" };
 export const revalidate = 3600;
 
 export default async function PricingPage() {
-  const plans = await getPublicPlans();
+  const [plans, prices] = await Promise.all([getPublicPlans(), getSignalPrices()]);
   const free = plans.find((p) => p.kind === "free");
   return (
     <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
       <PageHeader
         eyebrow="Prezzi"
-        title="Paghi solo i lead che ricevi."
-        description="Una sola moneta, il credito. Un lead con email generica costa 1 credito (2 se c'è anche il nome del referente), con email nominativa 2, con nominativa verificata 3. La ricerca estesa, quando i filtri vanno oltre il nostro database (dimensione, fatturato, parole chiave, paesi esteri) e cerchiamo aziende nuove sul web, costa 1 credito in più a lead. I crediti riservati e non usati tornano sempre disponibili."
+        title="Paghi solo le aziende che ricevi."
+        description={`Una sola moneta, il credito. Ogni azienda consegnata, con sito, settore, zona ed email aziendale, costa 1 credito. Con un'opportunità verificata costa ${extraCreditsLabel(prices)}. La ricerca estesa, quando i filtri vanno oltre il nostro database (dimensione, fatturato, parole chiave, paesi esteri) e cerchiamo aziende nuove sul web, costa 1 credito in più. I crediti riservati e non usati tornano sempre disponibili.`}
       />
       {free && (
         <Card className="mb-12 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -36,10 +38,10 @@ export default async function PricingPage() {
       />
       <div className="mt-16">
         <h2 className="mb-6 font-display text-2xl font-semibold">Calcola quanto ti serve</h2>
-        <PriceCalculator />
+        <PriceCalculator signalPrices={prices} />
       </div>
       <p className="mt-8 text-sm text-muted">
-        Prezzi IVA esclusa. Volumi superiori a 2.000 lead al mese, API dedicate o fatturazione annuale: scrivici per un&apos;offerta Enterprise.
+        Prezzi IVA esclusa. Volumi superiori a 2.000 aziende al mese, API dedicate o fatturazione annuale: scrivici per un&apos;offerta Enterprise.
       </p>
     </div>
   );

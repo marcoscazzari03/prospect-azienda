@@ -73,23 +73,27 @@ function Pill({ tone, children, small }: { tone: Tone; children: ReactNode; smal
 const faq = (prices: SignalPrices) => [
   {
     q: "Da dove arrivano i dati?",
-    a: "Da fonti pubbliche: siti ufficiali delle aziende, pagine team, note legali, registri e articoli. Ogni lead riporta la pagina in cui abbiamo trovato la persona e quella in cui abbiamo trovato l'email. Le email che deduciamo dal nome sono marcate come «Ipotizzate» e non vengono mai vendute.",
+    a: "Da fonti pubbliche: siti ufficiali delle aziende, registri, OpenStreetMap e annunci di lavoro. Ogni lead riporta la pagina in cui abbiamo trovato l'azienda e quella in cui abbiamo trovato l'email aziendale. Non raccogliamo dati di persone: niente nomi, niente email personali, niente email ipotizzate.",
   },
   {
     q: "Posso usare i lead per email marketing?",
-    a: "Le regole sulle comunicazioni commerciali cambiano da paese a paese (in Italia, ad esempio, l'invio di email promozionali richiede in genere il consenso). Sei tu a decidere come contattare i lead e a rispettare la normativa: nel prodotto trovi indicazioni e un testo di informativa da usare al primo contatto.",
+    a: "Le regole sulle comunicazioni commerciali cambiano da paese a paese (in Italia, ad esempio, l'invio di email promozionali richiede in genere il consenso, anche verso caselle aziendali). Sei tu a decidere come contattare le aziende e a rispettare la normativa: l'email aziendale è un'informazione in più, non un'autorizzazione a inviare promozioni.",
   },
   {
     q: "Cosa succede se non trovate abbastanza lead?",
-    a: "Paghi solo quelli consegnati. Facciamo altri giri con ricerche diverse; se il mercato è più piccolo del previsto, i crediti riservati e non usati tornano subito disponibili. Un contatto già consegnato non ti viene mai riproposto.",
+    a: "Paghi solo quelli consegnati. Facciamo altri giri con ricerche diverse; se il mercato è più piccolo del previsto, i crediti riservati e non usati tornano subito disponibili. Un'azienda già consegnata non ti viene mai riproposta.",
   },
   {
     q: "Come funzionano le opportunità?",
-    a: `Scegli il servizio che vendi (es. rifacimento del sito, assistenza IT, selezione del personale): cerchiamo noi i segnali collegati, come annunci di lavoro recenti per una figura o caratteristiche del sito (software non aggiornato, senza HTTPS, in una sola lingua). Controlliamo ogni segnale prima di cercare i contatti e lo consegniamo con la prova: link e data. Le aziende senza prova vengono escluse. Ogni lead con segnale costa ${extraCreditsLabel(prices)} e, se il segnale non è corretto, puoi segnalarlo entro 14 giorni.`,
+    a: `Scegli il servizio che vendi (es. rifacimento del sito, assistenza IT, selezione del personale): cerchiamo noi i segnali collegati, come annunci di lavoro recenti per una figura o caratteristiche del sito (software non aggiornato, senza HTTPS, in una sola lingua). Controlliamo ogni segnale prima di consegnare l'azienda e lo consegniamo con la prova: link e data. Le aziende senza prova vengono escluse. Ogni lead con segnale costa ${extraCreditsLabel(prices)} e, se il segnale non è corretto, puoi segnalarlo entro 14 giorni.`,
   },
   {
     q: "Che servizi posso scegliere?",
     a: "Siti web (rifacimento, manutenzione WordPress, sicurezza del sito), IT e sistemistica, marketing e comunicazione, HR e selezione, commerciale, amministrazione. Aggiungiamo un servizio solo quando abbiamo un segnale verificabile che lo distingue: per questo l'elenco cresce nel tempo.",
+  },
+  {
+    q: "Perché non ci sono i nomi dei referenti?",
+    a: `È una scelta di prodotto: ${BRAND.name} è intelligence commerciale sulle aziende, non un database di contatti personali. Ti diciamo quali aziende sono in target, perché sono un'opportunità e come raggiungerle tramite i loro canali aziendali; non raccogliamo né vendiamo dati di persone.`,
   },
 ];
 
@@ -103,13 +107,13 @@ const AUDIENCES = [
   {
     icon: "chart",
     title: "Team sales B2B",
-    text: "Arricchisci la tua pipeline con contatti verificati e opportunità reali.",
+    text: "Riempi la pipeline di aziende in target, con un motivo concreto per contattarle.",
     points: ["Più tempo sui lead caldi", "Export pronto per il tuo CRM"],
   },
   {
     icon: "briefcase",
     title: "Servizi professionali",
-    text: "Trova aziende e decisori per servizi legali, finanziari, IT, HR e altri servizi B2B.",
+    text: "Trova aziende in target per servizi legali, finanziari, IT, HR e altri servizi B2B.",
     points: ["Segnali di bisogno verificabili", "Riduci i tempi di ricerca"],
   },
 ] as const;
@@ -117,18 +121,19 @@ const AUDIENCES = [
 const COMPARISON = [
   ["Metodo", "Liste preconfezionate", "Database statici", "Ricerca su misura, al momento dell'ordine"],
   ["Aggiornamento", "Spesso datate", "Aggiornamenti periodici", "Dati verificati di recente"],
-  ["Fonte del contatto", "Sconosciuta", "Non sempre indicata", "Fonte sempre visibile"],
+  ["Fonte dei dati", "Sconosciuta", "Non sempre indicata", "Fonte sempre visibile"],
+  ["Dati di persone", "Nomi ed email personali", "Profili di persone", "Nessuno: solo dati delle aziende"],
   ["Flessibilità", "Limitata", "Filtri rigidi", "Ricerca personalizzata"],
   ["Pagamento", "Tutto in anticipo", "Abbonamento fisso", "Solo lead consegnati"],
   ["Opportunità verificabili", "Non disponibili", "Non disponibili", "Sì, con prova e data"],
 ];
 
 const SAMPLE_LEADS = [
-  ["Marco Bianchi", "TechSolutions S.r.l.", "CTO", "techsolutions.it", "Sito web", "marco.bianchi@techsolutions.it", ["amber", "Annuncio attivo"]],
-  ["Laura Rossi", "LogiTrack", "Head of IT", "logitrack.it", "LinkedIn", "laura.rossi@logitrack.it", ["signal", "Senza HTTPS"]],
-  ["Alessandro Conti", "FastMove", "CEO", "fastmove.it", "Sito web", "a.conti@fastmove.it", ["signal", "Non adatto ai cellulari"]],
-  ["Giulia Ferrari", "DataCloud", "IT Manager", "datacloud.it", "LinkedIn", "giulia.ferrari@datacloud.it", ["signal", "Software non aggiornato"]],
-  ["Davide Riva", "GreenTech", "CTO", "greentech.it", "Sito web", "davide.riva@greentech.it", ["signal", "Una sola lingua"]],
+  ["TechSolutions S.r.l.", "Software", "Milano", "techsolutions.it", "info@techsolutions.it", ["amber", "Annuncio attivo"]],
+  ["LogiTrack", "Logistica", "Bergamo", "logitrack.it", "commerciale@logitrack.it", ["signal", "Senza HTTPS"]],
+  ["FastMove", "Trasporti", "Brescia", "fastmove.it", "info@fastmove.it", ["signal", "Non adatto ai cellulari"]],
+  ["DataCloud", "Servizi IT", "Monza", "datacloud.it", "info@datacloud.it", ["signal", "Software non aggiornato"]],
+  ["GreenTech", "Energia", "Como", "greentech.it", "contatti@greentech.it", ["signal", "Una sola lingua"]],
 ] as const;
 
 const PROOFS = [
@@ -137,7 +142,7 @@ const PROOFS = [
   { icon: "doc", tone: "text-stamp-ink", text: "Annuncio «Sviluppatore backend» (8 gg fa)" },
 ] as const;
 
-const FIT = ["Settore: Software", "Dimensione: 51-200 dip.", "Ruolo: CTO", "Area: Lombardia"];
+const FIT = ["Settore: Software", "Dimensione: 51-200 dip.", "Area: Lombardia", "Sito controllato: 13/10"];
 
 function Section({ id, tone = "card", children }: { id?: string; tone?: "card" | "paper"; children: ReactNode }) {
   return (
@@ -222,8 +227,8 @@ function HeroCard() {
             </div>
             <p className="mt-4 text-xs text-muted">Azienda di software per la logistica</p>
             <ul className="mt-4 flex flex-col gap-2.5 text-sm text-ink-2">
-              <li className="flex items-center gap-2.5"><Ico name="person" className="h-4 w-4 text-muted" /><span><span className="font-semibold text-ink">Marco Bianchi</span> <span className="text-xs text-muted">CTO</span></span></li>
-              <li className="flex items-center gap-2.5"><Ico name="mail" className="h-4 w-4 text-muted" /><span className="truncate">marco.bianchi@techsolutions.it</span></li>
+              <li className="flex items-center gap-2.5"><Ico name="check" className="h-4 w-4 text-muted" />Sito controllato il 13/10</li>
+              <li className="flex items-center gap-2.5"><Ico name="mail" className="h-4 w-4 text-muted" /><span className="truncate">info@techsolutions.it</span> <span className="text-xs text-muted">email aziendale</span></li>
               <li className="flex items-center gap-2.5"><Ico name="globe" className="h-4 w-4 text-muted" />www.techsolutions.it</li>
             </ul>
             <div className="mt-5 flex flex-wrap gap-2">
@@ -285,20 +290,19 @@ function AppPreview() {
           <thead className="text-muted">
             <tr className="border-b border-line">
               <th className="w-10 py-2 pl-4"><span className="block h-3 w-3 rounded-sm border border-line" /></th>
-              {["Nome", "Azienda", "Ruolo", "Sito web", "Fonte", "Email", "Opportunità", "Stato"].map((h) => (
+              {["Azienda", "Settore", "Città", "Sito web", "Email aziendale", "Opportunità", "Stato"].map((h) => (
                 <th key={h} className="py-2 pr-3 font-medium">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {SAMPLE_LEADS.map(([name, company, role, site, source, email, sig]) => (
-              <tr key={name} className="border-b border-line">
+            {SAMPLE_LEADS.map(([company, industry, city, site, email, sig]) => (
+              <tr key={company} className="border-b border-line">
                 <td className="py-2.5 pl-4"><span className="block h-3 w-3 rounded-sm border border-line" /></td>
-                <td className="py-2.5 pr-3 font-medium">{name}</td>
-                <td className="py-2.5 pr-3 text-ink-2">{company}</td>
-                <td className="py-2.5 pr-3 text-ink-2">{role}</td>
+                <td className="py-2.5 pr-3 font-medium">{company}</td>
+                <td className="py-2.5 pr-3 text-ink-2">{industry}</td>
+                <td className="py-2.5 pr-3 text-ink-2">{city}</td>
                 <td className="py-2.5 pr-3 text-ledger underline">{site}</td>
-                <td className="py-2.5 pr-3 text-ink-2"><span className="inline-flex items-center gap-1"><Ico name={source === "LinkedIn" ? "linkedin" : "globe"} className="h-3.5 w-3.5 text-muted" />{source}</span></td>
                 <td className="py-2.5 pr-3 font-mono text-[11px] text-ink-2">{email}</td>
                 <td className="py-2.5 pr-3"><Pill tone={sig[0]} small>{sig[1]}</Pill></td>
                 <td className="py-2.5 pr-3"><Pill tone="verified" small>Verificata</Pill></td>
@@ -309,10 +313,10 @@ function AppPreview() {
       </div>
       <div className="grid gap-4 border-l-2 border-ledger bg-paper/60 p-4 sm:p-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
         <div className="flex items-start gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-paper-2 text-ink-2"><Ico name="person" className="h-4 w-4" /></span>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-paper-2 text-ink-2"><Ico name="building" className="h-4 w-4" /></span>
           <div>
-            <p className="text-sm font-semibold">Marco Bianchi <span className="font-normal text-muted">· CTO</span></p>
-            <p className="text-xs text-ink-2">TechSolutions S.r.l. · Milano · 51-200 dip.</p>
+            <p className="text-sm font-semibold">TechSolutions S.r.l. <span className="font-normal text-muted">· Software</span></p>
+            <p className="text-xs text-ink-2">Milano · 51-200 dip. · info@techsolutions.it</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               <Pill tone="verified" small>Opportunità</Pill>
               <Pill tone="signal" small>Non adatto ai cellulari</Pill>
@@ -337,25 +341,25 @@ export default async function HomePage() {
       <section className="ruled">
         <div className="mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-12 sm:px-6 md:grid-cols-[1fr_1.1fr] md:items-center md:pb-20 md:pt-16">
           <div className="animate-row-in">
-            <p className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-ledger">Lead generation B2B · Europa</p>
+            <p className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-ledger">Intelligence commerciale B2B</p>
             <h1 className="font-display text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[2.95rem]">
-              Trova aziende in target.<br className="hidden sm:block" /> Oppure quando hanno<br className="hidden sm:block" /> <span className="text-ledger">un bisogno concreto.</span>
+              Trova aziende in target.<br className="hidden sm:block" /> E scopri le loro<br className="hidden sm:block" /> <span className="text-ledger">opportunità verificate.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg text-ink-2">
-              {BRAND.name} trova aziende e decisori su richiesta, e ora può anche individuare le aziende con opportunità commerciali verificabili per i tuoi servizi.
+              {BRAND.name} trova le aziende che corrispondono al tuo cliente ideale e scopre quelle con un&apos;opportunità commerciale concreta per i tuoi servizi: annunci di lavoro, siti da rifare, software non aggiornato. Ogni opportunità arriva con la prova.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/registrati" size="lg">Prova gratis: 15 crediti</ButtonLink>
               <ButtonLink href="/prezzi" size="lg" variant="secondary">Vedi prezzi</ButtonLink>
             </div>
-            <p className="mt-4 text-sm text-muted">Nessuna carta richiesta · Nessuna email inventata</p>
+            <p className="mt-4 text-sm text-muted">Nessuna carta richiesta · Una prova per ogni opportunità</p>
           </div>
           <HeroCard />
         </div>
       </section>
 
       <Section id="come-funziona">
-        <Heading title="Due modi di cercare, un solo motore" text="Stessa qualità dei dati, stessa semplicità. Scegli il tipo di ricerca più adatto al tuo obiettivo." />
+        <Heading title="Due modi di cercare, un solo motore" text="Parti dal profilo del tuo cliente ideale, oppure da quello che vendi: ti mostriamo le aziende che ne hanno bisogno, con la prova." />
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           <div className="grid gap-5 rounded-2xl border border-line bg-card p-6 sm:grid-cols-[minmax(0,1fr)_150px]">
             <div>
@@ -363,13 +367,13 @@ export default async function HomePage() {
               <p className="mt-4 font-display text-2xl font-semibold">Trova aziende in target</p>
               <p className="mt-2 text-sm text-ink-2">Cerca aziende che corrispondono al profilo del tuo cliente ideale.</p>
               <ul className="mt-5 flex flex-col gap-2.5 text-sm">
-                {["Settore, zona e dimensione", "Ruoli decisionali", "Email generiche o nominative"].map((p) => (
+                {["Settore, zona e dimensione", "Sito e email aziendale", "Dati controllati di recente"].map((p) => (
                   <li key={p} className="flex items-center gap-2.5"><Check />{p}</li>
                 ))}
               </ul>
             </div>
             <div className="flex flex-col gap-2 self-end rounded-xl border border-line bg-paper/60 p-3">
-              {["Paese", "Settore", "Dimensione", "Ruolo"].map((l) => <FakeSelect key={l} label={l} />)}
+              {["Paese", "Settore", "Dimensione", "Zona"].map((l) => <FakeSelect key={l} label={l} />)}
             </div>
           </div>
           <div className="relative grid gap-5 rounded-2xl border border-ledger/60 bg-ledger-soft/40 p-6 shadow-[0_0_0_1px_var(--color-ledger)/10] sm:grid-cols-[minmax(0,1fr)_170px]">
@@ -443,19 +447,19 @@ export default async function HomePage() {
       <Section tone="paper">
         <Heading
           title="Vedi esattamente cosa ricevi."
-          text="Ogni lead include azienda, ruolo, fonte, stato dell'email e, se presente, la prova dell'opportunità. Puoi esportare tutto in Excel o CSV."
+          text="Ogni lead include azienda, settore, zona, sito, email aziendale con la sua fonte e, se presente, la prova dell'opportunità. Puoi esportare tutto in Excel o CSV."
         />
         <div className="mt-10"><AppPreview /></div>
       </Section>
 
       <Section>
-        <Heading title="Ogni opportunità mostra una prova." text="Sia i contatti sia le opportunità sono trasparenti: vedi sempre da dove viene l'informazione e perché è stata inclusa." />
+        <Heading title="Ogni opportunità mostra una prova." text="Sia i dati delle aziende sia le opportunità sono trasparenti: vedi sempre da dove viene l'informazione e perché è stata inclusa." />
         <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:gap-0 lg:divide-x lg:divide-line">
           {([
-            ["Le email dei contatti", [
+            ["Le email aziendali", [
               ["link", "bg-ledger-soft text-ledger", "Trovata sul sito", "Email presente su una pagina pubblica dell'azienda, con il link."],
-              ["check", "bg-ledger-soft text-ledger", "Verificata", "Confermata da un servizio di verifica della casella."],
-              ["person", "bg-brick-soft text-brick", "Ipotizzata", "Dedotta da un pattern di nome: solo un suggerimento, mai venduta."],
+              ["building", "bg-ledger-soft text-ledger", "Del dominio aziendale", "Solo caselle dell'azienda, come info@ o commerciale@: mai email personali o caselle gratuite."],
+              ["shield", "bg-paper-2 text-ink-2", "Mai inventata", "Niente email ipotizzate: se non è sul sito, non la consegniamo."],
             ]],
             ["Le prove delle opportunità", [
               ["bars", "bg-paper-2 text-ink-2", "Prova tecnica", "Dal sito: versione per cellulari, HTTPS, software, lingue."],
@@ -482,13 +486,13 @@ export default async function HomePage() {
       <Section tone="paper">
         <Heading
           title="Quanto costa? Lo scegli prima di iniziare."
-          text={`Da 1 a 3 crediti per lead in base al tipo di email, con costi chiari e senza sorprese. Se cerchi aziende con opportunità, ogni lead consegnato costa ${extraCreditsLabel(prices)}.`}
+          text={`1 credito per ogni azienda consegnata, con costi chiari e senza sorprese. Se cerchi aziende con opportunità, ogni lead consegnato costa ${extraCreditsLabel(prices)}.`}
         />
         <div className="mt-10"><HomeCalculator signalPrices={prices} /></div>
       </Section>
 
       <Section>
-        <Heading title="Per chi è utile" text={`${BRAND.name} è pensato per chi vuole trovare nuovi clienti B2B in modo rapido e mirato, anche con l'aiuto delle opportunità.`} />
+        <Heading title="Per chi è utile" text={`${BRAND.name} è pensato per chi vende servizi alle aziende e vuole sapere a chi proporli, e perché proprio ora.`} />
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           {AUDIENCES.map((a) => (
             <div key={a.title} className="rounded-2xl border border-line bg-card p-6">
@@ -556,7 +560,7 @@ export default async function HomePage() {
       <section className="bg-ledger text-white">
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-12 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="font-display text-3xl font-semibold tracking-tight">Trova aziende in target. O quando è il momento giusto.</h2>
+            <h2 className="font-display text-3xl font-semibold tracking-tight">Trova aziende in target. E scopri quando è il momento giusto.</h2>
             <p className="mt-2 text-white/80">15 crediti gratuiti, nessuna carta. La prima ricerca richiede due minuti.</p>
           </div>
           <ButtonLink href="/registrati" size="lg" variant="stamp">Crea l&apos;account gratuito <span aria-hidden>→</span></ButtonLink>

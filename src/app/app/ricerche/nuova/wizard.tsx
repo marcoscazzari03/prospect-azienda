@@ -1,7 +1,7 @@
 "use client";
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Button, Card, Field, Input, Select, Textarea, cx } from "@/components/ui";
-import { COMPANY_SIZES, COUNTRIES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
+import { COMPANY_SIZES, COUNTRIES, EMAIL_MODES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
 import { estimateCredits, formatEur } from "@/lib/domain/pricing";
 import { BLOCKED_SECTORS_MESSAGE, blockedSector } from "@/lib/domain/blocked-sectors";
 import {
@@ -48,8 +48,8 @@ const KINDS: { kind: SearchKind; title: string; text: string; example: string; i
   {
     kind: "standard",
     title: "Trova aziende in target",
-    text: "Aziende e decisori in base a settore, zona e ruolo.",
-    example: "Es. titolari di studi dentistici in Lombardia",
+    text: "Aziende in base a settore, zona e dimensione, con sito ed email aziendale.",
+    example: "Es. studi dentistici in Lombardia",
     icon: "target",
   },
   {
@@ -167,6 +167,7 @@ export function SearchWizard({
   signalPrices,
   offers,
   centsPerCredit = 0,
+  modes = EMAIL_MODES,
 }: {
   credits: number;
   centsPerCredit?: number; // prezzo indicativo di un credito, per la stima in euro
@@ -175,6 +176,7 @@ export function SearchWizard({
   initialKind?: SearchKind;
   signalPrices: SignalPrices;
   offers: ActiveOffer[]; // servizi attivi, con le regole dell'admin
+  modes?: readonly EmailMode[]; // modalità attive: solo «Solo azienda» finché i referenti sono spenti
 }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(createSearch, {});
   const [kind, setKind] = useState<SearchKind>(initialKind);
@@ -185,7 +187,9 @@ export function SearchWizard({
   const [regions, setRegions] = useState(defaults.regions?.join(", ") ?? "");
   const [offer, setOffer] = useState(defaults.offer ?? "");
   const [area, setArea] = useState(offerByCode(defaults.offer ?? "", offers)?.area ?? "");
-  const [mode, setMode] = useState<EmailMode>(defaults.emailMode ?? "mixed");
+  // Referenti spenti: niente passi «Chi contattare» e «Che email», si consegna solo l'azienda.
+  const peopleOn = modes.some((m) => m !== "company_only");
+  const [mode, setMode] = useState<EmailMode>(defaults.emailMode && modes.includes(defaults.emailMode) ? defaults.emailMode : modes[0]);
   const [quantity, setQuantity] = useState(Math.min(defaults.quantity ?? 10, maxQuantity));
   const [countries, setCountries] = useState<string[]>(defaults.countries ?? ["IT"]);
   // Nessuna dimensione preselezionata: con la dimensione la ricerca in target non può usare il database.
@@ -221,7 +225,7 @@ export function SearchWizard({
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const countryName = (c: string) => COUNTRIES.find(([k]) => k === c)?.[1] ?? c;
 
-  const steps = STEPS[kind];
+  const steps = STEPS[kind].filter(([key]) => peopleOn || (key !== "roles" && key !== "email"));
   const current = steps[Math.min(step, steps.length - 1)][0];
   const last = steps.length - 1;
   const chooseKind = (k: SearchKind) => {
@@ -296,8 +300,10 @@ export function SearchWizard({
     ["Paesi", countries.length ? countries.map(countryName).join(", ") : <em key="c" className="text-muted">Nessuno</em>],
     ["Regioni", regionList.length ? regionList.join(", ") : <em key="r" className="text-muted">Tutto il paese</em>],
     ["Dimensione", sizes.length ? `${sizes.join(", ")} dipendenti` : <em key="d" className="text-muted">Qualsiasi</em>],
-    ["Ruoli", roles.length || customRoles.length ? [...roles, ...customRoles].join(", ") : <em key="o" className="text-muted">Non specificato</em>],
-    ["Tipo email", info.label],
+    ...(peopleOn && mode !== "company_only"
+      ? [["Ruoli", roles.length || customRoles.length ? [...roles, ...customRoles].join(", ") : <em key="o" className="text-muted">Non specificato</em>] as [string, ReactNode]]
+      : []),
+    ["Cosa ricevi", mode === "company_only" ? "Azienda ed email aziendale" : info.label],
     ["Numero lead", <span key="q" className="font-mono">{leads}</span>],
   ];
 
@@ -617,8 +623,8 @@ export function SearchWizard({
           </div>
         </Card>
 
-        {/* Passo: ruoli */}
-        <Card className={cx("flex flex-col gap-5 p-6", current !== "roles" && "hidden")}>
+        {/* Passo: ruoli (solo con i referenti attivi) */}
+        {peopleOn && <Card className={cx("flex flex-col gap-5 p-6", current !== "roles" && "hidden")}>
           <div>
             <SectionTitle icon="target" title="Ruoli da contattare" text="Le persone a cui vuoi scrivere." />
             <div className="mt-3 flex flex-wrap gap-2">
@@ -640,11 +646,12 @@ export function SearchWizard({
               <option value="3">Fino a 3</option>
             </select>
           </Field>
-        </Card>
+        </Card>}
 
-        {/* Passo: modalità email */}
-        <div className={cx("grid gap-4 md:grid-cols-3", current !== "email" && "hidden")} role="radiogroup">
-          {(Object.keys(MODE_INFO) as EmailMode[]).map((m) => (
+        {/* Passo: modalità email (solo con i referenti attivi) */}
+        {!peopleOn && <input type="hidden" name="emailMode" value="company_only" />}
+        {peopleOn && <div className={cx("grid gap-4 md:grid-cols-2 xl:grid-cols-4", current !== "email" && "hidden")} role="radiogroup">
+          {modes.map((m) => (
             <label key={m} className={cx("flex cursor-pointer flex-col gap-3 rounded-xl border bg-card p-5 transition-colors", mode === m ? "border-ledger shadow-[0_0_0_1px_var(--color-ledger)]" : "border-line hover:border-ink-2")}>
               <input type="radio" name="emailMode" value={m} checked={mode === m} onChange={() => setMode(m)} className="sr-only" />
               <span className="font-display text-lg font-semibold">{MODE_INFO[m].label}</span>
@@ -658,7 +665,7 @@ export function SearchWizard({
               </span>
             </label>
           ))}
-        </div>
+        </div>}
 
         {/* Passo: quantità e nome */}
         <Card className={cx("flex flex-col gap-6 p-6", current !== "quantity" && "hidden")}>
@@ -686,7 +693,7 @@ export function SearchWizard({
               <option value="weekly">Ogni settimana, con nuovi lead</option>
               <option value="monthly">Ogni mese, con nuovi lead</option>
             </Select>
-            <p className="mt-1 text-xs text-muted">Ogni ripetizione cerca solo contatti che non hai già e usa i crediti disponibili in quel momento. Puoi fermarla quando vuoi dalla pagina della ricerca.</p>
+            <p className="mt-1 text-xs text-muted">Ogni ripetizione cerca solo aziende che non hai già e usa i crediti disponibili in quel momento. Puoi fermarla quando vuoi dalla pagina della ricerca.</p>
           </Field>
           <Field label="Nome della ricerca (facoltativo)" htmlFor="name">
             <Input id="name" name="name" defaultValue={defaults.name} placeholder="Generato automaticamente se vuoto" />

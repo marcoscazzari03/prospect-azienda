@@ -57,7 +57,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
     <>
       <PageHeader
         title="Lead"
-        description={`${total} lead acquistati. Ogni contatto resta tuo: non te lo riproporremo in altre ricerche.`}
+        description={`${total} lead acquistati. Ogni azienda resta tua: non te la riproporremo in altre ricerche.`}
         actions={
           total ? (
             <div className="flex gap-2">
@@ -83,14 +83,9 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
         ))}
         <div className="ml-auto"><NewListForm /></div>
       </div>
-      <form className="mb-6 grid gap-3 rounded-xl border border-line bg-card p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr_1.5fr_auto]">
+      <form className="mb-6 grid gap-3 rounded-xl border border-line bg-card p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1.5fr_auto]">
         {lista && <input type="hidden" name="lista" value={lista} />}
-        <Input name="q" defaultValue={q} placeholder="Cerca nome, azienda, ruolo, email" aria-label="Cerca" />
-        <Select name="tipo" defaultValue={tipo} aria-label="Tipo email">
-          <option value="">Tutte le email</option>
-          <option value="personal">Nominative</option>
-          <option value="generic">Generiche</option>
-        </Select>
+        <Input name="q" defaultValue={q} placeholder="Cerca azienda, sito, email" aria-label="Cerca" />
         <Select name="stato" defaultValue={stato} aria-label="Stato email">
           <option value="">Ogni stato</option>
           <option value="found_public">Trovate sul sito</option>
@@ -101,8 +96,8 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
           <option value="si">Con opportunità</option>
           <option value="no">Solo in target</option>
         </Select>
-        <Select name="fase" defaultValue={fase} aria-label="Stato del contatto">
-          <option value="">Ogni contatto</option>
+        <Select name="fase" defaultValue={fase} aria-label="Fase commerciale">
+          <option value="">Ogni fase</option>
           {LEAD_STAGES.map((st) => <option key={st} value={st}>{LEAD_STAGE_LABEL[st]}</option>)}
         </Select>
         <Select name="ricerca" defaultValue={ricerca} aria-label="Ricerca">

@@ -15,7 +15,7 @@ const BLOCKED: { label: string; pattern: RegExp }[] = [
 ];
 
 export const BLOCKED_SECTORS_MESSAGE =
-  "Non cerchiamo contatti per attività per adulti, gioco d'azzardo, armi o droghe: cambia il settore o le parole chiave.";
+  "Non cerchiamo aziende di attività per adulti, gioco d'azzardo, armi o droghe: cambia il settore o le parole chiave.";
 
 // Il primo settore bloccato trovato nei testi della ricerca, o null.
 export function blockedSector(texts: (string | undefined | null)[]): string | null {

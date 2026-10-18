@@ -10,7 +10,7 @@ const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["lati
 export const metadata: Metadata = {
   title: { default: `${BRAND.name} · ${BRAND.tagline}`, template: `%s · ${BRAND.name}` },
   description:
-    "Descrivi i clienti che cerchi: troviamo aziende reali e i referenti giusti sul web, verifichiamo le email e paghi solo i lead consegnati. Ogni contatto con la sua fonte.",
+    "Trova le aziende in target per settore e zona e scopri quelle con un'opportunità commerciale verificata per i tuoi servizi, con la prova. Paghi solo i lead consegnati.",
   metadataBase: new URL(`https://${BRAND.domain}`),
 };
 

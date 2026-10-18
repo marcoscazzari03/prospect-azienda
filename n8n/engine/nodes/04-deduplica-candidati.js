@@ -110,6 +110,9 @@ const scarti = {};
 const scarta = (m) => { scarti[m] = (scarti[m] || 0) + 1; };
 const out = [];
 
+// «Solo azienda»: nessun referente da cercare né da tenere, anche se l'AI ne indica uno.
+const soloAzienda = job.email_mode === 'company_only';
+
 // Riserva: aziende con il segnale GIÀ verificato nei giri precedenti di questa
 // ricerca, rimaste senza referente. Vanno per prime e non costano una nuova ricerca AI.
 for (const r of job.reserve || []) {
@@ -129,7 +132,8 @@ for (const r of job.reserve || []) {
       source_url: urlPulito(r.source_url) || sito,
       contact_page: host(urlPulito(r.contact_page)) === dominio ? urlPulito(r.contact_page) : '',
       job_ad_url: '', job_ad_title: '', job_ad_date: '',
-      signals: r.signals, lotto: 0, _riserva: true, _serve_referente: true
+      signals: r.signals, lotto: 0, _riserva: true, _serve_referente: !soloAzienda,
+      ...(soloAzienda ? { _senza_referente: true } : {})
     }
   });
 }
@@ -148,7 +152,7 @@ for (const item of $input.all()) {
     // Il referente arriva in un secondo passaggio; un nome dell'AI con un ruolo non coerente
     // non scarta l'azienda (es. «Legale rappresentante» per «Titolare / CEO»): lo cerchiamo noi.
     const ruoloAI = nome && parti(nome).length >= 2 ? coerenzaRuolo(c?.job_title) : 'unknown';
-    const senzaReferente = dueFasi && (!nome || parti(nome).length < 2 || ruoloAI === 'mismatch');
+    const senzaReferente = soloAzienda || (dueFasi && (!nome || parti(nome).length < 2 || ruoloAI === 'mismatch'));
     const annuncio = annunciRichiesti && /^https?:\/\//i.test(String(c?.job_ad_url ?? '').trim()) ? urlPulito(c.job_ad_url) : '';
 
     if (!azienda || (!senzaReferente && !nomeValido(nome))) { scarta('dati_persona_incompleti'); continue; }
@@ -189,14 +193,15 @@ for (const item of $input.all()) {
         job_title: senzaReferente ? '' : pulito(c?.job_title, 120),
         role_match: ruolo,
         person_key: kp,
-        linkedin_url: /linkedin\.com\/in\//i.test(String(c?.linkedin_url ?? '')) ? pulito(c.linkedin_url, 300) : '',
+        linkedin_url: !senzaReferente && /linkedin\.com\/in\//i.test(String(c?.linkedin_url ?? '')) ? pulito(c.linkedin_url, 300) : '',
         source_url: fonte || annuncio,
         contact_page: /^https?:\/\//i.test(contatti) && host(contatti) === dominio ? contatti : '',
         job_ad_url: annuncio,
         job_ad_title: annuncio ? pulito(c?.job_ad_title, 160) : '',
         job_ad_date: annuncio && /^\d{4}-\d{2}-\d{2}$/.test(pulito(c?.job_ad_date, 10)) ? pulito(c.job_ad_date, 10) : '',
         lotto: item.json.lotto,
-        _serve_referente: senzaReferente
+        _serve_referente: senzaReferente && !soloAzienda,
+        ...(soloAzienda ? { _senza_referente: true } : {})
       }
     });
   }
