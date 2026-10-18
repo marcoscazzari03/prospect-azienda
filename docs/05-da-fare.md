@@ -205,9 +205,52 @@ Le stime della revisione non sono dati misurati.
       bassa (migrazione 039); moduli di contatto rilevati dal motore e salvati in companies.contact_form_url (per ora
       non cambiano la consegna); riquadro «Database aziende» nell'admin (raccolte → sito e settore → contatto →
       opportunità); caso Lusha segnato come non definitivo; «costo AI zero» al posto di «costo zero».
-- [ ] Test sulle aziende senza email ma con modulo: giudicarne 50 a mano, poi decidere se consegnarle
-      («Modulo di contatto disponibile», senza inventare recapiti) e a che prezzo.
-- [ ] Punteggio interno di opportunità (prova, attinenza al servizio, freschezza) e nomi «segnale verificato» /
-      «opportunità potenziale».
-- [ ] Coda del controllo siti: priorità ad aziende con segnali attivi, settori e zone più cercati, verifiche in scadenza.
 
+## Piano dal 19/10 (dopo la seconda valutazione)
+
+Obiettivo: chiudere i blocchi e passare alla beta con 5–10 agenzie web. Nessuna nuova grande modifica
+all'architettura; il resto si decide con i clienti.
+
+### A. Blocchi prima della beta (obbligatori)
+- [ ] Nomi raccolti nei collaudi: contare i record con dati di persone (lead, magazzino, referenti) e cancellarli
+      dopo l'OK dell'utente. Disattivare people_enabled non equivale a cancellarli.
+- [ ] Esecuzioni salvate su n8n: contengono nomi ed email dei collaudi con referenti. Cancellare le vecchie e
+      ridurre il periodo di conservazione.
+- [ ] Adzuna: chiedere l'autorizzazione scritta per l'uso commerciale (dopo i 14 giorni di prova). Senza, niente
+      segnali «sta assumendo» in vendita. Testo della richiesta da preparare.
+- [ ] Testi del sito e dell'export: email pubblicata ≠ consenso alla pubblicità (Garante 2026). Controllare tutte
+      le pagine e aggiungere un avviso chiaro dove si scaricano i risultati.
+- [ ] Legale e commercialista (`09-domande-consulenti.md`): stato del caso Lusha, LIA, art. 130, ODbL, Adzuna, P.IVA.
+- [ ] Sicurezza (`08-messa-in-produzione.md`, Fase 1): 2FA sugli account, chiave Anthropic dedicata a Webora Leads.
+
+### B. Test: email facoltativa con modulo di contatto
+- [ ] 2–3 ricerche in target (costo AI previsto zero, dalle aziende OSM; chiedere l'OK prima) per avere almeno
+      50 aziende senza email ma con modulo salvato (`companies.contact_form_url`, attivo dal 18/10).
+- [ ] Giudicarle a mano: azienda valida, in target, modulo vero e funzionante.
+- [ ] Decidere: consegnare anche «Modulo di contatto disponibile» (senza inventare recapiti) e a che prezzo.
+
+### C. Qualità delle opportunità
+- [ ] Punteggio interno 0–100 con regole fisse e configurabili: affidabilità della prova × attinenza al servizio
+      («Cosa vendi?») × freschezza (data della prova).
+- [ ] Due livelli: «segnale verificato» (senza HTTPS, CMS obsoleto, in costruzione, annuncio verificato) e
+      «opportunità potenziale» (copyright vecchio, sito in una sola lingua). «Non adatto ai cellulari» a metà
+      finché il controllo non è più solido.
+- [ ] Mostrare punteggio e livello nei risultati e nell'export, con la spiegazione per il cliente.
+
+### D. Database
+- [ ] Coda del controllo siti (80/ora, ~57.000/mese): prima le aziende con segnali attivi in scadenza, poi settori
+      e zone più cercati, poi le altre.
+- [ ] Seguire i quattro numeri del riquadro «Database aziende» nell'admin (raccolte → sito e settore → contatto →
+      opportunità).
+
+### E. Beta
+- [ ] Testo dell'invito e lista delle 5–10 agenzie da contattare.
+- [ ] Domanda da verificare: un'agenzia paga con regolarità per aziende con bisogni documentati, senza il nome di
+      un referente?
+- [ ] Prezzi: invariati per la beta.
+
+### Dopo la beta (non ora)
+- [ ] Monitoraggio continuo delle opportunità («nuove aziende e nuovi segnali per il tuo target»): solo se i
+      clienti della beta lo chiedono.
+- [ ] Referenti: restano spenti; si riaccendono solo dopo il parere legale e su richiesta dei clienti.
+- [ ] Espansione fuori dall'Italia: rimandata.
