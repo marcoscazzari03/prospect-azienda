@@ -120,7 +120,7 @@ Le stime della revisione non sono dati misurati.
 
 ### Bloccanti per il lancio
 - [ ] Parere legale privacy, prima del listino: art. 130 Codice privacy (email promozionali anche a caselle aziendali), raccolta e rivendita di email nominative, cessione a terzi, licenza ODbL di OpenStreetMap (regole sui database derivati, non solo l'attribuzione). Il parere decide cosa si può vendere
-- [ ] Limiti Adzuna: la revisione indica 250 chiamate/giorno e 2.500/mese, il nostro codice ne assume 500/5.000. Verificare sul pannello Adzuna e ridurre la raccolta se serve; accordo scritto per l'uso commerciale degli annunci come segnali
+- [x] Limiti Adzuna verificati sul pannello (18/10, piano «API Access» 8 £/mese): 50/minuto, 500/giorno, 2.000/settimana, 5.000/mese, come assume il codice. L'accordo scritto per l'uso commerciale resta aperto (sotto)
 - [ ] Collaudo dei costi (15/10) e poi misura su almeno 100 lead per modalità: costo per lead accettato, percentuale di richieste soddisfatte, quota di lead nominativi da Icypeas
 - [ ] Beta su invito con 5-10 aziende (agenzie web, società IT, consulenti HR): aziende davvero in target, email valide, segnali confermati, lead giudicati interessanti dai clienti
 - [ ] Backup del database con prova di ripristino (già in lista sicurezza)
@@ -217,7 +217,7 @@ all'architettura; il resto si decide con i clienti.
       «Referente» quando nessun lead ha un nome.
 - [x] Esecuzioni salvate su n8n (18/10): cancellate le 53 del motore dal 13 al 17/10 (collaudi con referenti).
       Conservazione invariata: con i referenti spenti le nuove esecuzioni non contengono dati di persone.
-- [ ] Adzuna: c'è un piano a pagamento (8 $/mese). Chiedere conferma scritta che copra il nostro uso (annunci come
+- [ ] Adzuna: piano «API Access» 8 £/mese (solo limiti di chiamate, nessuna clausola sull'uso commerciale nel pannello). Chiedere conferma scritta che copra il nostro uso (annunci come
       segnale mostrato a clienti B2B, con link all'annuncio, senza ripubblicarli). Mail breve pronta (18/10).
       Conservare la risposta per il legale.
 - [ ] Testi del sito e dell'export: email pubblicata ≠ consenso alla pubblicità (Garante 2026). Controllare tutte
