@@ -654,7 +654,7 @@ export function SearchWizard({
                 {(() => {
                   const e = estimateCredits(m, 1, extra);
                   return e.min === e.max ? e.min : `${e.min}–${e.max}`;
-                })()} crediti per lead{withSignal ? " (segnale compreso)" : aiExtra ? " (ricerca sul web compresa)" : ""}
+                })()} crediti per lead{withSignal ? " (segnale compreso)" : aiExtra ? " (ricerca estesa compresa)" : ""}
               </span>
             </label>
           ))}
@@ -750,8 +750,8 @@ export function SearchWizard({
             )}
             <p className="mt-1 text-xs text-ink-2">
               {withSignal && <>Ogni lead con opportunità: {extraCreditsLabel(signalPrices)}. </>}
-              {!withSignal && aiExtra > 0 && <>Con questi filtri cerchiamo le aziende sul web: {aiExtra} credito in più a lead. </>}
-              Riserviamo {reserve} crediti e addebitiamo solo i lead consegnati. Disponibili: <strong>{credits}</strong>.
+              {!withSignal && aiExtra > 0 && <>Ricerca estesa: con questi filtri non ci fermiamo al nostro database, cerchiamo aziende nuove sul web e le controlliamo una per una ({aiExtra} credito in più a lead). </>}
+              Riserviamo {reserve} crediti e addebitiamo solo i lead consegnati; un lead sbagliato si segnala e il credito torna. Disponibili: <strong>{credits}</strong>.
             </p>
           </div>
           {withSignal && (

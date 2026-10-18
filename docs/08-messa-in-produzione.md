@@ -11,6 +11,12 @@ opportunità ~0,022 €, ricerca AI ~0,135 €), listino deciso, migrazioni fino
 
 ## Fase 0 – Consulenze (da avviare subito: sono le più lunghe)
 
+**Bloccante anche per la beta** (deciso il 18/10, dopo il caso Lusha: provvedimento del Garante
+n. 542/2026, 2 milioni di euro a un data broker B2B, legittimo interesse respinto anche per i dati
+professionali). Finché non arriva il parere: beta solo con la modalità **«solo azienda»** (azienda,
+sito, settore, email generica, segnale; nessun nome di persona). I nomi si riattivano dopo il
+parere, se lo consente.
+
 - [ ] **Tu** – Commercialista: apertura partita IVA, regime fiscale, fatturazione elettronica (SDI)
       per le vendite con Stripe (bastano i dati raccolti dal portale Stripe o servono campi nostri?)
 - [ ] **Tu** – Legale privacy. Domande da portare (le preparo io in un documento a parte):
@@ -19,8 +25,12 @@ opportunità ~0,022 €, ricerca AI ~0,135 €), listino deciso, migrazioni fino
   - lead senza nome (solo azienda + info@): rischio più basso? modalità da privilegiare?
   - licenza ODbL di OpenStreetMap (database derivato, attribuzione)
   - informativa, termini, LIA/DPIA, opposizione e cancellazione (già presenti: da validare)
-- [ ] **Tu** – Adzuna: verificare sul pannello i limiti reali (250/giorno?) e chiedere l'accordo
-      scritto per l'uso commerciale degli annunci come segnali
+- [ ] **Tu** – Adzuna: verificare sul pannello i limiti reali (di base 25/minuto, 250/giorno,
+      2.500/mese) e chiedere l'accordo scritto per l'uso commerciale degli annunci come segnali
+      (le condizioni ammettono solo 14 giorni di prova)
+- [x] **Io** – Raccolta Adzuna ogni 2 giorni (annunci degli ultimi 3), una chiamata ogni 2,5 s:
+      ~1.100 chiamate al mese invece di ~2.100
+- [ ] **Io** – Modalità «solo azienda» per la beta (nessun nome di persona consegnato né conservato)
 - [x] **Io** – Documento con le domande per il legale e per il commercialista (descrizione del
       servizio, dati trattati, fonti, flussi): `09-domande-consulenti.md`
 
@@ -75,6 +85,10 @@ opportunità ~0,022 €, ricerca AI ~0,135 €), listino deciso, migrazioni fino
 - [ ] **Insieme** – Piano n8n: verificare il margine sulle esecuzioni (tetto 2.500/mese)
 
 ## Fase 6 – Beta su invito (2–3 settimane)
+
+Obiettivo commerciale, non solo tecnico: agenzie web italiane che usano davvero i risultati e
+ricomprano. Misure: ricerche complete ≥ 85%, lead nel target ≥ 90%, rimbalzi < 3%, almeno 3
+clienti disposti a pagare, almeno 2 secondi acquisti entro 60 giorni.
 
 - [ ] **Insieme** – 5–10 aziende (agenzie web, società IT, consulenti), crediti regalati dall'admin
 - [ ] **Io** – Testo dell'invito e breve guida d'uso

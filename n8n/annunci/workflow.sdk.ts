@@ -1,7 +1,7 @@
 import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 
 // GENERATO da n8n/annunci/build.mjs: non modificare a mano.
-// Ogni mattina scarica da Adzuna gli annunci delle figure del catalogo, scarta agenzie
+// Ogni 2 giorni, al mattino, scarica da Adzuna gli annunci delle figure del catalogo, scarta agenzie
 // e titoli fuori tema e li salva nel database (POST /api/engine/job-ads -> job_ads).
 
 const ogniGiorno = trigger({
@@ -9,7 +9,7 @@ const ogniGiorno = trigger({
   version: 1.3,
   config: {
     name: 'Ogni mattina',
-    parameters: { rule: { interval: [{ field: 'days', daysInterval: 1, triggerAtHour: 6, triggerAtMinute: 10 }] } }
+    parameters: { rule: { interval: [{ field: 'days', daysInterval: 2, triggerAtHour: 6, triggerAtMinute: 10 }] } }
   }
 });
 
@@ -24,9 +24,9 @@ const preparaRichieste = node({
   version: 2,
   config: {
     name: 'Prepara richieste',
-    parameters: { jsCode: "// Richieste ad Adzuna: una per figura del catalogo (JOB_FAMILIES, titoli italiani e\n// inglesi), in tutta Italia, cercata SOLO nel titolo dell'annuncio (title_only: tutte le\n// parole nel titolo). Le ricerche libere (what/what_or) di Adzuna sono troppo larghe:\n// con «sistemista» uscivano anche i corrieri. Si saltano i titoli già coperti da uno\n// più corto («web developer» è dentro «developer»).\n// Ogni giorno bastano gli annunci degli ultimi 2 giorni; il primo riempimento,\n// avviato a mano, va indietro di 30. Pagine da 50, al massimo 5 per ricerca.\n// Limiti del piano Adzuna: 50 chiamate al minuto, 500 al giorno, 5.000 al mese.\nconst FAMIGLIE = [{\"code\":\"it_systems\",\"titles\":[\"sistemista\",\"tecnico informatico\",\"tecnico it\",\"amministratore di sistema\",\"amministratore di rete\",\"help desk\",\"supporto it\",\"system administrator\",\"sysadmin\",\"systems engineer\",\"network administrator\",\"network engineer\",\"it technician\",\"it support\"]},{\"code\":\"software_dev\",\"titles\":[\"programmatore\",\"sviluppatore\",\"developer\",\"software engineer\",\"full stack\",\"frontend\",\"backend\",\"software developer\",\"programmer\",\"web developer\"]},{\"code\":\"cybersecurity\",\"titles\":[\"cyber security\",\"cybersecurity\",\"sicurezza informatica\",\"security analyst\",\"security engineer\",\"information security\",\"soc analyst\"]},{\"code\":\"digital_marketing\",\"titles\":[\"digital marketing\",\"marketing specialist\",\"social media manager\",\"seo specialist\",\"marketing manager\",\"web marketing\",\"growth marketer\"]},{\"code\":\"sales\",\"titles\":[\"commerciale\",\"agente di commercio\",\"sales manager\",\"account manager\",\"venditore\",\"business developer\",\"sales representative\",\"account executive\"]},{\"code\":\"hr\",\"titles\":[\"risorse umane\",\"hr specialist\",\"hr manager\",\"recruiter\",\"selezione del personale\",\"addetto paghe\",\"human resources\",\"talent acquisition\",\"payroll\"]},{\"code\":\"accounting\",\"titles\":[\"contabile\",\"impiegato amministrativo\",\"addetto contabilita\",\"controller\",\"responsabile amministrativo\",\"accountant\",\"bookkeeper\",\"finance assistant\",\"accounts payable\"]},{\"code\":\"design\",\"titles\":[\"grafico\",\"web designer\",\"graphic designer\",\"ui designer\",\"ux designer\",\"visual designer\"]}];\n\nconst parole = (t) => t.split(/\\s+/).filter(w => w && !['di', 'de', 'del'].includes(w));\nconst titoli = [...new Set(FAMIGLIE.flatMap(f => f.titles))];\nconst ricerche = titoli.filter(t => !titoli.some(a => a !== t && parole(a).every(w => parole(t).includes(w))));\n\n// Avvio a mano = primo riempimento. ($execution.mode non basta: vale «test» anche per\n// le prove dall'editor.)\nlet programmato = false;\ntry { programmato = $('Ogni mattina').isExecuted; } catch { programmato = false; }\nconst giorni = programmato ? 2 : 30;\n\n// Tutta Italia: la regione di ogni annuncio arriva da Adzuna (location.area).\nreturn ricerche.map(titolo => ({ json: { term: titolo, region: '', max_days_old: giorni } }));\n" }
+    parameters: { jsCode: "// Richieste ad Adzuna: una per figura del catalogo (JOB_FAMILIES, titoli italiani e\n// inglesi), in tutta Italia, cercata SOLO nel titolo dell'annuncio (title_only: tutte le\n// parole nel titolo). Le ricerche libere (what/what_or) di Adzuna sono troppo larghe:\n// con «sistemista» uscivano anche i corrieri. Si saltano i titoli già coperti da uno\n// più corto («web developer» è dentro «developer»).\n// Ogni 2 giorni bastano gli annunci degli ultimi 3 (uno di sovrapposizione); il primo\n// riempimento, avviato a mano, va indietro di 30. Pagine da 50, al massimo 5 per ricerca.\n// Limiti di base dell'API Adzuna: 25 chiamate al minuto, 250 al giorno, 2.500 al mese.\n// Ogni giro fa circa 70 chiamate (67 titoli + qualche pagina in più): ogni giorno erano\n// ~2.100 al mese, troppo vicino al tetto; ogni 2 giorni ~1.100.\nconst FAMIGLIE = [{\"code\":\"it_systems\",\"titles\":[\"sistemista\",\"tecnico informatico\",\"tecnico it\",\"amministratore di sistema\",\"amministratore di rete\",\"help desk\",\"supporto it\",\"system administrator\",\"sysadmin\",\"systems engineer\",\"network administrator\",\"network engineer\",\"it technician\",\"it support\"]},{\"code\":\"software_dev\",\"titles\":[\"programmatore\",\"sviluppatore\",\"developer\",\"software engineer\",\"full stack\",\"frontend\",\"backend\",\"software developer\",\"programmer\",\"web developer\"]},{\"code\":\"cybersecurity\",\"titles\":[\"cyber security\",\"cybersecurity\",\"sicurezza informatica\",\"security analyst\",\"security engineer\",\"information security\",\"soc analyst\"]},{\"code\":\"digital_marketing\",\"titles\":[\"digital marketing\",\"marketing specialist\",\"social media manager\",\"seo specialist\",\"marketing manager\",\"web marketing\",\"growth marketer\"]},{\"code\":\"sales\",\"titles\":[\"commerciale\",\"agente di commercio\",\"sales manager\",\"account manager\",\"venditore\",\"business developer\",\"sales representative\",\"account executive\"]},{\"code\":\"hr\",\"titles\":[\"risorse umane\",\"hr specialist\",\"hr manager\",\"recruiter\",\"selezione del personale\",\"addetto paghe\",\"human resources\",\"talent acquisition\",\"payroll\"]},{\"code\":\"accounting\",\"titles\":[\"contabile\",\"impiegato amministrativo\",\"addetto contabilita\",\"controller\",\"responsabile amministrativo\",\"accountant\",\"bookkeeper\",\"finance assistant\",\"accounts payable\"]},{\"code\":\"design\",\"titles\":[\"grafico\",\"web designer\",\"graphic designer\",\"ui designer\",\"ux designer\",\"visual designer\"]}];\n\nconst parole = (t) => t.split(/\\s+/).filter(w => w && !['di', 'de', 'del'].includes(w));\nconst titoli = [...new Set(FAMIGLIE.flatMap(f => f.titles))];\nconst ricerche = titoli.filter(t => !titoli.some(a => a !== t && parole(a).every(w => parole(t).includes(w))));\n\n// Avvio a mano = primo riempimento. ($execution.mode non basta: vale «test» anche per\n// le prove dall'editor.)\nlet programmato = false;\ntry { programmato = $('Ogni mattina').isExecuted; } catch { programmato = false; }\nconst giorni = programmato ? 3 : 30;\n\n// Tutta Italia: la regione di ogni annuncio arriva da Adzuna (location.area).\nreturn ricerche.map(titolo => ({ json: { term: titolo, region: '', max_days_old: giorni } }));\n" }
   },
-  output: [{ term: 'sistemista', region: '', max_days_old: 2 }]
+  output: [{ term: 'sistemista', region: '', max_days_old: 3 }]
 });
 
 const adzuna = node({
@@ -48,8 +48,8 @@ const adzuna = node({
         { name: 'content-type', value: 'application/json' }
       ] },
       options: {
-        // Piano Adzuna: massimo 50 chiamate al minuto.
-        batching: { batch: { batchSize: 1, batchInterval: 1500 } },
+        // API Adzuna: massimo 25 chiamate al minuto -> una ogni 2,5 secondi (24 al minuto).
+        batching: { batch: { batchSize: 1, batchInterval: 2500 } },
         // Pagina successiva finché la pagina è piena (50), al massimo 5 pagine.
         // $pageCount vale 0 già alla prima richiesta: la prima è la pagina 1.
         pagination: { pagination: {
@@ -59,7 +59,7 @@ const adzuna = node({
           completeExpression: expr('{{ !Array.isArray($response.body.results) || $response.body.results.length < 50 }}'),
           limitPagesFetched: true,
           maxRequests: 5,
-          requestInterval: 1500
+          requestInterval: 2500
         } },
         response: { response: { neverError: true } },
         timeout: 30000

@@ -16,13 +16,13 @@ const run = (code, { nodes = {}, input = [], eseguiti = [], json = {}, statico =
   return new Function('$', '$input', '$execution', '$json', '$getWorkflowStaticData', code)($, $input, { id: 'test', mode: 'test' }, json, () => statico).map(i => i.json);
 };
 
-// 1. Richieste: una per titolo del catalogo, ogni mattina 2 giorni, a mano 30.
+// 1. Richieste: una per titolo del catalogo, ogni 2 giorni gli ultimi 3, a mano 30.
 const giorno = run(codice('01-prepara-richieste.js'), { eseguiti: ['Ogni mattina'] });
 const termini = giorno.map(r => r.term);
 assert.ok(termini.includes('sistemista') && termini.includes('developer') && termini.includes('graphic designer'));
 assert.ok(!termini.includes('web developer') && !termini.includes('software developer'), 'titoli già coperti saltati');
 assert.ok(giorno.length < 75, `al massimo ~70 ricerche al giorno (${giorno.length})`);
-assert.ok(giorno.every(r => r.max_days_old === 2 && r.region === ''), 'tutta Italia');
+assert.ok(giorno.every(r => r.max_days_old === 3 && r.region === ''), 'tutta Italia');
 const mano = run(codice('01-prepara-richieste.js'), {});
 assert.ok(mano.every(r => r.max_days_old === 30));
 

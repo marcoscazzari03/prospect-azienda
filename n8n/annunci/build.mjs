@@ -35,7 +35,7 @@ const ANTHROPIC = "{ id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' }";
 const sdk = `import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 
 // GENERATO da n8n/annunci/build.mjs: non modificare a mano.
-// Ogni mattina scarica da Adzuna gli annunci delle figure del catalogo, scarta agenzie
+// Ogni 2 giorni, al mattino, scarica da Adzuna gli annunci delle figure del catalogo, scarta agenzie
 // e titoli fuori tema e li salva nel database (POST /api/engine/job-ads -> job_ads).
 
 const ogniGiorno = trigger({
@@ -43,7 +43,7 @@ const ogniGiorno = trigger({
   version: 1.3,
   config: {
     name: 'Ogni mattina',
-    parameters: { rule: { interval: [{ field: 'days', daysInterval: 1, triggerAtHour: 6, triggerAtMinute: 10 }] } }
+    parameters: { rule: { interval: [{ field: 'days', daysInterval: 2, triggerAtHour: 6, triggerAtMinute: 10 }] } }
   }
 });
 
@@ -60,7 +60,7 @@ const preparaRichieste = node({
     name: 'Prepara richieste',
     parameters: { jsCode: ${JSON.stringify(codice('01-prepara-richieste.js'))} }
   },
-  output: [{ term: 'sistemista', region: '', max_days_old: 2 }]
+  output: [{ term: 'sistemista', region: '', max_days_old: 3 }]
 });
 
 const adzuna = node({
@@ -82,8 +82,8 @@ const adzuna = node({
         { name: 'content-type', value: 'application/json' }
       ] },
       options: {
-        // Piano Adzuna: massimo 50 chiamate al minuto.
-        batching: { batch: { batchSize: 1, batchInterval: 1500 } },
+        // API Adzuna: massimo 25 chiamate al minuto -> una ogni 2,5 secondi (24 al minuto).
+        batching: { batch: { batchSize: 1, batchInterval: 2500 } },
         // Pagina successiva finché la pagina è piena (50), al massimo 5 pagine.
         // $pageCount vale 0 già alla prima richiesta: la prima è la pagina 1.
         pagination: { pagination: {
@@ -93,7 +93,7 @@ const adzuna = node({
           completeExpression: expr('{{ !Array.isArray($response.body.results) || $response.body.results.length < 50 }}'),
           limitPagesFetched: true,
           maxRequests: 5,
-          requestInterval: 1500
+          requestInterval: 2500
         } },
         response: { response: { neverError: true } },
         timeout: 30000

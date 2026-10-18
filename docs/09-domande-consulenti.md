@@ -65,6 +65,24 @@ modalità e i dati inclusi. Clienti solo professionisti/imprese, Italia e UE in 
 5. Uso dell'AI per estrarre i dati dalle pagine (Anthropic, USA): trasferimento extra-UE, serve
    altro oltre alle clausole del fornitore?
 
+### A-bis. Il caso Lusha (provvedimento n. 542/2026 del 14/07/2026)
+Il Garante ha sanzionato Lusha (data broker B2B) con 2 milioni di euro, vietato il trattamento
+dei dati delle persone in Italia e ordinato la cancellazione. Secondo il comunicato: il
+legittimo interesse non è base giuridica adeguata; i dati professionali non sono leciti in
+sé; pesano la cessione a clienti terzi, l'origine eterogenea, l'imprevedibilità degli usi e
+l'aggiornamento nel tempo dei profili (considerato «tracciamento»).
+- A. In cosa il nostro modello si distingue (dimensioni, fonti solo pubbliche e citate per
+  ogni lead, niente social né acquisto da altri broker, solo aziende e ruoli aziendali,
+  opposizione permanente) e se basta a reggere il legittimo interesse.
+- B. La riverifica periodica dei contatti nel magazzino è «tracciamento»? Conviene non
+  conservare i dati personali dopo la consegna (solo l'azienda nel magazzino) e ricercare il
+  referente ad ogni ricerca?
+- C. Una modalità **solo azienda** (nome, sito, settore, email generica, segnale; nessun nome
+  di persona) è fuori da questi rischi? Le email generiche (info@) di una ditta individuale
+  sono dati personali?
+- D. Se si consegnano nomi: quali condizioni minime (informativa entro un mese, limite di
+  clienti per contatto, nessuna conservazione oltre N mesi, contratto con il cliente)?
+
 ### B. Informativa agli interessati (art. 14)
 6. Basta l'informativa pubblicata sul sito (con la pagina di opposizione), o dobbiamo
    **informare ogni persona** entro un mese dalla raccolta (art. 14.3)? L'eccezione
@@ -96,7 +114,8 @@ modalità e i dati inclusi. Clienti solo professionisti/imprese, Italia e UE in 
     rendere pubblico il database derivato (share-alike)? Come strutturarci (es. tenere i dati
     OSM separati e usarli solo per trovare il sito)?
 16. **Adzuna**: l'uso degli annunci come «segnale» venduto ai clienti è compatibile con i loro
-    termini? (Stiamo chiedendo un accordo scritto.) Conserviamo solo link, titolo e data.
+    termini? Le condizioni dell'API ammettono l'uso commerciale solo per 14 giorni di prova, poi
+    serve un consenso scritto (stiamo chiedendo l'accordo). Conserviamo solo link, titolo e data.
 17. Lettura automatica dei siti (scraping leggero di poche pagine pubbliche per azienda): rischi
     legati ai termini d'uso dei siti o al diritto sui database (direttiva 96/9/CE)?
 
