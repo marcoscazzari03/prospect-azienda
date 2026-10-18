@@ -152,7 +152,10 @@ if (job.target.signals.codes.length) {
   // Giro solo dalla riserva: niente ricerca AI, quindi si prova il referente su più aziende.
   // Collaudo del 17/10 (hotel in Puglia): referente trovato in 2 aziende su 15, con il tetto
   // a 9 e poi 6 la ricerca si è chiusa a 2 lead su 5 con 34 aziende ancora da provare.
-  if (bastaRiserva) job.limits.referenti_max = Math.min(job.reserve.length, Math.ceil(job.quantity * (job.email_mode === 'personal_only' ? 3 : 2.5)) + 2);
+  // Con «Email generiche incluse» il lead si consegna anche senza nome (prova del 17/10:
+  // 7 lead da 10 aziende provate per 3 richiesti), quindi basta un margine più piccolo.
+  const MARGINE_RISERVA = { personal_only: 3, mixed: 2.5, generic_ok: 1.6 }[job.email_mode];
+  if (bastaRiserva) job.limits.referenti_max = Math.min(job.reserve.length, Math.ceil(job.quantity * MARGINE_RISERVA) + 2);
   const daCercare = Math.max(0, job.quantity * SOVRACAMPIONAMENTO - job.reserve.length);
   lotti = bastaRiserva ? 0 : Math.min(
     job.limits.max_lots,

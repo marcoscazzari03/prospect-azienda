@@ -214,6 +214,9 @@ assert.equal(target(7, { email_mode: 'mixed' }).reserve.length, 7, 'target: rise
 assert.equal(target(7, { email_mode: 'mixed' }).lotti_previsti, 0, 'target: riserva sufficiente, niente AI');
 assert.equal(target(7, { email_mode: 'mixed' }).limits.referenti_max, 7, 'giro solo dalla riserva: tutte quelle disponibili');
 assert.equal(target(30, { email_mode: 'mixed' }).limits.referenti_max, Math.ceil(5 * 2.5) + 2, 'giro solo dalla riserva: tetto 2,5 volte i lead + 2');
+assert.equal(target(30, { email_mode: 'generic_ok' }).limits.referenti_max, Math.ceil(5 * 1.6) + 2, 'generiche incluse: tetto 1,6 volte i lead + 2');
+assert.equal(target(30, { email_mode: 'personal_only' }).limits.referenti_max, Math.ceil(5 * 3) + 2, 'solo nominative: tetto invariato');
+assert.equal(target(7, { email_mode: 'generic_ok' }).limits.referenti_max, 7, 'generiche incluse: mai oltre la riserva');
 assert.ok(target(3, { email_mode: 'mixed' }).lotti_previsti >= 1, 'target: riserva scarsa, AI per il resto');
 assert.equal(target(0).limits.referenti_max, Math.ceil(5 * 2.2) + 1, 'target senza riserva: tetto ai referenti anche per le aziende dell AI');
 assert.equal(target(0).limits.candidates_per_lot, 30, 'l AI cerca solo aziende: molte per lotto');

@@ -2,7 +2,7 @@
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Button, Card, Field, Input, Select, Textarea, cx } from "@/components/ui";
 import { COMPANY_SIZES, COUNTRIES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
-import { estimateCredits } from "@/lib/domain/pricing";
+import { estimateCredits, formatEur } from "@/lib/domain/pricing";
 import { BLOCKED_SECTORS_MESSAGE, blockedSector } from "@/lib/domain/blocked-sectors";
 import {
   JOB_AD_COUNTRIES,
@@ -166,8 +166,10 @@ export function SearchWizard({
   initialKind = "standard",
   signalPrices,
   offers,
+  centsPerCredit = 0,
 }: {
   credits: number;
+  centsPerCredit?: number; // prezzo indicativo di un credito, per la stima in euro
   maxQuantity: number;
   defaults?: WizardDefaults;
   initialKind?: SearchKind;
@@ -207,9 +209,15 @@ export function SearchWizard({
   // La disponibilità dal server dice anche se la ricerca userà la ricerca AI sul web (+1 credito a lead).
   const [aiExtra, setAiExtra] = useState(0);
   const extra = chosen ? signalExtraRange(signalPrices, chosen.signals) : aiExtra;
-  const estimate = estimateCredits(mode, quantity, extra);
+  // Quantità limitata anche dai crediti: al massimo i lead che il saldo copre nel caso peggiore.
+  const perLead = estimateCredits(mode, 1, extra).max;
+  const affordable = perLead > 0 ? Math.floor(credits / perLead) : maxQuantity;
+  const quantityMax = Math.max(1, Math.min(maxQuantity, affordable));
+  const leads = Math.min(quantity, quantityMax);
+  const estimate = estimateCredits(mode, leads, extra);
   const reserve = estimate.reserve;
   const enough = credits >= reserve;
+  const euro = (n: number) => formatEur(Math.round((n * centsPerCredit) / 10) * 10);
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const countryName = (c: string) => COUNTRIES.find(([k]) => k === c)?.[1] ?? c;
 
@@ -290,7 +298,7 @@ export function SearchWizard({
     ["Dimensione", sizes.length ? `${sizes.join(", ")} dipendenti` : <em key="d" className="text-muted">Qualsiasi</em>],
     ["Ruoli", roles.length || customRoles.length ? [...roles, ...customRoles].join(", ") : <em key="o" className="text-muted">Non specificato</em>],
     ["Tipo email", info.label],
-    ["Numero lead", <span key="q" className="font-mono">{quantity}</span>],
+    ["Numero lead", <span key="q" className="font-mono">{leads}</span>],
   ];
 
   return (
@@ -656,11 +664,14 @@ export function SearchWizard({
         <Card className={cx("flex flex-col gap-6 p-6", current !== "quantity" && "hidden")}>
           <div>
             <label htmlFor="quantity" className="mb-3 flex justify-between text-sm font-medium">
-              Quanti lead? <span className="font-mono">{quantity}</span>
+              Quanti lead? <span className="font-mono">{leads}</span>
             </label>
-            <input id="quantity" name="quantity" type="range" min={1} max={maxQuantity} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="w-full accent-[var(--color-ledger)]" />
-            <p className="mt-1 text-xs text-muted">Il tuo piano permette fino a {maxQuantity} lead per ricerca.</p>
-            {quantity > 300 && (
+            <input id="quantity" name="quantity" type="range" min={1} max={quantityMax} value={leads} onChange={(e) => setQuantity(Number(e.target.value))} className="w-full accent-[var(--color-ledger)]" />
+            <p className="mt-1 text-xs text-muted">
+              Il tuo piano permette fino a {maxQuantity} lead per ricerca
+              {affordable < maxQuantity && <>; con i crediti disponibili ({credits}) puoi chiederne fino a {Math.max(0, affordable)}</>}.
+            </p>
+            {leads > 300 && (
               <div className="mt-3">
                 <Alert>
                   Le ricerche molto grandi procedono a tappe e possono richiedere un paio d&apos;ore: i lead compaiono man mano.
@@ -708,7 +719,7 @@ export function SearchWizard({
                     : available.databaseOnly
                       ? available.count === 0
                         ? "Per ora nessuna azienda con un annuncio recente per questa ricerca: prova ad allargare la zona o a scegliere tutti i settori."
-                        : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < quantity && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
+                        : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < leads && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
                       : available.count > 0
                         ? <>Stima preliminare: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda compatibile" : "aziende compatibili"} con la prova. Avvia la ricerca per scoprire altri risultati.</>
                         : "Cerchiamo le aziende sul web: può richiedere qualche minuto in più."}
@@ -734,6 +745,9 @@ export function SearchWizard({
               <Icon name="coins" className="h-4 w-4" /> Crediti stimati
             </p>
             <p className="mt-1 font-mono text-3xl font-semibold">{estimate.min}–{reserve}</p>
+            {centsPerCredit > 0 && (
+              <p className="text-xs text-ink-2">circa {euro(estimate.min)}–{euro(reserve)} al prezzo del tuo piano</p>
+            )}
             <p className="mt-1 text-xs text-ink-2">
               {withSignal && <>Ogni lead con opportunità: {extraCreditsLabel(signalPrices)}. </>}
               {!withSignal && aiExtra > 0 && <>Con questi filtri cerchiamo le aziende sul web: {aiExtra} credito in più a lead. </>}

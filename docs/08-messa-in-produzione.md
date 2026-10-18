@@ -21,8 +21,8 @@ opportunità ~0,022 €, ricerca AI ~0,135 €), listino deciso, migrazioni fino
   - informativa, termini, LIA/DPIA, opposizione e cancellazione (già presenti: da validare)
 - [ ] **Tu** – Adzuna: verificare sul pannello i limiti reali (250/giorno?) e chiedere l'accordo
       scritto per l'uso commerciale degli annunci come segnali
-- [ ] **Io** – Documento con le domande per il legale e per il commercialista (descrizione del
-      servizio, dati trattati, fonti, flussi)
+- [x] **Io** – Documento con le domande per il legale e per il commercialista (descrizione del
+      servizio, dati trattati, fonti, flussi): `09-domande-consulenti.md`
 
 ## Fase 1 – Sicurezza degli account (Tu, ~1 ora)
 
@@ -57,12 +57,12 @@ opportunità ~0,022 €, ricerca AI ~0,135 €), listino deciso, migrazioni fino
 
 ## Fase 4 – Prodotto (Io, nessun costo API)
 
-- [ ] Quantità del wizard limitata dai crediti disponibili, costo stimato anche in euro
-- [ ] «Stimati» accanto a dimensione e fatturato quando non hanno una fonte
-- [ ] Sinonimi dei settori più cercati (hotel/albergo, dentista/odontoiatra/studio dentistico…)
+- [x] Quantità del wizard limitata dai crediti disponibili, costo stimato anche in euro
+- [x] «Stimati» accanto a dimensione e fatturato quando non hanno una fonte (colonna dell’export; la tabella non mostra la dimensione e il fatturato non si consegna)
+- [x] Sinonimi dei settori più cercati (hotel/albergo, dentista/odontoiatra/studio dentistico…): migrazione 036
 - [x] Pagine ospitate su siti altrui e piattaforme scartate già all'importazione (migrazione 035)
-- [ ] «Email generiche incluse»: tetto dei referenti a ~1,5 volte i lead
-- [ ] Fonti citate: «© OpenStreetMap contributors (ODbL)» nella pagina fonti/informativa
+- [x] «Email generiche incluse»: tetto dei referenti a 1,6 volte i lead + 2 (giri dalla riserva)
+- [x] Fonti citate: «© OpenStreetMap contributors (ODbL)» nella pagina fonti/informativa
 - [ ] Testi del sito coerenti con il parere legale (niente promesse di «email pronte per campagne»)
 - [ ] **Tu** – Casella leads@weborastudio.it per ricevere risposte e richieste di assistenza
 

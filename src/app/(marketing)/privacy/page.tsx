@@ -26,6 +26,9 @@ export default function PrivacyPage() {
         <li>Fornitori: infrastruttura e servizi tecnici (Supabase, Vercel, n8n, Anthropic, OpenAI, servizi di verifica email), con dati ospitati nell&apos;Unione Europea dove possibile.</li>
       </ul>
 
+      <h2>Fonti dei dati aziendali</h2>
+      <p>Gli elenchi di aziende (nome, settore, città, sito) provengono anche da OpenStreetMap: © <a className="text-ledger underline" href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap contributors</a>, dati disponibili con licenza Open Database License (ODbL). Gli annunci di lavoro usati come segnali provengono da Adzuna e dalle pagine «Lavora con noi» dei siti aziendali. Ogni lead riporta la fonte da cui è stato ricavato.</p>
+
       <h2>I tuoi diritti</h2>
       <p>Puoi chiedere accesso, rettifica, cancellazione, limitazione e opporti al trattamento in qualsiasi momento. Per non comparire più nei nostri risultati usa la pagina <Link className="text-ledger underline" href="/opposizione">Rimuovi i tuoi dati</Link>: inseriamo il tuo indirizzo in una lista di esclusione permanente. Puoi anche proporre reclamo al Garante per la protezione dei dati personali.</p>
     </article>

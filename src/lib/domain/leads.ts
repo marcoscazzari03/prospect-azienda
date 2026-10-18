@@ -102,7 +102,7 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "paese", label: "Paese" },
   { key: "citta", label: "Città" },
   { key: "settore", label: "Settore" },
-  { key: "dimensione", label: "Dimensione" },
+  { key: "dimensione", label: "Dimensione (stimata)" },
   { key: "nome", label: "Nome" },
   { key: "cognome", label: "Cognome" },
   { key: "ruolo", label: "Ruolo" },

@@ -40,6 +40,16 @@ export default async function NewSearchPage({ searchParams }: PageProps<"/app/ri
     }
   }
   const kind: SearchKind = tipo === "opportunita" || defaults.offer ? "opportunity" : "standard";
+  // Prezzo indicativo di un credito: quello del piano in abbonamento o del pacchetto, altrimenti
+  // il pacchetto più piccolo (chi ha i crediti di benvenuto ricomprerà da lì).
+  const plan = viewer.plan;
+  let centsPerCredit = plan && plan.price_cents > 0 && plan.credits > 0 ? plan.price_cents / plan.credits : 0;
+  if (!centsPerCredit) {
+    const supabase = await createClient();
+    const { data: packs } = await supabase.from("plans").select("price_cents, credits").eq("kind", "pack").eq("active", true).order("price_cents").limit(1);
+    const p = packs?.[0];
+    centsPerCredit = p && p.credits > 0 ? p.price_cents / p.credits : 0;
+  }
   return (
     <>
       <PageHeader
@@ -47,7 +57,7 @@ export default async function NewSearchPage({ searchParams }: PageProps<"/app/ri
         title="Chi sono i tuoi clienti ideali?"
         description="Scegli il tipo di ricerca. Più sei preciso, più i lead saranno pertinenti. I contatti che hai già ricevuto vengono esclusi in automatico."
       />
-      <SearchWizard credits={viewer.credits} maxQuantity={viewer.plan?.max_quantity_per_search ?? 10} defaults={defaults} initialKind={kind} signalPrices={await getSignalPrices()} offers={await getEnabledOffers()} />
+      <SearchWizard credits={viewer.credits} maxQuantity={viewer.plan?.max_quantity_per_search ?? 10} defaults={defaults} initialKind={kind} signalPrices={await getSignalPrices()} offers={await getEnabledOffers()} centsPerCredit={centsPerCredit} />
     </>
   );
 }
