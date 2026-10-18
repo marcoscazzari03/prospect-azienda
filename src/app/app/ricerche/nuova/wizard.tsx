@@ -751,9 +751,9 @@ export function SearchWizard({
             <p className="flex items-center gap-2 text-sm font-medium text-ledger">
               <Icon name="coins" className="h-4 w-4" /> Crediti stimati
             </p>
-            <p className="mt-1 font-mono text-3xl font-semibold">{estimate.min}–{reserve}</p>
+            <p className="mt-1 font-mono text-3xl font-semibold">{estimate.min === reserve ? reserve : `${estimate.min}–${reserve}`}</p>
             {centsPerCredit > 0 && (
-              <p className="text-xs text-ink-2">circa {euro(estimate.min)}–{euro(reserve)} al prezzo del tuo piano</p>
+              <p className="text-xs text-ink-2">circa {estimate.min === reserve ? euro(reserve) : `${euro(estimate.min)}–${euro(reserve)}`} al prezzo del tuo piano</p>
             )}
             <p className="mt-1 text-xs text-ink-2">
               {withSignal && <>Ogni lead con opportunità: {extraCreditsLabel(signalPrices)}. </>}
