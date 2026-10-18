@@ -215,10 +215,10 @@ all'architettura; il resto si decide con i clienti.
 - [x] Nomi raccolti nei collaudi (18/10): 152 referenti, 29 email nominative e 96 lead di prova con nome cancellati
       (un solo account, quello di prova). Controllo finale: tre zeri. La tabella dei lead nasconde da sola la colonna
       «Referente» quando nessun lead ha un nome.
-- [ ] Esecuzioni salvate su n8n: contengono nomi ed email dei collaudi con referenti. Cancellare le vecchie e
-      ridurre il periodo di conservazione.
+- [x] Esecuzioni salvate su n8n (18/10): cancellate le 53 del motore dal 13 al 17/10 (collaudi con referenti).
+      Conservazione invariata: con i referenti spenti le nuove esecuzioni non contengono dati di persone.
 - [ ] Adzuna: chiedere l'autorizzazione scritta per l'uso commerciale (dopo i 14 giorni di prova). Senza, niente
-      segnali «sta assumendo» in vendita. Testo della richiesta da preparare.
+      segnali «sta assumendo» in vendita. Testo della richiesta pronto (18/10): da inviare e attendere risposta.
 - [ ] Testi del sito e dell'export: email pubblicata ≠ consenso alla pubblicità (Garante 2026). Controllare tutte
       le pagine e aggiungere un avviso chiaro dove si scaricano i risultati.
 - [ ] Legale e commercialista (`09-domande-consulenti.md`): stato del caso Lusha, LIA, art. 130, ODbL, Adzuna, P.IVA.
