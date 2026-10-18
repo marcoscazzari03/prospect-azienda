@@ -156,7 +156,8 @@ const migliore = trovate[0];
 
 // Quando fermarsi: con "solo generiche" basta una generica; altrimenti
 // si continua a cercare finché non c'è una nominativa.
-const soglia = job.email_mode === 'generic_ok' ? 4 : 4.5;
+// «Solo azienda»: basta la generica del dominio (non si cercano nominative).
+const soglia = job.email_mode === 'generic_ok' || job.email_mode === 'company_only' ? 4 : 4.5;
 const basta = Boolean(migliore && migliore.p >= soglia);
 
 const out = {
@@ -172,7 +173,7 @@ const out = {
 };
 
 if (FASE !== 'HOMEPAGE') {
-  if (basta) out.page_2 = '';
+  if (basta) { out.page_2 = ''; out.page_3 = ''; }
   return { json: out };
 }
 
@@ -202,7 +203,9 @@ const rendiAssoluto = (href) => {
 const categoria = (url) => {
   const u = String(url).toLowerCase().split('?')[0].split('#')[0];
   if (/contact|kontakt|contacto|contato|contatti|contacte|get-in-touch|reach-us|enquir|inquir|dove-siamo|find-us|location|donde-estamos|onde-estamos|yhteys|kapcsolat/.test(u)) return ['CONTATTI', 100];
-  if (/impressum|impresszum|aviso-legal|avisolegal|nota-legal|note-legali|legal-notice|mentions-legales|colofon|privacy|privacidad|datenschutz|gdpr|cookie|terms|termini|polityka/.test(u)) return ['LEGALE', 80];
+  if (/impressum|impresszum|aviso-legal|avisolegal|nota-legal|note-legali|legal-notice|mentions-legales|colofon|privacy|privacidad|datenschutz|gdpr|polityka/.test(u)) return ['LEGALE', 80];
+  // Cookie e condizioni d'uso: l'email aziendale c'è di rado, si provano per ultime.
+  if (/cookie|terms|termini|condizioni/.test(u)) return ['LEGALE', 50];
   if (/team|people|management|leadership|chi-siamo|about|azienda|company|quienes-somos|quem-somos|over-ons|uber-uns|ueber-uns|qui-sommes|o-nas|staff|persone|organigramma/.test(u)) return ['TEAM', 70];
   return ['', 0];
 };
@@ -254,7 +257,7 @@ if (!candidate.length && origin) {
     /olanda|paesi bassi|netherl|^nl$/.test(p) ? ['/contact', '/colofon'] :
     /polon|poland|^pl$|ceca|czech|^cz$|slovac|^sk$/.test(p) ? ['/kontakt', '/kontakty'] :
     ['/contact', '/contact-us'];
-  ipotesi.forEach((path, k) => candidate.push({ url: origin + path, cat: 'IPOTESI', score: 1 - k / 10 }));
+  [...ipotesi, '/privacy-policy'].forEach((path, k) => candidate.push({ url: origin + path, cat: 'IPOTESI', score: 1 - k / 10 }));
 }
 
 const pagina1 = candidate[0];
@@ -263,7 +266,17 @@ const pagina2 = pagina1
      candidate.find(x => x !== pagina1 && normalizeUrl(x.url) !== normalizeUrl(pagina1.url)))
   : null;
 
+// Quarta pagina (solo se le prime tre non bastano): un'altra pagina, di preferenza di un tipo
+// non ancora visto (es. note legali dopo contatti e chi siamo). Collaudo del 18/10: 23 aziende
+// su 40 senza email dopo tre pagine, spesso con la privacy policy mai aperta.
+const usate = [pagina1, pagina2].filter(Boolean);
+const nuova = (x) => !usate.some(u => normalizeUrl(u.url) === normalizeUrl(x.url));
+const pagina3 = pagina2
+  ? (candidate.find(x => nuova(x) && !usate.some(u => u.cat === x.cat)) || candidate.find(nuova))
+  : null;
+
 out.page_1 = basta || !pagina1 ? '' : pagina1.url;
 out.page_2 = basta || !pagina2 ? '' : pagina2.url;
+out.page_3 = basta || !pagina3 ? '' : pagina3.url;
 
 return { json: out };

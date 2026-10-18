@@ -195,4 +195,10 @@ Le stime della revisione non sono dati misurati.
       Per riaccendere i referenti dopo il parere legale: `update app_settings set value = 'true' where key = 'people_enabled'`
       (e rivedere i testi del sito).
 - [x] Testi del sito riscritti (home, demo, prezzi, termini, informativa, wizard, lead, dashboard, export).
+- [x] Prova «Rifacimento del sito» · Lombardia · 3 lead (Solo azienda): 17 lead da 40 aziende della riserva in 1 giro,
+      0 token Claude, 0 Icypeas. 23 senza email: ~10 grandi aziende (solo moduli), ~7 siti in JavaScript, 4 caselle
+      non vendibili. Corretti: grandi aziende fuori dalle ricerche con opportunità (migrazione 038: elenco
+      large_companies, 201+ dipendenti, banche e assicurazioni, 6+ annunci o annunci in 3+ regioni in 120 giorni);
+      quarta pagina (note legali/privacy, cookie per ultimi) solo se le prime tre non bastano; in «Solo azienda» ci si
+      ferma alla prima email generica del dominio.
 

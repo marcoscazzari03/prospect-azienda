@@ -109,6 +109,19 @@ const r3 = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, js
 assert.equal(r3.page_1, 'https://www.acme.it/it/home', 'homepage con meta refresh: si segue il rimando');
 const r4 = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: '<meta http-equiv="refresh" content="0;url=https://altro.it/">' } }).json;
 assert.notEqual(r4.page_1, 'https://altro.it/', 'rimando verso un altro dominio: ignorato');
+// Quarta pagina: dopo contatti e chi siamo, le note legali; i cookie per ultimi.
+const pagine = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: '<a href="/cookie-policy">c</a><a href="/contatti">c</a><a href="/chi-siamo">a</a><a href="/note-legali">n</a>' } }).json;
+assert.equal(pagine.page_1, 'https://www.acme.it/contatti');
+assert.equal(pagine.page_2, 'https://www.acme.it/note-legali', 'note legali prima dei cookie');
+assert.equal(pagine.page_3, 'https://www.acme.it/chi-siamo', 'quarta pagina: un tipo non ancora visto');
+const azGen = run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [{ ...job, email_mode: 'company_only' }] }, json: { html: '<a href="mailto:info@acme.it">x</a><a href="/contatti">c</a>' } }).json;
+assert.equal(azGen.page_1, '', 'solo azienda: con la generica del dominio basta la homepage');
+const jsSito = run(estrai, { nodes: { P: [{ ...dedup[0], country: 'Italia' }], 'Valida richiesta': [job] }, json: { html: '<div id="app"></div>' } }).json;
+assert.equal(jsSito.page_3, 'https://www.acme.it/privacy-policy', 'sito senza link: anche la privacy policy');
+const p3 = src('05-estrai-email.template.js', { __SORGENTE__: 'P', __FASE__: 'PAGINA 3', __FONTE__: "''" });
+const fineP3 = p3.split("if (FASE !== 'HOMEPAGE') {")[0] + "if (basta) { out.page_2 = ''; out.page_3 = ''; }\nreturn { json: out };\n";
+const dopoP3 = run(fineP3, { nodes: { P: [{ ...dedup[0], page_3: 'https://www.acme.it/privacy' }], 'Valida richiesta': [{ ...job, email_mode: 'company_only' }] }, json: { html: '<a href="mailto:info@acme.it">x</a>' } }).json;
+assert.equal(dopoP3.page_3, '', 'email trovata a pagina 3: niente quarta pagina');
 const tipoDi = (h) => run(estrai, { nodes: { P: [dedup[0]], 'Valida richiesta': [job] }, json: { html: h } }).json.email_site_type;
 assert.equal(tipoDi('<a href="mailto:segreteria.rossi@gmail.com">x</a>'), 'generic', 'segreteria.cognome su gmail: casella di ufficio');
 assert.equal(tipoDi('<a href="mailto:studiodentisticorossi@gmail.com">x</a>'), 'generic');

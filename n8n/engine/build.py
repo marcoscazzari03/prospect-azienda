@@ -39,7 +39,7 @@ def estrai(fase, sorgente, fonte):
     s = s.replace("__FASE__", fase).replace("__SORGENTE__", sorgente).replace("__FONTE__", fonte)
     if fase != "HOMEPAGE":
         # Le pagine successive non cercano altri link: basta la parte di estrazione.
-        s = s.split("if (FASE !== 'HOMEPAGE') {")[0] + "if (basta) out.page_2 = '';\nreturn { json: out };\n"
+        s = s.split("if (FASE !== 'HOMEPAGE') {")[0] + "if (basta) { out.page_2 = ''; out.page_3 = ''; }\nreturn { json: out };\n"
     return json.dumps(s, ensure_ascii=True)
 
 
@@ -417,10 +417,15 @@ add(if_node("servePagina3", "Serve pagina 3?", "{{ $json.page_2 }}", "string", "
 add(http_page("pagina3", "HTTP - Pagina 3", "{{ $json.page_2 }}"))
 add(code("estraiP3", "Estrai email pagina 3",
          estrai("PAGINA 3", "Serve pagina 3?", "$('Serve pagina 3?').item.json.page_2"),
+         mode="runOnceForEachItem", output="{ email_site: 'info@acme.it', page_3: '' }"))
+add(if_node("servePagina4", "Serve pagina 4?", "{{ $json.page_3 }}", "string", "notEmpty"))
+add(http_page("pagina4", "HTTP - Pagina 4", "{{ $json.page_3 }}"))
+add(code("estraiP4", "Estrai email pagina 4",
+         estrai("PAGINA 4", "Serve pagina 4?", "$('Serve pagina 4?').item.json.page_3"),
          mode="runOnceForEachItem", output="{ email_site: 'info@acme.it' }"))
 add("""const riunisciEmail = merge({
   version: 3.2,
-  config: { name: 'Riunisci email sito', parameters: { mode: 'append', numberInputs: 3 } }
+  config: { name: 'Riunisci email sito', parameters: { mode: 'append', numberInputs: 4 } }
 });
 """)
 
@@ -593,7 +598,9 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .add(pagina2)
   .to(estraiP2)
   .to(servePagina3
-    .onTrue(pagina3.to(estraiP3).to(riunisciEmail.input(2)))
+    .onTrue(pagina3.to(estraiP3).to(servePagina4
+      .onTrue(pagina4.to(estraiP4).to(riunisciEmail.input(3)))
+      .onFalse(riunisciEmail.input(2))))
     .onFalse(riunisciEmail.input(1)))
   .add(riunisciEmail)
   .to(decidi)
@@ -617,7 +624,7 @@ add("""export default workflow('lead-engine-search-v1', 'Lead Engine | Search (v
   .group('2 - Ricerca AI', [planner, modelloPlanner, prepara, """ + RICERCA_GROUP + """, normalizzaAI], { description: 'Piano in lotti non sovrapposti, ricerca web per lotto, recupero output anche se malformato.' })
   .group('2b - Segnali', [serveAnnuncio, annuncio, verificaAnnuncio, riunisciAnnunci, segnaleOk, serveControlloSito, sitoSegnali, serveHttps, controlloHttps, riunisciHttps, valutaSito, segnaliSitoOk, riunisciSegnali], { description: 'Annuncio di lavoro verificato e segnali controllati sul sito PRIMA di cercare il referente.' })
   .group('2c - Referente', [scegliRef, serveReferente, servePaginaRef, paginaRef, riunisciPaginaRef, preparaRefSito, refSitoPossibile, claudeRefSito, esitoRefSito, serveRefWeb, riunisciRefWeb, cercaRefWeb, preparaRef, claudeRef, esitoRef, riunisciRef, referenteOk], { description: 'Referente solo per chi ha il segnale, entro un tetto: prima dal testo del sito, poi con la ricerca web.' })
-  .group('3 - Email dal sito', [homepage, estraiHome, controlliTecnici, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
+  .group('3 - Email dal sito', [homepage, estraiHome, controlliTecnici, servePagina2, pagina2, estraiP2, servePagina3, pagina3, estraiP3, servePagina4, pagina4, estraiP4, riunisciEmail], { description: 'Email reali dal sito ufficiale: homepage, contatti, note legali. Nessuna email ipotizzata.' })
   .group('4 - Arricchimento', [icyCerca, icyAttendi, icyLeggi, icyInCorso, icyAttendi2, icyRileggi, riunisciIcy, normalizzaIcy], { description: 'Icypeas solo per chi ne ha bisogno ed entro il tetto deciso dal backend. Solo email del dominio con certezza alta.' })
   .group('5 - Consegna', [classifica, inviaRisultati], { description: 'Classifica per modalita email, calcola qualita e invia i risultati al backend con retry.' });
 """)
