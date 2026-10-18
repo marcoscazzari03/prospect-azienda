@@ -60,7 +60,7 @@ opportunità ~0,022 €, ricerca AI ~0,135 €), listino deciso, migrazioni fino
 - [ ] Quantità del wizard limitata dai crediti disponibili, costo stimato anche in euro
 - [ ] «Stimati» accanto a dimensione e fatturato quando non hanno una fonte
 - [ ] Sinonimi dei settori più cercati (hotel/albergo, dentista/odontoiatra/studio dentistico…)
-- [ ] Pagine ospitate su siti altrui e piattaforme scartate già all'importazione da OpenStreetMap
+- [x] Pagine ospitate su siti altrui e piattaforme scartate già all'importazione (migrazione 035)
 - [ ] «Email generiche incluse»: tetto dei referenti a ~1,5 volte i lead
 - [ ] Fonti citate: «© OpenStreetMap contributors (ODbL)» nella pagina fonti/informativa
 - [ ] Testi del sito coerenti con il parere legale (niente promesse di «email pronte per campagne»)

@@ -108,6 +108,11 @@ $input.all().forEach((item, i) => {
     const tipo = TIPI.find(k => t[k]) || '';
     const valore = String(t[tipo] || '').toLowerCase();
     if (SCARTA.test(valore) || (SOLO_ELENCO.has(tipo) && !SETTORI[tipo]?.[valore])) { stats.excluded_category++; continue; }
+    // Porti turistici: non sono clienti (18/10).
+    if (t.leisure === 'marina') { stats.excluded_category++; continue; }
+    // Marchi nazionali con scheda Wikidata (Piaggio, Sisal...): grandi gruppi, non le PMI locali
+    // che cerchiamo (18/10). Le catene locali restano escluse dalla regola sui domini ripetuti.
+    if (t['brand:wikidata'] || t['operator:wikidata']) { stats.chains++; continue; }
     const nome = pulisci(t.name || t['name:it'] || t.operator, 200);
     if (!nome) { stats.no_name++; continue; }
     const sito = String(t.website || t['contact:website'] || '').split(/[;\s]/)[0];

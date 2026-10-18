@@ -265,7 +265,9 @@ const [osm] = run(codice('11-normalizza-osm.js'), {
       el({ shop: 'supermarket', name: 'Conad Modena', brand: 'Conad', website: 'https://www.conad.it/negozi' }),
       el({ shop: 'clothes', name: 'Boutique Anna', website: 'https://boutiqueanna.it' }),
       el({ shop: 'clothes', name: 'Boutique Anna 2', website: 'https://boutiqueanna.it/negozio2' }),
-      el({ shop: 'clothes', name: 'Moda Svizzera', website: 'https://modasvizzera.ch' })
+      el({ shop: 'clothes', name: 'Moda Svizzera', website: 'https://modasvizzera.ch' }),
+      el({ shop: 'motorcycle', name: 'Piaggio', 'brand:wikidata': 'Q27360', website: 'https://www.piaggio.com/' }),
+      el({ tourism: 'yes', leisure: 'marina', name: 'Porto Bolaro', website: 'https://portobolaro.it/' })
     ] },
     { error: { message: 'timeout' } }
   ]
@@ -277,7 +279,8 @@ assert.ok(bianchi.keywords.includes('avvocati'));
 assert.equal(osm.companies[1].industry, '', 'categoria generica: settore da Haiku');
 assert.equal(osm.companies[1].website, 'https://meccanicarossi.it');
 assert.equal(osm.companies[3].industry, 'Abbigliamento');
-assert.deepEqual([osm.stats.excluded_category, osm.stats.no_name, osm.stats.not_company_site, osm.stats.foreign, osm.stats.chains, osm.stats.duplicates, osm.stats.errors], [2, 1, 2, 1, 2, 1, 1]);
+// Marchio nazionale (scheda Wikidata) e porto turistico esclusi (18/10).
+assert.deepEqual([osm.stats.excluded_category, osm.stats.no_name, osm.stats.not_company_site, osm.stats.foreign, osm.stats.chains, osm.stats.duplicates, osm.stats.errors], [3, 1, 2, 1, 3, 1, 1]);
 assert.deepEqual(osm.stats.failed_provinces, ['Altrove']);
 // Province fallite: riprovate il giorno dopo, al massimo 3 volte.
 const primo = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico: {} });
