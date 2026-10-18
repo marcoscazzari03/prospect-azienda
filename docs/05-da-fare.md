@@ -217,8 +217,9 @@ all'architettura; il resto si decide con i clienti.
       «Referente» quando nessun lead ha un nome.
 - [x] Esecuzioni salvate su n8n (18/10): cancellate le 53 del motore dal 13 al 17/10 (collaudi con referenti).
       Conservazione invariata: con i referenti spenti le nuove esecuzioni non contengono dati di persone.
-- [ ] Adzuna: chiedere l'autorizzazione scritta per l'uso commerciale (dopo i 14 giorni di prova). Senza, niente
-      segnali «sta assumendo» in vendita. Testo della richiesta pronto (18/10): da inviare e attendere risposta.
+- [ ] Adzuna: c'è un piano a pagamento (8 $/mese). Chiedere conferma scritta che copra il nostro uso (annunci come
+      segnale mostrato a clienti B2B, con link all'annuncio, senza ripubblicarli). Mail breve pronta (18/10).
+      Conservare la risposta per il legale.
 - [ ] Testi del sito e dell'export: email pubblicata ≠ consenso alla pubblicità (Garante 2026). Controllare tutte
       le pagine e aggiungere un avviso chiaro dove si scaricano i risultati.
 - [ ] Legale e commercialista (`09-domande-consulenti.md`): stato del caso Lusha, LIA, art. 130, ODbL, Adzuna, P.IVA.
