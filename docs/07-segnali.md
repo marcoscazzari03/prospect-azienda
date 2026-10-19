@@ -75,8 +75,12 @@ Due famiglie di segnali:
 ### Sito senza connessione sicura (`no_https`) · verificato
 - **Vale se:** il sito risponde solo in HTTP (nessun redirect a HTTPS), oppure il certificato
   HTTPS è scaduto, autofirmato o per un altro dominio.
+- **Dove:** sull'host del sito salvato (con il www se il sito lo usa), sempre sul dominio
+  dell'azienda: il dominio nudo spesso ha un certificato diverso da quello del sito vero (19/10).
 - **Non determinabile:** sito irraggiungibile in entrambi i modi; errori di rete temporanei
-  (si riprova una volta).
+  (si riprova una volta); catena del certificato incompleta («unable to verify the first
+  certificate») ed errori di handshake (EPROTO), che i browser di solito accettano; certificato
+  per il solo www del dominio.
 - **Prova:** tipo di problema («nessun HTTPS» / «certificato scaduto il …»), data del controllo.
 
 ### Sito non adatto ai cellulari (`no_mobile`) · verificato

@@ -347,7 +347,9 @@ add(if_node("serveControlloSito", "Serve controllo sito?",
 add(http_page("sitoSegnali", "HTTP - Sito (segnali)", "{{ $json.website }}"))
 add(if_node("serveHttps", "Serve controllo HTTPS?",
             "{{ $('Valida richiesta').first().json.target.signals.codes.includes('no_https') }}", "boolean", "true"))
-add(http_page("controlloHttps", "HTTP - Controllo HTTPS", "{{ 'https://' + $('Serve controllo sito?').item.json.domain + '/' }}", prop="https_body", timeout=8000))
+# Host del sito vero (con www se il sito salvato lo usa), sempre sul dominio validato: col solo
+# dominio nudo il certificato scaduto o di un altro sito dava falsi «Senza HTTPS» (19/10).
+add(http_page("controlloHttps", "HTTP - Controllo HTTPS", "{{ 'https://' + (String($('Serve controllo sito?').item.json.website || '').toLowerCase().includes('://www.') ? 'www.' : '') + $('Serve controllo sito?').item.json.domain + '/' }}", prop="https_body", timeout=8000))
 add("""const riunisciHttps = merge({
   version: 3.2,
   config: { name: 'Riunisci controllo HTTPS', parameters: { mode: 'append', numberInputs: 2 } }

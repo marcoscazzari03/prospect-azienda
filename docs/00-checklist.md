@@ -42,10 +42,12 @@ Ultimo aggiornamento: 19/10/2026.
 19. **Insieme** – Pulizia dei dati di collaudo (account e ricerche di prova, crediti regalati).
 
 ## 🟡 Durante la beta
-19b. **Io, prima degli inviti del Nord** – Segnale «Senza HTTPS»: tra gli esempi del 19/10 compare anche su siti
-    che rispondono in https (amgasblu.it, touristintercontinental.com, nawawax.com, bbdellepalme.it, giovannirusso.it).
-    Probabile falso positivo: certificati con la catena incompleta, che i browser accettano ma n8n no («unable to
-    verify the first certificate»). Verificare a mano e, se confermato, contarli come «non determinabile».
+19b. ~~**Io** – Segnale «Senza HTTPS»: falsi positivi (controllo sul dominio nudo invece che sul www, catena
+    incompleta ed errori di handshake contati come difetto). Ora controlla l'host del sito e conta solo
+    certificato scaduto, autofirmato o di un altro sito~~ (19/10, workflow aggiornati).
+19c. **Tu** – Pubblicare «Lead Engine | Search (v1)» e «Aziende | Controllo siti»; poi eseguire
+    `supabase/queries/https_ricontrollo.sql` (prima il conteggio, poi la correzione): le vecchie prove
+    tornano «non determinabile» e quelle aziende vengono ricontrollate per prime.
 20. **Insieme** – Alla prima ricerca vera: controllare le nuove regole delle email (reservations@, albergo…@, domini
     fratelli).
 21. **Tu** – Giudicare a mano le 24 aziende con il solo modulo di contatto (query `moduli.sql`).

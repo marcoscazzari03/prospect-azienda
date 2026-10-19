@@ -503,6 +503,15 @@ const httpsCert = valutaFile('site-modern.html', ['no_https'], { error: { messag
 assert.equal(httpsCert.signals[0].status, 'pass');
 const httpsBoh = valutaFile('site-modern.html', ['no_https'], { error: { message: 'ETIMEDOUT' } });
 assert.equal(httpsBoh.signals[0].status, 'undetermined');
+// Errori veri di n8n (esecuzione del 17/10): il motivo sta in error.cause.
+const sslErr = (cause) => ({ error: { message: "SSL Issue: consider using the 'Ignore SSL issues' option", name: 'NodeSslError', cause: { name: 'Error', message: cause } } });
+const esitoHttps = (h) => valutaFile('site-modern.html', ['no_https'], h).signals[0];
+assert.equal(esitoHttps(sslErr('certificate has expired')).evidence.detail, 'Certificato HTTPS scaduto');
+assert.equal(esitoHttps(sslErr("Hostname/IP does not match certificate's altnames: Host: nawawax.com. is not in the cert's altnames: DNS:preview.infomaniak.website, DNS:*.infomaniak.site")).status, 'pass', 'certificato di un altro sito');
+assert.equal(esitoHttps(sslErr("Hostname/IP does not match certificate's altnames: Host: prova.it. is not in the cert's altnames: DNS:www.prova.it")).status, 'undetermined', 'il certificato copre il www');
+assert.equal(esitoHttps({ error: { message: 'unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca', code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' } }).status, 'undetermined', 'catena incompleta: i browser la accettano');
+assert.equal(esitoHttps({ error: { message: 'write EPROTO 5073C1A18A7F0000:error:0A000410:SSL routines:ssl3_read_bytes:ssl/tls alert handshake failure', code: 'EPROTO' } }).status, 'undetermined', 'handshake rifiutato');
+assert.equal(esitoHttps(sslErr('self-signed certificate')).status, 'pass');
 const senzaSegnali = run(valuta, { nodes: { 'Valida richiesta': [job], 'Serve controllo sito?': [prospettoSito], 'HTTP - Sito (segnali)': [{ html: '' }] }, json: prospettoSito }).json;
 assert.deepEqual(senzaSegnali, prospettoSito, 'ricerche senza segnali: nessun cambiamento');
 

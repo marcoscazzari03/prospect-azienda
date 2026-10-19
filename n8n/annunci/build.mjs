@@ -634,7 +634,9 @@ const https = node({
       // HEAD: serve solo sapere se la connessione HTTPS riesce, non la pagina (con il GET
       // ogni sito veniva scaricato due volte e il giro andava in crash per memoria).
       method: 'HEAD',
-      url: expr("{{ 'https://' + $json.domain + '/' }}"),
+      // Host del sito vero (con www se il sito salvato lo usa), sempre sul dominio validato:
+      // col solo dominio nudo il certificato scaduto o di un altro sito dava falsi «Senza HTTPS».
+      url: expr("{{ 'https://' + (String($json.website || '').toLowerCase().includes('://www.') ? 'www.' : '') + $json.domain + '/' }}"),
       sendHeaders: true,
       headerParameters: { parameters: [
         { name: 'User-Agent', value: '${UA}' },

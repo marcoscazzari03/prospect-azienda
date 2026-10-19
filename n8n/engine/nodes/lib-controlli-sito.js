@@ -109,10 +109,21 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
     // Esito della richiesta HTTPS: presente solo se eseguita.
     const h = https;
     const eseguito = h && (h.https_body !== undefined || h.error !== undefined);
-    const msg = String(h?.error?.message ?? h?.error ?? '');
+    // n8n mette il motivo vero in error.cause o in description («SSL Issue: …» da solo non dice nulla).
+    const e = h?.error;
+    const msg = [e?.message ?? e, e?.cause?.message, e?.description, h?.details?.description, e?.code].filter(Boolean).map(String).join(' | ');
+    // Solo i difetti che anche un browser mostra (controllo del 19/10). Catena incompleta
+    // («unable to verify the first certificate») e handshake rifiutati (EPROTO) di solito
+    // passano nei browser: non dimostrano niente.
+    const nome = /altname|does not match|ERR_TLS_CERT_ALTNAME/i.test(msg);
+    const host = ((msg.match(/Host: ([a-z0-9.-]+?)\.? is not/i) || [])[1] || '').toLowerCase();
+    const copreWww = host && msg.toLowerCase().includes('dns:www.' + host.replace(/^www\./, ''));
     if (!eseguito) metti('no_https', 'undetermined');
     else if (!h.error) metti('no_https', 'fail');
-    else if (/certificate|self.signed|CERT_|ERR_TLS|SSL|unable to verify|altname|expired/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS non valido o scaduto');
+    else if (/expired|CERT_HAS_EXPIRED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS scaduto');
+    else if (/self.signed|SELF_SIGNED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS autofirmato');
+    // Nome sbagliato: conta solo se il certificato non copre nemmeno il www del dominio.
+    else if (nome && !copreWww) metti('no_https', 'pass', 'Certificato HTTPS non valido per questo sito');
     else if (/ECONNREFUSED/i.test(msg) && /^http:\/\//i.test(website) && leggibile) metti('no_https', 'pass', 'Il sito non risponde in HTTPS');
     else metti('no_https', 'undetermined');
   }
