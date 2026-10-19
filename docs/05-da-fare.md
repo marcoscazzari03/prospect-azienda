@@ -322,7 +322,7 @@ all'architettura; il resto si decide con i clienti.
       Emilia-Romagna subito, Nord dopo il 28/10 (copertura da rimisurare). Crediti beta e piano Growth dall'admin.
 - [ ] Lista delle 5–10 agenzie da contattare (fonti in `10-beta.md`).
 - [ ] Bloccanti prima di inviare: elenco in `10-beta.md` (2FA e chiave Anthropic, popolamento pubblicato, clausola di
-      riservatezza nei termini, sconto dei beta tester).
+      riservatezza nei termini: fatta il 19/10, sconto dei beta tester).
 - [ ] Domanda da verificare: un'agenzia paga con regolarità per aziende con bisogni documentati, senza il nome di
       un referente?
 - [ ] Prezzi: invariati per la beta.

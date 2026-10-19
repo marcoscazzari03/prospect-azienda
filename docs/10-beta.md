@@ -32,14 +32,16 @@
 4. Directory (Sortlist, Clutch, DesignRush, Google Maps «agenzia web + città») per la lista; contatto a mano.
 5. Community: gruppi WordPress Italia, web designer e freelance, meetup locali.
 
-Riservatezza: Webora Leads è «un servizio di Webora Studio». Dire nell'invito che i dati delle ricerche dei clienti
-non vengono usati da Webora Studio, e scriverlo nei termini di servizio prima di inviare.
+Riservatezza: Webora Leads è «un servizio di Webora Studio». Nei termini (19/10, «Riservatezza delle ricerche»):
+criteri, aziende ricevute, note e liste del cliente sono riservati e Webora Studio non li usa per la propria attività
+commerciale; i dati pubblici delle aziende trovate entrano invece nel database comune e possono andare anche ad
+altri clienti. Non promettere nell'invito più di così (es. «esclusiva» sulle aziende).
 
 ## Prima di inviare (bloccanti)
 
 - [ ] 2FA sugli account dei servizi e chiave Anthropic dedicata (`08-messa-in-produzione.md`, Fase 1).
 - [ ] Workflow «Aziende | Popolamento OSM» pubblicato (Nord prima, dal 20/10).
-- [ ] Termini: clausola di riservatezza sulle ricerche dei clienti (vedi sotto).
+- [x] Termini: clausola «Riservatezza delle ricerche» (19/10).
 - [ ] Decidere lo sconto per i beta tester (proposta −30% per 12 mesi).
 - [ ] Logo accanto al mittente e firma con il logo per leads@ (facoltativi ma utili).
 
@@ -70,7 +72,8 @@ Cerco 5 agenzie per una **beta gratuita di 4 settimane**:
 Due cose da sapere subito:
 - non ti diamo i nomi dei referenti, solo canali aziendali (info@, commerciale@, modulo di contatto): è una
   scelta, per lavorare solo con dati d'azienda;
-- quello che cerchi resta tuo: i dati delle tue ricerche non vengono usati da Webora Studio.
+- le tue ricerche e i lead che ricevi restano riservati: non li vede nessun altro cliente e Webora Studio
+  non li usa per la sua attività commerciale (è scritto nei termini di servizio).
 
 Se ti interessa, rispondimi qui e ti mando l'accesso. Se preferisci, ci sentiamo 10 minuti e te lo mostro.
 

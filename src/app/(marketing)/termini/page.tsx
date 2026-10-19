@@ -30,6 +30,9 @@ export default async function TermsPage() {
       <h2>Uso lecito dei dati</h2>
       <p>Il cliente è responsabile dell&apos;uso dei dati ricevuti nel rispetto della normativa applicabile, incluse le regole sulle comunicazioni commerciali (ad esempio, in Italia, l&apos;art. 130 del Codice Privacy, che in genere richiede il consenso per l&apos;invio di email promozionali anche a caselle aziendali). L&apos;email aziendale e la pagina del modulo di contatto sono informazioni sull&apos;azienda, non un&apos;autorizzazione a inviare comunicazioni promozionali: la pubblicazione di un indirizzo sul sito di un&apos;azienda non equivale al suo consenso. È vietato rivendere i dati, usarli per spam o per finalità diverse dal contatto commerciale tra imprese, e contattare aziende o persone che si sono opposte.</p>
 
+      <h2>Riservatezza delle ricerche</h2>
+      <p>I criteri delle ricerche del cliente, l&apos;elenco delle aziende che ha ricevuto e le note, gli stati e le liste che aggiunge sono riservati: non li mostriamo ad altri clienti e {BRAND.owner} non li usa per la propria attività commerciale (ad esempio per contattare le stesse aziende). Li consultiamo solo per assistenza, sicurezza, verifica delle segnalazioni e controllo dei costi, e in forma aggregata e anonima per migliorare il servizio. Le informazioni pubbliche sulle aziende trovate durante una ricerca (sito, settore, zona, contatto aziendale, segnali) entrano invece nel database comune del servizio e possono essere consegnate anche ad altri clienti con criteri simili; a nessun cliente viene indicato chi altro le ha ricevute.</p>
+
       <h2>Responsabilità</h2>
       <p>Le informazioni provengono da fonti pubbliche che possono cambiare nel tempo: non garantiamo la completezza dei risultati né l&apos;esito delle attività commerciali del cliente.</p>
     </article>
