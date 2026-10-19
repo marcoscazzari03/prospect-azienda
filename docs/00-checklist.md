@@ -4,7 +4,7 @@ Formato (deciso il 19/10): sezioni con colore e titolo, ruolo in grassetto (**Tu
 progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data. Quando l'utente chiede «riscrivimi
 la checklist» si riscrive tutto da qui, fatti compresi. Il dettaglio storico resta in `05-da-fare.md`.
 
-Ultimo aggiornamento: 19/10/2026.
+Ultimo aggiornamento: 19/10/2026 (sera).
 
 ## 🔴 Bloccanti per la prima ondata della beta (Sud ed Emilia-Romagna)
 1. ~~**Tu** – Verifica in due passaggi su Supabase, Vercel, GitHub, Stripe, n8n~~ (19/10). Decisione dell'utente
@@ -69,12 +69,14 @@ Ultimo aggiornamento: 19/10/2026.
 29. **Tu, con il legale** – DPA pronto da firmare per i clienti.
 
 ## ⚪ Email e immagine
-30. **Tu** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo.
+30. **Tu, 20/10** – Logo accanto al mittente: account Google con leads@ («usa il tuo indirizzo email attuale») e
+    logo 800×800 come foto profilo (file già pronto). Vale soprattutto per chi usa Gmail.
 31. **Tu** – Firma con il logo per leads@ nella webmail di Hostinger.
 32. ~~**Io** – Email dell'app in HTML con logo e grafica Webora, e modelli per le email di accesso di
     Supabase (`supabase/templates/`)~~ (19/10).
 32b. ~~**Tu** – Incollati i 5 modelli in Supabase e attivati gli avvisi di sicurezza (password, 2FA aggiunta e
-    tolta)~~ (19/10). Resta: una prova di registrazione e di «Password dimenticata» con un indirizzo di prova.
+    tolta); provate registrazione e «Password dimenticata»: funzionano~~ (19/10). Schermata «Controlla la tua
+    email» dopo registrazione e recupero password (19/10).
 33. **Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027.
 
 ## ⚪ Dopo la beta
@@ -91,6 +93,7 @@ Ultimo aggiornamento: 19/10/2026.
 44. **Insieme** – Capacità di n8n oltre 50–100 clienti attivi.
 45. **Insieme** – Estero, un paese alla volta (prima il parere legale).
 46. **Insieme** – Referenti: restano spenti, solo dopo il parere legale e su richiesta dei clienti.
+47. **Insieme** – BIMI (logo del mittente su tutti i client): DMARC restrittivo e certificato VMC/CMC a pagamento.
 
 ## ✅ Fatto di recente (19/10)
 - ~~Homepage rifatta: opportunità in primo piano, demo simulata, «Per chi è», prezzi dal listino~~
