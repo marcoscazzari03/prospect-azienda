@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { ContactNotice } from "@/components/contact-notice";
 import { LeadsTable } from "@/components/leads-table";
-import { Badge, Button, ButtonLink, Card, EmptyState, PageHeader, Progress, SearchStatus } from "@/components/ui";
+import { Badge, Button, ButtonLink, Card, EmptyState, PageHeader, Progress, SearchStatus, cx } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
 import { createClient } from "@/lib/supabase/server";
 import { closeStaleRuns } from "@/lib/server/searches";
@@ -14,6 +14,7 @@ import { REPEAT_LABEL, type Repeat, type SearchTarget } from "@/lib/domain/searc
 import { describeOffer, describeOpportunity, offerByCode, signalByCode } from "@/lib/domain/signals";
 import { archiveSearch, deleteSearch, stopRepeat } from "../../actions";
 import { ConfirmSubmit } from "@/components/confirm-submit";
+import { ActionMenu, menuItem } from "@/components/action-menu";
 
 export const metadata: Metadata = { title: "Ricerca" };
 
@@ -56,23 +57,43 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
         }
         actions={
           <>
-            {!!leads?.length && <ButtonLink href={`/api/export?format=xlsx&search=${id}`} variant="secondary" prefetch={false}>Esporta Excel</ButtonLink>}
-            {!!leads?.length && <ButtonLink href={`/api/export?search=${id}`} variant="ghost" prefetch={false}>CSV</ButtonLink>}
             <ButtonLink href={`/app/ricerche/nuova?da=${id}`} variant={running ? "secondary" : "primary"}>Ripeti con nuovi lead</ButtonLink>
-            {!running && (
-              <form action={archiveSearch}>
-                <input type="hidden" name="searchId" value={search.id} />
-                <input type="hidden" name="archive" value={search.archived_at ? "0" : "1"} />
-                <Button type="submit" variant="ghost">{search.archived_at ? "Ripristina" : "Archivia"}</Button>
-              </form>
+            {!!leads?.length && (
+              <ActionMenu label="Esporta">
+                <a href={`/api/export?format=xlsx&search=${id}`} className={menuItem}>
+                  <span><span className="block font-medium">Excel</span><span className="text-xs text-muted">Con filtri e il foglio «Come usarli»</span></span>
+                </a>
+                <a href={`/api/export?search=${id}`} className={menuItem}>
+                  <span><span className="block font-medium">CSV</span><span className="text-xs text-muted">Per importarli nel tuo CRM</span></span>
+                </a>
+              </ActionMenu>
             )}
             {!running && (
-              <form action={deleteSearch}>
-                <input type="hidden" name="searchId" value={search.id} />
-                <ConfirmSubmit variant="ghost" className="text-brick" message={`Eliminare la ricerca «${search.name}» e i suoi ${leads?.length ?? 0} lead? I dati vengono cancellati per sempre; le aziende non ti verranno riproposte e i crediti usati non tornano.`}>
-                  Elimina
-                </ConfirmSubmit>
-              </form>
+              <ActionMenu label="Altro">
+                <form action={archiveSearch}>
+                  <input type="hidden" name="searchId" value={search.id} />
+                  <input type="hidden" name="archive" value={search.archived_at ? "0" : "1"} />
+                  <button type="submit" className={menuItem}>
+                    <span>
+                      <span className="block font-medium">{search.archived_at ? "Ripristina la ricerca" : "Archivia la ricerca"}</span>
+                      <span className="text-xs text-muted">{search.archived_at ? "Torna tra le ricerche, con i suoi lead" : "La nasconde con i suoi lead; si può ripristinare"}</span>
+                    </span>
+                  </button>
+                </form>
+                <form action={deleteSearch}>
+                  <input type="hidden" name="searchId" value={search.id} />
+                  <ConfirmSubmit
+                    variant="ghost"
+                    className={cx(menuItem, "h-auto justify-start font-normal text-brick hover:text-brick")}
+                    message={`Eliminare la ricerca «${search.name}» e i suoi ${leads?.length ?? 0} lead? I dati vengono cancellati per sempre; le aziende non ti verranno riproposte e i crediti usati non tornano.`}
+                  >
+                    <span>
+                      <span className="block font-medium">Elimina la ricerca</span>
+                      <span className="text-xs text-muted">Cancella per sempre i suoi lead</span>
+                    </span>
+                  </ConfirmSubmit>
+                </form>
+              </ActionMenu>
             )}
           </>
         }
