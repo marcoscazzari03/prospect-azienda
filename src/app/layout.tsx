@@ -7,10 +7,14 @@ const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"], axes: ["opsz", "SOFT"] });
 const jetbrains = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] });
 
+// Per tutti i settori: la ricerca in target vale per chiunque venda alle aziende.
+const DESCRIPTION =
+  "Per chi vende alle aziende, in ogni settore: aziende in target per settore e zona con il contatto aziendale, e opportunità commerciali verificate con la prova. Paghi solo quelle consegnate.";
+
 export const metadata: Metadata = {
   title: { default: `${BRAND.name} · ${BRAND.tagline}`, template: `%s · ${BRAND.name}` },
-  description:
-    "Trova le aziende in target per settore e zona e scopri quelle con un'opportunità commerciale verificata per i tuoi servizi, con la prova. Paghi solo i lead consegnati.",
+  description: DESCRIPTION,
+  openGraph: { type: "website", locale: "it_IT", siteName: BRAND.name, description: DESCRIPTION },
   metadataBase: new URL(`https://${BRAND.domain}`),
 };
 

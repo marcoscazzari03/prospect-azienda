@@ -113,7 +113,8 @@ export default async function HomePage() {
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-2">
               Dicci cosa vendi. Ti consegniamo le aziende con un segnale concreto, come un sito da rifare, un annuncio di lavoro
-              o un sito senza HTTPS, insieme al contatto aziendale e alla prova da citare nel primo messaggio.
+              o un sito senza HTTPS, insieme al contatto aziendale e alla prova da citare nel primo messaggio. Il tuo settore non ha
+              ancora segnali? Ricevi comunque le aziende in target.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/registrati" size="lg">Prova gratis con {freeCredits} crediti</ButtonLink>

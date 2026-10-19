@@ -16,7 +16,7 @@ const REGIONS = [
   "Lombardia", "Veneto", "Emilia-Romagna", "Piemonte", "Toscana", "Lazio", "Campania", "Puglia", "Sicilia", "Friuli-Venezia Giulia",
   "Trentino-Alto Adige", "Liguria", "Marche", "Umbria", "Abruzzo", "Sardegna", "Calabria", "Basilicata", "Molise", "Valle d'Aosta",
 ];
-const SECTORS = ["Hotel e ospitalità", "Ristoranti", "Studi professionali", "Manifattura", "Edilizia e impianti", "Commercio", "Software e IT", "Studi dentistici"];
+const SECTORS = ["Hotel e ospitalità", "Ristoranti", "Studi professionali", "Manifattura", "Edilizia e impianti", "Commercio", "Logistica e magazzini", "Software e IT", "Studi dentistici"];
 const QUANTITIES = [10, 25, 50] as const;
 
 type Mode = "opportunity" | "target";
@@ -165,6 +165,15 @@ export function OpportunityDemo({ offers, signalPrices, freeCredits, freeMax }: 
                 {offer && <span className="text-xs text-muted">Cerchiamo aziende con {offer.lookFor}.</span>}
               </label>
             )}
+            {opp && (
+              <button
+                type="button"
+                onClick={() => update({ mode: "target", sector: cfg.sector || SECTORS[0] })}
+                className="-mt-2 self-start text-left text-xs font-medium text-ledger underline-offset-2 hover:underline"
+              >
+                Vendi altro (edilizia, pulizie, logistica…)? Prova la ricerca in target →
+              </button>
+            )}
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="font-medium">{opp ? "2. Dove?" : "1. Dove?"}</span>
               <select className={field} value={cfg.region} onChange={(e) => update({ region: e.target.value })}>
@@ -172,7 +181,7 @@ export function OpportunityDemo({ offers, signalPrices, freeCredits, freeMax }: 
               </select>
             </label>
             <label className="flex flex-col gap-1.5 text-sm">
-              <span className="font-medium">{opp ? "3. In quale settore?" : "2. In quale settore?"}</span>
+              <span className="font-medium">{opp ? "3. In quale settore?" : "2. Che aziende cerchi?"}</span>
               <select className={field} value={cfg.sector} onChange={(e) => update({ sector: e.target.value })}>
                 {opp && <option value="">Tutti i settori</option>}
                 {SECTORS.map((s) => <option key={s}>{s}</option>)}

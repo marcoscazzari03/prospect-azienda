@@ -50,8 +50,8 @@ const KINDS: { kind: SearchKind; title: string; text: string; example: string; i
   {
     kind: "standard",
     title: "Trova aziende in target",
-    text: "Aziende in base a settore, zona e dimensione, con sito ed email aziendale.",
-    example: "Es. studi dentistici in Lombardia",
+    text: "Per qualunque settore: aziende in base a settore, zona e dimensione, con sito e contatto aziendale.",
+    example: "Es. hotel in Veneto per un'impresa di pulizie",
     icon: "target",
   },
   {
@@ -64,7 +64,8 @@ const KINDS: { kind: SearchKind; title: string; text: string; example: string; i
 ];
 
 // Esempi rapidi sotto il settore: riempiono il campo con parole che il database riconosce.
-const POPULAR_INDUSTRIES = ["Software house", "Agenzie di marketing", "Studi dentistici", "Studi legali", "Aziende manifatturiere"];
+// Di settori diversi: clienti tipici di chi vende servizi digitali e di chi vende altro (pulizie, edilizia, forniture).
+const POPULAR_INDUSTRIES = ["Hotel", "Ristoranti", "Aziende manifatturiere", "Commercio all'ingrosso", "Studi dentistici", "Software house"];
 
 // Paesi sempre visibili (gli altri sotto «Altri paesi»).
 const MAIN_COUNTRIES = ["IT", "ES", "FR", "DE", "CH"] as const;
@@ -410,6 +411,20 @@ export function SearchWizard({
                     </span>
                   </button>
                 ))}
+                {/* Chi vende fuori da queste aree: niente segnali per ora, ricerca in target. */}
+                <button
+                  type="button"
+                  onClick={() => chooseKind("standard")}
+                  className="flex items-start gap-3 rounded-xl border border-dashed border-ink-2/40 bg-paper p-4 text-left transition-colors hover:border-ink-2"
+                >
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper-2 text-ink-2">
+                    <Icon name="target" className="h-5 w-5" />
+                  </span>
+                  <span>
+                    <span className="block font-semibold">Vendi altro?</span>
+                    <span className="mt-0.5 block text-xs text-ink-2">Edilizia, pulizie, logistica, forniture… Per il tuo settore usa la ricerca in target →</span>
+                  </span>
+                </button>
               </div>
             </div>
 
