@@ -321,6 +321,12 @@ all'architettura; il resto si decide con i clienti.
 - [ ] Sicurezza: siamo a posto? Ripassare l'audit dell'11/10 (report non pubblicato) e quello che è cambiato dopo
       (2FA, archiviazione ed eliminazione, moduli di contatto, nuove migrazioni 040–045, homepage), più la Fase 1 di
       `08-messa-in-produzione.md` (2FA sugli account dei servizi, chiave Anthropic dedicata).
+- [ ] Pagina «Sicurezza e privacy» sul sito (dopo l'analisi di sicurezza qui sopra, per scrivere solo cose verificate):
+      fonti dei dati e niente dati di persone, dove stanno i server (controllare la regione di Supabase: UE è un
+      argomento forte), pagamenti con Stripe, verifica in due passaggi, come chiedere la cancellazione, DPA su
+      richiesta. Certificazioni (ISO 27001, SOC 2, GDPR): non ora (19/10), da rivalutare con clienti medio-grandi.
+- [ ] DPA (accordo sul trattamento dei dati) pronto da firmare per i clienti: domanda 11-bis in
+      `09-domande-consulenti.md`, insieme a una sintesi del parere legale da mostrare.
 - [ ] Motore: si può ottimizzare? Ci sono parti inutilizzate? Già visto: nel workflow «Lead Engine | Search (v1)»
       i nodi «OpenAI (pianificazione)» e «Ricerca prospect AI» non sono collegati a niente; i rami dei referenti
       (spenti dal 18/10) e RocketReach/Icypeas restano nel flusso. Contare costi e tempi per nodo dalle esecuzioni.

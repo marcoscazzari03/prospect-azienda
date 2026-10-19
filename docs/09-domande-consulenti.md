@@ -110,6 +110,10 @@ regola consolidata.
    per contatto in un periodo)?
 10. Conservazione nel magazzino per 24 mesi con riverifica: periodo accettabile?
 11. Serve una **DPIA**? Serve un registro dei trattamenti (lo prepariamo noi su un modello)?
+11-bis. **Accordo sul trattamento dei dati (DPA) per i clienti**: ci serve un modello pronto da firmare
+    da dare alle agenzie che lo chiedono (e per i dati dei loro account: utenti, note, liste)? Che ruoli
+    indica, visto che sui lead il cliente è titolare autonomo? Possiamo avere anche una breve sintesi del
+    parere da mostrare ai clienti («uso dei dati verificato con il nostro consulente legale»)?
 
 ### D. Invio di email commerciali da parte dei clienti
 12. Art. 130 Codice privacy (consenso per comunicazioni commerciali con mezzi automatizzati):
