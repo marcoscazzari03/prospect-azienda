@@ -84,19 +84,22 @@ export function nextRepeatAt(repeat: Exclude<Repeat, "none">, from: Date, now = 
 export type SearchInput = z.infer<typeof searchInputSchema>;
 
 // Il target salvato nel database e inviato al motore.
+// Ricerca con segnali: dimensione, fatturato, parole chiave aggiuntive e note non si usano,
+// perché le aziende del database non si possono filtrare così (il wizard non li chiede).
 export function toTarget(input: SearchInput) {
+  const signals = input.signals.codes.length > 0;
   return {
     industry: input.industry,
     industry_keywords: input.industryKeywords,
     countries: input.countries,
     country_names: input.countries.map((c) => COUNTRY_NAME[c]),
     regions: input.regions,
-    company_size: input.companySizes,
-    revenue_range: input.revenueRange,
+    company_size: signals ? [] : input.companySizes,
+    revenue_range: signals ? "" : input.revenueRange,
     roles: input.emailMode === "company_only" ? [] : input.roles,
-    keywords: input.keywords,
+    keywords: signals ? [] : input.keywords,
     exclude_keywords: input.excludeKeywords,
-    notes: input.notes,
+    notes: signals ? "" : input.notes,
     contact: input.emailMode === "company_only" ? input.contact : "email_only",
     ...(input.signals.codes.length ? { signals: toSignalsTarget(input.signals) } : {}),
   };

@@ -30,6 +30,14 @@ describe("segnali nella ricerca (fase 3)", () => {
     expect("signals" in t).toBe(false);
   });
 
+  it("con i segnali niente filtri che il database non sa applicare", () => {
+    const extra = { companySizes: ["11-50"], revenueRange: "1-10 milioni", keywords: ["export"], notes: "solo B2B", excludeKeywords: ["franchising"] };
+    const opp = toTarget(searchInputSchema.parse({ ...base, ...extra, signals: { codes: ["no_https"] } }));
+    expect([opp.company_size, opp.revenue_range, opp.keywords, opp.notes, opp.exclude_keywords]).toEqual([[], "", [], "", ["franchising"]]);
+    const target = toTarget(searchInputSchema.parse({ ...base, ...extra }));
+    expect([target.company_size, target.revenue_range, target.keywords, target.notes]).toEqual([["11-50"], "1-10 milioni", ["export"], "solo B2B"]);
+  });
+
   it("annunci: famiglie con i titoli in tutte le lingue, senza doppioni", () => {
     const input = searchInputSchema.parse({ ...base, signals: { codes: ["job_ad"], jobFamilies: ["it_systems"] } });
     const s = toTarget(input).signals!;

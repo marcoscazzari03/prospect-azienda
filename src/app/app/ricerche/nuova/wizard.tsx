@@ -304,7 +304,7 @@ export function SearchWizard({
     ["Settore", showIndustry ? industry.trim() || <em key="i" className="text-muted">Non specificato</em> : "Tutti i settori"],
     ["Paesi", countries.length ? countries.map(countryName).join(", ") : <em key="c" className="text-muted">Nessuno</em>],
     ["Regioni", regionList.length ? regionList.join(", ") : <em key="r" className="text-muted">Tutto il paese</em>],
-    ["Dimensione", sizes.length ? `${sizes.join(", ")} dipendenti` : <em key="d" className="text-muted">Qualsiasi</em>],
+    ["Dimensione", opportunity ? "Piccole e medie imprese" : sizes.length ? `${sizes.join(", ")} dipendenti` : <em key="d" className="text-muted">Qualsiasi</em>],
     ...(peopleOn && mode !== "company_only"
       ? [["Ruoli", roles.length || customRoles.length ? [...roles, ...customRoles].join(", ") : <em key="o" className="text-muted">Non specificato</em>] as [string, ReactNode]]
       : []),
@@ -574,6 +574,13 @@ export function SearchWizard({
               <SectionTitle icon="pin" htmlFor="regions" title="Regione o città" text="Facoltativo. Più zone separate da virgola." />
               <Input id="regions" name="regions" value={regions} onChange={(e) => setRegions(e.target.value)} placeholder="Es. Milano, Torino, Lombardia" className="mt-3" />
             </div>
+            {/* Opportunità: dimensione, fatturato, parole chiave aggiuntive e note non si chiedono,
+                perché le aziende del database non si possono filtrare così (solo PMI, d'ufficio). */}
+            {opportunity ? (
+              <div>
+                <SectionTitle icon="building" title="Dimensione aziendale" text="Piccole e medie imprese: le grandi aziende e i gruppi le escludiamo noi." />
+              </div>
+            ) : (
             <div>
                 <SectionTitle icon="building" title="Dimensione aziendale" text="Facoltativa: senza scelta, qualsiasi dimensione." />
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -590,15 +597,16 @@ export function SearchWizard({
                     </label>
                   ))}
                 </div>
-                {sizes.length > 0 && !opportunity && (
+                {sizes.length > 0 && (
                   <p className="mt-2 text-xs text-stamp-ink">La dimensione la verifichiamo sul web: la ricerca può richiedere qualche minuto in più.</p>
                 )}
               </div>
+            )}
           </div>
 
           <div className="border-t border-line pt-5">
             <button type="button" onClick={() => setAdvanced(!advanced)} aria-expanded={advanced} className="flex w-full items-center justify-between gap-3 text-left">
-              <SectionTitle icon="filter" title="Filtri avanzati (facoltativi)" text="Fatturato, parole chiave, esclusioni e note per affinare la ricerca." />
+              <SectionTitle icon="filter" title="Filtri avanzati (facoltativi)" text={opportunity ? "Esclusioni per affinare la ricerca." : "Fatturato, parole chiave, esclusioni e note per affinare la ricerca."} />
               <Icon name="chevron" className={cx("h-5 w-5 shrink-0 text-muted transition-transform", advanced && "rotate-180")} />
             </button>
             <div className={cx("mt-4 grid gap-4 rounded-xl bg-paper-2/60 p-4 sm:grid-cols-2", !advanced && "hidden")}>
@@ -610,6 +618,8 @@ export function SearchWizard({
               <Field label="Da escludere" htmlFor="excludeKeywords" hint="Aziende con queste parole non entrano nella ricerca.">
                 <Input id="excludeKeywords" name="excludeKeywords" defaultValue={defaults.excludeKeywords?.join(", ")} placeholder="Es. franchising, multinazionali" />
               </Field>
+              {!opportunity && (
+                <>
               <Field label="Fatturato indicativo" htmlFor="revenueRange" hint="Usato quando il dato è pubblico.">
                 <Input id="revenueRange" name="revenueRange" defaultValue={defaults.revenueRange} placeholder="Es. 1-10 milioni €" />
               </Field>
@@ -621,6 +631,8 @@ export function SearchWizard({
                   <Textarea id="notes" name="notes" maxLength={600} defaultValue={defaults.notes} className="min-h-20" />
                 </Field>
               </div>
+                </>
+              )}
               {!opportunity && (
                 <p className="text-xs text-muted sm:col-span-2">Fatturato, parole chiave aggiuntive e note li verifichiamo sul web: la ricerca può richiedere qualche minuto in più.</p>
               )}
