@@ -14,6 +14,13 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 - [x] Motore: ruoli con alternative e sinonimi (es. «Titolare / CEO»)
 - [x] Casella Hostinger leads@weborastudio.it (19/10, provata). Piano «Starter Business Email» in prova gratuita fino al
       19/02/2027 con rinnovo automatico: controllare il prezzo del rinnovo prima della scadenza.
+- [ ] Logo accanto al mittente: account Google creato con leads@weborastudio.it («Usa il tuo indirizzo email attuale»)
+      e logo Webora come foto profilo (lo vedono i destinatari Gmail). BIMI (tutte le caselle, serve DMARC
+      quarantine/reject e un certificato del marchio a pagamento): solo più avanti, con più volume.
+- [ ] Firma con il logo per leads@ nella webmail di Hostinger (email della beta scritte a mano).
+- [ ] Email dell'app più belle: oggi sono solo testo (`src/lib/server/email.ts`). Versione HTML con logo e grafica
+      Webora (con la versione testo per chi non legge l'HTML), e stessi modelli per le email di accesso nel pannello
+      di Supabase (conferma, reset password, magic link).
 
 ## Prodotto
 - [x] Scadenza automatica dei crediti (si usano prima quelli che scadono prima; migrazione `20261010000004_credit_expiry.sql`)
