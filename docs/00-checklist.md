@@ -45,9 +45,9 @@ Ultimo aggiornamento: 19/10/2026.
 19b. ~~**Io** – Segnale «Senza HTTPS»: falsi positivi (controllo sul dominio nudo invece che sul www, catena
     incompleta ed errori di handshake contati come difetto). Ora controlla l'host del sito e conta solo
     certificato scaduto, autofirmato o di un altro sito~~ (19/10, workflow aggiornati).
-19c. **Tu** – Pubblicare «Lead Engine | Search (v1)» e «Aziende | Controllo siti»; poi eseguire
-    `supabase/queries/https_ricontrollo.sql` (prima il conteggio, poi la correzione): le vecchie prove
-    tornano «non determinabile» e quelle aziende vengono ricontrollate per prime.
+19c. ~~**Tu** – Pubblicati motore e «Aziende | Controllo siti»; eseguita `https_ricontrollo.sql`: 341 prove vecchie
+    tornate «non determinabile» e in ricontrollo~~ (19/10). Resta: rilanciare la parte 1 dopo ~3 ore e
+    guardare quante restano e con che motivo.
 20. **Insieme** – Alla prima ricerca vera: controllare le nuove regole delle email (reservations@, albergo…@, domini
     fratelli).
 21. **Tu** – Giudicare a mano le 24 aziende con il solo modulo di contatto (query `moduli.sql`).
