@@ -73,8 +73,14 @@ export async function requireViewer(): Promise<Viewer> {
   return viewer;
 }
 
+// L'admin deve avere la verifica in due passaggi e averla usata in questa sessione (ripasso del
+// 19/10): con la sola password un admin potrebbe toglierla ai clienti.
 export async function requireAdmin(): Promise<Viewer> {
   const viewer = await requireViewer();
   if (!viewer.isAdmin) redirect("/app");
+  const { data: aal } = await (await createClient()).auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.currentLevel !== "aal2") {
+    redirect(aal?.nextLevel === "aal2" ? "/accedi/verifica?next=/admin" : "/app/account/sicurezza");
+  }
   return viewer;
 }

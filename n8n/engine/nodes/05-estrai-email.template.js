@@ -14,7 +14,8 @@ const FONTE = __FONTE__;
 
 let html = String($json.html ?? '');
 
-const cleanHost = (raw) => String(raw ?? '').trim().toLowerCase()
+// Indirizzi con «\\» o «@» nascondono un altro host (ripasso di sicurezza del 19/10): nessun host.
+const cleanHost = (raw) => /[\\@]/.test(String(raw ?? '')) ? '' : String(raw ?? '').trim().toLowerCase()
   .replace(/^https?:\/\//i, '').replace(/^\/\//, '')
   .split('/')[0].split('?')[0].split('#')[0]
   .replace(/^www\./, '').replace(/:\d+$/, '');

@@ -1,0 +1,19 @@
+import "server-only";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+// Limite di frequenza nel database (migrazione 046): true se c'è ancora posto, e registra l'evento.
+// Con record = false controlla soltanto. Se il database non risponde lascia passare: un limite
+// non deve bloccare il servizio.
+export async function rateHit(key: string, kind: string, windowSeconds: number, max: number, record = true) {
+  const { data, error } = await createAdminClient().rpc("rate_hit", {
+    p_key: key, p_kind: kind, p_window: `${windowSeconds} seconds`, p_max: max, p_record: record,
+  });
+  if (error) {
+    console.error("rate_hit", kind, error.message);
+    return true;
+  }
+  return data !== false;
+}
+
+// Codice della verifica in due passaggi: al massimo 5 errori in 15 minuti per utente.
+export const MFA_FAILURES = { windowSeconds: 15 * 60, max: 5 } as const;

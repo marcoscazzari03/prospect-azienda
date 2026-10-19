@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireViewer } from "@/lib/server/dal";
+import { MFA_FAILURES, rateHit } from "@/lib/server/rate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { env } from "@/lib/env";
@@ -97,15 +98,21 @@ export async function confirmMfa(_: AccountState, form: FormData): Promise<Accou
 
 // Disattivazione: serve un codice valido dell'app (chi ha solo la password non può toglierla).
 export async function disableMfa(_: AccountState, form: FormData): Promise<AccountState> {
-  await requireViewer();
+  const viewer = await requireViewer();
   const code = codeSchema.safeParse(form.get("code"));
   if (!code.success) return { error: code.error.issues[0]?.message };
   const supabase = await createClient();
   const { data: list } = await supabase.auth.mfa.listFactors();
   const factors = (list?.totp ?? []).filter((f) => f.status === "verified");
   if (!factors.length) return { info: "La verifica in due passaggi non è attiva." };
+  if (!(await rateHit(viewer.user.id, "mfa_fail", MFA_FAILURES.windowSeconds, MFA_FAILURES.max, false))) {
+    return { error: "Troppi codici non validi. Riprova tra 15 minuti." };
+  }
   const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factors[0].id, code: code.data });
-  if (error) return { error: "Codice non valido o scaduto." };
+  if (error) {
+    await rateHit(viewer.user.id, "mfa_fail", MFA_FAILURES.windowSeconds, MFA_FAILURES.max);
+    return { error: "Codice non valido o scaduto." };
+  }
   for (const f of factors) {
     const { error: e } = await supabase.auth.mfa.unenroll({ factorId: f.id });
     if (e) return { error: "Non è stato possibile disattivarla. Riprova." };

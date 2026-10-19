@@ -764,6 +764,9 @@ isOneToOne: false
 "forget_deliveries":
 { Args: { "p_ids": string[],"p_org": string }; Returns: number
                            },
+"rate_hit":
+{ Args: { "p_key": string,"p_kind": string,"p_window": string,"p_max": number,"p_record"?: boolean }; Returns: boolean
+                           },
 "forget_search":
 { Args: { "p_org": string,"p_search": string }; Returns: number
                            },

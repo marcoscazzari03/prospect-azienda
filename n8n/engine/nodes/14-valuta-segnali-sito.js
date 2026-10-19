@@ -29,6 +29,7 @@ if (base._serve_referente && !SCANSIONE) {
   const origine = (String(base.website).match(/^(https?:\/\/[^\/?#]+)/i) || [])[1] || '';
   const assoluto = (h) => /^https?:\/\//i.test(h) ? h : h.startsWith('//') ? 'https:' + h : h.startsWith('/') ? origine + h : origine + '/' + h.replace(/^\.\//, '');
   const link = [...html.matchAll(/href\s*=\s*["']([^"'#]+)["']/gi)].map(m => assoluto(m[1].trim()))
+    .filter(u => !/[\\@]/.test(u))
     .filter(u => { const h = u.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split(/[/?#:]/)[0]; return dom && (h === dom || h.endsWith('.' + dom)); })
     .filter(u => !/\.(pdf|jpe?g|png|gif|svg|webp|zip|css|js)(\?|$)/i.test(u))
     .filter(u => u.replace(/\/+$/, '') !== String(base.website).replace(/\/+$/, ''));

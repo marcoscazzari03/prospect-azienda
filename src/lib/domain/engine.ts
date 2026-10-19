@@ -176,11 +176,41 @@ export function reserveCompaniesForDatabase(
 // email, ma con il modulo di contatto sul loro sito, diventano lead. Il database le consegna
 // solo se la ricerca ha l'opzione (target.contact) e se il modulo è sul dominio dell'azienda.
 // Punteggio più basso delle aziende con email, che restano davanti nell'ordine di consegna.
+// URL sul sito dell'azienda (dominio o suo sottodominio), solo http(s), senza credenziali né porte
+// insolite. Usato per i moduli di contatto e per i siti importati (ripasso di sicurezza del 19/10).
+const DOMAIN_RE = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/;
+export function urlOnDomain(raw: unknown, domain: unknown) {
+  const d = String(domain ?? "").trim().toLowerCase();
+  const s = String(raw ?? "").trim();
+  if (!DOMAIN_RE.test(d) || !/^https?:\/\//i.test(s) || /[\\\s]/.test(s)) return false;
+  try {
+    const u = new URL(s);
+    if (u.username || u.password || (u.port && u.port !== "80" && u.port !== "443")) return false;
+    const h = u.hostname.toLowerCase();
+    return h === d || h.endsWith(`.${d}`);
+  } catch {
+    return false;
+  }
+}
+
+// Toglie dai lead i moduli di contatto che non stanno sul sito dell'azienda.
+export function dropForeignContactForms(leads: unknown[] | undefined) {
+  type L = { company?: { domain?: string; contact_form?: string } };
+  return (leads ?? []).map((l) => {
+    const lead = l as L;
+    const form = lead?.company?.contact_form;
+    if (!form || urlOnDomain(form, lead.company?.domain)) return l;
+    const { contact_form: _drop, ...company } = lead.company ?? {};
+    void _drop;
+    return { ...(l as object), company };
+  });
+}
+
 export function formOnlyLeads(rejected: unknown[] | undefined) {
   type R = { reason?: string; company?: { domain?: string; contact_form?: string }; sources?: { discovery_url?: string } };
   return (rejected ?? [])
     .map((r) => r as R)
-    .filter((r) => r?.reason === "nessuna_email" && r.company?.domain && /^https?:\/\//i.test(String(r.company?.contact_form ?? "")))
+    .filter((r) => r?.reason === "nessuna_email" && urlOnDomain(r.company?.contact_form, r.company?.domain))
     .map((r) => ({
       ...r,
       quality: { score: 45, checks: { official_site: true, discovery_source: Boolean(r.sources?.discovery_url), contact_form: true } },

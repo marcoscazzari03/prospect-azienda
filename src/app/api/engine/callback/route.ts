@@ -6,7 +6,7 @@ import { safeEqual, sha256Hex } from "@/lib/server/crypto";
 import { afterResults, saveReserveCompanies } from "@/lib/server/searches";
 import { checkMailboxes } from "@/lib/server/email-check";
 import { applyMailboxChecks } from "@/lib/domain/mailbox";
-import { formOnlyLeads, type ApplyResult } from "@/lib/domain/engine";
+import { dropForeignContactForms, formOnlyLeads, type ApplyResult } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 
 // Eventi dal motore n8n (vedi docs/03-contratto-motore.md).
@@ -127,6 +127,7 @@ export async function POST(request: Request) {
     if (missedError) console.error("referente_missed_at", missedError.message);
   }
 
+  payload.leads = dropForeignContactForms(payload.leads);
   const { data, error } = await db.rpc("apply_engine_results", {
     p_run: evt.run_id,
     p_token_hash: tokenHash,

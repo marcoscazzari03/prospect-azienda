@@ -38,7 +38,7 @@ export async function saveLeadNotes(_: LeadActionState, form: FormData): Promise
   const viewer = await requireViewer();
   const p = z.object({ id: uuid, notes: z.string().trim().max(2000) }).safeParse({ id: form.get("deliveryId"), notes: form.get("notes") ?? "" });
   if (!p.success) return { error: "Nota troppo lunga (massimo 2.000 caratteri)." };
-  const { error } = await createAdminClient().from("deliveries").update({ notes: p.data.notes }).eq("id", p.data.id).eq("org_id", viewer.org.id);
+  const { error } = await createAdminClient().from("deliveries").update({ notes: p.data.notes }).eq("id", p.data.id).eq("org_id", viewer.org.id).is("deleted_at", null);
   return error ? { error: "Non salvata, riprova." } : { info: "Nota salvata." };
 }
 

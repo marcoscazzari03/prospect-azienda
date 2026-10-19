@@ -45,7 +45,8 @@ const daLeggere = node({
   version: 2,
   config: {
     name: 'Homepage da leggere',
-    parameters: { jsCode: "return ($input.first().json.companies || []).map(c => ({ json: { company_id: c.company_id, company_name: c.company_name, url: c.website } }));" }
+    // Solo siti http(s) senza credenziali, porte o barre rovesciate (ripasso di sicurezza del 19/10).
+    parameters: { jsCode: "const ok = (w) => /^https?:[/][/]/i.test(w) && !w.includes('@') && !w.includes(String.fromCharCode(92)) && !/^https?:[/][/][^/]*:/i.test(w); return ($input.first().json.companies || []).filter(c => ok(String(c.website || ''))).map(c => ({ json: { company_id: c.company_id, company_name: c.company_name, url: c.website } }));" }
   },
   output: [{ company_id: '00000000-0000-4000-8000-000000000000', company_name: 'Var Group', url: 'https://vargroup.it' }]
 });

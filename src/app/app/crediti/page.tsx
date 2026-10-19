@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPublicPlans } from "@/lib/server/catalog";
 import { stripeEnabled } from "@/lib/server/stripe";
 import { formatEur, formatNumber } from "@/lib/domain/pricing";
+import { safeHttpUrl } from "@/lib/domain/safe-url";
 import { buyPlan, openPortal } from "../actions";
 
 export const metadata: Metadata = { title: "Crediti e piano" };
@@ -104,7 +105,7 @@ export default async function CreditsPage({ searchParams }: PageProps<"/app/cred
                 </div>
                 <div className="flex items-center gap-3">
                   <p className="font-mono">{formatEur(p.amount_cents)}</p>
-                  {p.invoice_url && <a href={p.invoice_url} target="_blank" rel="noopener noreferrer" className="text-xs text-ledger underline">Ricevuta</a>}
+                  {safeHttpUrl(p.invoice_url) && <a href={safeHttpUrl(p.invoice_url)!} target="_blank" rel="noopener noreferrer" className="text-xs text-ledger underline">Ricevuta</a>}
                 </div>
               </div>
             ))}

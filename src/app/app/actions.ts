@@ -11,6 +11,7 @@ import type { Json } from "@/lib/supabase/database.types";
 import { startSearch } from "@/lib/server/searches";
 import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
 import { RATE_LIMITS, SEARCH_RULES } from "@/lib/config";
+import { rateHit } from "@/lib/server/rate";
 import { SIGNAL_RULES, offerChoice } from "@/lib/domain/signals";
 import { getEnabledOffers } from "@/lib/server/offer-rules";
 
@@ -116,6 +117,8 @@ export type Availability = { count: number; databaseOnly: boolean; kind: "opport
 // ricerche «semplici» (settore e zona), le altre si cercano sul web.
 export async function searchAvailability(form: FormData): Promise<Availability> {
   const viewer = await requireViewer();
+  // Query pesante: al massimo 60 conteggi al minuto per account (il wizard li chiama a ogni modifica).
+  if (!(await rateHit(viewer.org.id, "availability", 60, 60))) return null;
   const parsed = await parseSearchForm(form);
   if ("error" in parsed) return null;
   const target = toTarget(parsed.input);
@@ -165,7 +168,7 @@ export async function reportLead(_: ActionState, form: FormData): Promise<Action
 
   // Lettura con la RLS dell'utente: verifica che il lead sia suo.
   const supabase = await createClient();
-  const { data: delivery } = await supabase.from("deliveries").select("id, search_id, delivered_at, signals:data->signals").eq("id", deliveryId).maybeSingle();
+  const { data: delivery } = await supabase.from("deliveries").select("id, search_id, delivered_at, signals:data->signals").eq("id", deliveryId).is("deleted_at", null).maybeSingle();
   if (!delivery) return { error: "Lead non trovato." };
   if (reason === "wrong_signal" && !(Array.isArray(delivery.signals) && delivery.signals.length)) {
     return { error: "Questo lead non è stato consegnato con un segnale." };

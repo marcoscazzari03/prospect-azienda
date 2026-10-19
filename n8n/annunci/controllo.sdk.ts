@@ -88,7 +88,8 @@ const apri = node({
   config: {
     name: 'Apri sito',
     parameters: {
-      url: expr("{{ $('Siti da controllare').item.json.website }}"),
+      // Dal dominio validato, non dal sito salvato (ripasso di sicurezza del 19/10).
+      url: expr("https://{{ $('Siti da controllare').item.json.domain }}"),
       sendHeaders: true,
       headerParameters: { parameters: [
         { name: 'User-Agent', value: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36' },

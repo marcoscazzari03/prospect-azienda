@@ -87,6 +87,14 @@ const SOLO_ELENCO = new Set(['amenity', 'tourism', 'healthcare', 'industrial']);
 const NON_AZIENDALI = /(^|\.)(facebook|instagram|twitter|x|youtube|tiktok|linkedin|wikipedia|tripadvisor|booking|airbnb|google|goo|linktr|paginegialle|paginebianche|virgilio|subito|amazon|ebay|etsy|business\.site|wixsite|blogspot|wordpress|altervista|jimdo|weebly|webnode|github)\.[a-z.]+$|\.(gov|edu)\.it$|(^|\.)(comune|regione|provincia|asl|ausl|usl|unibo|unimore|unipr|unife)\.|(^|\.)gov\.it$/;
 
 const dominio = (url) => String(url || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\d?\./, '').split(/[/?#:\s]/)[0];
+// Sito da aprire nei controlli: quello di OSM solo se è davvero sul dominio (niente credenziali, porte
+// o barre rovesciate che nascondono un altro host), altrimenti https://dominio. Ripasso del 19/10.
+const sitoSicuro = (sito, dom) => {
+  const s = String(sito || '').trim();
+  if (!/^https?:\/\//i.test(s) || /[\\@\s]/.test(s)) return `https://${dom}`;
+  const host = s.toLowerCase().replace(/^https?:\/\//, '').split(/[/?#]/)[0];
+  return /:/.test(host) || !(host === dom || host.endsWith('.' + dom)) ? `https://${dom}` : s.slice(0, 300);
+};
 const pulisci = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
 const trovate = [];
@@ -123,7 +131,7 @@ $input.all().forEach((item, i) => {
     const mappa = SETTORI[tipo]?.[valore];
     if (!mappa) stats.unmapped++;
     trovate.push({
-      domain: dom, name: nome, website: /^https?:\/\//i.test(sito) ? sito.slice(0, 300) : `https://${dom}`,
+      domain: dom, name: nome, website: sitoSicuro(sito, dom),
       ...(() => {
         const dichiarata = PROVINCE[String(t['addr:province'] || '').trim().toUpperCase()];
         return { city: pulisci(t['addr:city'], 80), province: dichiarata ? dichiarata[0] : provincia, region: dichiarata ? dichiarata[1] : regione };

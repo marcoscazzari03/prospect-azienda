@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { urlOnDomain } from "@/lib/domain/engine";
 import { safeEqual } from "@/lib/server/crypto";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -33,9 +34,16 @@ export async function POST(request: Request) {
   if (!authorized(request)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "aziende non valide" }, { status: 400 });
+  // Il sito si apre poi nei controlli: solo sul dominio dell'azienda, altrimenti https://dominio
+  // (un sito OSM può contenere credenziali o un altro host nascosto nell'indirizzo).
+  const companies = parsed.data.companies.map((c) => ({
+    ...c,
+    domain: c.domain.trim().toLowerCase(),
+    website: urlOnDomain(c.website, c.domain.trim().toLowerCase()) ? c.website : `https://${c.domain.trim().toLowerCase()}`,
+  }));
   const { data, error } = await createAdminClient().rpc("store_imported_companies", {
     p_source: parsed.data.source,
-    p_items: parsed.data.companies as Json,
+    p_items: companies as Json,
   });
   if (error) {
     console.error("store_imported_companies", error);
