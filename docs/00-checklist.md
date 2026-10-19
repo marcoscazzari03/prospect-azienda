@@ -15,7 +15,10 @@ Ultimo aggiornamento: 19/10/2026.
    Nota: «Prospect | Search» e «Prospect Avvocati | Search» su n8n sono di un altro progetto: non toccarli.
 3. ~~**Tu** – Pubblicare su n8n «Aziende | Popolamento OSM» (Nord prima, 8 province a notte)~~ (19/10)
 4. ~~**Tu** – Sconto per i beta tester: −30% per 12 mesi~~ (19/10)
-5. **Tu** – Scegliere 2–3 agenzie del Sud o dell'Emilia-Romagna (fonti in `10-beta.md`).
+5. ~~**Tu** – Scegliere e invitare 3 agenzie: Gopher (Torremaggiore, FG), Mutart (Napoli), Studio360 (Molfetta, BA),
+   con email personalizzate e PDF di esempi reali della loro provincia~~ (19/10, inviate da leads@).
+5b. **Insieme** – Alle risposte: account, +150 crediti beta e piano Growth dall'admin, email di benvenuto
+   (`10-beta.md`). Se non rispondono, un solo promemoria dopo 5–7 giorni lavorativi (verso il 27/10).
 6. ~~**Io** – Clausola «Riservatezza delle ricerche» nei termini~~ (19/10)
 7. ~~**Io** – Piano della beta e testi dell'invito: email, LinkedIn, benvenuto (`10-beta.md`)~~ (19/10)
 8. ~~**Tu** – Casella leads@weborastudio.it attiva e provata~~ (19/10)
