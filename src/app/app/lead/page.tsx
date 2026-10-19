@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ActionMenu } from "@/components/action-menu";
 import { ContactNotice } from "@/components/contact-notice";
+import { menuItem } from "@/components/menu-item";
 import { LeadsTable } from "@/components/leads-table";
 import { Badge, Button, ButtonLink, EmptyState, Input, PageHeader, Select, cx } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
@@ -65,10 +67,17 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
         description={archivio ? `${total} lead archiviati. Puoi ripristinarli quando vuoi.` : `${total} lead acquistati. Ogni azienda resta tua: non te la riproporremo in altre ricerche.`}
         actions={
           total ? (
-            <div className="flex gap-2">
-              <ButtonLink href={`/api/export?${exportQs("xlsx")}`} variant="secondary" prefetch={false}>Esporta Excel</ButtonLink>
-              <ButtonLink href={`/api/export?${exportQs("csv")}`} variant="ghost" prefetch={false}>CSV</ButtonLink>
-            </div>
+            <ActionMenu label="Esporta">
+              <a href={`/api/export?${exportQs("xlsx")}`} className={menuItem}>
+                <span className="font-medium">Excel</span>
+                <span className="text-xs text-muted">Con filtri e il foglio «Come usarli»</span>
+              </a>
+              <a href={`/api/export?${exportQs("csv")}`} className={menuItem}>
+                <span className="font-medium">CSV</span>
+                <span className="text-xs text-muted">Per importarli nel tuo CRM</span>
+              </a>
+              <p className="px-3 pb-1 pt-2 text-xs text-muted">Si esportano i lead mostrati, con i filtri attivi.</p>
+            </ActionMenu>
           ) : undefined
         }
       />

@@ -46,5 +46,3 @@ export function ActionMenu({ label, children, align = "right" }: { label: ReactN
   );
 }
 
-// Stile comune delle voci del menu (link e pulsanti).
-export const menuItem = "flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left text-sm hover:bg-paper-2";

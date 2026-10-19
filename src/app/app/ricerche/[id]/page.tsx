@@ -14,7 +14,8 @@ import { REPEAT_LABEL, type Repeat, type SearchTarget } from "@/lib/domain/searc
 import { describeOffer, describeOpportunity, offerByCode, signalByCode } from "@/lib/domain/signals";
 import { archiveSearch, deleteSearch, stopRepeat } from "../../actions";
 import { ConfirmSubmit } from "@/components/confirm-submit";
-import { ActionMenu, menuItem } from "@/components/action-menu";
+import { ActionMenu } from "@/components/action-menu";
+import { menuItem } from "@/components/menu-item";
 
 export const metadata: Metadata = { title: "Ricerca" };
 
@@ -61,10 +62,12 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
             {!!leads?.length && (
               <ActionMenu label="Esporta">
                 <a href={`/api/export?format=xlsx&search=${id}`} className={menuItem}>
-                  <span><span className="block font-medium">Excel</span><span className="text-xs text-muted">Con filtri e il foglio «Come usarli»</span></span>
+                  <span className="font-medium">Excel</span>
+                  <span className="text-xs text-muted">Con filtri e il foglio «Come usarli»</span>
                 </a>
                 <a href={`/api/export?search=${id}`} className={menuItem}>
-                  <span><span className="block font-medium">CSV</span><span className="text-xs text-muted">Per importarli nel tuo CRM</span></span>
+                  <span className="font-medium">CSV</span>
+                  <span className="text-xs text-muted">Per importarli nel tuo CRM</span>
                 </a>
               </ActionMenu>
             )}
@@ -74,10 +77,8 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
                   <input type="hidden" name="searchId" value={search.id} />
                   <input type="hidden" name="archive" value={search.archived_at ? "0" : "1"} />
                   <button type="submit" className={menuItem}>
-                    <span>
-                      <span className="block font-medium">{search.archived_at ? "Ripristina la ricerca" : "Archivia la ricerca"}</span>
-                      <span className="text-xs text-muted">{search.archived_at ? "Torna tra le ricerche, con i suoi lead" : "La nasconde con i suoi lead; si può ripristinare"}</span>
-                    </span>
+                    <span className="font-medium">{search.archived_at ? "Ripristina la ricerca" : "Archivia la ricerca"}</span>
+                    <span className="text-xs text-muted">{search.archived_at ? "Torna tra le ricerche, con i suoi lead" : "La nasconde con i suoi lead; si può ripristinare"}</span>
                   </button>
                 </form>
                 <form action={deleteSearch} className="mt-1 border-t border-line pt-1">
@@ -86,10 +87,8 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
                     className={cx(menuItem, "text-brick")}
                     message={`Eliminare la ricerca «${search.name}» e i suoi ${leads?.length ?? 0} lead? I dati vengono cancellati per sempre; le aziende non ti verranno riproposte e i crediti usati non tornano.`}
                   >
-                    <span>
-                      <span className="block font-medium">Elimina la ricerca</span>
-                      <span className="text-xs text-brick/70">Cancella per sempre i suoi lead</span>
-                    </span>
+                    <span className="font-medium">Elimina la ricerca</span>
+                    <span className="text-xs text-brick/70">Cancella per sempre i suoi lead</span>
                   </ConfirmSubmit>
                 </form>
               </ActionMenu>
