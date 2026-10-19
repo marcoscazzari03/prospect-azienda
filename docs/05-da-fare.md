@@ -12,7 +12,8 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 - [x] Email: Resend (dominio verificato, record su sottodomini), SMTP in Supabase, testi in italiano, notifiche app
 - [x] Stripe in modalità test (chiavi, webhook, portale clienti): acquisto di prova accreditato
 - [x] Motore: ruoli con alternative e sinonimi (es. «Titolare / CEO»)
-- [ ] Facoltativo: casella Hostinger leads@weborastudio.it per ricevere le risposte
+- [x] Casella Hostinger leads@weborastudio.it (19/10, provata). Piano «Starter Business Email» in prova gratuita fino al
+      19/02/2027 con rinnovo automatico: controllare il prezzo del rinnovo prima della scadenza.
 
 ## Prodotto
 - [x] Scadenza automatica dei crediti (si usano prima quelli che scadono prima; migrazione `20261010000004_credit_expiry.sql`)

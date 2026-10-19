@@ -78,7 +78,7 @@ parere, se lo consente.
 - [x] «Email generiche incluse»: tetto dei referenti a 1,6 volte i lead + 2 (giri dalla riserva)
 - [x] Fonti citate: «© OpenStreetMap contributors (ODbL)» nella pagina fonti/informativa
 - [ ] Testi del sito coerenti con il parere legale (niente promesse di «email pronte per campagne»)
-- [ ] **Tu** – Casella leads@weborastudio.it per ricevere risposte e richieste di assistenza
+- [x] **Tu** – Casella leads@weborastudio.it per ricevere risposte e richieste di assistenza (19/10)
 
 ## Fase 5 – Controllo e allarmi
 
