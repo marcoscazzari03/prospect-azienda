@@ -75,7 +75,10 @@ const GENERICHE = new Set([
   'inquiries', 'inquiry', 'general', 'geral', 'sales', 'vendite', 'commerciale', 'business', 'ventas', 'vertrieb', 'verkauf',
   'marketing', 'ordini', 'orders', 'order', 'support', 'assistenza', 'service', 'servizioclienti', 'customerservice',
   'team', 'studio', 'company', 'azienda', 'firma', 'direzione', 'management', 'board', 'export', 'import', 'shop', 'store',
-  'booking', 'prenotazioni', 'kanzlei', 'kancelaria', 'cabinet', 'despacho', 'bufete', 'biuro', 'kontor', 'web', 'mailbox'
+  'booking', 'prenotazioni', 'kanzlei', 'kancelaria', 'cabinet', 'despacho', 'bufete', 'biuro', 'kontor', 'web', 'mailbox',
+  // Strutture ricettive (collaudo del 19/10: reservations@vittoriahotels.it scartata come «persona»).
+  'reservations', 'reservation', 'reservas', 'reserva', 'reservierung', 'prenota', 'prenotazione', 'ricevimento',
+  'accoglienza', 'frontdesk', 'welcome', 'hotel', 'albergo', 'residence', 'camping', 'agriturismo'
 ]);
 // Caselle privacy anche composte: contact.dataprivacy@, privacy-office@, dpo.italia@.
 const PRIVACY_PAROLE = /privacy|gdpr|datenschutz|dataprotection|protecciondedatos|datiperson/;
@@ -99,9 +102,29 @@ const conNome = (local) => {
 };
 
 // Caselle di ufficio anche se contengono un nome: segreteria.rossi@, studiodentisticorossi@, info-rossi@.
-const PREFISSI_UFFICIO = ['segreteria', 'studio', 'ufficio', 'amministrazione', 'reception', 'info', 'contatti', 'office', 'direzione'];
+const PREFISSI_UFFICIO = ['segreteria', 'studio', 'ufficio', 'amministrazione', 'reception', 'info', 'contatti', 'office', 'direzione',
+  'albergo', 'hotel', 'booking', 'prenota', 'reserv', 'ricevimento', 'accoglienza'];
+// Nome del dominio senza estensione (zoello.it -> zoello, albergo.mo.it -> albergo, magnagallo-hotel.com -> magnagallohotel).
+const etichetta = (d) => {
+  const l = String(d ?? '').toLowerCase().replace(/^www\./, '').split('.');
+  const x = l.length >= 3 && l[l.length - 2].length <= 3 ? l[l.length - 3] : l[Math.max(l.length - 2, 0)];
+  return String(x ?? '').replace(/[^a-z0-9]/g, '');
+};
+const nomeSito = etichetta(dominio);
+// Casella col nome del sito (zoello@zoello.it): è dell'azienda.
 const diUfficio = (local) => local.split(/[._-]+/).some(t => GENERICHE.has(t.replace(/[0-9]+$/, '')))
-  || PREFISSI_UFFICIO.some(x => local.startsWith(x));
+  || PREFISSI_UFFICIO.some(x => local.startsWith(x))
+  || (nomeSito.length >= 4 && local.replace(/[^a-z0-9]/g, '') === nomeSito);
+// Dominio «fratello» pubblicato sul sito ufficiale: stesso nome con un'altra estensione
+// (zoello.it / info@zoello.com) o un nome che contiene l'altro, di almeno 6 lettere
+// (magnagallo-hotel.com / info@magnagallo.it). Stessa regola di email_on_domain in SQL.
+const fratello = (dom) => {
+  const a = nomeSito, b = etichetta(dom);
+  if (!a || !b || GRATUITE.test(dom)) return false;
+  if (a === b) return a.length >= 4;
+  const [corto, lungo] = a.length < b.length ? [a, b] : [b, a];
+  return corto.length >= 6 && lungo.includes(corto);
+};
 
 // Cosa resta dell'indirizzo togliendo nome, cognome e numeri: se resta altro
 // (es. bocciacostruzionisrl@) è la casella dell'azienda, non della persona.
@@ -115,7 +138,7 @@ const punteggio = (email) => {
   const [local, dom] = email.split('@');
   if (!local || !dom || SCARTA_LOCALI.test(local) || SCARTA_DOMINI.test(dom) || ESTENSIONI.test(email)) return 0;
   if (dom.startsWith('www.') || SEGNAPOSTO.test(local) || PEC.test(dom)) return 0;
-  const delDominio = dominio && (dom === dominio || dom.endsWith('.' + dominio));
+  const delDominio = dominio && (dom === dominio || dom.endsWith('.' + dominio) || fratello(dom));
   if (delDominio) {
     if (privacy(local)) return 1;
     if (diUfficio(local)) return 4;

@@ -237,7 +237,11 @@ all'architettura; il resto si decide con i clienti.
       «nessuna_email» con il modulo.
 - [x] Migrazione 040: ricostruito il magazzino «Solo azienda» (schede senza nome dalle email generiche): la pulizia del
       18/10 aveva cancellato tutta la tabella people, comprese le schede senza nome.
-- [ ] Collaudo dell'opzione con una ricerca in target dal database (costo zero).
+- [x] Collaudo dell'opzione (19/10, Hotel Emilia-Romagna, 10 lead): 5 lead con il solo modulo; 0,30 $ per un giro AI
+      (hotel della regione nel database già tutti consegnati al cliente di prova). Wizard: «Contatto» in un passo a sé.
+- [x] Sui 5 moduli c'erano email non riconosciute: reservations@ e albergo…@ (caselle d'ufficio nuove) e domini fratelli
+      (zoello.it / info@zoello.com, magnagallo-hotel.com / info@magnagallo.it). Motore aggiornato + migrazione 041
+      (email_on_domain con la stessa regola: stesso nome 4+ lettere, nome contenuto 6+ lettere).
 
 ### C. Qualità delle opportunità
 - [ ] Punteggio interno 0–100 con regole fisse e configurabili: affidabilità della prova × attinenza al servizio

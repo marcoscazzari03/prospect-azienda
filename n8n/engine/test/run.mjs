@@ -144,7 +144,19 @@ assert.equal(tipoFam('<a href="mailto:maggiolispa@maggioli.it">x</a>'), 'generic
 assert.equal(tipoFam('<a href="mailto:maggioli@maggioli.it">x</a>'), 'generic');
 assert.equal(tipoFam('<a href="mailto:paolo.maggioli@maggioli.it">x</a>'), 'personal', 'con il nome resta nominativa');
 assert.equal(tipoFam('<a href="mailto:pmaggioli@maggioli.it">x</a>'), 'personal');
-console.log('ok  estrazione email, offuscamento, PEC/noreply scartate, pagine successive, caselle di ufficio');
+// Collaudo del 19/10 (hotel in «Solo azienda», senza nomi): caselle di prenotazione e domini fratelli.
+const tipoSito = (website, h) => run(estrai, { nodes: { P: [{ ...dedup[0], website, full_name: '', first_name: '', last_name: '' }], 'Valida richiesta': [{ ...job, email_mode: 'company_only' }] }, json: { html: h } }).json;
+assert.equal(tipoSito('https://www.vittoriahotels.it/', 'reservations@vittoriahotels.it').email_site_type, 'generic', 'reservations@: casella di ufficio');
+assert.equal(tipoSito('https://www.zoello.it/', 'albergojesuis@zoello.it').email_site_type, 'generic', 'albergo…@: casella di ufficio');
+assert.equal(tipoSito('https://www.zoello.it/', 'zoello@zoello.it').email_site_type, 'generic', 'casella col nome del sito');
+assert.equal(tipoSito('https://www.zoello.it/', 'info@zoello.com').email_site, 'info@zoello.com', 'stesso nome, altra estensione');
+assert.equal(tipoSito('https://www.magnagallo-hotel.com/', 'info@magnagallo.it').email_site, 'info@magnagallo.it', 'nome contenuto nel sito (6+ lettere)');
+assert.equal(tipoSito('https://rossi.it/', 'info@rossicatering.it').email_site, '', 'nome troppo corto: dominio non accettato');
+assert.equal(tipoSito('https://www.acme.it/', 'info@altrasocieta.it').email_site, '', 'dominio di terzi scartato');
+assert.equal(tipoSito('http://www.ilcastellaroaisassi.it/', '<a href="mailto:michele.gessani@libero.it">x</a>').email_site_type, 'generic', 'gmail/libero: generica ma casella gratuita');
+assert.equal(tipoSito('http://www.ilcastellaroaisassi.it/', '<a href="mailto:michele.gessani@libero.it">x</a>').email_site_free_provider, true, '…e segnata come gratuita (mai consegnata in «Solo azienda»)');
+assert.equal(tipoSito('https://www.mariorossi.it/', 'mario@mariorossi.it').email_site_type, 'other_person', 'nome di persona nel dominio: non è una casella d\'ufficio');
+console.log('ok  estrazione email, offuscamento, PEC/noreply scartate, pagine successive, caselle di ufficio, domini fratelli');
 
 // 4. Classificazione finale per modalità
 const classifica = src('08-classifica-e-prepara-risultati.js');
