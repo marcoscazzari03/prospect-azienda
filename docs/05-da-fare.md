@@ -317,6 +317,14 @@ all'architettura; il resto si decide con i clienti.
       un referente?
 - [ ] Prezzi: invariati per la beta.
 
+### F. Analisi da fare (chieste il 19/10)
+- [ ] Sicurezza: siamo a posto? Ripassare l'audit dell'11/10 (report non pubblicato) e quello che è cambiato dopo
+      (2FA, archiviazione ed eliminazione, moduli di contatto, nuove migrazioni 040–045, homepage), più la Fase 1 di
+      `08-messa-in-produzione.md` (2FA sugli account dei servizi, chiave Anthropic dedicata).
+- [ ] Motore: si può ottimizzare? Ci sono parti inutilizzate? Già visto: nel workflow «Lead Engine | Search (v1)»
+      i nodi «OpenAI (pianificazione)» e «Ricerca prospect AI» non sono collegati a niente; i rami dei referenti
+      (spenti dal 18/10) e RocketReach/Icypeas restano nel flusso. Contare costi e tempi per nodo dalle esecuzioni.
+
 ### Dopo la beta (non ora)
 - [ ] Monitoraggio continuo delle opportunità («nuove aziende e nuovi segnali per il tuo target»): solo se i
       clienti della beta lo chiedono.
