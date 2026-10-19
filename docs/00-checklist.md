@@ -10,11 +10,10 @@ Ultimo aggiornamento: 19/10/2026.
 1. **Tu** – Verifica in due passaggi sugli account dei servizi:
    - ~~Supabase~~ · ~~Vercel~~ · ~~GitHub~~ · ~~Stripe~~ (19/10)
    - n8n · Anthropic · Resend · Hostinger · Cloudflare (se lo usi) · Icypeas
-2. **Tu** – Chiave Anthropic: il progetto US VIRAL è chiuso, quindi la credenziale «US VIRAL - Anthropic» resta e
-   diventa solo di Webora Leads (19/10). Da fare: chiave nuova (rotazione, la vecchia è passata per l'altro
-   progetto) incollata nella stessa credenziale n8n, vecchia chiave eliminata, limite di spesa mensile (es. 50 $)
-   e avviso via email; facoltativo rinominare la credenziale in «Webora Leads - Anthropic» (poi **Io** aggiorno il
-   nome nei file del repository).
+2. ~~**Tu** – Chiave Anthropic: workspace dedicato con limite di spesa, chiave nuova creata lì e messa nella
+   credenziale n8n esistente~~ (19/10). Resta: eliminare la chiave vecchia dopo la prima prova riuscita;
+   facoltativo rinominare la credenziale in «Webora Leads - Anthropic» (poi **Io** aggiorno i file del repository).
+   Nota: «Prospect | Search» e «Prospect Avvocati | Search» su n8n sono di un altro progetto: non toccarli.
 3. **Tu** – Pubblicare su n8n «Aziende | Popolamento OSM» (Nord prima, 8 province a notte).
 4. **Tu** – Decidere lo sconto per i beta tester (proposta: −30% per 12 mesi).
 5. **Tu** – Scegliere 2–3 agenzie del Sud o dell'Emilia-Romagna (fonti in `10-beta.md`).
