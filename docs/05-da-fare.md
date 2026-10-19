@@ -246,8 +246,12 @@ all'architettura; il resto si decide con i clienti.
       (email_on_domain con la stessa regola: stesso nome 4+ lettere, nome contenuto 6+ lettere).
 
 - [ ] Verificare alla prossima ricerca reale le nuove regole delle email (reservations@, albergo…@, domini fratelli).
-- [ ] Settore: aziende fuori target finite nelle ricerche (Rossi S.p.A., distributore per hotel, in «Hotel»).
-      Rivedere come si assegna il settore dal nome/sito (parole come «per hotel», «fornitore», «distribuzione»).
+- [x] Settore: aziende fuori target finite nelle ricerche (Rossi S.p.A., «Distribuzione alimentare per ristorazione e
+      hotel», in «Hotel»). Migrazione 045: quello che segue «per / for / rivolto a / destinato a» nel settore descrive i
+      clienti e non diventa etichetta (anche i sinonimi), salvo le categorie OSM con «per» nel nome. Prompt della ricerca
+      AI («Prepara lotti»): niente fornitori, distributori, consulenti o software house del settore cercato.
+      Limiti: «Forniture alberghiere» (senza «per») resta etichettata come hotel; «Software per hotel» non esce più
+      cercando «Software per hotel» nel database (la trova la ricerca AI).
 - [ ] Da valutare: consegnare i lead con il solo modulo solo quando le aziende con email sono finite (oggi l'ordine è
       per giro). Più resa di email ma più giri AI: decidere dopo la beta.
 - Regola per i collaudi: prima di una ricerca di prova controllare che settore e zona siano nel database (il contatore

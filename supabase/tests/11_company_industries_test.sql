@@ -40,7 +40,9 @@ create temp table r11 as select store_company_industries(jsonb_build_array(
   jsonb_build_object('company_id', 'non-un-id', 'industry', 'X'))) as r;
 select pg_temp.check((select (r ->> 'classified')::int = 2 and (r ->> 'unknown')::int = 1 from r11), 'due classificate, una no');
 select pg_temp.check((select industry = 'Produzione di macchine per il packaging'
-                         and tags @> term_stems('manifatturiero metalmeccanica packaging macchine')
+                         and tags @> term_stems('manifatturiero metalmeccanica macchine')
+                         -- «per il packaging»: clienti, non settore (migrazione 045).
+                         and not tags && term_stems('packaging')
                          and industry_checked_at is not null
                       from companies where domain = 'meccanicazeta.it'), 'settore e parole nelle etichette');
 select pg_temp.check((select industry = 'Logistica' and tags @> term_stems('trasporti') from companies where domain = 'giaclassificata.it'),
