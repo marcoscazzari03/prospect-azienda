@@ -51,8 +51,8 @@ Ultimo aggiornamento: 19/10/2026.
 ## 🔵 Analisi da fare
 26. ~~**Io** – Sicurezza: ripasso dell'audit dopo le modifiche 11–19/10~~ (19/10): nessun problema grave; corretti
     limite ai codici 2FA, admin solo con 2FA, eliminazione dei lead completa, favicon, moduli e siti solo sul dominio
-    dell'azienda, controlli degli indirizzi nel motore, limiti sul contatore. Da fare tu: **migrazione 046** e
-    **pubblicare** «Lead Engine | Search (v1)», «Aziende | Controllo siti», «Annunci | Settore aziende».
+    dell'azienda, controlli degli indirizzi nel motore, limiti sul contatore. ~~Migrazione 046 eseguita e workflow
+    pubblicati~~ (19/10), app in produzione.
 26b. **Io, dopo la beta** – Motore: seguire a mano i reindirizzamenti dei siti con ricontrollo dell'indirizzo
     (oggi il filtro guarda il nome, non dove porta il rimando; impatto su n8n Cloud da verificare).
 27. **Io** – Motore: ottimizzazioni e parti non usate (nodi scollegati, rami referenti e RocketReach/Icypeas).
