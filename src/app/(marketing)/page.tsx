@@ -14,7 +14,7 @@ import { getEnabledOffers } from "@/lib/server/offer-rules";
 import { getSignalPrices } from "@/lib/server/signal-prices";
 
 // Homepage. Percorso: cosa fa (hero) → il problema → cosa ricevi → cosa cerchiamo → demo →
-// la ricerca in target → le domande giuste → prezzi → FAQ → registrazione.
+// per chi è → la ricerca in target → le domande giuste → prezzi → FAQ → registrazione.
 // La ricerca con opportunità è il prodotto in primo piano; quella in target resta accessibile.
 // Esempi e demo sono sempre dichiarati come illustrativi o simulati.
 
@@ -57,6 +57,18 @@ const ANATOMY = [
   ["Perché è nel tuo target", "Zona, dimensione indicativa e settore, confermati dal sito. Poi lo esporti in Excel o CSV, o lo segui nell'app con note, fasi e liste."],
 ] as const;
 
+// Per chi è: chi vende, a chi, con quale ricerca. `offer`: il servizio con opportunità, mostrato
+// solo se attivo; senza, la ricerca in target (vale per qualunque settore).
+const AUDIENCES = [
+  { who: "Imprese edili e impiantisti", clients: "Hotel, capannoni, uffici e negozi", example: "Hotel · Veneto" },
+  { who: "Pulizie e facility management", clients: "Uffici, studi professionali, palestre, hotel", example: "Studi professionali · Milano" },
+  { who: "Trasporti e logistica", clients: "Produttori, grossisti, negozi online", example: "Grossisti alimentari · Emilia-Romagna" },
+  { who: "Fornitori industriali", clients: "Aziende manifatturiere del tuo settore e della tua zona", example: "Carpenterie metalliche · Brescia" },
+  { who: "Agenzie per il lavoro e selezione", clients: "Aziende che stanno assumendo", offer: "recruiting" },
+  { who: "Commercialisti e consulenti", clients: "Aziende che cercano un contabile o un amministrativo", offer: "accounting" },
+  { who: "Web agency, IT e marketing", clients: "Aziende con un sito datato, senza HTTPS o con software vecchio", offer: "web_redesign" },
+] as const;
+
 const OBJECTIONS = (prices: SignalPrices, freeCredits: number) => [
   ["I dati sono affidabili?", "Ogni azienda ha il suo sito ufficiale controllato e ogni contatto la pagina da cui l'abbiamo preso. Le email sono solo caselle del dominio aziendale trovate sul sito: mai indirizzi inventati o ipotizzati."],
   ["Da dove arrivano le aziende?", "Da fonti pubbliche: i siti delle aziende, OpenStreetMap e gli annunci di lavoro pubblicati online. Per i filtri più specifici le cerchiamo anche sul web, una per una."],
@@ -95,7 +107,7 @@ export default async function HomePage() {
       <section className="ruled border-b border-line">
         <div className="mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-12 sm:px-6 md:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pb-24">
           <div className="animate-row-in">
-            <p className="mb-5 font-mono text-xs uppercase tracking-[0.18em] text-ledger">Per chi vende servizi alle aziende</p>
+            <p className="mb-5 font-mono text-xs uppercase tracking-[0.18em] text-ledger">Per chi vende alle aziende</p>
             <h1 className="font-display text-[2.6rem] font-semibold leading-[1.04] tracking-tight sm:text-6xl">
               Trova le aziende che hanno un motivo per <span className="text-ledger">sceglierti</span>.
             </h1>
@@ -188,20 +200,62 @@ export default async function HomePage() {
         <OpportunityDemo offers={offers} signalPrices={prices} freeCredits={freeCredits} freeMax={free?.max_quantity_per_search ?? 10} />
       </Section>
 
-      {/* 6. La ricerca in target (secondaria) */}
-      <Section label="Anche senza segnali" tone="card">
+      {/* 6. Per chi è: ogni settore con la ricerca in target, le opportunità dove ci sono */}
+      <Section id="per-chi-e" label="Per chi è" tone="card">
+        <div className="grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-end">
+          <Title>Vendi alle aziende? Ti aiutiamo a trovarle.</Title>
+          <p className="text-ink-2">
+            La ricerca in target funziona per qualunque settore: descrivi le aziende che vuoi come clienti e la zona. Le opportunità le
+            aggiungiamo un servizio alla volta, solo quando c&apos;è un segnale che possiamo verificare.
+          </p>
+        </div>
+        <ul className="mt-12 divide-y divide-line border-y border-line">
+          {AUDIENCES.map((a) => {
+            const offer = "offer" in a ? offers.find((o) => o.code === a.offer) : undefined;
+            return (
+              <li key={a.who} className="grid gap-x-8 gap-y-2 py-5 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)_minmax(0,1.1fr)] md:items-baseline">
+                <p className="font-medium">{a.who}</p>
+                <p className="text-ink-2">
+                  <span className="text-muted">Cerchi: </span>
+                  {a.clients}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                  {offer ? (
+                    <span className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ledger-soft px-2.5 py-1 text-xs font-medium text-ledger">
+                      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-ledger" />
+                      Con opportunità · {offer.label}
+                    </span>
+                  ) : (
+                    <>
+                      {"example" in a && <span className="text-xs text-muted">Es. {a.example}</span>}
+                      <span className="whitespace-nowrap rounded-full border border-line px-2.5 py-1 text-xs font-medium text-ink-2">In target</span>
+                    </>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-4 text-xs text-muted">
+          Esempi di ricerca, non clienti. Le aziende arrivano dal nostro database e, dove non basta, dal web; le opportunità con gli
+          annunci di lavoro sono disponibili per l&apos;Italia.
+        </p>
+      </Section>
+
+      {/* 7. La ricerca in target (secondaria) */}
+      <Section label="Anche senza segnali" tone="paper">
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-center lg:gap-16">
           <div>
             <Title>Ti basta un elenco mirato? C&apos;è la ricerca in target.</Title>
             <Lead>
-              Settore, zona e dimensione: ti consegniamo le aziende che corrispondono, con sito controllato e contatto aziendale.
+              Descrivi le aziende che cerchi, di qualunque settore, con zona e dimensione: ti consegniamo quelle che corrispondono, con sito controllato e contatto aziendale.
               Utile per coprire un mercato o preparare una campagna, quando il momento giusto lo scegli tu.
             </Lead>
           </div>
-          <div className="overflow-hidden rounded-2xl border border-line">
+          <div className="overflow-hidden rounded-2xl border border-line bg-card">
             <table className="w-full text-left text-sm">
               <caption className="sr-only">Differenze tra ricerca in target e ricerca con opportunità</caption>
-              <thead className="bg-paper text-xs text-muted">
+              <thead className="bg-paper-2 text-xs text-muted">
                 <tr>
                   <th scope="col" className="px-4 py-3 font-medium"><span className="sr-only">Caratteristica</span></th>
                   <th scope="col" className="px-4 py-3 font-medium">In target</th>
@@ -227,7 +281,7 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      {/* 7. Le domande giuste (obiezioni) */}
+      {/* 8. Le domande giuste (obiezioni) */}
       <Section label="Prima di provarlo" tone="ink">
         <Title className="text-white">Le domande che è giusto farsi.</Title>
         <dl className="mt-12 grid gap-x-12 gap-y-10 md:grid-cols-2 lg:grid-cols-3">
@@ -241,7 +295,7 @@ export default async function HomePage() {
         <p className="mt-12 text-sm text-white/60">Niente dati di persone: niente nomi, email personali o caselle gratuite. Solo i canali aziendali.</p>
       </Section>
 
-      {/* 8. Prezzi */}
+      {/* 9. Prezzi */}
       <Section id="prezzi" label="Prezzi" tone="paper">
         <div className="grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-end">
           <Title>Paghi le aziende che ricevi. Non l&apos;accesso.</Title>
@@ -299,7 +353,7 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      {/* 9. FAQ */}
+      {/* 10. FAQ */}
       <Section id="faq" label="Domande frequenti" tone="card">
         <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
           <div>
@@ -322,7 +376,7 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      {/* 10. Chiusura */}
+      {/* 11. Chiusura */}
       <section className="bg-ledger text-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-16 sm:px-6 md:flex-row md:items-end md:justify-between md:py-20">
           <div>
