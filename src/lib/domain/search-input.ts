@@ -88,9 +88,11 @@ export type SearchInput = z.infer<typeof searchInputSchema>;
 // perché le aziende del database non si possono filtrare così (il wizard non li chiede).
 export function toTarget(input: SearchInput) {
   const signals = input.signals.codes.length > 0;
+  // «Tutti i settori» con un servizio che ha i suoi settori adatti: si cercano solo quelli.
+  const sectors = !input.industry && !input.industryKeywords.length && input.signals.offer ? offerByCode(input.signals.offer)?.sectors : undefined;
   return {
     industry: input.industry,
-    industry_keywords: input.industryKeywords,
+    industry_keywords: sectors ?? input.industryKeywords,
     countries: input.countries,
     country_names: input.countries.map((c) => COUNTRY_NAME[c]),
     regions: input.regions,

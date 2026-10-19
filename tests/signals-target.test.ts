@@ -30,6 +30,15 @@ describe("segnali nella ricerca (fase 3)", () => {
     expect("signals" in t).toBe(false);
   });
 
+  it("servizio con settori adatti: usati solo con «tutti i settori»", () => {
+    const opp = { ...base, industry: "", emailMode: "company_only", roles: [], signals: { codes: ["single_language"], offer: "translation" } };
+    const tutti = toTarget(searchInputSchema.parse(opp));
+    expect(tutti.industry_keywords).toEqual(OFFERS.find((o) => o.code === "translation")!.sectors);
+    expect(toTarget(searchInputSchema.parse({ ...opp, industry: "Hotel" })).industry_keywords).toEqual([]);
+    expect(toTarget(searchInputSchema.parse({ ...opp, signals: { codes: ["outdated_cms"], offer: "web_redesign" } })).industry_keywords).toEqual([]);
+    expect(describeOffer({ offer: "translation", industry: "", where: "Veneto" })).toContain("aziende di industria, agroalimentare, vino e turismo in Veneto");
+  });
+
   it("con i segnali niente filtri che il database non sa applicare", () => {
     const extra = { companySizes: ["11-50"], revenueRange: "1-10 milioni", keywords: ["export"], notes: "solo B2B", excludeKeywords: ["franchising"] };
     const opp = toTarget(searchInputSchema.parse({ ...base, ...extra, signals: { codes: ["no_https"] } }));
@@ -161,7 +170,7 @@ describe("segnali nella ricerca (fase 3)", () => {
     }
     expect(searchInputSchema.safeParse({ ...base, industry: "" }).success).toBe(false);
     expect(searchInputSchema.safeParse({ ...base, industry: "ab", signals: offerChoice("it_support") }).success).toBe(false);
-    expect(describeOffer({ offer: "translation", industry: "", where: "Veneto" })).toMatch(/^Cercheremo aziende di ogni settore in Veneto/);
+    expect(describeOffer({ offer: "web_redesign", industry: "", where: "Veneto" })).toMatch(/^Cercheremo aziende di ogni settore in Veneto/);
   });
 });
 

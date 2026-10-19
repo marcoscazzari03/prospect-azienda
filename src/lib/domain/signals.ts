@@ -251,6 +251,12 @@ export type OfferDef = {
   signals: string[]; // al massimo 3
   jobFamilies: string[]; // solo se tra i segnali c'è "job_ad"
   match: "any" | "all";
+  // Settori adatti, usati quando il cliente non sceglie un settore («tutti i settori»): per i
+  // segnali che da soli dicono poco (un sito in una sola lingua ce l'ha quasi ogni piccola impresa).
+  // Parole delle etichette delle aziende (categorie OSM e settori dell'AI), almeno una deve esserci.
+  sectors?: string[];
+  sectorsLabel?: string; // per il cliente, nel wizard
+  sectorsWho?: string; // nell'anteprima: «Cercheremo <sectorsWho> con …»
 };
 
 export const OFFERS: OfferDef[] = [
@@ -307,6 +313,10 @@ export const OFFERS: OfferDef[] = [
     description: "Per traduttori e consulenti per l'estero.",
     lookFor: "un sito disponibile in una sola lingua",
     signals: ["single_language"], jobFamilies: [], match: "any",
+    // 19/10: senza settori 3.342 aziende, quasi tutte piccole attività locali (bar, parrucchieri).
+    sectors: ["manifattura", "industria", "metalmeccanica", "agroalimentare", "cantina", "turismo", "ricettivo"],
+    sectorsLabel: "Aziende che esportano o accolgono clienti stranieri: industria, agroalimentare, vino, turismo.",
+    sectorsWho: "aziende di industria, agroalimentare, vino e turismo",
   },
   {
     code: "recruiting", area: "hr", label: "Selezione del personale",
@@ -438,7 +448,7 @@ export function describeOffer(args: { offer: string; industry: string; where: st
   const o = found ? { ...found, lookFor: args.lookFor || found.lookFor } : null;
   if (!o) return "";
   const sector = args.industry.trim().replace(/^\p{Lu}(?=\p{Ll})/u, (c) => c.toLowerCase());
-  const who = `${sector || "aziende di ogni settore"}${args.where ? ` in ${args.where}` : ""}`;
+  const who = `${sector || o.sectorsWho || "aziende di ogni settore"}${args.where ? ` in ${args.where}` : ""}`;
   return `Cercheremo ${who} con ${o.lookFor}. Ogni lead ha la prova (link e data): le aziende senza prova vengono escluse.`;
 }
 

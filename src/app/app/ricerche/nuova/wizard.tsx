@@ -302,7 +302,7 @@ export function SearchWizard({
   const summary: [string, ReactNode][] = [
     ["Tipologia", opportunity ? "Aziende con opportunità" : "Aziende in target"],
     ...(opportunity ? [["Servizio", chosen?.label ?? <em key="s" className="text-muted">Da scegliere</em>] as [string, ReactNode]] : []),
-    ["Settore", showIndustry ? industry.trim() || <em key="i" className="text-muted">Non specificato</em> : "Tutti i settori"],
+    ["Settore", showIndustry ? industry.trim() || <em key="i" className="text-muted">Non specificato</em> : chosen?.sectors?.length ? "Settori adatti al servizio" : "Tutti i settori"],
     ["Paesi", countries.length ? countries.map(countryName).join(", ") : <em key="c" className="text-muted">Nessuno</em>],
     ["Regioni", regionList.length ? regionList.join(", ") : <em key="r" className="text-muted">Tutto il paese</em>],
     ["Dimensione", opportunity ? "Piccole e medie imprese" : sizes.length ? `${sizes.join(", ")} dipendenti` : <em key="d" className="text-muted">Qualsiasi</em>],
@@ -467,7 +467,14 @@ export function SearchWizard({
             <div>
               <SectionTitle icon="building" title="In quali aziende?" />
               <div className="mt-3 grid gap-2 sm:grid-cols-2" role="radiogroup" aria-label="Settore">
-                {([[true, "Tutti i settori", "Consigliato: più aziende con il segnale, risultati più rapidi."], [false, "Solo un settore", "Se il tuo servizio è pensato per un settore preciso."]] as const).map(([v, l, d]) => (
+                {(
+                  [
+                    chosen?.sectors?.length
+                      ? [true, "Settori adatti al servizio", chosen.sectorsLabel ?? ""]
+                      : [true, "Tutti i settori", "Consigliato: più aziende con il segnale, risultati più rapidi."],
+                    [false, "Solo un settore", "Se il tuo servizio è pensato per un settore preciso."],
+                  ] as [boolean, string, string][]
+                ).map(([v, l, d]) => (
                   <label key={l} className={cx("flex cursor-pointer gap-3 rounded-lg border px-4 py-3 text-sm", allSectors === v ? "border-ledger bg-ledger-soft" : "border-line hover:border-ink-2")}>
                     <input type="radio" name="sectorScope" checked={allSectors === v} onChange={() => setAllSectors(v)} className="mt-0.5 accent-[var(--color-ledger)]" />
                     <span><span className="block font-medium">{l}</span><span className="block text-xs text-ink-2">{d}</span></span>

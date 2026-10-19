@@ -183,7 +183,7 @@ export function OpportunityDemo({ offers, signalPrices, freeCredits, freeMax }: 
             <label className="flex flex-col gap-1.5 text-sm">
               <span className="font-medium">{opp ? "3. In quale settore?" : "2. Che aziende cerchi?"}</span>
               <select className={field} value={cfg.sector} onChange={(e) => update({ sector: e.target.value })}>
-                {opp && <option value="">Tutti i settori</option>}
+                {opp && <option value="">{offer?.sectors?.length ? "Settori adatti al servizio" : "Tutti i settori"}</option>}
                 {SECTORS.map((s) => <option key={s}>{s}</option>)}
               </select>
             </label>
@@ -221,7 +221,7 @@ export function OpportunityDemo({ offers, signalPrices, freeCredits, freeMax }: 
               <p className="font-mono text-[11px] uppercase tracking-wider text-muted">La tua ricerca</p>
               <p className="max-w-lg font-display text-2xl font-semibold leading-snug sm:text-3xl">
                 {opp && offer
-                  ? <>Aziende {cfg.sector ? <>del settore <span className="text-ledger">{cfg.sector.toLowerCase()}</span></> : "di ogni settore"} in {cfg.region} con {offer.lookFor}.</>
+                  ? <>Aziende {cfg.sector ? <>del settore <span className="text-ledger">{cfg.sector.toLowerCase()}</span></> : offer.sectorsWho ? offer.sectorsWho.replace(/^aziende /, "") : "di ogni settore"} in {cfg.region} con {offer.lookFor}.</>
                   : <>Aziende del settore <span className="text-ledger">{(cfg.sector || SECTORS[0]).toLowerCase()}</span> in {cfg.region}, con sito e contatto aziendale.</>}
               </p>
               <dl className="grid max-w-lg grid-cols-2 gap-4 border-t border-line pt-5 text-sm">
