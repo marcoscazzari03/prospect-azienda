@@ -18,15 +18,6 @@ const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString
 const ad = (title: string, days: number): LeadSignal => ({ code: "job_ad", evidence: { title, date: daysAgo(days) } });
 const site = (code: string, detail: string, days = 3): LeadSignal => ({ code, evidence: { detail, checked_at: daysAgo(days) } });
 
-// Chi vende in un settore senza segnali (edilizia, pulizie, logistica…): ricerca in target,
-// senza il motivo per contattarla. Esempio: un'impresa di pulizie che cerca hotel in Veneto.
-export const OTHER_SECTOR = "other";
-export const TARGET_EXAMPLE: ExampleLead = {
-  company: "Hotel Esempio", sector: "Hotel 4 stelle", city: "Jesolo", region: "Veneto", size: "11-50 dip.",
-  contact: { kind: "email", value: "info@hotel-esempio.it" },
-  signals: [],
-};
-
 export const EXAMPLE_LEADS: Record<string, ExampleLead> = {
   web_redesign: {
     company: "Carpenteria Esempio S.r.l.", sector: "Carpenteria metallica", city: "Treviso", region: "Veneto", size: "11-50 dip.",

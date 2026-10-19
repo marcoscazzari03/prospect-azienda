@@ -22,15 +22,6 @@ export function ExampleLeadCard({ lead, offer, marks = false, className }: { lea
         <span className="shrink-0 rounded-full border border-line px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted">Esempio</span>
       </header>
 
-      {lead.signals.length === 0 ? (
-        <div className="px-5 py-4">
-          <p className="font-mono text-[11px] uppercase tracking-wider text-muted">Ricerca in target</p>
-          <p className="mt-2 rounded-lg bg-paper px-3 py-2.5 text-sm text-ink-2">
-            Un&apos;azienda del settore e della zona che hai scelto, con sito controllato e contatto aziendale. Senza un segnale: il
-            momento per contattarla lo scegli tu.
-          </p>
-        </div>
-      ) : (
       <div className="px-5 py-4">
         <p className="flex items-center font-mono text-[11px] uppercase tracking-wider text-ledger"><Mark n={2} show={marks} />Perché contattarla</p>
         <ul className="mt-2 flex flex-col gap-2.5">
@@ -52,7 +43,6 @@ export function ExampleLeadCard({ lead, offer, marks = false, className }: { lea
           </div>
         )}
       </div>
-      )}
 
       <footer className="grid gap-3 border-t border-line px-5 py-4 text-sm sm:grid-cols-2">
         <div className="min-w-0">
