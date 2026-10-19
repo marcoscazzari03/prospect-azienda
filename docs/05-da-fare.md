@@ -281,7 +281,7 @@ all'architettura; il resto si decide con i clienti.
       dopo la password (/accedi/verifica), proxy che non apre /app e /admin senza il codice, migrazione 044 (le tabelle
       del cliente non si leggono con la sola password se il 2FA è attivo). L'admin può toglierla a chi perde il telefono
       (scheda del cliente). Il cambio password non abbassa più il livello della sessione.
-- [ ] Verificare in Supabase (Authentication → Multi-Factor) che il TOTP sia attivo; provare attivazione e accesso.
+- [x] 2FA provata dall'utente il 19/10 (migrazione 044 eseguita): attivazione e accesso con il codice funzionano.
 
 ### D. Database
 - [ ] Rimandato (analisi del 19/10): coda del controllo siti con priorità (segnali attivi in scadenza, settori e zone
