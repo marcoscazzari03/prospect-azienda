@@ -42,8 +42,8 @@ export type WizardDefaults = {
 export type SearchKind = "standard" | "opportunity";
 
 const STEPS = {
-  standard: [["target", "Chi cerchi"], ["roles", "Chi contattare"], ["email", "Che email"], ["quantity", "Quanti"]],
-  opportunity: [["offer", "Cosa vendi"], ["target", "In quali aziende"], ["roles", "Chi contattare"], ["email", "Che email"], ["quantity", "Quanti"]],
+  standard: [["target", "Chi cerchi"], ["roles", "Chi contattare"], ["email", "Che email"], ["contact", "Contatto"], ["quantity", "Quanti"]],
+  opportunity: [["offer", "Cosa vendi"], ["target", "In quali aziende"], ["roles", "Chi contattare"], ["email", "Che email"], ["contact", "Contatto"], ["quantity", "Quanti"]],
 } as const;
 
 const KINDS: { kind: SearchKind; title: string; text: string; example: string; icon: keyof typeof ICONS }[] = [
@@ -229,7 +229,8 @@ export function SearchWizard({
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const countryName = (c: string) => COUNTRIES.find(([k]) => k === c)?.[1] ?? c;
 
-  const steps = STEPS[kind].filter(([key]) => peopleOn || (key !== "roles" && key !== "email"));
+  // «Contatto» (email o modulo) solo in «Solo azienda».
+  const steps = STEPS[kind].filter(([key]) => (peopleOn || (key !== "roles" && key !== "email")) && (key !== "contact" || mode === "company_only"));
   const current = steps[Math.min(step, steps.length - 1)][0];
   const last = steps.length - 1;
   const chooseKind = (k: SearchKind) => {
@@ -671,12 +672,12 @@ export function SearchWizard({
           ))}
         </div>}
 
-        {/* Passo: quantità e nome */}
-        <Card className={cx("flex flex-col gap-6 p-6", current !== "quantity" && "hidden")}>
-          {mode === "company_only" && (
+        {/* Passo: contatto richiesto («Solo azienda») */}
+        {mode === "company_only" && (
+          <Card className={cx("flex flex-col gap-5 p-6", current !== "contact" && "hidden")}>
             <div role="radiogroup" aria-label="Contatto richiesto">
-              <p className="mb-3 text-sm font-medium">Contatto richiesto</p>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <SectionTitle icon="target" title="Contatto richiesto" text="Come vuoi poter contattare le aziende." />
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 {CONTACT_OPTIONS.map((c) => (
                   <label key={c} className={cx("flex cursor-pointer flex-col gap-1 rounded-xl border bg-card p-4 transition-colors", contact === c ? "border-ledger shadow-[0_0_0_1px_var(--color-ledger)]" : "border-line hover:border-ink-2")}>
                     <input type="radio" name="contact" value={c} checked={contact === c} onChange={() => setContact(c)} className="sr-only" />
@@ -690,7 +691,11 @@ export function SearchWizard({
                 ))}
               </div>
             </div>
-          )}
+          </Card>
+        )}
+
+        {/* Passo: quantità e nome */}
+        <Card className={cx("flex flex-col gap-6 p-6", current !== "quantity" && "hidden")}>
           <div>
             <label htmlFor="quantity" className="mb-3 flex justify-between text-sm font-medium">
               Quanti lead? <span className="font-mono">{leads}</span>
