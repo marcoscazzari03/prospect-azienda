@@ -73,8 +73,8 @@ Ultimo aggiornamento: 19/10/2026.
 31. **Tu** – Firma con il logo per leads@ nella webmail di Hostinger.
 32. ~~**Io** – Email dell'app in HTML con logo e grafica Webora, e modelli per le email di accesso di
     Supabase (`supabase/templates/`)~~ (19/10).
-32b. **Tu** – Incollare i 5 modelli in Supabase (Authentication → Emails) e provare la conferma e il
-    recupero password.
+32b. ~~**Tu** – Incollati i 5 modelli in Supabase e attivati gli avvisi di sicurezza (password, 2FA aggiunta e
+    tolta)~~ (19/10). Resta: una prova di registrazione e di «Password dimenticata» con un indirizzo di prova.
 33. **Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027.
 
 ## ⚪ Dopo la beta
