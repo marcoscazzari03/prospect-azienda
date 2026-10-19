@@ -3,7 +3,7 @@ import { signalByCode, signalPhrase, type LeadSignal } from "./signals";
 // Forma dei lead consegnati (deliveries.data) e conversione per tabelle ed export.
 
 export type LeadData = {
-  company?: { name?: string; domain?: string; website?: string; country?: string; city?: string; industry?: string; size_hint?: string };
+  company?: { name?: string; domain?: string; website?: string; country?: string; city?: string; industry?: string; size_hint?: string; contact_form?: string };
   person?: { full_name?: string; first_name?: string; last_name?: string; job_title?: string; role_match?: string; linkedin_url?: string };
   email?: {
     address?: string;
@@ -57,6 +57,7 @@ export const EMAIL_STATUS_LABEL: Record<string, string> = {
 export const EMAIL_TYPE_LABEL: Record<string, string> = {
   personal: "Nominativa",
   generic: "Generica",
+  form: "Solo modulo di contatto",
 };
 
 export const ROLE_MATCH_LABEL: Record<string, string> = {
@@ -82,8 +83,9 @@ export function flattenDelivery(d: DeliveryRow) {
     linkedin: x.person?.linkedin_url ?? "",
     email: d.email_address,
     tipo_email: EMAIL_TYPE_LABEL[d.email_type] ?? d.email_type,
-    stato_email: EMAIL_STATUS_LABEL[d.email_status] ?? d.email_status,
+    stato_email: d.email_type === "form" ? "" : EMAIL_STATUS_LABEL[d.email_status] ?? d.email_status,
     fonte_email: x.email?.source === "enrichment" ? "Verifica tecnica (arricchimento)" : x.email?.source_url ?? "",
+    modulo_contatto: x.company?.contact_form ?? "",
     fonte_contatto: x.sources?.discovery_url ?? "",
     email_ipotizzate: (x.email_patterns ?? []).map((p) => p.address).join(", "),
     segnali: (x.signals ?? []).map((sg) => `${signalByCode(sg.code)?.label ?? sg.code}: ${signalPhrase(sg)}`).join(" | "),
@@ -110,6 +112,7 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "tipo_email", label: "Tipo email" },
   { key: "stato_email", label: "Stato email" },
   { key: "fonte_email", label: "Fonte email" },
+  { key: "modulo_contatto", label: "Pagina modulo di contatto" },
   { key: "fonte_contatto", label: "Fonte azienda" },
   { key: "linkedin", label: "LinkedIn" },
   { key: "email_ipotizzate", label: "Email ipotizzate (non verificate)" },

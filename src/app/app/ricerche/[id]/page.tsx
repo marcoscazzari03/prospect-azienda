@@ -44,6 +44,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
             <SearchStatus status={search.status} />
             <Badge>{MODE_INFO[search.email_mode as EmailMode]?.label}</Badge>
             {!!t.signals?.codes.length && <Badge tone="stamp">Opportunità</Badge>}
+            {t.contact === "email_or_form" && <Badge>Email o modulo di contatto</Badge>}
             <span className="text-sm text-muted">avviata il {new Date(search.created_at).toLocaleString("it-IT")}</span>
             {search.repeat_of && (
               <Link href={`/app/ricerche/${search.repeat_of}`} className="text-sm text-ledger underline">ripetizione automatica</Link>

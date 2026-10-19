@@ -17,6 +17,7 @@ import {
   type OfferArea,
   type SignalPrices,
 } from "@/lib/domain/signals";
+import { CONTACT_LABEL, CONTACT_OPTIONS, type ContactOption } from "@/lib/domain/search-input";
 import { createSearch, industrySuggestions, searchAvailability, type ActionState, type Availability, type IndustrySuggestion } from "../../actions";
 
 export type WizardDefaults = {
@@ -32,6 +33,7 @@ export type WizardDefaults = {
   excludeKeywords?: string[];
   notes?: string;
   emailMode?: EmailMode;
+  contact?: ContactOption;
   quantity?: number;
   contactsPerCompany?: number;
   offer?: string;
@@ -191,6 +193,8 @@ export function SearchWizard({
   const peopleOn = modes.some((m) => m !== "company_only");
   const [mode, setMode] = useState<EmailMode>(defaults.emailMode && modes.includes(defaults.emailMode) ? defaults.emailMode : modes[0]);
   const [quantity, setQuantity] = useState(Math.min(defaults.quantity ?? 10, maxQuantity));
+  // «Solo azienda»: di default anche le aziende con il solo modulo di contatto (più resa).
+  const [contact, setContact] = useState<ContactOption>(defaults.contact ?? "email_or_form");
   const [countries, setCountries] = useState<string[]>(defaults.countries ?? ["IT"]);
   // Nessuna dimensione preselezionata: con la dimensione la ricerca in target non può usare il database.
   const [sizes, setSizes] = useState<string[]>(defaults.companySizes ?? []);
@@ -303,7 +307,7 @@ export function SearchWizard({
     ...(peopleOn && mode !== "company_only"
       ? [["Ruoli", roles.length || customRoles.length ? [...roles, ...customRoles].join(", ") : <em key="o" className="text-muted">Non specificato</em>] as [string, ReactNode]]
       : []),
-    ["Cosa ricevi", mode === "company_only" ? "Azienda ed email aziendale" : info.label],
+    ["Cosa ricevi", mode === "company_only" ? (contact === "email_or_form" ? "Azienda con email aziendale o modulo di contatto" : "Azienda ed email aziendale") : info.label],
     ["Numero lead", <span key="q" className="font-mono">{leads}</span>],
   ];
 
@@ -669,6 +673,24 @@ export function SearchWizard({
 
         {/* Passo: quantità e nome */}
         <Card className={cx("flex flex-col gap-6 p-6", current !== "quantity" && "hidden")}>
+          {mode === "company_only" && (
+            <div role="radiogroup" aria-label="Contatto richiesto">
+              <p className="mb-3 text-sm font-medium">Contatto richiesto</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {CONTACT_OPTIONS.map((c) => (
+                  <label key={c} className={cx("flex cursor-pointer flex-col gap-1 rounded-xl border bg-card p-4 transition-colors", contact === c ? "border-ledger shadow-[0_0_0_1px_var(--color-ledger)]" : "border-line hover:border-ink-2")}>
+                    <input type="radio" name="contact" value={c} checked={contact === c} onChange={() => setContact(c)} className="sr-only" />
+                    <span className="text-sm font-semibold">{CONTACT_LABEL[c]}</span>
+                    <span className="text-xs text-ink-2">
+                      {c === "email_or_form"
+                        ? "Più aziende: se sul sito non c'è un'email, ti diamo la pagina del modulo di contatto. Ideale per contatti scritti a mano."
+                        : "Solo aziende con un'email aziendale pubblica (info@, commerciale@)."}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
           <div>
             <label htmlFor="quantity" className="mb-3 flex justify-between text-sm font-medium">
               Quanti lead? <span className="font-mono">{leads}</span>

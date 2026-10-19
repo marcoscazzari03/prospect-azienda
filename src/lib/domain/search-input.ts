@@ -9,6 +9,13 @@ const list = (max: number, itemMax = 80) =>
     .max(max)
     .transform((a) => [...new Set(a)]);
 
+export const CONTACT_OPTIONS = ["email_or_form", "email_only"] as const;
+export type ContactOption = (typeof CONTACT_OPTIONS)[number];
+export const CONTACT_LABEL: Record<ContactOption, string> = {
+  email_or_form: "Email aziendale o modulo di contatto",
+  email_only: "Solo con email aziendale",
+};
+
 export const searchInputSchema = z.object({
   name: z.string().trim().max(120).optional().default(""),
   // Facoltativo solo nella ricerca opportunità («tutti i settori»): vedi il controllo sotto.
@@ -26,6 +33,9 @@ export const searchInputSchema = z.object({
   excludeKeywords: list(15),
   notes: z.string().trim().max(600).optional().default(""),
   emailMode: z.enum(EMAIL_MODES),
+  // «Solo azienda»: contatto richiesto. Con il modulo si consegnano anche le aziende senza
+  // email pubblica ma con il modulo di contatto sul loro sito.
+  contact: z.enum(CONTACT_OPTIONS).default("email_only"),
   quantity: z.coerce.number().int().min(1).max(1000),
   contactsPerCompany: z.coerce.number().int().min(1).max(3).default(1),
   repeat: z.enum(["none", "weekly", "monthly"]).default("none"),
@@ -87,6 +97,7 @@ export function toTarget(input: SearchInput) {
     keywords: input.keywords,
     exclude_keywords: input.excludeKeywords,
     notes: input.notes,
+    contact: input.emailMode === "company_only" ? input.contact : "email_only",
     ...(input.signals.codes.length ? { signals: toSignalsTarget(input.signals) } : {}),
   };
 }

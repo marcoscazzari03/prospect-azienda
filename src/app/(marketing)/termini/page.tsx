@@ -16,7 +16,7 @@ export default async function TermsPage() {
       <Alert>Bozza da far validare da un consulente prima dell&apos;apertura al pubblico.</Alert>
 
       <h2>Il servizio</h2>
-      <p>{BRAND.name} cerca su fonti pubbliche le aziende corrispondenti ai criteri indicati dal cliente e, a richiesta, quelle con un&apos;opportunità commerciale verificata, e le consegna con sito, settore, zona, l&apos;email aziendale generica trovata sul loro sito e l&apos;indicazione della fonte. Non vengono consegnati nomi o email di persone. Il servizio è riservato a professionisti e imprese.</p>
+      <p>{BRAND.name} cerca su fonti pubbliche le aziende corrispondenti ai criteri indicati dal cliente e, a richiesta, quelle con un&apos;opportunità commerciale verificata, e le consegna con sito, settore, zona, l&apos;email aziendale generica trovata sul loro sito (o, se il cliente lo sceglie e l&apos;email non c&apos;è, la pagina del modulo di contatto del sito) e l&apos;indicazione della fonte. Non vengono consegnati nomi o email di persone. Il servizio è riservato a professionisti e imprese.</p>
 
       <h2>Crediti e pagamenti</h2>
       <p>All&apos;avvio di una ricerca viene riservato il numero massimo di crediti necessario; al termine vengono addebitati solo i lead consegnati e i crediti restanti tornano disponibili. I crediti di benvenuto e quelli dei pacchetti valgono 12 mesi; quelli degli abbonamenti scadono un mese dopo la fine del periodo in cui sono stati accreditati. Si usano sempre per primi i crediti più vicini alla scadenza; alla scadenza la parte non usata viene tolta dal saldo e il movimento compare in «Crediti e piano». Gli abbonamenti si rinnovano ogni mese e si possono annullare in qualsiasi momento con effetto a fine periodo.</p>

@@ -171,3 +171,19 @@ export function reserveCompaniesForDatabase(
   }
   return out.slice(0, 200);
 }
+
+// «Email aziendale o modulo di contatto»: le aziende scartate dal motore solo perché senza
+// email, ma con il modulo di contatto sul loro sito, diventano lead. Il database le consegna
+// solo se la ricerca ha l'opzione (target.contact) e se il modulo è sul dominio dell'azienda.
+// Punteggio più basso delle aziende con email, che restano davanti nell'ordine di consegna.
+export function formOnlyLeads(rejected: unknown[] | undefined) {
+  type R = { reason?: string; company?: { domain?: string; contact_form?: string }; sources?: { discovery_url?: string } };
+  return (rejected ?? [])
+    .map((r) => r as R)
+    .filter((r) => r?.reason === "nessuna_email" && r.company?.domain && /^https?:\/\//i.test(String(r.company?.contact_form ?? "")))
+    .map((r) => ({
+      ...r,
+      quality: { score: 45, checks: { official_site: true, discovery_source: Boolean(r.sources?.discovery_url), contact_form: true } },
+      _form_only: true,
+    }));
+}

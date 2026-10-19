@@ -34,6 +34,7 @@ export default async function NewSearchPage({ searchParams }: PageProps<"/app/ri
         excludeKeywords: t.exclude_keywords,
         notes: t.notes,
         emailMode: data.email_mode as EmailMode,
+        contact: t.contact ?? "email_only",
         quantity: data.quantity,
         contactsPerCompany: data.contacts_per_company,
         offer: t.signals?.offer,

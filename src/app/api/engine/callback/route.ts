@@ -6,7 +6,7 @@ import { safeEqual, sha256Hex } from "@/lib/server/crypto";
 import { afterResults, saveReserveCompanies } from "@/lib/server/searches";
 import { checkMailboxes } from "@/lib/server/email-check";
 import { applyMailboxChecks } from "@/lib/domain/mailbox";
-import type { ApplyResult } from "@/lib/domain/engine";
+import { formOnlyLeads, type ApplyResult } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 
 // Eventi dal motore n8n (vedi docs/03-contratto-motore.md).
@@ -67,7 +67,9 @@ export async function POST(request: Request) {
     .map((r) => r as { reason?: string; email?: { address?: string } })
     .filter((r) => r?.reason === "solo_email_generica" && r.email?.address)
     .map((r) => ({ ...r, _stock_only: true }));
-  if (stockOnly.length) payload.leads = [...(payload.leads ?? []), ...stockOnly].slice(0, 2000);
+  // Aziende senza email ma con il modulo di contatto: dopo quelle con l'email.
+  const formOnly = (payload as { email_mode?: string }).email_mode === "company_only" ? formOnlyLeads(payload.rejected) : [];
+  if (stockOnly.length || formOnly.length) payload.leads = [...(payload.leads ?? []), ...stockOnly, ...formOnly].slice(0, 2000);
   // Aziende già controllate e scartate in questo giro: i giri successivi della stessa
   // ricerca non le ripropongono (salvate in search_runs.stats).
   // Aziende con il segnale verificato ma senza referente cercato (oltre il tetto del giro):

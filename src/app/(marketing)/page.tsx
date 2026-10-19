@@ -73,11 +73,11 @@ function Pill({ tone, children, small }: { tone: Tone; children: ReactNode; smal
 const faq = (prices: SignalPrices) => [
   {
     q: "Da dove arrivano i dati?",
-    a: "Da fonti pubbliche: siti ufficiali delle aziende, registri, OpenStreetMap e annunci di lavoro. Ogni lead riporta la pagina in cui abbiamo trovato l'azienda e quella in cui abbiamo trovato l'email aziendale. Non raccogliamo dati di persone: niente nomi, niente email personali, niente email ipotizzate.",
+    a: "Da fonti pubbliche: siti ufficiali delle aziende, registri, OpenStreetMap e annunci di lavoro. Ogni lead riporta la pagina in cui abbiamo trovato l'azienda e quella in cui abbiamo trovato l'email aziendale o il modulo di contatto. Non raccogliamo dati di persone: niente nomi, niente email personali, niente email ipotizzate.",
   },
   {
     q: "Posso usare i lead per email marketing?",
-    a: "Le regole sulle comunicazioni commerciali cambiano da paese a paese (in Italia, ad esempio, l'invio di email promozionali richiede in genere il consenso, anche verso caselle aziendali). Sei tu a decidere come contattare le aziende e a rispettare la normativa: l'email aziendale è un'informazione in più, non un'autorizzazione a inviare promozioni.",
+    a: "Le regole sulle comunicazioni commerciali cambiano da paese a paese (in Italia, ad esempio, l'invio di email promozionali richiede in genere il consenso, anche verso caselle aziendali). Sei tu a decidere come contattare le aziende e a rispettare la normativa: l'email aziendale è un'informazione in più, non un'autorizzazione a inviare promozioni. Il modulo di contatto si compila a mano, un'azienda alla volta, con un messaggio pensato per lei.",
   },
   {
     q: "Cosa succede se non trovate abbastanza lead?",
@@ -367,7 +367,7 @@ export default async function HomePage() {
               <p className="mt-4 font-display text-2xl font-semibold">Trova aziende in target</p>
               <p className="mt-2 text-sm text-ink-2">Cerca aziende che corrispondono al profilo del tuo cliente ideale.</p>
               <ul className="mt-5 flex flex-col gap-2.5 text-sm">
-                {["Settore, zona e dimensione", "Sito e email aziendale", "Dati controllati di recente"].map((p) => (
+                {["Settore, zona e dimensione", "Sito ed email aziendale o modulo di contatto", "Dati controllati di recente"].map((p) => (
                   <li key={p} className="flex items-center gap-2.5"><Check />{p}</li>
                 ))}
               </ul>
@@ -447,7 +447,7 @@ export default async function HomePage() {
       <Section tone="paper">
         <Heading
           title="Vedi esattamente cosa ricevi."
-          text="Ogni lead include azienda, settore, zona, sito, email aziendale con la sua fonte e, se presente, la prova dell'opportunità. Puoi esportare tutto in Excel o CSV."
+          text="Ogni lead include azienda, settore, zona, sito, email aziendale con la sua fonte (o la pagina del modulo di contatto, se l'email non c'è) e, se presente, la prova dell'opportunità. Puoi esportare tutto in Excel o CSV."
         />
         <div className="mt-10"><AppPreview /></div>
       </Section>

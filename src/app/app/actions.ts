@@ -50,6 +50,7 @@ async function parseSearchForm(form: FormData): Promise<{ input: SearchInput } |
     excludeKeywords: lines(form.get("excludeKeywords")),
     notes: form.get("notes") ?? "",
     emailMode: form.get("emailMode"),
+    contact: form.get("contact") ?? "email_only",
     quantity: form.get("quantity"),
     contactsPerCompany: form.get("contactsPerCompany") ?? 1,
     repeat: form.get("repeat") ?? "none",

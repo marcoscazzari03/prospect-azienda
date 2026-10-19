@@ -8,14 +8,14 @@ import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
 import { Alert, Badge, Button, ProvenanceStamp, Select, cx } from "./ui";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
 
-function ReportForm({ deliveryId, hasSignals, hasPerson }: { deliveryId: string; hasSignals: boolean; hasPerson: boolean }) {
+function ReportForm({ deliveryId, hasSignals, hasPerson, hasEmail }: { deliveryId: string; hasSignals: boolean; hasPerson: boolean; hasEmail: boolean }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(reportLead, {});
   if (state.info) return <Alert tone="ledger">{state.info}</Alert>;
   return (
     <form action={action} className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <input type="hidden" name="deliveryId" value={deliveryId} />
-      <Select name="reason" className="sm:w-64" defaultValue="bounce" aria-label="Motivo">
-        <option value="bounce">L&apos;email rimbalza</option>
+      <Select name="reason" className="sm:w-64" defaultValue={hasEmail ? "bounce" : "company_closed"} aria-label="Motivo">
+        {hasEmail && <option value="bounce">L&apos;email rimbalza</option>}
         {hasPerson && <option value="wrong_role">Ruolo sbagliato</option>}
         <option value="company_closed">Azienda chiusa o inesistente</option>
         <option value="out_of_target">Fuori dai filtri della ricerca</option>
@@ -160,7 +160,7 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
             )}
             {withPeople && <th className="px-4 py-3 font-medium">Referente</th>}
             <th className="px-4 py-3 font-medium">Azienda</th>
-            <th className="px-4 py-3 font-medium">Email aziendale</th>
+            <th className="px-4 py-3 font-medium">Contatto</th>
             <th className="px-4 py-3 text-right font-medium">Qualità</th>
             {manage && <th className="px-4 py-3 font-medium">Stato</th>}
             <th className="w-10 px-2 py-3"><span className="sr-only">Dettagli</span></th>
@@ -194,8 +194,20 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-mono text-[13px]">{r.email_address}</p>
-                    <div className="mt-1"><ProvenanceStamp status={r.email_status} type={r.email_type} href={safeHttpUrl(d.email?.source_url)} /></div>
+                    {r.email_type === "form" ? (
+                      <>
+                        <a href={safeHttpUrl(d.company?.contact_form)} target="_blank" rel="noopener noreferrer nofollow" className="font-medium text-ledger underline">Modulo di contatto →</a>
+                        <p className="mt-1 text-xs text-ink-2">Nessuna email pubblica sul sito</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-mono text-[13px]">{r.email_address}</p>
+                        <div className="mt-1"><ProvenanceStamp status={r.email_status} type={r.email_type} href={safeHttpUrl(d.email?.source_url)} /></div>
+                        {safeHttpUrl(d.company?.contact_form) && (
+                          <a href={safeHttpUrl(d.company?.contact_form)} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 block text-xs text-ledger underline">anche modulo di contatto</a>
+                        )}
+                      </>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right font-mono">{r.quality_score}</td>
                   {manage && (
@@ -240,8 +252,11 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                           {d.person?.full_name && <p className="mt-2">{ROLE_MATCH_LABEL[d.person?.role_match ?? ""] ?? ""}</p>}
                         </div>
                         <div className="text-xs">
-                          <p className="mb-1 font-medium uppercase tracking-wider text-muted">Altre email trovate</p>
-                          {d.email?.alternatives?.length ? d.email.alternatives.map((a) => <p key={a.address} className="font-mono">{a.address}</p>) : <p className="text-muted">Nessuna</p>}
+                          <p className="mb-1 font-medium uppercase tracking-wider text-muted">{r.email_type === "form" ? "Modulo di contatto" : "Altre email trovate"}</p>
+                          {r.email_type === "form" && safeHttpUrl(d.company?.contact_form) && (
+                            <p className="mb-1">Pagina: <a className="text-ledger underline" href={safeHttpUrl(d.company?.contact_form)} target="_blank" rel="noopener noreferrer nofollow">{host(d.company?.contact_form ?? "")}</a>. Compila il modulo a mano, con un messaggio personalizzato.</p>
+                          )}
+                          {r.email_type === "form" ? null : d.email?.alternatives?.length ? d.email.alternatives.map((a) => <p key={a.address} className="font-mono">{a.address}</p>) : <p className="text-muted">Nessuna</p>}
                           {!!d.email_patterns?.length && (
                             <div className="mt-2">
                               <Badge tone="brick">Ipotizzate, non verificate</Badge>
@@ -274,7 +289,7 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                       )}
                       <div className="mt-4 border-t border-line pt-4">
                         <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">Qualcosa non va?</p>
-                        <ReportForm deliveryId={r.id} hasSignals={Boolean(r.data?.signals?.length)} hasPerson={Boolean(r.data?.person?.full_name)} />
+                        <ReportForm deliveryId={r.id} hasSignals={Boolean(r.data?.signals?.length)} hasPerson={Boolean(r.data?.person?.full_name)} hasEmail={r.email_type !== "form"} />
                       </div>
                     </td>
                   </tr>

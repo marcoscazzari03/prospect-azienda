@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { blockedSector } from "@/lib/domain/blocked-sectors";
-import { aiSearchExtra, buildEnginePayload, reserveCompaniesForDatabase, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
+import { aiSearchExtra, buildEnginePayload, formOnlyLeads, reserveCompaniesForDatabase, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
 import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { toCsv } from "@/lib/domain/csv";
 import { exportColumns, flattenDelivery } from "@/lib/domain/leads";
@@ -255,5 +255,35 @@ describe("solo azienda", () => {
     expect(keys).not.toContain("linkedin");
     expect(keys).toContain("email");
     expect(exportColumns([{ ...row, nome: "Mario" }]).map((c) => c.key)).toContain("nome");
+  });
+});
+
+describe("moduli di contatto", () => {
+  it("contatto: modulo solo in «Solo azienda», email di default", () => {
+    const company = searchInputSchema.parse({ ...baseInput, emailMode: "company_only", roles: [], contact: "email_or_form" });
+    expect(toTarget(company).contact).toBe("email_or_form");
+    expect(toTarget(searchInputSchema.parse({ ...baseInput, emailMode: "company_only", roles: [] })).contact).toBe("email_only");
+    expect(toTarget(searchInputSchema.parse({ ...baseInput, contact: "email_or_form" })).contact).toBe("email_only");
+  });
+
+  it("solo le aziende senza email con un modulo diventano lead", () => {
+    const out = formOnlyLeads([
+      { reason: "nessuna_email", company: { domain: "a.it", contact_form: "https://a.it/contatti" }, sources: { discovery_url: "https://a.it" } },
+      { reason: "nessuna_email", company: { domain: "b.it", contact_form: "" } },
+      { reason: "riserva", company: { domain: "c.it", contact_form: "https://c.it/contatti" } },
+      { reason: "nessuna_email", company: { domain: "d.it", contact_form: "javascript:alert(1)" } },
+    ]);
+    expect(out.map((l) => l.company?.domain)).toEqual(["a.it"]);
+    expect(out[0]).toMatchObject({ _form_only: true, quality: { score: 45 } });
+  });
+
+  it("export: pagina del modulo e nessuno stato email", () => {
+    const row = flattenDelivery({
+      id: "1", search_id: "s", email_address: "", email_type: "form", email_status: "found_public", credits: 1, quality_score: 45,
+      delivered_at: "2026-10-19T10:00:00Z", data: { company: { name: "A", contact_form: "https://a.it/contatti" } },
+    });
+    expect(row.modulo_contatto).toBe("https://a.it/contatti");
+    expect(row.tipo_email).toBe("Solo modulo di contatto");
+    expect(row.stato_email).toBe("");
   });
 });

@@ -17,7 +17,7 @@ export default async function PricingPage() {
       <PageHeader
         eyebrow="Prezzi"
         title="Paghi solo le aziende che ricevi."
-        description={`Una sola moneta, il credito. Ogni azienda consegnata, con sito, settore, zona ed email aziendale, costa 1 credito. Con un'opportunità verificata costa ${extraCreditsLabel(prices)}. La ricerca estesa, quando i filtri vanno oltre il nostro database (dimensione, fatturato, parole chiave, paesi esteri) e cerchiamo aziende nuove sul web, costa 1 credito in più. I crediti riservati e non usati tornano sempre disponibili.`}
+        description={`Una sola moneta, il credito. Ogni azienda consegnata, con sito, settore, zona ed email aziendale (o, se sul sito non c'è, la pagina del suo modulo di contatto), costa 1 credito. Con un'opportunità verificata costa ${extraCreditsLabel(prices)}. La ricerca estesa, quando i filtri vanno oltre il nostro database (dimensione, fatturato, parole chiave, paesi esteri) e cerchiamo aziende nuove sul web, costa 1 credito in più. I crediti riservati e non usati tornano sempre disponibili.`}
       />
       {free && (
         <Card className="mb-12 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">

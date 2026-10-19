@@ -9,7 +9,7 @@ export type EmailMode = (typeof EMAIL_MODES)[number];
 export const MODE_INFO: Record<EmailMode, { label: string; short: string; maxCredits: number; minCredits: number; example: string }> = {
   company_only: {
     label: "Solo azienda",
-    short: "Azienda in target con sito, settore, zona ed email aziendale (info@, commerciale@). Nessun dato di persone.",
+    short: "Azienda in target con sito, settore, zona ed email aziendale (info@, commerciale@) o, se non c'è, il modulo di contatto del sito. Nessun dato di persone.",
     minCredits: 1,
     maxCredits: 1,
     example: "TechSolutions S.r.l. · info@techsolutions.it",

@@ -226,10 +226,18 @@ all'architettura; il resto si decide con i clienti.
 - [ ] Sicurezza (`08-messa-in-produzione.md`, Fase 1): 2FA sugli account, chiave Anthropic dedicata a Webora Leads.
 
 ### B. Test: email facoltativa con modulo di contatto
-- [ ] 2–3 ricerche in target (costo AI previsto zero, dalle aziende OSM; chiedere l'OK prima) per avere almeno
-      50 aziende senza email ma con modulo salvato (`companies.contact_form_url`, attivo dal 18/10).
-- [ ] Giudicarle a mano: azienda valida, in target, modulo vero e funzionante.
-- [ ] Decidere: consegnare anche «Modulo di contatto disponibile» (senza inventare recapiti) e a che prezzo.
+- [x] Test del 19/10 (Hotel Emilia-Romagna, Architettura Lombardia, Metalmeccanica Veneto, 20 lead ciascuna):
+      125 aziende, 51 senza email, di cui 22 con modulo (43%); moduli rilevati in 42 aziende. Costo 0,77 $: architettura
+      e metalmeccanica non erano nel database e sono partite con la ricerca AI (prima dei test controllare la disponibilità).
+- [ ] Giudicare a mano le 24 aziende con solo modulo (valida, in target, modulo funzionante). Rossi S.p.A. (distributore
+      per hotel) uscita in una ricerca di hotel: qualità del settore da rivedere.
+- [x] Deciso (19/10): opzione nel wizard «Contatto richiesto»: «Email aziendale o modulo di contatto» (predefinita) o
+      «Solo con email aziendale». Stesso prezzo (1 credito). Colonna «Contatto» nei risultati, «Pagina modulo di
+      contatto» nell'export. Migrazione 040 (consegna `email_type = 'form'`); il callback trasforma in lead gli scarti
+      «nessuna_email» con il modulo.
+- [x] Migrazione 040: ricostruito il magazzino «Solo azienda» (schede senza nome dalle email generiche): la pulizia del
+      18/10 aveva cancellato tutta la tabella people, comprese le schede senza nome.
+- [ ] Collaudo dell'opzione con una ricerca in target dal database (costo zero).
 
 ### C. Qualità delle opportunità
 - [ ] Punteggio interno 0–100 con regole fisse e configurabili: affidabilità della prova × attinenza al servizio
