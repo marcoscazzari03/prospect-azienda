@@ -8,14 +8,14 @@ Ultimo aggiornamento: 19/10/2026.
 
 ## 🔴 Bloccanti per la prima ondata della beta (Sud ed Emilia-Romagna)
 1. **Tu** – Verifica in due passaggi sugli account dei servizi:
-   - ~~Supabase~~ · ~~Vercel~~ · ~~GitHub~~ · ~~Stripe~~ (19/10)
-   - n8n · Anthropic · Resend · Hostinger · Cloudflare (se lo usi) · Icypeas
+   - ~~Supabase~~ · ~~Vercel~~ · ~~GitHub~~ · ~~Stripe~~ · ~~n8n~~ (19/10)
+   - Anthropic · Resend · Hostinger · Cloudflare (se lo usi) · Icypeas
 2. ~~**Tu** – Chiave Anthropic: workspace dedicato con limite di spesa, chiave nuova creata lì e messa nella
    credenziale n8n esistente~~ (19/10). Resta: eliminare la chiave vecchia dopo la prima prova riuscita;
    facoltativo rinominare la credenziale in «Webora Leads - Anthropic» (poi **Io** aggiorno i file del repository).
    Nota: «Prospect | Search» e «Prospect Avvocati | Search» su n8n sono di un altro progetto: non toccarli.
-3. **Tu** – Pubblicare su n8n «Aziende | Popolamento OSM» (Nord prima, 8 province a notte).
-4. **Tu** – Decidere lo sconto per i beta tester (proposta: −30% per 12 mesi).
+3. ~~**Tu** – Pubblicare su n8n «Aziende | Popolamento OSM» (Nord prima, 8 province a notte)~~ (19/10)
+4. ~~**Tu** – Sconto per i beta tester: −30% per 12 mesi~~ (19/10)
 5. **Tu** – Scegliere 2–3 agenzie del Sud o dell'Emilia-Romagna (fonti in `10-beta.md`).
 6. ~~**Io** – Clausola «Riservatezza delle ricerche» nei termini~~ (19/10)
 7. ~~**Io** – Piano della beta e testi dell'invito: email, LinkedIn, benvenuto (`10-beta.md`)~~ (19/10)
@@ -24,7 +24,7 @@ Ultimo aggiornamento: 19/10/2026.
 ## 🟠 Bloccanti per la seconda ondata (Nord)
 9. **Insieme, verso il 28/10** – Rilanciare `supabase/queries/opportunita_per_regione.sql` e invitare solo dove il
    servizio dell'agenzia ha almeno 40–50 aziende pronte.
-10. ~~**Io** – Popolamento OSM dal Nord, 8 province a notte~~ (19/10, da pubblicare: punto 3)
+10. ~~**Io** – Popolamento OSM dal Nord, 8 province a notte~~ (19/10, pubblicato)
 
 ## 🔴 Bloccanti per il lancio a pagamento (non per la beta)
 11. **Tu** – Partita IVA, regime fiscale, fatturazione elettronica (SDI) e dati di fatturazione italiani, con il

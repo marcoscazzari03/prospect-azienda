@@ -15,7 +15,7 @@
   l'esito nell'app (stato del contatto, note); segnalare i lead sbagliati dall'app; due chiamate da 20 minuti
   (seconda e quarta settimana).
 - **Cosa offriamo:** crediti gratuiti per tutta la beta; prezzo bloccato più basso al passaggio a pagamento
-  (proposta: −30% per 12 mesi, da confermare); voce sulle prossime funzioni.
+  (−30% per 12 mesi, deciso il 19/10); voce sulle prossime funzioni.
 - **Cosa misuriamo:** tasso di risposta per servizio e per tipo di contatto (email o modulo); segnali che
   funzionano (per tarare il punteggio); la domanda chiave: «senza il nome del referente, lo pagheresti?»;
   lato nostro costi della ricerca AI, errori, segnalazioni (admin: Ricerche, Costi, Segnalazioni; resoconto
@@ -40,9 +40,9 @@ altri clienti. Non promettere nell'invito più di così (es. «esclusiva» sulle
 ## Prima di inviare (bloccanti)
 
 - [ ] 2FA sugli account dei servizi e chiave Anthropic dedicata (`08-messa-in-produzione.md`, Fase 1).
-- [ ] Workflow «Aziende | Popolamento OSM» pubblicato (Nord prima, dal 20/10).
+- [x] Workflow «Aziende | Popolamento OSM» pubblicato (Nord prima, dal 20/10).
 - [x] Termini: clausola «Riservatezza delle ricerche» (19/10).
-- [ ] Decidere lo sconto per i beta tester (proposta −30% per 12 mesi).
+- [x] Sconto per i beta tester: −30% per 12 mesi (19/10).
 - [ ] Logo accanto al mittente e firma con il logo per leads@ (facoltativi ma utili).
 
 ## Testi dell'invito
@@ -67,7 +67,7 @@ Cerco 5 agenzie per una **beta gratuita di 4 settimane**:
 - crediti gratuiti per circa 75 aziende con opportunità, più quelli di benvenuto;
 - in cambio: almeno 3 ricerche vere, contattare le aziende che ti interessano e dirmi com'è andata
   (due chiamate da 20 minuti);
-- a beta finita, se vorrai continuare, un prezzo bloccato più basso per i beta tester.
+- a beta finita, se vorrai continuare, il 30% di sconto per 12 mesi, riservato ai beta tester.
 
 Due cose da sapere subito:
 - non ti diamo i nomi dei referenti, solo canali aziendali (info@, commerciale@, modulo di contatto): è una
