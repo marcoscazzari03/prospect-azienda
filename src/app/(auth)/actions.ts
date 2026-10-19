@@ -30,7 +30,32 @@ export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
         : "Email o password non corretti.",
     };
   }
+  // Verifica in due passaggi attiva: prima di entrare serve il codice dell'app.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+    redirect(`/accedi/verifica?next=${encodeURIComponent(safeNext(form.get("next")))}`);
+  }
   redirect(safeNext(form.get("next")));
+}
+
+// Secondo passaggio dell'accesso: codice dell'app di autenticazione.
+export async function verifyMfaLogin(_: AuthState, form: FormData): Promise<AuthState> {
+  const code = String(form.get("code") ?? "").trim();
+  if (!/^\d{6}$/.test(code)) return { error: "Il codice ha 6 cifre." };
+  const supabase = await createClient();
+  const { data: list } = await supabase.auth.mfa.listFactors();
+  const factor = list?.totp?.find((f) => f.status === "verified");
+  if (!factor) redirect(safeNext(form.get("next")));
+  const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
+  if (error) return { error: "Codice non valido o scaduto: controlla l'ora del telefono e riprova." };
+  redirect(safeNext(form.get("next")));
+}
+
+// Esce da un accesso lasciato a metà (es. telefono non a portata di mano).
+export async function cancelMfaLogin() {
+  const supabase = await createClient();
+  await supabase.auth.signOut({ scope: "local" });
+  redirect("/accedi");
 }
 
 const signUpSchema = z.object({

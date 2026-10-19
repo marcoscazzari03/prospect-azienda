@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { Alert, Button, Field, Input } from "@/components/ui";
 import { Captcha } from "@/components/captcha";
-import { requestReset, signIn, signUp, updatePassword, type AuthState } from "./actions";
+import { requestReset, signIn, signUp, updatePassword, verifyMfaLogin, type AuthState } from "./actions";
 
 export function SignInForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(signIn, {});
@@ -60,6 +60,20 @@ export function NewPasswordForm() {
       {state.error && <Alert tone="brick">{state.error}</Alert>}
       <Field label="Nuova password" htmlFor="password" hint="Almeno 10 caratteri."><Input id="password" name="password" type="password" required minLength={10} autoComplete="new-password" /></Field>
       <Button type="submit" size="lg" disabled={pending}>Salva la password</Button>
+    </form>
+  );
+}
+
+export function MfaLoginForm({ next }: { next?: string }) {
+  const [state, action, pending] = useActionState<AuthState, FormData>(verifyMfaLogin, {});
+  return (
+    <form action={action} className="flex flex-col gap-4">
+      {state.error && <Alert tone="brick">{state.error}</Alert>}
+      <input type="hidden" name="next" value={next ?? "/app"} />
+      <Field label="Codice di 6 cifre" htmlFor="code">
+        <Input id="code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" maxLength={6} required autoFocus className="font-mono text-lg tracking-[0.4em]" />
+      </Field>
+      <Button type="submit" size="lg" disabled={pending}>{pending ? "Verifica…" : "Accedi"}</Button>
     </form>
   );
 }

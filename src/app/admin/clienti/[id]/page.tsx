@@ -4,7 +4,7 @@ import { Button, Card, Input, PageHeader, Select, Stat } from "@/components/ui";
 import { SearchTable, type SearchListItem } from "@/components/search-table";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatEur } from "@/lib/domain/pricing";
-import { adjustCredits, setOrgPlan, setOrgStatus } from "../../actions";
+import { adjustCredits, resetUserMfa, setOrgPlan, setOrgStatus } from "../../actions";
 import { requireAdmin } from "@/lib/server/dal";
 
 export const metadata: Metadata = { title: "Cliente" };
@@ -20,11 +20,16 @@ export default async function ClientPage({ params }: PageProps<"/admin/clienti/[
     db.from("searches").select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at").eq("org_id", id).order("created_at", { ascending: false }).limit(50),
     db.from("credit_ledger").select("id, delta, kind, description, created_at").eq("org_id", id).order("created_at", { ascending: false }).limit(30),
     db.from("payments").select("amount_cents").eq("org_id", id).eq("status", "paid"),
-    db.from("memberships").select("role, profiles:user_id(email, full_name)").eq("org_id", id),
+    db.from("memberships").select("user_id, role, profiles:user_id(email, full_name)").eq("org_id", id),
     db.from("plans").select("id, name").order("sort"),
   ]);
   if (!org) notFound();
   const revenue = (payments ?? []).reduce((s, p) => s + p.amount_cents, 0);
+  // Utenti con la verifica in due passaggi attiva (per toglierla a chi ha perso il telefono).
+  const withMfa = (await Promise.all((members ?? []).map(async (m) => {
+    const { data } = await db.auth.admin.mfa.listFactors({ userId: m.user_id });
+    return (data?.factors ?? []).some((f) => f.status === "verified") ? m : null;
+  }))).filter((m) => m !== null);
 
   return (
     <>
@@ -54,6 +59,20 @@ export default async function ClientPage({ params }: PageProps<"/admin/clienti/[
           </form>
           <p className="mt-2 text-xs text-muted">Per gli abbonamenti Stripe il piano viene aggiornato in automatico.</p>
         </Card>
+        {withMfa.length > 0 && (
+          <Card className="p-5">
+            <p className="mb-1 font-medium">Verifica in due passaggi</p>
+            <p className="mb-3 text-xs text-muted">Toglila solo dopo aver verificato l&apos;identità (risposta dall&apos;email dell&apos;account).</p>
+            {withMfa.map((m) => (
+              <form key={m.user_id} action={resetUserMfa} className="flex items-center justify-between gap-2 py-1 text-sm">
+                <input type="hidden" name="orgId" value={id} />
+                <input type="hidden" name="userId" value={m.user_id} />
+                <span className="truncate">{(m.profiles as unknown as { email: string }).email}</span>
+                <Button type="submit" size="sm" variant="secondary">Disattiva</Button>
+              </form>
+            ))}
+          </Card>
+        )}
         <Card className="p-5">
           <p className="mb-3 font-medium">Accesso</p>
           <form action={setOrgStatus}>

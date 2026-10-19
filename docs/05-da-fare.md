@@ -276,6 +276,13 @@ all'architettura; il resto si decide con i clienti.
       i suoi lead). Eliminare cancella i dati per sempre ma tiene la chiave dell'azienda (non riproposta né riaddebitata);
       le ricerche in corso non si eliminano.
 
+- [x] Account su quattro pagine (Profilo, Sicurezza, Piano e fatturazione, Assistenza e dati) e verifica in due
+      passaggi facoltativa (app di autenticazione, TOTP di Supabase): attivazione con QR in Sicurezza, codice chiesto
+      dopo la password (/accedi/verifica), proxy che non apre /app e /admin senza il codice, migrazione 044 (le tabelle
+      del cliente non si leggono con la sola password se il 2FA è attivo). L'admin può toglierla a chi perde il telefono
+      (scheda del cliente). Il cambio password non abbassa più il livello della sessione.
+- [ ] Verificare in Supabase (Authentication → Multi-Factor) che il TOTP sia attivo; provare attivazione e accesso.
+
 ### D. Database
 - [ ] Rimandato (analisi del 19/10): coda del controllo siti con priorità (segnali attivi in scadenza, settori e zone
       più cercati, poi le altre). Oggi la coda si svuota in ~3 ore dopo l'importazione OSM notturna (4 province al

@@ -45,6 +45,16 @@ export async function proxy(request: NextRequest) {
     login.search = `?next=${encodeURIComponent(path)}`;
     return NextResponse.redirect(login);
   }
+  // Verifica in due passaggi attiva ma non ancora fatta in questa sessione: prima il codice.
+  if (user && (path.startsWith("/app") || path.startsWith("/admin"))) {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+      const verify = request.nextUrl.clone();
+      verify.pathname = "/accedi/verifica";
+      verify.search = `?next=${encodeURIComponent(path)}`;
+      return NextResponse.redirect(verify);
+    }
+  }
   // Area admin: secondo controllo prima di qualsiasi rendering (le pagine
   // verificano comunque da sole con requireAdmin).
   if (user && path.startsWith("/admin")) {

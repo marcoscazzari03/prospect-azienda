@@ -151,3 +151,17 @@ export async function resetOfferRule(form: FormData) {
     return next;
   }, admin.user.id, "settings.offer_rule_reset", code);
 }
+
+// Verifica in due passaggi: la toglie a un utente che ha perso il telefono (dopo averlo verificato
+// fuori dalla piattaforma, per esempio rispondendo dall'email dell'account).
+export async function resetUserMfa(form: FormData) {
+  const admin = await requireAdmin();
+  const p = z.object({ orgId: z.string().uuid(), userId: z.string().uuid() }).parse(Object.fromEntries(form));
+  const db = createAdminClient();
+  const { data: member } = await db.from("memberships").select("user_id").eq("org_id", p.orgId).eq("user_id", p.userId).maybeSingle();
+  if (!member) return;
+  const { data } = await db.auth.admin.mfa.listFactors({ userId: p.userId });
+  for (const f of data?.factors ?? []) await db.auth.admin.mfa.deleteFactor({ id: f.id, userId: p.userId });
+  await audit(admin.user.id, "user.mfa_reset", p.userId);
+  revalidatePath(`/admin/clienti/${p.orgId}`);
+}
