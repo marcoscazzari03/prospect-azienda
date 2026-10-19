@@ -5,7 +5,7 @@ import { LeadsTable } from "@/components/leads-table";
 import { Badge, Button, ButtonLink, EmptyState, Input, PageHeader, Select, cx } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
 import { createClient } from "@/lib/supabase/server";
-import { LEAD_STAGES, LEAD_STAGE_LABEL, type DeliveryRow } from "@/lib/domain/leads";
+import { LEAD_STAGES, LEAD_STAGE_LABEL, offersBySearch, type DeliveryRow } from "@/lib/domain/leads";
 import { deleteList } from "./actions";
 import { NewListForm } from "./new-list-form";
 
@@ -46,7 +46,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
 
   const [{ data, count }, { data: searches }] = await Promise.all([
     query,
-    supabase.from("searches").select("id, name").order("created_at", { ascending: false }).limit(100),
+    supabase.from("searches").select("id, name, target").order("created_at", { ascending: false }).limit(500),
   ]);
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE));
@@ -103,14 +103,14 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
         </Select>
         <Select name="ricerca" defaultValue={ricerca} aria-label="Ricerca">
           <option value="">Tutte le ricerche</option>
-          {(searches ?? []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          {(searches ?? []).slice(0, 100).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </Select>
         <Button type="submit" variant="secondary">Filtra</Button>
       </form>
       {data?.length ? (
         <>
           <ContactNotice />
-          <LeadsTable rows={data as DeliveryRow[]} lists={lists ?? []} />
+          <LeadsTable rows={data as DeliveryRow[]} lists={lists ?? []} offers={offersBySearch(searches)} />
           {pages > 1 && (
             <nav className="mt-6 flex items-center justify-between text-sm">
               {page > 1 ? <Link className="text-ledger underline" href={`?${qs({ pagina: String(page - 1) })}`}>← Precedenti</Link> : <span />}

@@ -506,3 +506,46 @@ export function describeOpportunity(args: { codes: string[]; match: "any" | "all
     "Ogni segnale ha una prova (link e data): le aziende senza prova vengono escluse.",
   ].filter(Boolean).join(" ");
 }
+
+// Punteggio dell'opportunità (0-100), con regole fisse e spiegabili al cliente.
+// Per ogni segnale: affidabilità della prova × attinenza al servizio venduto × freschezza;
+// conta il segnale migliore, più un piccolo bonus per ogni altro segnale. Il segnale è un fatto
+// osservato (con la prova); l'opportunità è dedotta, per questo il livello parla di
+// «opportunità forte / probabile / potenziale» e mai di bisogno certo.
+export const OPPORTUNITY_RULES = {
+  // Affidabilità: quanto il fatto indica davvero un bisogno.
+  reliability: {
+    job_ad: 90, no_https: 90, outdated_cms: 85, under_construction: 70, no_mobile: 65,
+    single_language: 50, no_booking_engine: 45, stale_copyright: 40,
+  } as Record<string, number>,
+  // Attinenza al servizio scelto («Cosa vendi?»): il primo segnale del servizio è il principale.
+  relevance: { primary: 1, secondary: 0.85, other: 0.7 },
+  // Freschezza della prova (giorni dalla data dell'annuncio o del controllo).
+  freshness: [[14, 1], [30, 0.9], [60, 0.75], [Infinity, 0.6]] as [number, number][],
+  extraSignalBonus: 8,
+  levels: [[75, "forte"], [50, "probabile"], [0, "potenziale"]] as [number, string][],
+};
+
+export type OpportunityScore = {
+  score: number;
+  level: string;
+  parts: { code: string; reliability: number; relevance: number; freshness: number; ageDays: number | null }[];
+};
+
+export function opportunityScore(signals: LeadSignal[] | undefined, offerCode?: string, now = new Date()): OpportunityScore | null {
+  if (!signals?.length) return null;
+  const R = OPPORTUNITY_RULES;
+  const offer = offerCode ? offerByCode(offerCode) : undefined;
+  const parts = signals.map((s) => {
+    const when = s.code === "job_ad" ? s.evidence?.date : s.evidence?.checked_at;
+    const t = when ? Date.parse(String(when).slice(0, 10)) : NaN;
+    const ageDays = Number.isFinite(t) ? Math.max(0, Math.floor((now.getTime() - t) / 86_400_000)) : null;
+    const freshness = ageDays === null ? R.freshness[R.freshness.length - 1][1] : R.freshness.find(([d]) => ageDays <= d)![1];
+    const relevance = !offer ? 1 : offer.signals[0] === s.code ? R.relevance.primary : offer.signals.includes(s.code) ? R.relevance.secondary : R.relevance.other;
+    return { code: s.code, reliability: R.reliability[s.code] ?? 40, relevance, freshness, ageDays };
+  });
+  const best = Math.max(...parts.map((p) => p.reliability * p.relevance * p.freshness));
+  const score = Math.round(Math.min(100, best + R.extraSignalBonus * (parts.length - 1)));
+  const level = R.levels.find(([min]) => score >= min)![1];
+  return { score, level, parts };
+}

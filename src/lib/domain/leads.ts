@@ -1,4 +1,4 @@
-import { signalByCode, signalPhrase, type LeadSignal } from "./signals";
+import { opportunityScore, signalByCode, signalPhrase, type LeadSignal } from "./signals";
 
 // Forma dei lead consegnati (deliveries.data) e conversione per tabelle ed export.
 
@@ -66,8 +66,10 @@ export const ROLE_MATCH_LABEL: Record<string, string> = {
   unknown: "Ruolo non indicato",
 };
 
-export function flattenDelivery(d: DeliveryRow) {
+// `offers`: servizio scelto in ogni ricerca (search_id -> codice), per l'attinenza del punteggio.
+export function flattenDelivery(d: DeliveryRow, offers: Record<string, string | undefined> = {}) {
   const x = d.data ?? {};
+  const opp = opportunityScore(x.signals, offers[d.search_id]);
   return {
     azienda: x.company?.name ?? "",
     sito: x.company?.website ?? "",
@@ -90,6 +92,8 @@ export function flattenDelivery(d: DeliveryRow) {
     email_ipotizzate: (x.email_patterns ?? []).map((p) => p.address).join(", "),
     segnali: (x.signals ?? []).map((sg) => `${signalByCode(sg.code)?.label ?? sg.code}: ${signalPhrase(sg)}`).join(" | "),
     prove_segnali: (x.signals ?? []).map((sg) => sg.evidence?.url ?? "").filter(Boolean).join(" "),
+    punteggio_opportunita: opp ? opp.score : "",
+    livello_opportunita: opp ? `Opportunità ${opp.level}` : "",
     qualita: d.quality_score,
     crediti: d.credits,
     consegnato_il: d.delivered_at?.slice(0, 10) ?? "",
@@ -118,6 +122,8 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "email_ipotizzate", label: "Email ipotizzate (non verificate)" },
   { key: "segnali", label: "Perché è in target" },
   { key: "prove_segnali", label: "Prova del segnale" },
+  { key: "punteggio_opportunita", label: "Punteggio opportunità (0-100)" },
+  { key: "livello_opportunita", label: "Livello opportunità" },
   { key: "qualita", label: "Qualità" },
   { key: "consegnato_il", label: "Consegnato il" },
   { key: "stato_contatto", label: "Fase commerciale" },
@@ -126,8 +132,12 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
 
 // Colonne della persona: solo se almeno un lead ha il referente (in «Solo azienda» mai).
 const PERSON_COLUMNS = new Set(["nome", "cognome", "ruolo", "linkedin", "email_ipotizzate"]);
+// Colonne dell'opportunità: solo se almeno un lead ha un segnale.
+const OPPORTUNITY_COLUMNS = new Set(["punteggio_opportunita", "livello_opportunita"]);
 export function exportColumns(rows: ReturnType<typeof flattenDelivery>[]) {
-  return rows.some((r) => r.nome) ? EXPORT_COLUMNS : EXPORT_COLUMNS.filter((c) => !PERSON_COLUMNS.has(c.key));
+  const people = rows.some((r) => r.nome);
+  const opportunities = rows.some((r) => r.punteggio_opportunita !== "");
+  return EXPORT_COLUMNS.filter((c) => (people || !PERSON_COLUMNS.has(c.key)) && (opportunities || !OPPORTUNITY_COLUMNS.has(c.key)));
 }
 
 // Avviso sull'uso dei contatti (pagine dei lead ed export Excel). Pubblicare un indirizzo sul
@@ -138,3 +148,8 @@ export const CONTACT_NOTICE = [
   "Usa questi dati per contatti mirati e personali, uno per azienda, non per invii di massa; il modulo di contatto si compila a mano.",
   "Rispetta sempre chi ti chiede di non essere più contattato. Se hai dubbi sul tuo caso, chiedi a un consulente.",
 ];
+
+// Servizio scelto in ogni ricerca opportunità (search_id -> codice del servizio).
+export function offersBySearch(searches: { id: string; target: unknown }[] | null | undefined) {
+  return Object.fromEntries((searches ?? []).map((s) => [s.id, (s.target as { signals?: { offer?: string } } | null)?.signals?.offer]));
+}

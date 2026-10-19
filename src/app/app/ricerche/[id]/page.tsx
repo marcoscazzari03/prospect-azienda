@@ -154,7 +154,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
       {leads?.length ? (
         <>
           <ContactNotice />
-          <LeadsTable rows={leads as DeliveryRow[]} lists={lists ?? []} />
+          <LeadsTable rows={leads as DeliveryRow[]} lists={lists ?? []} offers={{ [search.id]: t.signals?.offer }} />
         </>
       ) : (
         <EmptyState title={running ? "Stiamo cercando…" : "Nessun lead in questa ricerca"}>

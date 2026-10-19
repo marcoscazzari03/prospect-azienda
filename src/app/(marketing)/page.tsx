@@ -88,6 +88,10 @@ const faq = (prices: SignalPrices) => [
     a: `Scegli il servizio che vendi (es. rifacimento del sito, assistenza IT, selezione del personale): cerchiamo noi i segnali collegati, come annunci di lavoro recenti per una figura o caratteristiche del sito (software non aggiornato, senza HTTPS, in una sola lingua). Controlliamo ogni segnale prima di consegnare l'azienda e lo consegniamo con la prova: link e data. Le aziende senza prova vengono escluse. Ogni lead con segnale costa ${extraCreditsLabel(prices)} e, se il segnale non è corretto, puoi segnalarlo entro 14 giorni.`,
   },
   {
+    q: "Cosa vuol dire il punteggio dell'opportunità?",
+    a: "Il segnale è un fatto verificato, con la prova. Che l'azienda abbia davvero bisogno del tuo servizio lo stimiamo noi, con un punteggio da 0 a 100: quanto quel fatto indica un bisogno (un sito senza HTTPS conta più di un copyright vecchio), quanto è legato al servizio che vendi e quanto è recente la prova. Da 75 in su è un'opportunità forte, da 50 probabile, sotto potenziale. È una stima per decidere chi contattare prima, non una garanzia.",
+  },
+  {
     q: "Che servizi posso scegliere?",
     a: "Siti web (rifacimento, manutenzione WordPress, sicurezza del sito), IT e sistemistica, marketing e comunicazione, HR e selezione, commerciale, amministrazione. Aggiungiamo un servizio solo quando abbiamo un segnale verificabile che lo distingue: per questo l'elenco cresce nel tempo.",
   },

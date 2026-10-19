@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { estimateCredits } from "@/lib/domain/pricing";
 import { defaultSearchName, searchInputSchema, toTarget } from "@/lib/domain/search-input";
-import { OFFERS, VERIFIED_SIGNAL_CODES, applyOfferRules, describeOffer, describeOpportunity, offerChoice, validateOfferRule, extraCreditsLabel, signalExtraRange, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
+import { OFFERS, VERIFIED_SIGNAL_CODES, applyOfferRules, opportunityScore, describeOffer, describeOpportunity, offerChoice, validateOfferRule, extraCreditsLabel, signalExtraRange, signalPhrase, toSignalsTarget } from "@/lib/domain/signals";
 import { flattenDelivery } from "@/lib/domain/leads";
 
 const base = {
@@ -154,5 +154,42 @@ describe("segnali nella ricerca (fase 3)", () => {
     expect(searchInputSchema.safeParse({ ...base, industry: "" }).success).toBe(false);
     expect(searchInputSchema.safeParse({ ...base, industry: "ab", signals: offerChoice("it_support") }).success).toBe(false);
     expect(describeOffer({ offer: "translation", industry: "", where: "Veneto" })).toMatch(/^Cercheremo aziende di ogni settore in Veneto/);
+  });
+});
+
+describe("punteggio dell'opportunità", () => {
+  const now = new Date("2026-10-19T12:00:00Z");
+  it("nessun segnale: nessun punteggio", () => {
+    expect(opportunityScore([], "web_redesign", now)).toBeNull();
+  });
+  it("prova forte, attinente e recente: opportunità forte", () => {
+    const o = opportunityScore([{ code: "outdated_cms", evidence: { checked_at: "2026-10-15" } }], "wp_maintenance", now)!;
+    expect(o.score).toBe(85);
+    expect(o.level).toBe("forte");
+  });
+  it("indizio debole e vecchio: opportunità potenziale", () => {
+    const o = opportunityScore([{ code: "stale_copyright", evidence: { checked_at: "2026-07-01" } }], "web_redesign", now)!;
+    expect(o.score).toBe(Math.round(40 * 0.85 * 0.6));
+    expect(o.level).toBe("potenziale");
+  });
+  it("stesso segnale, servizio diverso: cambia l'attinenza", () => {
+    const sig = [{ code: "single_language", evidence: { checked_at: "2026-10-18" } }];
+    expect(opportunityScore(sig, "translation", now)!.score).toBeGreaterThan(opportunityScore(sig, "web_redesign", now)!.score);
+  });
+  it("più segnali: bonus, massimo 100", () => {
+    const o = opportunityScore([
+      { code: "job_ad", evidence: { date: "2026-10-17" } },
+      { code: "no_https", evidence: { checked_at: "2026-10-18" } },
+      { code: "outdated_cms", evidence: { checked_at: "2026-10-18" } },
+    ], "cybersecurity", now)!;
+    expect(o.score).toBe(Math.min(100, 90 + 16));
+  });
+  it("export: punteggio e livello", () => {
+    const row = flattenDelivery({
+      id: "1", search_id: "s1", email_address: "info@a.it", email_type: "generic", email_status: "found_public", credits: 2, quality_score: 63,
+      delivered_at: "2026-10-19T10:00:00Z", data: { company: { name: "A" }, signals: [{ code: "outdated_cms", evidence: { checked_at: new Date().toISOString().slice(0, 10) } }] },
+    }, { s1: "wp_maintenance" });
+    expect(row.punteggio_opportunita).toBe(85);
+    expect(row.livello_opportunita).toBe("Opportunità forte");
   });
 });

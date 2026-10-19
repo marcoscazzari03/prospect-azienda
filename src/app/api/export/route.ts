@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getViewer } from "@/lib/server/dal";
 import { toCsv } from "@/lib/domain/csv";
-import { CONTACT_NOTICE, LEAD_STAGES, exportColumns, flattenDelivery, type DeliveryRow } from "@/lib/domain/leads";
+import { CONTACT_NOTICE, LEAD_STAGES, exportColumns, flattenDelivery, offersBySearch, type DeliveryRow } from "@/lib/domain/leads";
 import { toXlsx } from "@/lib/server/xlsx";
 import { RATE_LIMITS } from "@/lib/config";
 
@@ -61,9 +61,14 @@ export async function GET(request: Request) {
 
   if (log) await db.from("exports").update({ rows: rows.length }).eq("id", log.id);
 
+  const searchIds = [...new Set(rows.map((r) => r.search_id))].slice(0, 1000);
+  const { data: searches } = searchIds.length ? await supabase.from("searches").select("id, target").in("id", searchIds) : { data: [] };
+  const offers = offersBySearch(searches);
+  const flat = rows.map((r) => flattenDelivery(r, offers));
+
   const date = new Date().toISOString().slice(0, 10);
   if (format === "xlsx") {
-    const file = await toXlsx(rows.map(flattenDelivery), exportColumns(rows.map(flattenDelivery)), "Lead", CONTACT_NOTICE);
+    const file = await toXlsx(flat, exportColumns(flat), "Lead", CONTACT_NOTICE);
     return new NextResponse(new Uint8Array(file), {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -72,7 +77,7 @@ export async function GET(request: Request) {
       },
     });
   }
-  const csv = toCsv(rows.map(flattenDelivery), exportColumns(rows.map(flattenDelivery)));
+  const csv = toCsv(flat, exportColumns(flat));
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",

@@ -3,7 +3,7 @@ import { Fragment, useActionState, useState, useTransition } from "react";
 import { reportLead, type ActionState } from "@/app/app/actions";
 import { saveLeadNotes, setLeadStage, setListMembership, type LeadActionState } from "@/app/app/lead/actions";
 import { LEAD_STAGES, LEAD_STAGE_LABEL, ROLE_MATCH_LABEL, type DeliveryRow, type LeadStage } from "@/lib/domain/leads";
-import { signalByCode, signalPhrase } from "@/lib/domain/signals";
+import { OPPORTUNITY_RULES, opportunityScore, signalByCode, signalPhrase } from "@/lib/domain/signals";
 import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
 import { Alert, Badge, Button, ProvenanceStamp, Select, cx } from "./ui";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
@@ -126,7 +126,8 @@ function ListChips({ id, memberOf, lists }: { id: string; memberOf: string[]; li
   );
 }
 
-export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadList[] }) {
+// `offers`: servizio scelto in ogni ricerca (search_id -> codice), per il punteggio dell'opportunità.
+export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; lists?: LeadList[]; offers?: Record<string, string | undefined> }) {
   const [open, setOpen] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const manage = Boolean(lists);
@@ -170,6 +171,7 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
           {rows.map((r, i) => {
             const d = r.data;
             const isOpen = open === r.id;
+            const opp = opportunityScore(d.signals, offers[r.search_id]);
             return (
               <Fragment key={r.id}>
                 <tr className={cx("animate-row-in border-t border-line align-top", isOpen && "bg-paper/70")} style={{ animationDelay: `${Math.min(i, 20) * 25}ms` }}>
@@ -191,6 +193,11 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                       <div className="mt-1 flex flex-wrap gap-1">
                         {d.signals.map((sg) => <Badge key={sg.code} tone="stamp">{signalByCode(sg.code)?.label ?? sg.code}</Badge>)}
                       </div>
+                    )}
+                    {opp && (
+                      <p className="mt-1 text-xs text-ink-2">
+                        Opportunità <span className={cx("font-medium", opp.level === "forte" ? "text-ledger" : "text-ink")}>{opp.level}</span> · <span className="font-mono">{opp.score}</span>/100
+                      </p>
                     )}
                   </td>
                   <td className="px-4 py-3">
@@ -237,7 +244,14 @@ export function LeadsTable({ rows, lists }: { rows: DeliveryRow[]; lists?: LeadL
                               </li>
                             ))}
                           </ul>
-                          <p className="mt-2 text-muted">Fatti pubblici osservati alla data indicata: non garantiscono che l&apos;azienda abbia bisogno di un servizio.</p>
+                          {opp && (
+                            <p className="mt-2">
+                              <span className="font-medium">Opportunità {opp.level} ({opp.score}/100):</span>{" "}
+                              {opp.parts.map((p) => `${signalByCode(p.code)?.label ?? p.code}: affidabilità ${p.reliability}, attinenza al servizio ${Math.round(p.relevance * 100)}%, prova ${p.ageDays === null ? "senza data" : p.ageDays === 0 ? "di oggi" : `di ${p.ageDays} giorni fa`}`).join(" · ")}
+                              {opp.parts.length > 1 ? ` · +${OPPORTUNITY_RULES.extraSignalBonus} per ogni segnale in più` : ""}.
+                            </p>
+                          )}
+                          <p className="mt-2 text-muted">I segnali sono fatti pubblici osservati alla data indicata; l&apos;opportunità è una nostra stima e non garantisce che l&apos;azienda abbia bisogno di un servizio.</p>
                         </div>
                       )}
                       <div className="grid gap-4 md:grid-cols-3">

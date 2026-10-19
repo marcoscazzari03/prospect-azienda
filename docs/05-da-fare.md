@@ -254,12 +254,15 @@ all'architettura; il resto si decide con i clienti.
   del wizard), altrimenti parte la ricerca AI a pagamento.
 
 ### C. Qualità delle opportunità
-- [ ] Punteggio interno 0–100 con regole fisse e configurabili: affidabilità della prova × attinenza al servizio
-      («Cosa vendi?») × freschezza (data della prova).
-- [ ] Due livelli: «segnale verificato» (senza HTTPS, CMS obsoleto, in costruzione, annuncio verificato) e
-      «opportunità potenziale» (copyright vecchio, sito in una sola lingua). «Non adatto ai cellulari» a metà
-      finché il controllo non è più solido.
-- [ ] Mostrare punteggio e livello nei risultati e nell'export, con la spiegazione per il cliente.
+- [x] Punteggio dell'opportunità 0–100 (19/10, `opportunityScore` in signals.ts, regole in `OPPORTUNITY_RULES`):
+      affidabilità della prova (annuncio e HTTPS 90, CMS 85, in costruzione 70, cellulari 65, una lingua 50,
+      prenotazioni 45, copyright 40) × attinenza al servizio (principale 100%, secondario 85%, altro 70%) × freschezza
+      (≤14 gg 100%, ≤30 90%, ≤60 75%, oltre 60%); +8 per ogni segnale in più, massimo 100.
+- [x] Livelli: opportunità forte (75+), probabile (50+), potenziale. Il segnale è il fatto con la prova, l'opportunità
+      è la nostra stima (detto così nei risultati e nelle FAQ).
+- [x] Punteggio e livello sotto l'azienda nei risultati, spiegazione nel dettaglio del lead, due colonne nell'export
+      (solo se ci sono segnali). Calcolato dall'app: si può cambiare senza migrazioni.
+- [ ] Dopo la beta: tarare i pesi con i giudizi dei clienti (quali opportunità hanno portato a una risposta).
 
 ### D. Database
 - [ ] Rimandato (analisi del 19/10): coda del controllo siti con priorità (segnali attivi in scadenza, settori e zone
