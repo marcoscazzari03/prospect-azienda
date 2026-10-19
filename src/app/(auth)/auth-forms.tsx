@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 import { Alert, Button, Field, Input } from "@/components/ui";
 import { Captcha } from "@/components/captcha";
 import { requestReset, signIn, signUp, updatePassword, verifyMfaLogin, type AuthState } from "./actions";
@@ -19,10 +19,36 @@ export function SignInForm({ next }: { next?: string }) {
   );
 }
 
-export function SignUpForm({ plan, captchaKey = "" }: { plan?: string; captchaKey?: string }) {
-  const [state, action, pending] = useActionState<AuthState, FormData>(signUp, {});
-  if (state.info) return <Alert tone="ledger">{state.info}</Alert>;
+// Dopo l'invio dell'email il modulo e il suo titolo lasciano il posto a «Controlla la tua email»:
+// con il solo riquadro verde sotto il titolo della pagina sembrava che non fosse successo nulla.
+function EmailSent({ title, children }: { title: string; children: ReactNode }) {
   return (
+    <div role="status">
+      <div className="mb-5 grid h-12 w-12 place-items-center rounded-full bg-ledger-soft text-ledger" aria-hidden>
+        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" />
+        </svg>
+      </div>
+      <h1 className="font-display text-3xl font-semibold">{title}</h1>
+      <div className="mt-3 space-y-3 text-ink-2">{children}</div>
+    </div>
+  );
+}
+
+export function SignUpForm({ plan, captchaKey = "", intro }: { plan?: string; captchaKey?: string; intro?: ReactNode }) {
+  const [state, action, pending] = useActionState<AuthState, FormData>(signUp, {});
+  if (state.info) {
+    return (
+      <EmailSent title="Controlla la tua email">
+        <p>{state.info}</p>
+        <p className="text-sm">L&apos;email arriva da leads@weborastudio.it. Se non la vedi entro qualche minuto, guarda nella posta indesiderata o nelle promozioni.</p>
+        <p className="text-sm">Hai già confermato? <Link href="/accedi" className="text-ledger underline">Accedi</Link>.</p>
+      </EmailSent>
+    );
+  }
+  return (
+    <>
+    {intro}
     <form action={action} className="flex flex-col gap-4">
       {state.error && <Alert tone="brick">{state.error}</Alert>}
       <input type="hidden" name="plan" value={plan ?? ""} />
@@ -39,17 +65,29 @@ export function SignUpForm({ plan, captchaKey = "" }: { plan?: string; captchaKe
       <Captcha siteKey={captchaKey} resetSignal={state} />
       <Button type="submit" size="lg" disabled={pending}>{pending ? "Creazione…" : "Crea l'account gratuito"}</Button>
     </form>
+    </>
   );
 }
 
-export function ResetForm() {
+export function ResetForm({ intro }: { intro?: ReactNode }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(requestReset, {});
-  if (state.info) return <Alert tone="ledger">{state.info}</Alert>;
+  if (state.info) {
+    return (
+      <EmailSent title="Controlla la tua email">
+        <p>{state.info}</p>
+        <p className="text-sm">Se non la vedi entro qualche minuto, guarda nella posta indesiderata o nelle promozioni.</p>
+        <p className="text-sm"><Link href="/accedi" className="text-ledger underline">Torna all&apos;accesso</Link></p>
+      </EmailSent>
+    );
+  }
   return (
+    <>
+    {intro}
     <form action={action} className="flex flex-col gap-4">
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" required autoComplete="email" /></Field>
-      <Button type="submit" size="lg" disabled={pending}>Invia il link</Button>
+      <Button type="submit" size="lg" disabled={pending}>{pending ? "Invio…" : "Invia il link"}</Button>
     </form>
+    </>
   );
 }
 
