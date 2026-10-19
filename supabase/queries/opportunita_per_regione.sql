@@ -1,6 +1,6 @@
 -- Opportunità pronte nel database, per servizio e regione (solo lettura, nessun costo).
 -- Stesso calcolo del contatore del wizard, per un cliente nuovo (che non ha ancora ricevuto niente).
--- Conteggio nazionale fermo a 501 (come il contatore). Regole dei servizi: quelle predefinite.
+-- Senza il tetto di 501 del contatore. Regole dei servizi: quelle predefinite (non le modifiche dall'admin).
 with servizi(servizio, target) as (values
   ('Rifacimento del sito', '{"industry":"","industry_keywords":[],"countries":["IT"],"exclude_keywords":[],"signals":{"offer":"web_redesign","look_for":"un sito datato: software non aggiornato o pagine non adatte ai cellulari","codes":["outdated_cms","no_mobile","stale_copyright"],"match":"any","job_families":[],"max_age_days":60}}'::jsonb),
   ('Manutenzione WordPress', '{"industry":"","industry_keywords":[],"countries":["IT"],"exclude_keywords":[],"signals":{"offer":"wp_maintenance","look_for":"un sito WordPress, Joomla o WooCommerce con una versione uscita da più di 2 anni","codes":["outdated_cms"],"match":"any","job_families":[],"max_age_days":60}}'::jsonb),
