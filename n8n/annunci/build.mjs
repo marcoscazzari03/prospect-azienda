@@ -733,7 +733,7 @@ const popolamento = `import { workflow, node, trigger, expr } from '@n8n/workflo
 
 // GENERATO da n8n/annunci/build.mjs: non modificare a mano.
 // Popolamento del database aziende da OpenStreetMap (dati aperti, licenza ODbL): ogni notte
-// 4 province a rotazione (province.json), le attività con un sito web (uffici, artigiani, negozi, studi,
+// 8 province a rotazione, prima il Nord (province.json), le attività con un sito web (uffici, artigiani, negozi, studi,
 // hotel, industrie). Solo dati d'azienda, nessun dato personale. Poi «Aziende | Controllo
 // siti» trova i segnali e «Annunci | Settore aziende» classifica chi non ha una categoria.
 

@@ -1,9 +1,16 @@
 // Popolamento da OpenStreetMap per provincia: una query Overpass sull'area ufficiale della
 // provincia (codice ISO «IT-MO»; le query su un'intera regione vanno in timeout sui server
-// pubblici). Ogni giorno PER_GIORNO province a rotazione (tutta Italia in circa un mese),
+// pubblici). Ogni giorno PER_GIORNO province a rotazione (tutta Italia in circa due settimane),
 // a mano Modena. Le province fallite si riprovano il giorno dopo.
-const PROVINCE = __PROVINCE__; // [sigla, nome, regione]
-const PER_GIORNO = 4;
+// Dal 20/10 la rotazione riparte dal Nord: il primo giro (dal 13/10) aveva coperto il Sud, e il
+// Nord, dove ci sono più agenzie e aziende, aveva poche opportunità nel database (19/10:
+// «Rifacimento del sito» 48 in Lombardia, 14 in Veneto, 461 in Puglia).
+const PRIMA = ['Lombardia', 'Veneto', 'Emilia-Romagna', 'Piemonte', 'Lazio', 'Toscana', 'Liguria', 'Friuli-Venezia Giulia',
+  'Trentino-Alto Adige', 'Marche', 'Umbria', "Valle d'Aosta"];
+const ordine = (r) => (PRIMA.indexOf(r) + PRIMA.length + 1) % (PRIMA.length + 1);
+const PROVINCE = __PROVINCE__ // [sigla, nome, regione]
+  .map((p, i) => [p, i]).sort(([a, i], [b, j]) => ordine(a[2]) - ordine(b[2]) || i - j).map(([p]) => p);
+const PER_GIORNO = 8;
 // Server principale: è l'unico che regge le query per area (private.coffee va in timeout).
 const SERVER = 'https://overpass-api.de/api/interpreter';
 
@@ -18,9 +25,10 @@ try {
   riprova = (statico.osm_tentativi === undefined ? ['NA', 'BA'] : statico.osm_riprova || []).map(String);
 } catch { riprova = []; }
 const oggi = new Date();
-const giorno = Math.floor((oggi - new Date(2026, 0, 1)) / 86400000);
+const giorno = Math.max(0, Math.floor((oggi - new Date(2026, 9, 20)) / 86400000));
 const rotazione = Array.from({ length: PER_GIORNO }, (_, k) => PROVINCE[(giorno * PER_GIORNO + k) % PROVINCE.length]);
-const daRiprovare = PROVINCE.filter(([s]) => riprova.includes(s)).slice(0, PER_GIORNO);
+// Al massimo 4 riprove al giorno (divise in 3 parti ognuna): con 8 province nuove la notte resta breve.
+const daRiprovare = PROVINCE.filter(([s]) => riprova.includes(s)).slice(0, 4);
 const scelte = programmato
   ? [...daRiprovare, ...rotazione.filter(([s]) => !daRiprovare.some(([r]) => r === s))]
   : PROVINCE.filter(([s]) => s === 'MO');
