@@ -39,7 +39,7 @@ altri clienti. Non promettere nell'invito più di così (es. «esclusiva» sulle
 
 ## Prima di inviare (bloccanti)
 
-- [ ] 2FA sugli account dei servizi e chiave Anthropic dedicata (`08-messa-in-produzione.md`, Fase 1).
+- [x] 2FA su Supabase, Vercel, GitHub, Stripe, n8n e chiave Anthropic dedicata con limite (19/10). Niente 2FA su Anthropic, Resend, Hostinger, Cloudflare, Icypeas (scelta dell'utente).
 - [x] Workflow «Aziende | Popolamento OSM» pubblicato (Nord prima, dal 20/10).
 - [x] Termini: clausola «Riservatezza delle ricerche» (19/10).
 - [x] Sconto per i beta tester: −30% per 12 mesi (19/10).

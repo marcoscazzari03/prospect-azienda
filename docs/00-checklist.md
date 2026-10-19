@@ -7,9 +7,8 @@ la checklist» si riscrive tutto da qui, fatti compresi. Il dettaglio storico re
 Ultimo aggiornamento: 19/10/2026.
 
 ## 🔴 Bloccanti per la prima ondata della beta (Sud ed Emilia-Romagna)
-1. **Tu** – Verifica in due passaggi sugli account dei servizi:
-   - ~~Supabase~~ · ~~Vercel~~ · ~~GitHub~~ · ~~Stripe~~ · ~~n8n~~ (19/10)
-   - Anthropic · Resend · Hostinger · Cloudflare (se lo usi) · Icypeas
+1. ~~**Tu** – Verifica in due passaggi su Supabase, Vercel, GitHub, Stripe, n8n~~ (19/10). Decisione dell'utente
+   (19/10): niente 2FA su Anthropic, Resend, Hostinger, Cloudflare e Icypeas.
 2. ~~**Tu** – Chiave Anthropic: workspace dedicato con limite di spesa, chiave nuova creata lì e messa nella
    credenziale n8n esistente~~ (19/10). Resta: eliminare la chiave vecchia dopo la prima prova riuscita;
    facoltativo rinominare la credenziale in «Webora Leads - Anthropic» (poi **Io** aggiorno i file del repository).
