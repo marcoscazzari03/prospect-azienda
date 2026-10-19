@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AutoRefresh } from "@/components/auto-refresh";
+import { ContactNotice } from "@/components/contact-notice";
 import { LeadsTable } from "@/components/leads-table";
 import { Badge, Button, ButtonLink, Card, EmptyState, PageHeader, Progress, SearchStatus } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
@@ -151,7 +152,10 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
 
       <h2 className="mb-4 mt-10 font-display text-2xl font-semibold">Lead</h2>
       {leads?.length ? (
-        <LeadsTable rows={leads as DeliveryRow[]} lists={lists ?? []} />
+        <>
+          <ContactNotice />
+          <LeadsTable rows={leads as DeliveryRow[]} lists={lists ?? []} />
+        </>
       ) : (
         <EmptyState title={running ? "Stiamo cercando…" : "Nessun lead in questa ricerca"}>
           {running

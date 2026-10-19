@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ContactNotice } from "@/components/contact-notice";
 import { LeadsTable } from "@/components/leads-table";
 import { Badge, Button, ButtonLink, EmptyState, Input, PageHeader, Select, cx } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
@@ -108,6 +109,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
       </form>
       {data?.length ? (
         <>
+          <ContactNotice />
           <LeadsTable rows={data as DeliveryRow[]} lists={lists ?? []} />
           {pages > 1 && (
             <nav className="mt-6 flex items-center justify-between text-sm">

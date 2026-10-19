@@ -77,7 +77,7 @@ const faq = (prices: SignalPrices) => [
   },
   {
     q: "Posso usare i lead per email marketing?",
-    a: "Le regole sulle comunicazioni commerciali cambiano da paese a paese (in Italia, ad esempio, l'invio di email promozionali richiede in genere il consenso, anche verso caselle aziendali). Sei tu a decidere come contattare le aziende e a rispettare la normativa: l'email aziendale è un'informazione in più, non un'autorizzazione a inviare promozioni. Il modulo di contatto si compila a mano, un'azienda alla volta, con un messaggio pensato per lei.",
+    a: "Le regole sulle comunicazioni commerciali cambiano da paese a paese (in Italia, ad esempio, l'invio di email promozionali richiede in genere il consenso, anche verso caselle aziendali). Sei tu a decidere come contattare le aziende e a rispettare la normativa: l'email aziendale è un'informazione in più, non un'autorizzazione a inviare promozioni: un indirizzo pubblicato sul sito non equivale a un consenso. Il modulo di contatto si compila a mano, un'azienda alla volta, con un messaggio pensato per lei.",
   },
   {
     q: "Cosa succede se non trovate abbastanza lead?",

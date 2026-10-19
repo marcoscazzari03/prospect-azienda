@@ -220,10 +220,12 @@ all'architettura; il resto si decide con i clienti.
 - [ ] Adzuna: piano «API Access» 8 £/mese (solo limiti di chiamate, nessuna clausola sull'uso commerciale nel pannello). Chiedere conferma scritta che copra il nostro uso (annunci come
       segnale mostrato a clienti B2B, con link all'annuncio, senza ripubblicarli). Mail inviata il 18/10 ad api-partnerships@adzuna.com: in attesa di risposta.
       Conservare la risposta per il legale.
-- [ ] Testi del sito e dell'export: email pubblicata ≠ consenso alla pubblicità (Garante 2026). Controllare tutte
-      le pagine e aggiungere un avviso chiaro dove si scaricano i risultati.
+- [x] Testi del sito e dell'export (19/10): email pubblicata ≠ consenso alla pubblicità (Garante 2026). Avviso
+      «Come usare questi contatti» sopra i lead (pagina Lead e pagina della ricerca), foglio «Come usarli» nell'export
+      Excel, termini e FAQ aggiornati (anche per il modulo di contatto). Testo unico in `CONTACT_NOTICE` (leads.ts).
 - [ ] Legale e commercialista (`09-domande-consulenti.md`): stato del caso Lusha, LIA, art. 130, ODbL, Adzuna, P.IVA.
 - [ ] Sicurezza (`08-messa-in-produzione.md`, Fase 1): 2FA sugli account, chiave Anthropic dedicata a Webora Leads.
+      (Utente: Supabase, Vercel, n8n, GitHub, Stripe, Anthropic, Resend; chiave nuova da inserire nelle credenziali n8n.)
 
 ### B. Test: email facoltativa con modulo di contatto
 - [x] Test del 19/10 (Hotel Emilia-Romagna, Architettura Lombardia, Metalmeccanica Veneto, 20 lead ciascuna):
@@ -242,6 +244,14 @@ all'architettura; il resto si decide con i clienti.
 - [x] Sui 5 moduli c'erano email non riconosciute: reservations@ e albergo…@ (caselle d'ufficio nuove) e domini fratelli
       (zoello.it / info@zoello.com, magnagallo-hotel.com / info@magnagallo.it). Motore aggiornato + migrazione 041
       (email_on_domain con la stessa regola: stesso nome 4+ lettere, nome contenuto 6+ lettere).
+
+- [ ] Verificare alla prossima ricerca reale le nuove regole delle email (reservations@, albergo…@, domini fratelli).
+- [ ] Settore: aziende fuori target finite nelle ricerche (Rossi S.p.A., distributore per hotel, in «Hotel»).
+      Rivedere come si assegna il settore dal nome/sito (parole come «per hotel», «fornitore», «distribuzione»).
+- [ ] Da valutare: consegnare i lead con il solo modulo solo quando le aziende con email sono finite (oggi l'ordine è
+      per giro). Più resa di email ma più giri AI: decidere dopo la beta.
+- Regola per i collaudi: prima di una ricerca di prova controllare che settore e zona siano nel database (il contatore
+  del wizard), altrimenti parte la ricerca AI a pagamento.
 
 ### C. Qualità delle opportunità
 - [ ] Punteggio interno 0–100 con regole fisse e configurabili: affidabilità della prova × attinenza al servizio

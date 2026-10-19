@@ -88,6 +88,13 @@ regola consolidata.
 - D. Se si consegnano nomi: quali condizioni minime (informativa entro un mese, limite di
   clienti per contatto, nessuna conservazione oltre N mesi, contratto con il cliente)?
 
+- E. **Modulo di contatto** (dal 19/10): se il sito non ha un'email, consegniamo la pagina del modulo di contatto
+  del sito. Il cliente lo compila a mano, un'azienda alla volta. È una comunicazione «con mezzi automatizzati»
+  ai fini dell'art. 130? Cautele per i professionisti con studio individuale (es. «Architetto Mario Rossi»),
+  dove il modulo arriva di fatto alla persona?
+- F. **Domini fratelli**: consideriamo aziendale un'email pubblicata sul sito ufficiale anche se su un dominio
+  dello stesso nome (sito zoello.it, email info@zoello.com). Va bene?
+
 ### B. Informativa agli interessati (art. 14)
 6. Basta l'informativa pubblicata sul sito (con la pagina di opposizione), o dobbiamo
    **informare ogni persona** entro un mese dalla raccolta (art. 14.3)? L'eccezione

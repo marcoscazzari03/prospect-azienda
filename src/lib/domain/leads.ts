@@ -129,3 +129,12 @@ const PERSON_COLUMNS = new Set(["nome", "cognome", "ruolo", "linkedin", "email_i
 export function exportColumns(rows: ReturnType<typeof flattenDelivery>[]) {
   return rows.some((r) => r.nome) ? EXPORT_COLUMNS : EXPORT_COLUMNS.filter((c) => !PERSON_COLUMNS.has(c.key));
 }
+
+// Avviso sull'uso dei contatti (pagine dei lead ed export Excel). Pubblicare un indirizzo sul
+// sito non equivale a consentire comunicazioni promozionali (Garante, 2026).
+export const CONTACT_NOTICE = [
+  "Un'email pubblicata sul sito di un'azienda non è un consenso a ricevere pubblicità.",
+  "In Italia l'invio di email promozionali richiede in genere il consenso, anche verso caselle aziendali (art. 130 del Codice Privacy).",
+  "Usa questi dati per contatti mirati e personali, uno per azienda, non per invii di massa; il modulo di contatto si compila a mano.",
+  "Rispetta sempre chi ti chiede di non essere più contattato. Se hai dubbi sul tuo caso, chiedi a un consulente.",
+];

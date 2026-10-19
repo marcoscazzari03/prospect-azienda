@@ -7,6 +7,7 @@ export async function toXlsx<T extends Record<string, unknown>>(
   rows: T[],
   columns: { key: keyof T & string; label: string }[],
   sheetName = "Lead",
+  notes: readonly string[] = [],
 ) {
   const wb = new ExcelJS.Workbook();
   wb.creator = "Webora Leads";
@@ -31,5 +32,11 @@ export async function toXlsx<T extends Record<string, unknown>>(
   header.font = { bold: true, color: { argb: "FFFFFFFF" } };
   header.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0F5C4D" } };
   ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: columns.length } };
+  // Avvertenze in un foglio a parte (non disturbano filtri e importazioni del foglio dei lead).
+  if (notes.length) {
+    const info = wb.addWorksheet("Come usarli");
+    info.columns = [{ width: 120 }];
+    notes.forEach((n) => (info.addRow([n]).getCell(1).alignment = { wrapText: true }));
+  }
   return Buffer.from(await wb.xlsx.writeBuffer());
 }
