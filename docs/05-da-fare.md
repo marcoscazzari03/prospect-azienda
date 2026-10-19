@@ -318,7 +318,11 @@ all'architettura; il resto si decide con i clienti.
       «Per chi è» (anche edilizia, pulizie, logistica, fornitori: in target). Wizard: «Vendi altro?» porta alla
       ricerca in target; nella ricerca con opportunità non si chiedono più dimensione, fatturato, parole chiave
       aggiuntive e note (il database non li applica).
-- [ ] Testo dell'invito e lista delle 5–10 agenzie da contattare.
+- [x] Piano della beta e testi dell'invito (email, LinkedIn, benvenuto): `10-beta.md` (19/10). Due ondate: Sud ed
+      Emilia-Romagna subito, Nord dopo il 28/10 (copertura da rimisurare). Crediti beta e piano Growth dall'admin.
+- [ ] Lista delle 5–10 agenzie da contattare (fonti in `10-beta.md`).
+- [ ] Bloccanti prima di inviare: elenco in `10-beta.md` (2FA e chiave Anthropic, popolamento pubblicato, clausola di
+      riservatezza nei termini, sconto dei beta tester).
 - [ ] Domanda da verificare: un'agenzia paga con regolarità per aziende con bisogni documentati, senza il nome di
       un referente?
 - [ ] Prezzi: invariati per la beta.
