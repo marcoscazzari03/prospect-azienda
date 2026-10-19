@@ -263,6 +263,13 @@ all'architettura; il resto si decide con i clienti.
 - [x] Punteggio e livello sotto l'azienda nei risultati, spiegazione nel dettaglio del lead, due colonne nell'export
       (solo se ci sono segnali). Calcolato dall'app: si può cambiare senza migrazioni.
 - [ ] Dopo la beta: tarare i pesi con i giudizi dei clienti (quali opportunità hanno portato a una risposta).
+- [x] Collaudo del 19/10 (Rifacimento del sito · Veneto · 8 lead): 16 candidati dal database, costo zero, punteggi
+      corretti (93, 85, 55), email dei domini fratelli consegnate (info@krupps.com, info@th-resorts.com).
+- [x] Aziende fuori regione (Dinamica, Roma; A.m.A. Mobili, Porcia) in una ricerca sul Veneto: tag_company aggiungeva la
+      regione cercata. Migrazione 042: luoghi solo dai dati dell'azienda (OSM, o capoluogo di provincia dalla tabella
+      it_provinces), pulizia delle aziende non OSM.
+- [x] Colonna «Qualità» (63 per tutti in «Solo azienda») sostituita da «Opportunità» (punteggio e livello), nascosta
+      nelle ricerche in target; tolta anche dall'export.
 
 ### D. Database
 - [ ] Rimandato (analisi del 19/10): coda del controllo siti con priorità (segnali attivi in scadenza, settori e zone

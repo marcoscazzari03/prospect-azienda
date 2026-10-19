@@ -140,7 +140,10 @@ export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; 
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
   // Colonna del referente solo se qualche lead ce l'ha (in «Solo azienda» non c'è mai).
   const withPeople = rows.some((r) => Boolean(r.data.person?.full_name));
-  const cols = (manage ? 7 : 5) - (withPeople ? 0 : 1);
+  // Colonna del punteggio solo se qualche lead ha un'opportunità (la «qualità» del contatto era
+  // uguale per tutti in «Solo azienda» e non diceva niente).
+  const withOpportunity = rows.some((r) => Boolean(r.data.signals?.length));
+  const cols = (manage ? 7 : 5) - (withPeople ? 0 : 1) - (withOpportunity ? 0 : 1);
   return (
     <>
     {manage && selected.size > 0 && (
@@ -162,7 +165,7 @@ export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; 
             {withPeople && <th className="px-4 py-3 font-medium">Referente</th>}
             <th className="px-4 py-3 font-medium">Azienda</th>
             <th className="px-4 py-3 font-medium">Contatto</th>
-            <th className="px-4 py-3 text-right font-medium">Qualità</th>
+            {withOpportunity && <th className="px-4 py-3 text-right font-medium">Opportunità</th>}
             {manage && <th className="px-4 py-3 font-medium">Stato</th>}
             <th className="w-10 px-2 py-3"><span className="sr-only">Dettagli</span></th>
           </tr>
@@ -194,11 +197,6 @@ export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; 
                         {d.signals.map((sg) => <Badge key={sg.code} tone="stamp">{signalByCode(sg.code)?.label ?? sg.code}</Badge>)}
                       </div>
                     )}
-                    {opp && (
-                      <p className="mt-1 text-xs text-ink-2">
-                        Opportunità <span className={cx("font-medium", opp.level === "forte" ? "text-ledger" : "text-ink")}>{opp.level}</span> · <span className="font-mono">{opp.score}</span>/100
-                      </p>
-                    )}
                   </td>
                   <td className="px-4 py-3">
                     {r.email_type === "form" ? (
@@ -216,7 +214,11 @@ export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; 
                       </>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono">{r.quality_score}</td>
+                  {withOpportunity && (
+                    <td className="px-4 py-3 text-right">
+                      {opp ? <><span className="font-mono">{opp.score}</span><p className="text-xs text-ink-2">{opp.level}</p></> : <span className="text-muted">—</span>}
+                    </td>
+                  )}
                   {manage && (
                     <td className="px-4 py-3">
                       <StageSelect id={r.id} initial={r.stage ?? "new"} />

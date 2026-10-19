@@ -124,7 +124,6 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "prove_segnali", label: "Prova del segnale" },
   { key: "punteggio_opportunita", label: "Punteggio opportunità (0-100)" },
   { key: "livello_opportunita", label: "Livello opportunità" },
-  { key: "qualita", label: "Qualità" },
   { key: "consegnato_il", label: "Consegnato il" },
   { key: "stato_contatto", label: "Fase commerciale" },
   { key: "note", label: "Note" },
