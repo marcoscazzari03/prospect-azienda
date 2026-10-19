@@ -228,3 +228,26 @@ export async function stopRepeat(form: FormData) {
   revalidatePath(`/app/ricerche/${id.data}`);
   revalidatePath("/app/ricerche");
 }
+
+// Archivia o ripristina una ricerca (con i suoi lead).
+export async function archiveSearch(form: FormData) {
+  const viewer = await requireViewer();
+  const id = z.string().uuid().safeParse(form.get("searchId"));
+  if (!id.success) return;
+  await createAdminClient().rpc("archive_search", { p_org: viewer.org.id, p_search: id.data, p_archive: form.get("archive") === "1" });
+  revalidatePath(`/app/ricerche/${id.data}`);
+  revalidatePath("/app/ricerche");
+  revalidatePath("/app/lead");
+}
+
+// Elimina una ricerca conclusa e i suoi lead (dati cancellati, aziende non riproposte).
+export async function deleteSearch(form: FormData) {
+  const viewer = await requireViewer();
+  const id = z.string().uuid().safeParse(form.get("searchId"));
+  if (!id.success) return;
+  const { error } = await createAdminClient().rpc("forget_search", { p_org: viewer.org.id, p_search: id.data });
+  if (error) return;
+  revalidatePath("/app/ricerche");
+  revalidatePath("/app/lead");
+  redirect("/app/ricerche");
+}

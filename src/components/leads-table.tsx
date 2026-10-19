@@ -1,7 +1,7 @@
 "use client";
 import { Fragment, useActionState, useState, useTransition } from "react";
 import { reportLead, type ActionState } from "@/app/app/actions";
-import { saveLeadNotes, setLeadStage, setListMembership, type LeadActionState } from "@/app/app/lead/actions";
+import { archiveLeads, deleteLeads, saveLeadNotes, setLeadStage, setListMembership, type LeadActionState } from "@/app/app/lead/actions";
 import { LEAD_STAGES, LEAD_STAGE_LABEL, ROLE_MATCH_LABEL, type DeliveryRow, type LeadStage } from "@/lib/domain/leads";
 import { OPPORTUNITY_RULES, opportunityScore, signalByCode, signalPhrase } from "@/lib/domain/signals";
 import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
@@ -126,6 +126,38 @@ function ListPicker({ ids, lists, onDone, label = "Aggiungi" }: { ids: string[];
   );
 }
 
+// Archivia / ripristina / elimina (uno o più lead). L'eliminazione chiede conferma.
+function LeadActions({ ids, archived, onDone }: { ids: string[]; archived: boolean; onDone?: () => void }) {
+  const [pending, start] = useTransition();
+  const [msg, setMsg] = useState<LeadActionState>({});
+  const run = (fn: () => Promise<LeadActionState>) => start(async () => {
+    const res = await fn();
+    setMsg(res);
+    if (!res.error) onDone?.();
+  });
+  const n = ids.length;
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button type="button" size="sm" variant="secondary" disabled={pending || !n} onClick={() => run(() => archiveLeads(ids, !archived))}>
+        {archived ? "Ripristina" : "Archivia"}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="text-brick"
+        disabled={pending || !n}
+        onClick={() => {
+          if (window.confirm(`Eliminare ${n === 1 ? "questo lead" : `${n} lead`}? I dati vengono cancellati per sempre; l'azienda non ti verrà riproposta e i crediti usati non tornano.`)) run(() => deleteLeads(ids));
+        }}
+      >
+        Elimina
+      </Button>
+      {msg.error && <span className="text-xs text-brick">{msg.error}</span>}
+    </div>
+  );
+}
+
 function ListChips({ id, memberOf, lists }: { id: string; memberOf: string[]; lists: LeadList[] }) {
   const [pending, start] = useTransition();
   const names = lists.filter((l) => memberOf.includes(l.id));
@@ -143,7 +175,8 @@ function ListChips({ id, memberOf, lists }: { id: string; memberOf: string[]; li
 }
 
 // `offers`: servizio scelto in ogni ricerca (search_id -> codice), per il punteggio dell'opportunità.
-export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; lists?: LeadList[]; offers?: Record<string, string | undefined> }) {
+// `archived`: si stanno guardando i lead archiviati (le azioni diventano «Ripristina»).
+export function LeadsTable({ rows, lists, offers = {}, archived = false }: { rows: DeliveryRow[]; lists?: LeadList[]; offers?: Record<string, string | undefined>; archived?: boolean }) {
   const [open, setOpen] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const manage = Boolean(lists);
@@ -166,6 +199,7 @@ export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; 
       <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-card px-4 py-3 text-sm">
         <span className="font-medium">{selected.size} selezionati</span>
         <ListPicker ids={[...selected]} lists={lists ?? []} label="Aggiungi alla lista" onDone={() => setSelected(new Set())} />
+        <LeadActions ids={[...selected]} archived={archived} onDone={() => setSelected(new Set())} />
         <button type="button" className="text-xs text-ink-2 underline" onClick={() => setSelected(new Set())}>Annulla selezione</button>
       </div>
     )}
@@ -323,6 +357,12 @@ export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; 
                         </div>
                       )}
                       <div className="mt-4 border-t border-line pt-4">
+                        {manage && (
+                          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-xs text-muted">{r.archived_at ? `Archiviato il ${new Date(r.archived_at).toLocaleDateString("it-IT")}.` : "Non ti serve più? Archivialo: resta consultabile in «Archiviati»."}</p>
+                            <LeadActions ids={[r.id]} archived={Boolean(r.archived_at)} />
+                          </div>
+                        )}
                         <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">Qualcosa non va?</p>
                         <ReportForm deliveryId={r.id} hasSignals={Boolean(r.data?.signals?.length)} hasPerson={Boolean(r.data?.person?.full_name)} hasEmail={r.email_type !== "form"} />
                       </div>

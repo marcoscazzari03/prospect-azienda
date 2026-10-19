@@ -151,14 +151,14 @@ isOneToOne: false
                   ]
                 },"deliveries": {
                   Row: {
-                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at": string,"email_address": string,"email_id": string | null,"email_status": string,"email_type": string,"id": string,"notes": string,"org_id": string,"person_id": string | null,"person_key": string,"quality_score": number,"run_id": string | null,"search_id": string,"source": string,"stage": string,"stage_changed_at": string | null
+                    "archived_at": string | null,"deleted_at": string | null,"company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at": string,"email_address": string,"email_id": string | null,"email_status": string,"email_type": string,"id": string,"notes": string,"org_id": string,"person_id": string | null,"person_key": string,"quality_score": number,"run_id": string | null,"search_id": string,"source": string,"stage": string,"stage_changed_at": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at"?: string,"email_address": string,"email_id"?: string | null,"email_status": string,"email_type": string,"id"?: string,"notes"?: string,"org_id": string,"person_id"?: string | null,"person_key": string,"quality_score"?: number,"run_id"?: string | null,"search_id": string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
+                    "archived_at"?: string | null,"deleted_at"?: string | null,"company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at"?: string,"email_address": string,"email_id"?: string | null,"email_status": string,"email_type": string,"id"?: string,"notes"?: string,"org_id": string,"person_id"?: string | null,"person_key": string,"quality_score"?: number,"run_id"?: string | null,"search_id": string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
                   }
                   Update: {
-                    "company_domain"?: string,"credits"?: number,"data"?: NonNullable<Json>,"delivered_at"?: string,"email_address"?: string,"email_id"?: string | null,"email_status"?: string,"email_type"?: string,"id"?: string,"notes"?: string,"org_id"?: string,"person_id"?: string | null,"person_key"?: string,"quality_score"?: number,"run_id"?: string | null,"search_id"?: string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
+                    "archived_at"?: string | null,"deleted_at"?: string | null,"company_domain"?: string,"credits"?: number,"data"?: NonNullable<Json>,"delivered_at"?: string,"email_address"?: string,"email_id"?: string | null,"email_status"?: string,"email_type"?: string,"id"?: string,"notes"?: string,"org_id"?: string,"person_id"?: string | null,"person_key"?: string,"quality_score"?: number,"run_id"?: string | null,"search_id"?: string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
                   }
                   Relationships: [
                     {
@@ -561,14 +561,14 @@ isOneToOne: false
                   ]
                 },"searches": {
                   Row: {
-                    "attempts": number,"contacts_per_company": number,"created_at": string,"created_by": string | null,"credits_charged": number,"credits_reserved": number,"delivered": number,"email_mode": string,"error": string | null,"finished_at": string | null,"id": string,"name": string,"next_repeat_at": string | null,"org_id": string,"quantity": number,"repeat": string,"repeat_of": string | null,"signal_prices": Json | null,"started_at": string | null,"status": string,"target": NonNullable<Json>
+                    "archived_at": string | null,"deleted_at": string | null,"attempts": number,"contacts_per_company": number,"created_at": string,"created_by": string | null,"credits_charged": number,"credits_reserved": number,"delivered": number,"email_mode": string,"error": string | null,"finished_at": string | null,"id": string,"name": string,"next_repeat_at": string | null,"org_id": string,"quantity": number,"repeat": string,"repeat_of": string | null,"signal_prices": Json | null,"started_at": string | null,"status": string,"target": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode": string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name": string,"next_repeat_at"?: string | null,"org_id": string,"quantity": number,"repeat"?: string,"repeat_of"?: string | null,"signal_prices"?: Json | null,"started_at"?: string | null,"status"?: string,"target": NonNullable<Json>
+                    "archived_at"?: string | null,"deleted_at"?: string | null,"attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode": string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name": string,"next_repeat_at"?: string | null,"org_id": string,"quantity": number,"repeat"?: string,"repeat_of"?: string | null,"signal_prices"?: Json | null,"started_at"?: string | null,"status"?: string,"target": NonNullable<Json>
                   }
                   Update: {
-                    "attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode"?: string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name"?: string,"next_repeat_at"?: string | null,"org_id"?: string,"quantity"?: number,"repeat"?: string,"repeat_of"?: string | null,"signal_prices"?: Json | null,"started_at"?: string | null,"status"?: string,"target"?: NonNullable<Json>
+                    "archived_at"?: string | null,"deleted_at"?: string | null,"attempts"?: number,"contacts_per_company"?: number,"created_at"?: string,"created_by"?: string | null,"credits_charged"?: number,"credits_reserved"?: number,"delivered"?: number,"email_mode"?: string,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"name"?: string,"next_repeat_at"?: string | null,"org_id"?: string,"quantity"?: number,"repeat"?: string,"repeat_of"?: string | null,"signal_prices"?: Json | null,"started_at"?: string | null,"status"?: string,"target"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -757,6 +757,15 @@ isOneToOne: false
 { Args: { "p_org": string }; Returns: {
               "expired": number,"expires_at": string,"granted": number,"kind": string,"lot_id": number,"remaining": number
             }[]
+                           },
+"archive_search":
+{ Args: { "p_archive": boolean,"p_org": string,"p_search": string }; Returns: number
+                           },
+"forget_deliveries":
+{ Args: { "p_ids": string[],"p_org": string }; Returns: number
+                           },
+"forget_search":
+{ Args: { "p_org": string,"p_search": string }; Returns: number
                            },
 "database_funnel":
 { Args: Record<PropertyKey, never>; Returns: Json

@@ -20,14 +20,16 @@ export async function dashboardData(period: Period) {
 
   const [{ data: recent }, { count: total }, { count: withSignals }, { data: stages }, { data: running }, { data: searches }] = await Promise.all([
     supabase.from("deliveries").select("delivered_at, credits").gte("delivered_at", since).limit(20000),
-    supabase.from("deliveries").select("id", { count: "exact", head: true }),
+    supabase.from("deliveries").select("id", { count: "exact", head: true }).is("deleted_at", null),
     // Lead con almeno un'opportunità verificata (data.signals presente).
-    supabase.from("deliveries").select("id", { count: "exact", head: true }).not("data->signals", "is", null),
-    supabase.from("deliveries").select("stage").limit(20000),
+    supabase.from("deliveries").select("id", { count: "exact", head: true }).is("deleted_at", null).not("data->signals", "is", null),
+    supabase.from("deliveries").select("stage").is("deleted_at", null).is("archived_at", null).limit(20000),
     supabase.from("searches").select("credits_reserved, credits_charged").in("status", ["queued", "running"]),
     supabase
       .from("searches")
       .select("id, name, status, email_mode, quantity, delivered, credits_charged, created_at, repeat, signals:target->signals->codes")
+      .is("deleted_at", null)
+      .is("archived_at", null)
       .order("created_at", { ascending: false })
       .limit(5),
   ]);

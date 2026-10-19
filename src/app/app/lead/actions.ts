@@ -76,3 +76,31 @@ export async function setListMembership(listId: string, deliveryIds: string[], m
   revalidatePath("/app/lead");
   return { info: member ? `${ids.length} lead aggiunti alla lista.` : "Rimosso dalla lista." };
 }
+
+// Archivia o ripristina dei lead: spariscono dalle viste principali, restano nell'archivio.
+export async function archiveLeads(ids: string[], archive: boolean): Promise<LeadActionState> {
+  const viewer = await requireViewer();
+  const p = z.array(uuid).min(1).max(500).safeParse(ids);
+  if (!p.success) return { error: "Dati non validi." };
+  const { error } = await createAdminClient()
+    .from("deliveries")
+    .update({ archived_at: archive ? new Date().toISOString() : null })
+    .eq("org_id", viewer.org.id)
+    .in("id", p.data)
+    .is("deleted_at", null);
+  if (error) return { error: "Non salvato, riprova." };
+  revalidatePath("/app/lead");
+  return { info: archive ? `${p.data.length === 1 ? "Lead archiviato" : `${p.data.length} lead archiviati`}.` : "Ripristinato." };
+}
+
+// Elimina dei lead: dati cancellati per sempre; resta solo la chiave dell'azienda, perché non
+// ti venga riproposta (e addebitata) di nuovo. I crediti già usati non tornano.
+export async function deleteLeads(ids: string[]): Promise<LeadActionState> {
+  const viewer = await requireViewer();
+  const p = z.array(uuid).min(1).max(500).safeParse(ids);
+  if (!p.success) return { error: "Dati non validi." };
+  const { error } = await createAdminClient().rpc("forget_deliveries", { p_org: viewer.org.id, p_ids: p.data });
+  if (error) return { error: "Non eliminato, riprova." };
+  revalidatePath("/app/lead");
+  return { info: p.data.length === 1 ? "Lead eliminato." : `${p.data.length} lead eliminati.` };
+}

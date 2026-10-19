@@ -32,6 +32,7 @@ export type DeliveryRow = {
   delivered_at: string;
   stage?: LeadStage;
   notes?: string;
+  archived_at?: string | null;
   lead_list_items?: { list_id: string }[];
 };
 

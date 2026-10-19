@@ -18,6 +18,8 @@ export async function GET(request: Request) {
   const format = params.get("format") === "xlsx" ? "xlsx" : "csv";
   const stage = params.get("fase");
   const listId = params.get("lista");
+  // Archiviati: solo con «archivio=1»; dalla pagina di una ricerca si esporta tutta la ricerca.
+  const archived = params.get("archivio") === "1";
 
   // Limite d'uso (V12): l'export viene registrato prima di leggere i lead, così
   // anche le richieste in parallelo si vedono a vicenda.
@@ -49,6 +51,9 @@ export async function GET(request: Request) {
       .eq("org_id", viewer.org.id)
       .order("delivered_at", { ascending: false })
       .range(from, from + 999);
+    q = q.is("deleted_at", null);
+    if (archived) q = q.not("archived_at", "is", null);
+    else if (!searchId) q = q.is("archived_at", null);
     if (searchId) q = q.eq("search_id", searchId);
     if (emailType === "personal" || emailType === "generic") q = q.eq("email_type", emailType);
     if (stage && (LEAD_STAGES as readonly string[]).includes(stage)) q = q.eq("stage", stage);

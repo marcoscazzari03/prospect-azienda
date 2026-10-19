@@ -47,7 +47,7 @@ export async function activitySummary(since: string) {
     supabase.from("deliveries").select("credits").gt("delivered_at", since).limit(10000),
     supabase.from("searches").select("id, status").gt("finished_at", since).limit(500),
     supabase.from("credit_ledger").select("delta, kind").gt("created_at", since).in("kind", MOVIMENTI).limit(1000),
-    supabase.from("searches").select("id, name, status, delivered, quantity, finished_at").not("finished_at", "is", null).order("finished_at", { ascending: false }).limit(6),
+    supabase.from("searches").select("id, name, status, delivered, quantity, finished_at").not("finished_at", "is", null).is("deleted_at", null).order("finished_at", { ascending: false }).limit(6),
     supabase.from("credit_ledger").select("delta, kind, description, created_at").in("kind", MOVIMENTI).order("created_at", { ascending: false }).limit(6),
   ]);
 

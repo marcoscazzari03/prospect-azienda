@@ -271,6 +271,11 @@ all'architettura; il resto si decide con i clienti.
 - [x] Colonna «Qualità» (63 per tutti in «Solo azienda») sostituita da «Opportunità» (punteggio e livello), nascosta
       nelle ricerche in target; tolta anche dall'export.
 
+- [x] Archiviazione ed eliminazione (19/10, migrazione 043): lead singoli o selezionati e ricerche intere. Archiviare
+      nasconde e si annulla («Archiviati» nella pagina Lead, «Archiviate» nella pagina Ricerche; la ricerca archivia anche
+      i suoi lead). Eliminare cancella i dati per sempre ma tiene la chiave dell'azienda (non riproposta né riaddebitata);
+      le ricerche in corso non si eliminano.
+
 ### D. Database
 - [ ] Rimandato (analisi del 19/10): coda del controllo siti con priorità (segnali attivi in scadenza, settori e zone
       più cercati, poi le altre). Oggi la coda si svuota in ~3 ore dopo l'importazione OSM notturna (4 province al

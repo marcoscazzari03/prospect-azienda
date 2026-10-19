@@ -23,6 +23,8 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
   const ricerca = str("ricerca");
   const fase = (LEAD_STAGES as readonly string[]).includes(str("fase")) ? str("fase") : "";
   const lista = /^[0-9a-f-]{36}$/i.test(str("lista")) ? str("lista") : "";
+  // Archiviati: vista a parte; gli eliminati non si vedono mai.
+  const archivio = str("archivio") === "1" ? "1" : "";
   const page = Math.max(1, Number(str("pagina")) || 1);
 
   const supabase = await createClient();
@@ -32,9 +34,11 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
     : null;
   let query = supabase
     .from("deliveries")
-    .select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, lead_list_items(list_id)", { count: "exact" })
+    .select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, archived_at, lead_list_items(list_id)", { count: "exact" })
+    .is("deleted_at", null)
     .order("delivered_at", { ascending: false })
     .range((page - 1) * PAGE, page * PAGE - 1);
+  query = archivio ? query.not("archived_at", "is", null) : query.is("archived_at", null);
   if (q) query = query.or(`email_address.ilike.%${q}%,data->company->>name.ilike.%${q}%,data->person->>full_name.ilike.%${q}%,data->person->>job_title.ilike.%${q}%`);
   if (tipo === "personal" || tipo === "generic") query = query.eq("email_type", tipo);
   if (stato === "found_public" || stato === "validated") query = query.eq("email_status", stato);
@@ -50,15 +54,15 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
   ]);
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE));
-  const qs = (over: Record<string, string>) => new URLSearchParams({ q, tipo, stato, segnali, ricerca, fase, lista, ...over }).toString();
+  const qs = (over: Record<string, string>) => new URLSearchParams({ q, tipo, stato, segnali, ricerca, fase, lista, archivio, ...over }).toString();
   const exportQs = (format: string) =>
-    new URLSearchParams({ format, ...(ricerca ? { search: ricerca } : {}), ...(tipo ? { tipo } : {}), ...(fase ? { fase } : {}), ...(lista ? { lista } : {}) }).toString();
+    new URLSearchParams({ format, ...(ricerca ? { search: ricerca } : {}), ...(tipo ? { tipo } : {}), ...(fase ? { fase } : {}), ...(lista ? { lista } : {}), ...(archivio ? { archivio } : {}) }).toString();
 
   return (
     <>
       <PageHeader
         title="Lead"
-        description={`${total} lead acquistati. Ogni azienda resta tua: non te la riproporremo in altre ricerche.`}
+        description={archivio ? `${total} lead archiviati. Puoi ripristinarli quando vuoi.` : `${total} lead acquistati. Ogni azienda resta tua: non te la riproporremo in altre ricerche.`}
         actions={
           total ? (
             <div className="flex gap-2">
@@ -70,10 +74,10 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
       />
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium uppercase tracking-wider text-muted">Liste</span>
-        <Link href={`?${qs({ lista: "", pagina: "1" })}`}><Badge tone={lista ? "neutral" : "ledger"}>Tutti i lead</Badge></Link>
+        <Link href={`?${qs({ lista: "", archivio: "", pagina: "1" })}`}><Badge tone={lista || archivio ? "neutral" : "ledger"}>Tutti i lead</Badge></Link>
         {(lists ?? []).map((l) => (
           <span key={l.id} className="inline-flex items-center">
-            <Link href={`?${qs({ lista: l.id, pagina: "1" })}`}><Badge tone={lista === l.id ? "ledger" : "neutral"}>{l.name}</Badge></Link>
+            <Link href={`?${qs({ lista: l.id, archivio: "", pagina: "1" })}`}><Badge tone={lista === l.id ? "ledger" : "neutral"}>{l.name}</Badge></Link>
             {lista === l.id && (
               <form action={deleteList}>
                 <input type="hidden" name="listId" value={l.id} />
@@ -82,10 +86,12 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
             )}
           </span>
         ))}
+        <Link href={`?${qs({ lista: "", archivio: "1", pagina: "1" })}`}><Badge tone={archivio ? "ledger" : "neutral"}>Archiviati</Badge></Link>
         <div className="ml-auto"><NewListForm /></div>
       </div>
       <form className="mb-6 grid gap-3 rounded-xl border border-line bg-card p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1.5fr_auto]">
         {lista && <input type="hidden" name="lista" value={lista} />}
+        {archivio && <input type="hidden" name="archivio" value={archivio} />}
         <Input name="q" defaultValue={q} placeholder="Cerca azienda, sito, email" aria-label="Cerca" />
         <Select name="stato" defaultValue={stato} aria-label="Stato email">
           <option value="">Ogni stato</option>
@@ -110,7 +116,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
       {data?.length ? (
         <>
           <ContactNotice />
-          <LeadsTable rows={data as DeliveryRow[]} lists={lists ?? []} offers={offersBySearch(searches)} />
+          <LeadsTable rows={data as DeliveryRow[]} lists={lists ?? []} offers={offersBySearch(searches)} archived={Boolean(archivio)} />
           {pages > 1 && (
             <nav className="mt-6 flex items-center justify-between text-sm">
               {page > 1 ? <Link className="text-ledger underline" href={`?${qs({ pagina: String(page - 1) })}`}>← Precedenti</Link> : <span />}
@@ -120,7 +126,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
           )}
         </>
       ) : (
-        <EmptyState title={q || tipo || stato || segnali || ricerca || fase || lista ? "Nessun lead con questi filtri" : "Ancora nessun lead"} action={<ButtonLink href="/app/ricerche/nuova">Nuova ricerca</ButtonLink>} />
+        <EmptyState title={archivio ? "Nessun lead archiviato" : q || tipo || stato || segnali || ricerca || fase || lista ? "Nessun lead con questi filtri" : "Ancora nessun lead"} action={<ButtonLink href="/app/ricerche/nuova">Nuova ricerca</ButtonLink>} />
       )}
     </>
   );

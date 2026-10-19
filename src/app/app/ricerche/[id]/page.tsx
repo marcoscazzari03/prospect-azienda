@@ -12,7 +12,8 @@ import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
 import type { DeliveryRow } from "@/lib/domain/leads";
 import { REPEAT_LABEL, type Repeat, type SearchTarget } from "@/lib/domain/search-input";
 import { describeOffer, describeOpportunity, offerByCode, signalByCode } from "@/lib/domain/signals";
-import { stopRepeat } from "../../actions";
+import { archiveSearch, deleteSearch, stopRepeat } from "../../actions";
+import { ConfirmSubmit } from "@/components/confirm-submit";
 
 export const metadata: Metadata = { title: "Ricerca" };
 
@@ -24,10 +25,10 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
   const [{ data: search }, { data: events }, { data: leads }, { data: lists }] = await Promise.all([
     supabase.from("searches").select("*").eq("id", id).maybeSingle(),
     supabase.from("search_events").select("id, stage, message, created_at").eq("search_id", id).order("created_at", { ascending: false }).limit(30),
-    supabase.from("deliveries").select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, lead_list_items(list_id)").eq("search_id", id).order("quality_score", { ascending: false }),
+    supabase.from("deliveries").select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, archived_at, lead_list_items(list_id)").eq("search_id", id).is("deleted_at", null).order("quality_score", { ascending: false }),
     supabase.from("lead_lists").select("id, name").order("name"),
   ]);
-  if (!search) notFound();
+  if (!search || search.deleted_at) notFound();
 
   const t = search.target as SearchTarget;
   const running = ["queued", "running"].includes(search.status);
@@ -46,6 +47,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
             <Badge>{MODE_INFO[search.email_mode as EmailMode]?.label}</Badge>
             {!!t.signals?.codes.length && <Badge tone="stamp">Opportunità</Badge>}
             {t.contact === "email_or_form" && <Badge>Email o modulo di contatto</Badge>}
+            {search.archived_at && <Badge tone="neutral">Archiviata</Badge>}
             <span className="text-sm text-muted">avviata il {new Date(search.created_at).toLocaleString("it-IT")}</span>
             {search.repeat_of && (
               <Link href={`/app/ricerche/${search.repeat_of}`} className="text-sm text-ledger underline">ripetizione automatica</Link>
@@ -57,6 +59,21 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
             {!!leads?.length && <ButtonLink href={`/api/export?format=xlsx&search=${id}`} variant="secondary" prefetch={false}>Esporta Excel</ButtonLink>}
             {!!leads?.length && <ButtonLink href={`/api/export?search=${id}`} variant="ghost" prefetch={false}>CSV</ButtonLink>}
             <ButtonLink href={`/app/ricerche/nuova?da=${id}`} variant={running ? "secondary" : "primary"}>Ripeti con nuovi lead</ButtonLink>
+            {!running && (
+              <form action={archiveSearch}>
+                <input type="hidden" name="searchId" value={search.id} />
+                <input type="hidden" name="archive" value={search.archived_at ? "0" : "1"} />
+                <Button type="submit" variant="ghost">{search.archived_at ? "Ripristina" : "Archivia"}</Button>
+              </form>
+            )}
+            {!running && (
+              <form action={deleteSearch}>
+                <input type="hidden" name="searchId" value={search.id} />
+                <ConfirmSubmit variant="ghost" className="text-brick" message={`Eliminare la ricerca «${search.name}» e i suoi ${leads?.length ?? 0} lead? I dati vengono cancellati per sempre; le aziende non ti verranno riproposte e i crediti usati non tornano.`}>
+                  Elimina
+                </ConfirmSubmit>
+              </form>
+            )}
           </>
         }
       />
@@ -154,7 +171,7 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
       {leads?.length ? (
         <>
           <ContactNotice />
-          <LeadsTable rows={leads as DeliveryRow[]} lists={lists ?? []} offers={{ [search.id]: t.signals?.offer }} />
+          <LeadsTable rows={leads as DeliveryRow[]} lists={lists ?? []} offers={{ [search.id]: t.signals?.offer }} archived={Boolean(search.archived_at)} />
         </>
       ) : (
         <EmptyState title={running ? "Stiamo cercando…" : "Nessun lead in questa ricerca"}>
