@@ -40,6 +40,16 @@ const host = (u?: string) => {
 
 export type LeadList = { id: string; name: string };
 
+// Icona del sito (dal nostro /api/favicon); se non c'è, non si mostra niente.
+function SiteIcon({ domain }: { domain: string }) {
+  const [hidden, setHidden] = useState(false);
+  if (hidden) return null;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- icona 16px servita già in cache dalla nostra API
+    <img src={`/api/favicon?d=${encodeURIComponent(domain)}`} alt="" width={16} height={16} loading="lazy" className="h-4 w-4 shrink-0 rounded-sm" onError={() => setHidden(true)} />
+  );
+}
+
 function StageSelect({ id, initial }: { id: string; initial: LeadStage }) {
   const [stage, setStage] = useState<LeadStage>(initial);
   const [pending, start] = useTransition();
@@ -190,7 +200,10 @@ export function LeadsTable({ rows, lists, offers = {} }: { rows: DeliveryRow[]; 
                     </td>
                   )}
                   <td className="px-4 py-3">
-                    <a href={safeHttpUrl(d.company?.website)} target="_blank" rel="noopener noreferrer nofollow" className="font-medium hover:text-ledger">{d.company?.name}</a>
+                    <a href={safeHttpUrl(d.company?.website)} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-2 font-medium hover:text-ledger">
+                      {d.company?.domain && <SiteIcon domain={d.company.domain} />}
+                      {d.company?.name}
+                    </a>
                     <p className="text-xs text-ink-2">{[d.company?.industry, d.company?.city, d.company?.country].filter(Boolean).join(" · ")}</p>
                     {!!d.signals?.length && (
                       <div className="mt-1 flex flex-wrap gap-1">
