@@ -1,8 +1,7 @@
 "use client";
 import type { ComponentProps } from "react";
-import { Button } from "./ui";
 
-// Pulsante di invio che chiede conferma (azioni non annullabili).
-export function ConfirmSubmit({ message, ...props }: ComponentProps<typeof Button> & { message: string }) {
-  return <Button type="submit" {...props} onClick={(e) => { if (!window.confirm(message)) e.preventDefault(); }} />;
+// Pulsante di invio che chiede conferma (azioni non annullabili). Lo stile lo decide chi lo usa.
+export function ConfirmSubmit({ message, ...props }: ComponentProps<"button"> & { message: string }) {
+  return <button type="submit" {...props} onClick={(e) => { if (!window.confirm(message)) e.preventDefault(); }} />;
 }

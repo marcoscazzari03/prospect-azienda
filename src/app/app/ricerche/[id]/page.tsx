@@ -80,16 +80,15 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
                     </span>
                   </button>
                 </form>
-                <form action={deleteSearch}>
+                <form action={deleteSearch} className="mt-1 border-t border-line pt-1">
                   <input type="hidden" name="searchId" value={search.id} />
                   <ConfirmSubmit
-                    variant="ghost"
-                    className={cx(menuItem, "h-auto justify-start font-normal text-brick hover:text-brick")}
+                    className={cx(menuItem, "text-brick")}
                     message={`Eliminare la ricerca «${search.name}» e i suoi ${leads?.length ?? 0} lead? I dati vengono cancellati per sempre; le aziende non ti verranno riproposte e i crediti usati non tornano.`}
                   >
                     <span>
                       <span className="block font-medium">Elimina la ricerca</span>
-                      <span className="text-xs text-muted">Cancella per sempre i suoi lead</span>
+                      <span className="text-xs text-brick/70">Cancella per sempre i suoi lead</span>
                     </span>
                   </ConfirmSubmit>
                 </form>
