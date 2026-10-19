@@ -283,6 +283,10 @@ all'architettura; il resto si decide con i clienti.
       (scheda del cliente). Il cambio password non abbassa più il livello della sessione.
 - [x] 2FA provata dall'utente il 19/10 (migrazione 044 eseguita): attivazione e accesso con il codice funzionano.
 
+- Deciso (19/10): prezzi e crediti invariati per la beta. Nessun avviso quando il database si esaurisce (ricerca AI
+  silenziosa): l'obiettivo delle prossime settimane è un database abbastanza grande da servire 3-4 clienti Scale sulla
+  stessa zona. Dopo la beta: valutare opportunità a più crediti e un abbonamento di monitoraggio.
+
 ### D. Database
 - [ ] Rimandato (analisi del 19/10): coda del controllo siti con priorità (segnali attivi in scadenza, settori e zone
       più cercati, poi le altre). Oggi la coda si svuota in ~3 ore dopo l'importazione OSM notturna (4 province al
