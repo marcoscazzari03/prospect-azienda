@@ -16,6 +16,9 @@ sottodominio `leads.weborastudio.it`.
    - Confirm signup: `{{ .SiteURL }}/auth/conferma?token_hash={{ .TokenHash }}&type=email&next=/app`
    - Reset password: `{{ .SiteURL }}/auth/conferma?token_hash={{ .TokenHash }}&type=recovery&next=/nuova-password`
    Redirect URLs: aggiungere anche `https://leads.weborastudio.it/**`.
+   I modelli completi, con la grafica Webora, sono in `supabase/templates/` (oggetto e posizione in
+   `src/lib/email/supabase-templates.ts`): si incolla l'HTML nel campo *Body* di ciascun modello.
+   Si rigenerano con `WRITE_TEMPLATES=1 npx vitest run tests/email-templates.test.ts`.
    Per inviare dal tuo dominio serve l'SMTP personalizzato (Resend, punto 5).
 5. *Project Settings → API*: copia **Project URL**, **anon key** e **service_role key**.
 6. Dopo esserti registrato sulla piattaforma, renditi amministratore (*SQL Editor*):

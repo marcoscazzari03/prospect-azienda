@@ -61,10 +61,12 @@ export async function requestOptout(_: OptoutState, form: FormData): Promise<Opt
     ip_hash: ipHash,
   });
   if (error) return { error: "Non è stato possibile registrare la richiesta. Riprova." };
-  await sendEmail(
-    email,
-    "Conferma la rimozione dei tuoi dati",
-    `Hai chiesto di non comparire nei risultati della nostra piattaforma.\nConferma qui: ${env.appUrl()}/opposizione/conferma?token=${token}\n\nSe non sei stato tu, ignora questa email: non riceverai altri messaggi.`,
-  );
+  await sendEmail(email, "Conferma la rimozione dei tuoi dati", {
+    heading: "Conferma la rimozione dei tuoi dati",
+    paragraphs: ["Hai chiesto di non comparire nei risultati della nostra piattaforma. Per completare la richiesta, confermala dal pulsante qui sotto."],
+    cta: { label: "Conferma la rimozione", url: `${env.appUrl()}/opposizione/conferma?token=${token}` },
+    after: ["Se non sei stato tu, ignora questa email: non riceverai altri messaggi."],
+    footer: "Ricevi questa email perché questo indirizzo è stato inserito nel modulo di opposizione del sito.",
+  });
   return { ok: true };
 }

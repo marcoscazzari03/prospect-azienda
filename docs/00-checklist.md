@@ -71,7 +71,10 @@ Ultimo aggiornamento: 19/10/2026.
 ## ⚪ Email e immagine
 30. **Tu** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo.
 31. **Tu** – Firma con il logo per leads@ nella webmail di Hostinger.
-32. **Io** – Email dell'app in HTML con logo e grafica Webora (anche quelle di accesso di Supabase).
+32. ~~**Io** – Email dell'app in HTML con logo e grafica Webora, e modelli per le email di accesso di
+    Supabase (`supabase/templates/`)~~ (19/10).
+32b. **Tu** – Incollare i 5 modelli in Supabase (Authentication → Emails) e provare la conferma e il
+    recupero password.
 33. **Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027.
 
 ## ⚪ Dopo la beta

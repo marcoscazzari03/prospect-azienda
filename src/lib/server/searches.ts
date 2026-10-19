@@ -128,13 +128,20 @@ export async function finalizeSearch(searchId: string, error?: string) {
   if (search?.created_by && ["completed", "partial", "failed"].includes(search.status)) {
     const { data: profile } = await db.from("profiles").select("email").eq("user_id", search.created_by).maybeSingle();
     const link = `${env.appUrl()}/app/ricerche/${searchId}`;
-    const subject =
-      search.status === "failed" ? `Ricerca non riuscita: ${search.name}` : `Ricerca pronta: ${search.delivered} lead`;
-    const text =
-      search.status === "failed"
-        ? `La ricerca "${search.name}" non è andata a buon fine. I crediti riservati sono stati restituiti.\n\n${link}`
-        : `La ricerca "${search.name}" è conclusa: ${search.delivered} lead su ${search.quantity}. I crediti non usati sono tornati disponibili.\n\n${link}`;
-    await sendEmail(profile?.email ?? "", subject, text);
+    const failed = search.status === "failed";
+    const subject = failed ? `Ricerca non riuscita: ${search.name}` : `Ricerca pronta: ${search.delivered} lead`;
+    await sendEmail(profile?.email ?? "", subject, {
+      preheader: failed ? "I crediti riservati sono stati restituiti." : `${search.delivered} lead su ${search.quantity}.`,
+      heading: failed ? "La ricerca non è andata a buon fine" : "La tua ricerca è pronta",
+      paragraphs: failed
+        ? [`La ricerca «${search.name}» non è andata a buon fine. I crediti riservati sono stati restituiti.`]
+        : [
+            `La ricerca «${search.name}» è conclusa: ${search.delivered} lead su ${search.quantity}.`,
+            "I crediti non usati sono tornati disponibili.",
+          ],
+      cta: { label: failed ? "Apri la ricerca" : "Vedi i risultati", url: link },
+      footer: "Ricevi questa email perché hai avviato una ricerca sul tuo account.",
+    });
   }
   return search;
 }
@@ -342,11 +349,12 @@ export async function runDueRepeats() {
         message: `Ripetizione del ${day} non avviata: ${reason}`,
       });
       const { data: profile } = await db.from("profiles").select("email").eq("user_id", parent.created_by).maybeSingle();
-      await sendEmail(
-        profile?.email ?? "",
-        `Ripetizione non avviata: ${parent.name}`,
-        `La ripetizione automatica della ricerca "${parent.name}" non è partita (${reason}).\n\n${env.appUrl()}/app/crediti`,
-      );
+      await sendEmail(profile?.email ?? "", `Ripetizione non avviata: ${parent.name}`, {
+        heading: "Ripetizione non avviata",
+        paragraphs: [`La ripetizione automatica della ricerca «${parent.name}» non è partita (${reason}).`],
+        cta: { label: "Controlla i crediti", url: `${env.appUrl()}/app/crediti` },
+        footer: "Ricevi questa email perché hai impostato la ripetizione automatica di una ricerca.",
+      });
       continue;
     }
     const childId = (child as { id: string }).id;
