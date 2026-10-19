@@ -295,6 +295,11 @@ all'architettura; il resto si decide con i clienti.
       opportunità).
 
 ### E. Beta
+- [x] Homepage rifatta (19/10): opportunità in primo piano (scheda d'esempio, catalogo dei segnali, demo simulata
+      come strumento di registrazione), ricerca in target come alternativa, obiezioni, prezzi dal listino, sezione
+      «Per chi è» (anche edilizia, pulizie, logistica, fornitori: in target). Wizard: «Vendi altro?» porta alla
+      ricerca in target; nella ricerca con opportunità non si chiedono più dimensione, fatturato, parole chiave
+      aggiuntive e note (il database non li applica).
 - [ ] Testo dell'invito e lista delle 5–10 agenzie da contattare.
 - [ ] Domanda da verificare: un'agenzia paga con regolarità per aziende con bisogni documentati, senza il nome di
       un referente?
