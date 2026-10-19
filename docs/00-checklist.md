@@ -11,7 +11,7 @@ Ultimo aggiornamento: 19/10/2026.
    (19/10): niente 2FA su Anthropic, Resend, Hostinger, Cloudflare e Icypeas.
 2. ~~**Tu** – Chiave Anthropic: workspace dedicato con limite di spesa, chiave nuova creata lì e messa nella
    credenziale n8n esistente~~ (19/10). Resta: eliminare la chiave vecchia dopo la prima prova riuscita;
-   facoltativo rinominare la credenziale in «Webora Leads - Anthropic» (poi **Io** aggiorno i file del repository).
+   ~~credenziale rinominata in «Webora Leads - Anthropic», file del repository aggiornati~~ (19/10).
    Nota: «Prospect | Search» e «Prospect Avvocati | Search» su n8n sono di un altro progetto: non toccarli.
 3. ~~**Tu** – Pubblicare su n8n «Aziende | Popolamento OSM» (Nord prima, 8 province a notte)~~ (19/10)
 4. ~~**Tu** – Sconto per i beta tester: −30% per 12 mesi~~ (19/10)
@@ -49,7 +49,12 @@ Ultimo aggiornamento: 19/10/2026.
 25. **Insieme** – La domanda chiave: senza il nome del referente, lo pagherebbero?
 
 ## 🔵 Analisi da fare
-26. **Io** – Sicurezza: ripassare l'audit dell'11/10 con tutto quello che è cambiato dopo.
+26. ~~**Io** – Sicurezza: ripasso dell'audit dopo le modifiche 11–19/10~~ (19/10): nessun problema grave; corretti
+    limite ai codici 2FA, admin solo con 2FA, eliminazione dei lead completa, favicon, moduli e siti solo sul dominio
+    dell'azienda, controlli degli indirizzi nel motore, limiti sul contatore. Da fare tu: **migrazione 046** e
+    **pubblicare** «Lead Engine | Search (v1)», «Aziende | Controllo siti», «Annunci | Settore aziende».
+26b. **Io, dopo la beta** – Motore: seguire a mano i reindirizzamenti dei siti con ricontrollo dell'indirizzo
+    (oggi il filtro guarda il nome, non dove porta il rimando; impatto su n8n Cloud da verificare).
 27. **Io** – Motore: ottimizzazioni e parti non usate (nodi scollegati, rami referenti e RocketReach/Icypeas).
 28. **Io** – Pagina «Sicurezza e privacy» sul sito (dopo il punto 26).
 29. **Tu, con il legale** – DPA pronto da firmare per i clienti.

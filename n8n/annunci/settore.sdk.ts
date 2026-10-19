@@ -109,7 +109,7 @@ const claude = node({
         timeout: 120000
       }
     },
-    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' } }
   },
   output: [{ content: [], usage: {} }]
 });

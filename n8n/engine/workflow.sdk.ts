@@ -93,7 +93,7 @@ const modelloPlanner = languageModel({
       model: { __rl: true, mode: 'id', value: "={{ $('Valida richiesta').first().json.ai.model }}" },
       options: { maxTokensToSample: 4000, thinkingMode: 'adaptive', effort: 'low' }
     },
-    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' } }
   }
 });
 
@@ -148,7 +148,7 @@ const claudeRicerca = node({
         timeout: 300000
       }
     },
-    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' } }
   },
   output: [{ content: [], stop_reason: 'end_turn' }]
 });
@@ -196,7 +196,7 @@ const claudeSeguito = node({
         timeout: 300000
       }
     },
-    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' } }
   },
   output: [{ content: [], stop_reason: 'end_turn' }]
 });
@@ -572,7 +572,7 @@ const claudeRefSito = node({
         timeout: 300000
       }
     },
-    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' } }
   },
   output: [{ content: [], stop_reason: 'end_turn' }]
 });
@@ -646,7 +646,7 @@ const claudeRef = node({
         timeout: 300000
       }
     },
-    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'US VIRAL - Anthropic' } }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' } }
   },
   output: [{ content: [], stop_reason: 'end_turn' }]
 });
