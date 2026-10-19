@@ -240,8 +240,9 @@ all'architettura; il resto si decide con i clienti.
 - [ ] Mostrare punteggio e livello nei risultati e nell'export, con la spiegazione per il cliente.
 
 ### D. Database
-- [ ] Coda del controllo siti (80/ora, ~57.000/mese): prima le aziende con segnali attivi in scadenza, poi settori
-      e zone più cercati, poi le altre.
+- [ ] Rimandato (analisi del 19/10): coda del controllo siti con priorità (segnali attivi in scadenza, settori e zone
+      più cercati, poi le altre). Oggi la coda si svuota in ~3 ore dopo l'importazione OSM notturna (4 province al
+      giorno); riprendere quando i controlli cominciano ad accumularsi.
 - [ ] Seguire i quattro numeri del riquadro «Database aziende» nell'admin (raccolte → sito e settore → contatto →
       opportunità).
 
