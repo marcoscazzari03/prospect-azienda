@@ -300,6 +300,12 @@ all'architettura; il resto si decide con i clienti.
   stessa zona. Dopo la beta: valutare opportunità a più crediti e un abbonamento di monitoraggio.
 
 ### D. Database
+- [x] Copertura del 19/10 (`supabase/queries/opportunita_per_regione.sql`): Sud ed Emilia-Romagna ben coperti per i
+      segnali dei siti (Rifacimento del sito: Puglia 461, Campania 334), Nord scarso (Lombardia 48, Veneto 14).
+      Popolamento OSM dal 20/10: prima Lombardia, Veneto, Emilia-Romagna, Piemonte, poi il resto del Centro-Nord;
+      8 province al giorno (Nord coperto in ~8 giorni). Rilanciare la query verso il 28/10 prima degli inviti.
+- [x] «Traduzioni ed export» limitato ai settori che esportano (industria, agroalimentare, vino, turismo): da solo il
+      segnale «sito in una sola lingua» valeva per 3.342 aziende, quasi tutte piccole attività locali.
 - [ ] Rimandato (analisi del 19/10): coda del controllo siti con priorità (segnali attivi in scadenza, settori e zone
       più cercati, poi le altre). Oggi la coda si svuota in ~3 ore dopo l'importazione OSM notturna (4 province al
       giorno); riprendere quando i controlli cominciano ad accumularsi.
