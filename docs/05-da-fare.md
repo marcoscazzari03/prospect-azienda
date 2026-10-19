@@ -305,3 +305,10 @@ all'architettura; il resto si decide con i clienti.
       clienti della beta lo chiedono.
 - [ ] Referenti: restano spenti; si riaccendono solo dopo il parere legale e su richiesta dei clienti.
 - [ ] Espansione fuori dall'Italia: rimandata.
+- [ ] Segnale «nuova apertura / nuova sede» dagli annunci (per pulizie, facility, arredo, logistica,
+      sicurezza). Misurato il 19/10 sugli annunci salvati (solo figure d'ufficio): 19 aziende su ~2.900 con
+      una nuova apertura o sede vera (es. «per nuovo punto vendita»); «crescita / ampliamento» (330 aziende)
+      scartato perché è linguaggio pubblicitario o ripete l'annuncio stesso. Troppo poco per un servizio.
+      Prima di riprenderlo: cercare «nuova apertura» su adzuna.it (quanti annunci, se aziende vere o agenzie
+      per il lavoro e catene). Solo se convince, valutare nuove figure nell'import (addetto vendita,
+      magazziniere, operaio) rispetto ai limiti del piano Adzuna.
