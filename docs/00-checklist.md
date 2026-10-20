@@ -100,7 +100,8 @@ Ultimo aggiornamento: 20/10/2026 (sera).
 46. **Insieme** – Referenti: restano spenti, solo dopo il parere legale.
 47. **Insieme** – BIMI (logo del mittente su tutti i programmi di posta): DMARC restrittivo e certificato a pagamento.
 48. ~~**Io** – Segnale indicativo «Sito senza informativa privacy o cookie» (migrazione 051), nel servizio «Sicurezza del
-    sito»~~ (20/10). **Tu:** eseguire la migrazione 051 e pubblicare motore e «Aziende | Controllo siti».
+    sito»~~ (20/10). ~~Nodi caricati su n8n~~ (20/10). **Tu:** eseguire la migrazione 051, poi pubblicare «Lead Engine |
+    Search (v1)» e «Aziende | Controllo siti».
 49. **Io** – Controllo siti su un piccolo worker fuori da n8n: libera ~720 esecuzioni al mese e permette i segnali
     PageSpeed e «certificato in scadenza entro 30 giorni».
 50. **Insieme** – Seconda fonte per gli annunci (leggere i termini di Jooble e Careerjet) e pagine «Lavora con noi»
