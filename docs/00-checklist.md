@@ -92,7 +92,8 @@ Ultimo aggiornamento: 20/10/2026.
 37. **Io** – Nuovi servizi: «Sito nuovo» (in costruzione) e «Prenotazioni online per hotel».
 38. **Insieme** – Segnale «nuova apertura / nuova sede» (prima la ricerca «nuova apertura» su adzuna.it).
 39. **Io** – Coda del controllo siti con priorità, quando i controlli si accumulano.
-39b. **Io** – Import OSM: il contatore «nuove / aggiornate» sbaglia (20/10: 1.038 nuove contate come aggiornate).
+39b. ~~**Io** – Import OSM: contatore «nuove / aggiornate» robusto alle chiamate ripetute da n8n (migrazione 048)~~
+    (20/10). **Tu:** eseguire la migrazione 048.
 40. **Io** – Wizard: stima realistica dei lead e costo in euro.
 41. **Insieme** – Consegnare i lead con il solo modulo dopo aver esaurito le aziende con email?
 42. ~~**Io** – Captcha anche su accesso e recupero password, più limite ai tentativi: 10 accessi sbagliati per account e

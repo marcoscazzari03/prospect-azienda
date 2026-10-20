@@ -38,4 +38,16 @@ select pg_temp.check(opportunity_availability(null,
   '{"industry":"Studi legali","countries":["IT"],"regions":["Emilia-Romagna"],"signals":{"codes":["no_https"],"match":"any"}}', 1) = 1,
   'studio legale senza HTTPS in Emilia-Romagna disponibile');
 
+-- Contatore (migrazione 048): una chiamata ripetuta dopo un errore di rete conta ancora come nuove
+-- le aziende salvate dal primo tentativo; quelle vecchie restano aggiornate.
+select store_imported_companies('osm', '[{"domain":"ripetuta13.it","name":"Ripetuta Srl","city":"Rimini"}]');
+update companies set first_seen_at = now() - interval '2 minutes' where domain = 'ripetuta13.it';
+select pg_temp.check((select (r ->> 'new')::int = 1 and (r ->> 'updated')::int = 0
+                        from (select store_imported_companies('osm', '[{"domain":"ripetuta13.it","name":"Ripetuta Srl","city":"Rimini"}]') as r) x),
+                     'chiamata ripetuta: ancora nuova');
+update companies set first_seen_at = now() - interval '2 days' where domain = 'ripetuta13.it';
+select pg_temp.check((select (r ->> 'new')::int = 0 and (r ->> 'updated')::int = 1
+                        from (select store_imported_companies('osm', '[{"domain":"ripetuta13.it","name":"Ripetuta Srl","city":"Rimini"}]') as r) x),
+                     'azienda già nel database: aggiornata');
+
 select 'superati tutti i test popolamento aziende';
