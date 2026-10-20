@@ -37,7 +37,7 @@ Come tornare indietro, in generale:
 
 ## 20/10/2026 (sera) — segnale «Sito senza informativa privacy o cookie» (punto 48)
 
-### Nuovo segnale indicativo `no_privacy` — migrazione 051 · da eseguire; nodi caricati su n8n il 20/10, da pubblicare
+### Nuovo segnale indicativo `no_privacy` — migrazione 051 · in produzione (migrazione eseguita e workflow pubblicati il 20/10)
 - **Cosa:** regola in `n8n/engine/nodes/lib-controlli-sito.js` (nessuna traccia di privacy/cookie né gestore dei consensi
   nella homepage leggibile); codice aggiunto alle liste di motore (01, 08, 14) e controllo siti (09); catalogo dell'app
   (`src/lib/domain/signals.ts`: indicativo, affidabilità 40) e frase di apertura; migrazione 051 aggiorna
