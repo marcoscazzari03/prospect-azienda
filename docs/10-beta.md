@@ -80,42 +80,95 @@ altri clienti. Non promettere nell'invito più di così (es. «esclusiva» sulle
 
 Da personalizzare: [Nome], [Agenzia], [città/regione], [servizio] e la riga su come li abbiamo trovati.
 
-### Email (primo contatto)
+### Email (primo contatto) — riscritta il 21/10 dall'agente Sales & Copy
 
-**Oggetto:** [Nome], cerco qualche agenzia per provare uno strumento per trovare clienti
+Al «voi» (molte agenzie hanno solo info@). [PRIMA_RIGA] è la riga personalizzata del file delle agenzie. Un'email per
+agenzia, da leads@, senza link tracciati né allegati.
 
-Ciao [Nome],
+**Oggetto:** Aziende con il sito da aggiornare, per [AGENZIA]
+(alternativa: «[AGENZIA], vi propongo 4 settimane di prova gratuita»; la prima suona meno promozionale)
 
-sono [Tuo nome] di Webora Studio. Ho costruito **Webora Leads**, uno strumento che trova aziende con un motivo
-concreto per aver bisogno di un'agenzia come [Agenzia]: per esempio un sito con WordPress fermo al 2017, un sito
-senza HTTPS o non adatto ai cellulari. Per ogni azienda ti dà il segnale con il link alla prova e la data del
-controllo, il sito e il contatto aziendale (email o modulo di contatto del sito).
+**Variante breve (consigliata per l'invio largo)**
 
-Ho visto che lavorate su [servizio] in [città/regione], e il database ha già un buon numero di aziende in
-quella zona: per questo ti scrivo.
+Buongiorno,
 
-Cerco un piccolo gruppo di agenzie per una **beta gratuita di 4 settimane**:
-- crediti gratuiti per circa 75 aziende con opportunità, più quelli di benvenuto;
-- in cambio: almeno 3 ricerche vere, contattare le aziende che ti interessano e dirmi com'è andata
-  (due chiamate da 20 minuti);
-- a beta finita, se vorrai continuare, il 30% di sconto per 12 mesi, riservato ai beta tester.
+[PRIMA_RIGA], per questo scrivo a [AGENZIA].
+
+Sono [Tuo nome] di Webora Studio. Webora Leads vi trova aziende della vostra zona con un motivo documentato per rifare o
+mettere in sicurezza il sito: per esempio un WordPress fermo a una versione del 2019 o un certificato HTTPS scaduto. Per
+ogni azienda: la prova con il link e la data del controllo, il sito e il contatto aziendale (info@ o modulo del sito).
+
+Cerco alcune agenzie per una prova di 4 settimane. Durante la prova non costa niente e non serve la carta; se poi
+continuate, avete il 30% di sconto per 12 mesi.
+In cambio vi chiedo di contattare qualche azienda e raccontarmi com'è andata in due chiamate da 20 minuti.
+
+Vi interessa? Rispondete «sì» e vi mando l'accesso.
+
+[Tuo nome]
+Webora Leads, un servizio di Webora Studio · leads.weborastudio.it
+
+Se non vi interessa, rispondete «no» e non vi scriverò più.
+
+**Variante lunga (per chi vuole i dettagli)**
+
+Buongiorno,
+
+[PRIMA_RIGA], per questo scrivo a [AGENZIA].
+
+Sono [Tuo nome] di Webora Studio. Ho costruito Webora Leads: trova aziende della vostra zona con un motivo documentato per
+aver bisogno di un'agenzia web.
+
+Cosa ricevete, per ogni azienda:
+- il motivo, con la prova: il link e la data del controllo. Per esempio «WordPress 5.3, versione del 2019» oppure
+  «certificato HTTPS scaduto»;
+- il sito e il contatto aziendale: info@, commerciale@ o il modulo di contatto del sito;
+- una frase già pronta per il primo messaggio, scritta a partire dalla prova.
+
+Cosa costa: niente per 4 settimane, senza carta. Se poi continuate, il 30% di sconto per 12 mesi, riservato a chi
+partecipa alla prova.
+
+Cosa vi chiedo:
+- fare almeno 3 ricerche sul vostro servizio e nella vostra zona;
+- segnare nell'app quali aziende avete contattato e chi ha risposto;
+- due chiamate da 20 minuti, alla seconda e alla quarta settimana.
 
 Due cose da sapere subito:
-- non ti diamo i nomi dei referenti, solo canali aziendali (info@, commerciale@, modulo di contatto): è una
-  scelta, per lavorare solo con dati d'azienda;
-- le tue ricerche e i lead che ricevi restano riservati: non li vede nessun altro cliente e Webora Studio
-  non li usa per la sua attività commerciale (è scritto nei termini di servizio).
+- non vi diamo nomi di persone, solo i canali dell'azienda. È una scelta: lavoriamo solo con dati d'azienda;
+- le vostre ricerche, le vostre note e le vostre liste restano riservate: Webora Studio non le usa per la sua attività
+  commerciale.
 
-Se ti interessa, rispondimi qui e ti mando l'accesso. Se preferisci, ci sentiamo 10 minuti e te lo mostro.
+Se vi interessa, rispondete «sì» e vi mando l'accesso. Se preferite, ci sentiamo 10 minuti e ve lo mostro.
 
 Grazie,
 [Tuo nome]
-Webora Leads – leads.weborastudio.it
+Webora Leads, un servizio di Webora Studio · leads.weborastudio.it
+
+Se non vi interessa, rispondete «no» e non vi scriverò più.
+
+**Follow-up (uno solo, dopo 5–6 giorni, nella stessa conversazione; mai a chi ha risposto «no»)**
+
+Oggetto: Re: [oggetto originale]
+
+Buongiorno,
+
+vi riscrivo una sola volta per la prova gratuita di Webora Leads: aziende della vostra zona con un motivo documentato per
+rifare o mettere in sicurezza il sito, con la prova e il contatto aziendale.
+
+Se vi è utile, rispondete «sì» e vi mando l'accesso. Se non è il momento, non serve rispondere: non vi scriverò più.
+
+[Tuo nome]
+Webora Leads, un servizio di Webora Studio · leads.weborastudio.it
+
+**Correzioni rispetto al testo del 19/10:** tolto «non li vede nessun altro cliente» (non è vero: i dati pubblici delle
+aziende consegnate entrano nel database comune e possono andare ad altri clienti, come dicono i termini); «sito senza HTTPS»
+diventa «certificato HTTPS scaduto» (il controllo conta scaduto, autofirmato o di un altro sito); tolto «circa 75 aziende»
+(i crediti beta possono scendere se le adesioni sono tante). Da far rileggere al legale: firma con i dati completi di Webora
+Studio e riga «rispondete no».
 
 ### Messaggio LinkedIn (breve)
 
 Ciao [Nome], ho costruito Webora Leads: trova aziende con un segnale concreto per un'agenzia come [Agenzia]
-(sito vecchio, senza HTTPS, non adatto ai cellulari), con la prova e il contatto aziendale. Cerco qualche agenzia
+(sito vecchio, certificato HTTPS scaduto, non adatto ai cellulari), con la prova e il contatto aziendale. Cerco qualche agenzia
 per una beta gratuita di 4 settimane in [regione]: crediti gratuiti in cambio di un parere sincero. Ti interessa?
 Ti mando i dettagli.
 

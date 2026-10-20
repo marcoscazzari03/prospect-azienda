@@ -43,7 +43,9 @@ Come tornare indietro, in generale:
   al massimo 2 varianti motivate e un controllo delle regole a fine risposta (niente funzioni inventate, niente promesse sul
   consenso né confronti con concorrenti, niente accuratezze non dimostrate, «Solo azienda», prezzi veri, −30% della beta,
   niente esclusiva, testi legali da far rileggere). Non modifica il repository, non invia, non pubblica.
-  Prima prova: email d'invito della beta e follow-up.
+  Prima prova: email d'invito della beta e follow-up, ora in `docs/10-beta.md`. Ha trovato un errore nel testo del 19/10
+  già inviato alle 3 agenzie: «i lead che ricevi non li vede nessun altro cliente» non è vero (i dati pubblici delle aziende
+  vanno nel database comune). Da chiarire con le 3 agenzie se aderiscono.
 - **Indietro:** cancellare il file.
 
 ## 21/10/2026 — terzo agente: Data Quality · creato
