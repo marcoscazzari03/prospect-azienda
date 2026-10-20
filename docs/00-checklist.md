@@ -12,7 +12,8 @@ Ultimo aggiornamento: 19/10/2026 (sera).
 2. ~~**Tu** – Chiave Anthropic: workspace dedicato con limite di spesa, chiave nuova creata lì e messa nella
    credenziale n8n esistente~~ (19/10). Resta: eliminare la chiave vecchia dopo la prima prova riuscita;
    ~~credenziale rinominata in «Webora Leads - Anthropic», file del repository aggiornati~~ (19/10).
-   Nota: «Prospect | Search» e «Prospect Avvocati | Search» su n8n sono di un altro progetto: non toccarli.
+   Nota: «Prospect | Search» e «Prospect Avvocati | Search» su n8n sono di un altro progetto, ATTIVO (20/10): non
+   toccarli e non proporre di disattivarli. Da verificare (Tu): se usano la stessa credenziale Anthropic di Webora.
 3. ~~**Tu** – Pubblicare su n8n «Aziende | Popolamento OSM» (Nord prima, 8 province a notte)~~ (19/10)
 4. ~~**Tu** – Sconto per i beta tester: −30% per 12 mesi~~ (19/10)
 5. ~~**Tu** – Scegliere e invitare 3 agenzie: Gopher (Torremaggiore, FG), Mutart (Napoli), Studio360 (Molfetta, BA),
@@ -88,6 +89,7 @@ Ultimo aggiornamento: 19/10/2026 (sera).
 37. **Io** – Nuovi servizi: «Sito nuovo» (in costruzione) e «Prenotazioni online per hotel».
 38. **Insieme** – Segnale «nuova apertura / nuova sede» (prima la ricerca «nuova apertura» su adzuna.it).
 39. **Io** – Coda del controllo siti con priorità, quando i controlli si accumulano.
+39b. **Io** – Import OSM: il contatore «nuove / aggiornate» sbaglia (20/10: 1.038 nuove contate come aggiornate).
 40. **Io** – Wizard: stima realistica dei lead e costo in euro.
 41. **Insieme** – Consegnare i lead con il solo modulo dopo aver esaurito le aziende con email?
 42. **Io** – Captcha anche su accesso e recupero password.
