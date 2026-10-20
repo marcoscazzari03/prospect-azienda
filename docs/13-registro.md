@@ -38,6 +38,15 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — controlli automatici su GitHub · attivi dal push
+- **Cosa:** `.github/workflows/ci.yml` (GitHub Actions, a ogni push e pull request): job «App e motore» (eslint, tipi,
+  vitest, test del motore n8n) e job «Test SQL» (Postgres 16 di servizio, tutte le migrazioni e i test di `supabase/tests`).
+  Sola lettura (`permissions: contents: read`), nessun segreto, niente produzione.
+- **Revisione:** Code Reviewer, PRONTO CON RISERVE: provati su un clone pulito senza variabili d'ambiente e con quattro
+  errori artificiali (test fallito, migrazione rotta, messaggio di errore, test muto): il job fallisce in tutti. Applicate le
+  riserve: permessi in sola lettura, pipefail esplicito, controllo che il log esista, azioni alla versione 5.
+- **Indietro:** cancellare il file o disattivare il workflow su GitHub (Actions → Controlli → Disable).
+
 ## 21/10/2026 — sesto agente: Business Analyst · creato; resoconto giornaliero affidato a lui
 - **Cosa:** `.claude/agents/business-analyst.md`: resoconto giornaliero e settimanale (ricerche, qualità, database, costi
   AI e per lead, esecuzioni n8n del mese, beta rispetto alle soglie del 30/10); ogni numero misurato / stimato / mancante;

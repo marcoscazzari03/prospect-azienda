@@ -1,0 +1,71 @@
+# Controlli automatici a ogni push e pull request (punto 53, 21/10): test dell'app, del motore n8n e SQL, lint e tipi.
+# Gli stessi comandi si lanciano anche a mano (vedi package.json). Nessun segreto: tutto gira su dati di prova.
+name: Controlli
+
+on:
+  push:
+  pull_request:
+
+# Il workflow legge soltanto.
+permissions:
+  contents: read
+
+concurrency:
+  group: controlli-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App e motore
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npx eslint src tests
+      - name: Tipi
+        run: npm run -s typecheck
+      - name: Test dell'app
+        run: npx vitest run
+      - name: Test del motore n8n
+        run: npm run -s test:engine
+
+  sql:
+    name: Test SQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v5
+      - name: Migrazioni e test SQL
+        # shell bash e pipefail: senza, «| tee» nasconderebbe l'errore di run.sh.
+        shell: bash
+        run: |
+          set -o pipefail
+          bash supabase/tests/run.sh 2>&1 | tee sql.log
+      - name: Nessun test fallito
+        shell: bash
+        run: |
+          test -s sql.log
+          ! grep -E 'FALLITO|ERROR:' sql.log
