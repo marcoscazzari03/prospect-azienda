@@ -38,6 +38,13 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — terzo agente: Data Quality · creato
+- **Cosa:** `.claude/agents/data-quality.md`: su un campione (20–30 lead più 10 scarti; per un segnale nuovo tutte le prove
+  «pass» fino a 30) verifica azienda, target, contatto, prove dei segnali e motivi di scarto; corretto / errore confermato /
+  non determinabile. Legge solo le esecuzioni n8n (strumenti di lettura) e i siti con WebFetch; nessun accesso al database di
+  produzione; i dati delle aziende mai nel repository. Prima prova: segnale no_privacy e web agency dell'Emilia-Romagna.
+- **Indietro:** cancellare il file.
+
 ## 21/10/2026 — secondo agente: QA Tester · creato
 - **Cosa:** `.claude/agents/qa-tester.md`: prova i percorsi del cliente e i casi anomali nel database di prova locale (scenari
   SQL nella scratchpad), con i test del motore, con l'app in locale e Playwright (solo pagine senza accesso: non c'è un
