@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dropForeignContactForms, formOnlyLeads, urlOnDomain } from "@/lib/domain/engine";
+import { dropForeignContactForms, emailMissedDomains, formOnlyLeads, urlOnDomain } from "@/lib/domain/engine";
 
 describe("ripasso di sicurezza del 19/10", () => {
   it("url sul dominio dell'azienda", () => {
@@ -30,5 +30,20 @@ describe("ripasso di sicurezza del 19/10", () => {
       { reason: "nessuna_email", company: { domain: "x|attacker.com", contact_form: "https://attacker.com/x" } },
     ]);
     expect(leads).toHaveLength(1);
+  });
+});
+
+describe("aziende senza email", () => {
+  const r = (domain: string, reason: string, contact_form?: string) => ({ reason, company: { domain, contact_form } });
+  it("solo senza email e senza modulo sul loro sito", () => {
+    const rejected = [
+      r("a.it", "nessuna_email"),
+      r("b.it", "nessuna_email", "https://b.it/contatti"),
+      r("c.it", "nessuna_email", "https://altro.it/contatti"),
+      r("d.it", "fuori_target"),
+      r("A.it", "nessuna_email"),
+    ];
+    expect(emailMissedDomains(rejected, "company_only")).toEqual(["a.it", "c.it"]);
+    expect(emailMissedDomains(rejected, "personal_only")).toEqual([]);
   });
 });

@@ -6,7 +6,7 @@ import { safeEqual, sha256Hex } from "@/lib/server/crypto";
 import { afterResults, saveReserveCompanies } from "@/lib/server/searches";
 import { checkMailboxes } from "@/lib/server/email-check";
 import { applyMailboxChecks } from "@/lib/domain/mailbox";
-import { dropForeignContactForms, formOnlyLeads, type ApplyResult } from "@/lib/domain/engine";
+import { dropForeignContactForms, emailMissedDomains, formOnlyLeads, type ApplyResult } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 
 // Eventi dal motore n8n (vedi docs/03-contratto-motore.md).
@@ -125,6 +125,12 @@ export async function POST(request: Request) {
   if (open && missed.length) {
     const { error: missedError } = await db.from("companies").update({ referente_missed_at: new Date().toISOString() }).in("domain", missed);
     if (missedError) console.error("referente_missed_at", missedError.message);
+  }
+
+  const noEmail = emailMissedDomains(payload.rejected, (payload as { email_mode?: string }).email_mode);
+  if (open && noEmail.length) {
+    const { error: noEmailError } = await db.from("companies").update({ email_missed_at: new Date().toISOString() }).in("domain", noEmail);
+    if (noEmailError) console.error("email_missed_at", noEmailError.message);
   }
 
   payload.leads = dropForeignContactForms(payload.leads);

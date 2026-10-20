@@ -500,18 +500,19 @@ add(callback("inviaRisultati", "Invia risultati al backend", "{{ JSON.stringify(
 
 add("""const nota = sticky(
   '## Lead Engine | Search (v1)\\n' +
-  'Motore di ricerca prospect **generalista** chiamato dalla piattaforma SaaS via webhook autenticato.\\n\\n' +
-  '**Flusso:** richiesta validata (anti-SSRF) -> piano AI in lotti -> ricerca AI con web search -> ' +
-  'deduplica (anche contro lo storico del cliente) -> email dal sito ufficiale (homepage, contatti, note legali) -> ' +
-  'Icypeas solo se serve e entro il tetto del backend -> classificazione per modalita email -> callback al backend.\\n\\n' +
-  '**Non genera mai email ipotizzate come contatti:** i pattern finiscono in `email_patterns` con stato `guessed`.\\n\\n' +
-  '**Prima di attivare:** 1) verifica `DOMINIO_PIATTAFORMA` in *Valida richiesta* (oggi weborastudio.it); 2) crea le due credenziali ' +
-  '(*Lead Engine - Webhook in ingresso*: Header Auth; *Lead Engine - Callback verso backend*: header `X-Engine-Secret`) con segreti lunghi casuali, gli stessi del backend.\\n\\n' +
-  'Sorgenti, test e contratto API: GitHub `marcoscazzari03/prospect-azienda` (cartella n8n/engine).',
+  'Motore di ricerca delle aziende, chiamato dalla piattaforma via webhook autenticato.\\n\\n' +
+  '**Flusso:** richiesta validata (anti-SSRF) -> riserva dal database o piano AI in lotti (Claude) -> ricerca web per lotto -> ' +
+  'deduplica (anche contro lo storico del cliente) -> segnali (annuncio di lavoro, controlli tecnici sul sito) -> ' +
+  'email aziendali dal sito ufficiale -> classificazione -> callback al backend.\\n\\n' +
+  '**Oggi «Solo azienda»:** i gruppi 2c Referente e 4 Arricchimento (Icypeas) restano nel workflow ma non si attivano; ' +
+  'servono solo se i referenti verranno riaccesi.\\n\\n' +
+  '**Non genera mai email ipotizzate come contatti.**\\n\\n' +
+  'Sorgenti, test e contratto API: cartella n8n/engine del repository (build.py genera questo workflow).',
   [],
-  { color: 7, width: 760, height: 420 }
+  { color: 7, width: 760, height: 360 }
 );
 """)
+
 
 RICERCA_WIRING = """  .to(ricerca)
 """ if AI_PROVIDER == "openai" else """  .to(serveRicercaAI

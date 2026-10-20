@@ -10,7 +10,7 @@ const CALLBACK_AMMESSI = [
 ];
 
 // Modello AI del motore: per cambiare basta questa riga (es. 'claude-opus-5-5').
-// Il ritorno a OpenAI si fa ricollegando i nodi OpenAI rimasti nel workflow.
+// Il ritorno a OpenAI: AI_PROVIDER = "openai" in n8n/engine/build.py (i nodi OpenAI sono stati tolti il 20/10).
 // Referente via web con Claude Haiku: prova del 14/10 sulle 7 aziende del collaudo,
 // 5 referenti come Sonnet (4 identici) a 0,023 $ invece di 0,061 $ a chiamata.
 const AI = { provider: 'anthropic', model: 'claude-sonnet-5-5', ref_model: 'claude-haiku-5-5', effort: 'medium', max_searches: 12, max_ref_searches: 1 };

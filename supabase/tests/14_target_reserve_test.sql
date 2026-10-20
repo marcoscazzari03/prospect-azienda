@@ -58,4 +58,12 @@ update companies set referente_missed_at = now() - interval '120 days' where dom
 select pg_temp.check((select r -> 0 ->> 'website' = 'https://dentistavivo14.it' or r -> 1 ->> 'website' = 'https://dentistavivo14.it'
                         from (select target_reserve((select id from s14b), '{}', 40) as r) x), 'referente mancato da più di 90 giorni: ancora in riserva');
 
+-- Email non trovata (migrazione 047): in fondo per 90 giorni, come il referente.
+update companies set referente_missed_at = null, email_missed_at = now() - interval '1 day' where domain = 'dentistavivo14.it';
+select pg_temp.check((select jsonb_array_length(r) = 2 and r -> 1 ->> 'website' = 'https://dentistavivo14.it'
+                        from (select target_reserve((select id from s14b), '{}', 40) as r) x), 'email mancata: in fondo');
+update companies set email_missed_at = now() - interval '120 days' where domain = 'dentistavivo14.it';
+select pg_temp.check((select r -> 0 ->> 'website' = 'https://dentistavivo14.it' or r -> 1 ->> 'website' = 'https://dentistavivo14.it'
+                        from (select target_reserve((select id from s14b), '{}', 40) as r) x), 'email mancata da più di 90 giorni: ancora in riserva');
+
 select 'superati tutti i test riserva target';

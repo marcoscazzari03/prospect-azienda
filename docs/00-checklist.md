@@ -67,7 +67,9 @@ Ultimo aggiornamento: 19/10/2026 (sera).
     pubblicati~~ (19/10), app in produzione.
 26b. **Io, dopo la beta** – Motore: seguire a mano i reindirizzamenti dei siti con ricontrollo dell'indirizzo
     (oggi il filtro guarda il nome, non dove porta il rimando; impatto su n8n Cloud da verificare).
-27. **Io** – Motore: ottimizzazioni e parti non usate (nodi scollegati, rami referenti e RocketReach/Icypeas).
+27. ~~**Io** – Motore: analisi su ricerche reali, memoria delle aziende senza email (migrazione 047), tolti 3 nodi
+    OpenAI morti~~ (20/10). Dettagli e proposte in `11-analisi-motore.md`.
+27b. **Tu** – Eseguire la migrazione 047 nel SQL Editor; poi io pubblico l'app su main.
 28. ~~**Io** – Pagina «Sicurezza e privacy» sul sito (`/sicurezza`, link nel piè di pagina)~~ (20/10). Da far rileggere
     al legale insieme a informativa e termini.
 29. **Tu, con il legale** – DPA pronto da firmare per i clienti.

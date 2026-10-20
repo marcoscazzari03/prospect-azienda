@@ -59,6 +59,11 @@ create temp table s10c as
     '{"industry":"","countries":["IT"],"regions":["Emilia-Romagna"],"roles":["Titolare"],
       "signals":{"codes":["outdated_cms","job_ad"],"match":"any","job_families":[{"code":"it_systems"}]}}', 'mixed', 5, 1);
 select pg_temp.check((select jsonb_array_length(opportunity_reserve((select id from s10c), '{}', 40)) = 2), '«basta uno»: annuncio o CMS vecchio');
+-- Email non trovata (migrazione 047): la prima passa in fondo.
+create temp table p10 as select opportunity_reserve((select id from s10c), '{}', 40) -> 0 ->> 'website' as w;
+update companies set email_missed_at = now() where website = (select w from p10);
+select pg_temp.check((select opportunity_reserve((select id from s10c), '{}', 40) -> 1 ->> 'website' = (select w from p10)), 'email mancata: in fondo alla riserva');
+update companies set email_missed_at = null where website = (select w from p10);
 update company_signals set checked_at = now() - interval '40 days' where code = 'outdated_cms';
 select pg_temp.check((select jsonb_array_length(opportunity_reserve((select id from s10c), '{}', 40)) = 1), 'prova dal sito scaduta: esclusa');
 

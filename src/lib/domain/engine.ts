@@ -206,6 +206,19 @@ export function dropForeignContactForms(leads: unknown[] | undefined) {
   });
 }
 
+// Aziende senza email e senza modulo di contatto sul loro sito: le ricerche successive (anche di
+// altri clienti) le mettono in fondo alla riserva (migrazione 047). Non con «Solo nominative»:
+// lì «nessuna_email» vuol dire solo nessuna email di persona.
+export function emailMissedDomains(rejected: unknown[] | undefined, mode: string | undefined) {
+  if (mode === "personal_only") return [];
+  type R = { reason?: string; company?: { domain?: string; contact_form?: string } };
+  return [...new Set((rejected ?? [])
+    .map((r) => r as R)
+    .filter((r) => r?.reason === "nessuna_email" && !urlOnDomain(r.company?.contact_form, r.company?.domain))
+    .map((r) => String(r.company?.domain ?? "").trim().toLowerCase())
+    .filter(Boolean))].slice(0, 200);
+}
+
 export function formOnlyLeads(rejected: unknown[] | undefined) {
   type R = { reason?: string; company?: { domain?: string; contact_form?: string }; sources?: { discovery_url?: string } };
   return (rejected ?? [])
