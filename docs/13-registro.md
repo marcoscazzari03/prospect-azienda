@@ -49,6 +49,8 @@ Come tornare indietro, in generale:
 - **Effetto da sapere:** le ricerche già salvate con settore + parole chiave (anche le ripetute) trovano meno aziende nel
   database e usano di più la ricerca AI.
 - **Indietro:** rieseguire `target_pool` dalla 029, `warehouse_candidates` dalla 037, `opportunity_pool` dalla 038.
+- **Verifica (21/10):** «Informatica e software» + «web agency», Emilia-Romagna, 25 lead: riserva dal database vuota, 2 lotti
+  di ricerca AI, 44 candidati validi, 33 lead con email, tutti web agency (prima: negozi di computer e grandi gruppi).
 
 ### Zone e regione vuota · in produzione dopo il push
 - **Cosa:** `splitZones` in `src/lib/domain/search-input.ts` (usata dal wizard e da `src/app/app/actions.ts`): oltre a virgola
