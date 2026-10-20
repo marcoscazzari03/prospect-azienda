@@ -81,6 +81,10 @@ Ultimo aggiornamento: 21/10/2026.
     (`12-panoramica-sistema.md`)~~ (20/10)
 52. ~~**Io** – Ricerche in target: parole chiave del settore che restringono (migrazione 052), «Campania e Sicilia»
     divisa in due, conferma con regione vuota~~ (21/10). ~~Migrazione 052 eseguita~~ (21/10).
+53. **Io, il 21/10** – Squadra di agenti (decisa il 21/10, dettagli nel registro): prima i controlli automatici su GitHub
+    (test app, motore e SQL, lint, tipi a ogni push), poi Code Reviewer (sola lettura), QA Tester, Data Quality, poi
+    Sales & Copy (prepara, non invia), infine Designer e Business Analyst (voce del resoconto giornaliero).
+
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo
     (file pronto).

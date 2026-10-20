@@ -37,6 +37,13 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — da fare: squadra di agenti (punto 53)
+- Proposta dell'utente (6 agenti) valutata e accettata con correzioni: niente staging (QA in locale, Stripe test, account
+  admin di collaudo in produzione); Data Quality senza accesso al database di produzione (legge le esecuzioni n8n e i siti);
+  il Business Analyst è la voce del resoconto giornaliero già programmato; gli agenti li richiama il Claude principale.
+- Ordine: controlli automatici su GitHub (oggi non esistono), Code Reviewer in sola lettura, QA, Data Quality, Sales & Copy
+  (prepara, non invia email né pubblica), Designer, Business Analyst. File in `.claude/agents/`. Nessuna modifica fatta.
+
 ## 21/10/2026 — ricerche in target: parole chiave, zone, regione vuota (punto 52)
 
 ### Parole chiave del settore che restringono — migrazione 052 · in produzione (eseguita il 21/10)
