@@ -57,7 +57,7 @@ export default async function BetaPage({ searchParams }: PageProps<"/admin/beta"
           {v.go ? <Badge tone="ledger">soglie raggiunte</Badge> : !v.enoughData ? <Badge tone="stamp">dati ancora insufficienti</Badge> : <Badge tone="stamp">soglie non ancora raggiunte</Badge>}
         </p>
         <p className="mt-2 text-ink-2">
-          Regola decisa il 20/10, in percentuale dal 21/10 (decisione il 30/10): servono almeno {T.minActive} clienti attivi; via
+          Regola decisa il 20/10, in percentuale dalla sera del 20/10 (decisione il 30/10): servono almeno {T.minActive} clienti attivi; via
           libera se esporta lead almeno la metà di loro (e almeno {T.minExporters}), almeno {T.goResponders} ha una risposta da
           un&apos;azienda contattata e i lead segnalati restano sotto il {T.maxReportShare * 100}%. Le risposte che i clienti non
           segnano nell&apos;app vanno chieste a voce dopo una settimana. Se nessuno esporta, il problema non è il referente: il lead

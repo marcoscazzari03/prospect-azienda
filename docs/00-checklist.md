@@ -5,7 +5,7 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `05-da-fare.md`).
 
-Ultimo aggiornamento: 21/10/2026.
+Ultimo aggiornamento: 20/10/2026 (sera).
 
 ## 🔴 Bloccanti per la prima ondata della beta (Sud ed Emilia-Romagna)
 1. ~~**Tu** – Verifica in due passaggi su Supabase, Vercel, GitHub, Stripe, n8n~~ (19/10). Scelta dell'utente: niente
@@ -19,7 +19,7 @@ Ultimo aggiornamento: 21/10/2026.
 5b. **Insieme** – Alle risposte: account, +150 crediti, piano Growth dall'admin, email di benvenuto (`10-beta.md`).
     Se non rispondono, un solo promemoria verso il 27/10.
 5e. ~~**Io** – Beta allargata: soglie in percentuale nella pagina Admin → Beta, decisione spostata al 30/10, criteri e
-    testi dell'invito aggiornati in `10-beta.md`~~ (21/10). **Tu:** trovare e invitare una decina di agenzie al Sud e in
+    testi dell'invito aggiornati in `10-beta.md`~~ (20/10). **Tu:** trovare e invitare una decina di agenzie al Sud e in
     Emilia-Romagna; alle risposte, stessa procedura del 5b.
 5f. **Insieme, il 21/10** – Nuovo listino (proposta e valutazione nel registro, 20/10 sera). Prima del lancio a
     pagamento: pacchetti 59/249/790 €, Scale tolto, 20 crediti di benvenuto con i primi lead «forti», lead con solo

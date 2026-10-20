@@ -4,7 +4,7 @@
 
 - **Chi:** agenzie web piccole (2–15 persone), in due ondate:
   1. 3 agenzie del Sud e dell'Emilia-Romagna invitate il 19/10 (Gopher, Mutart, Studio360), più **una decina** invitate
-     dal 21/10 nelle stesse regioni (decisione del 21/10: con 3 agenzie il campione era troppo piccolo e una risposta è
+     dal 20/10 nelle stesse regioni (decisione del 20/10: con 3 agenzie il campione era troppo piccolo e una risposta è
      difficile da ottenere);
   2. dopo il 30/10 3–5 agenzie del Nord (popolamento OSM dal Nord dal 20/10). Prima rilanciare
      `supabase/queries/opportunita_per_regione.sql` e invitare solo dove il servizio dell'agenzia ha almeno
@@ -24,7 +24,7 @@
   giornaliero).
 - **Dopo:** con partita IVA, Stripe live e parere legale, offerta del piano a pagamento con lo sconto promesso.
 
-## Come decidiamo il 30/10 (fissato il 20/10, in percentuale dal 21/10)
+## Come decidiamo il 30/10 (fissato il 20/10, in percentuale dal 20/10 sera)
 
 Pagina **Admin → Beta**: per ogni agenzia ricerche, lead, export, righe esportate, contattati, risposte
 (stati «ha risposto», «appuntamento», «cliente» impostati sui lead) e lead segnalati.
@@ -35,14 +35,14 @@ la decisione si rimanda. Via libera alla seconda ondata (Nord) se:
 - almeno **1 agenzia ha una risposta** da un'azienda contattata (dall'app, o chiesta a voce dopo una settimana);
 - i lead segnalati restano **sotto il 10%**.
 
-Decisione spostata dal 28 al **30/10** per dare almeno una settimana d'uso alle agenzie invitate il 21/10.
+Decisione spostata dal 28 al **30/10** per dare almeno una settimana d'uso alle agenzie invitate dal 20/10.
 
 Se nessuna esporta, il problema non è il referente: il lead non è abbastanza pronto. Nella beta ogni lead con segnale ha
 anche lo **«Spunto per il primo messaggio»** (frase scritta dalla prova, da adattare): chiedere alle agenzie se lo usano.
 
 ## Come troviamo le agenzie
 
-**Criteri per la seconda tornata di inviti (21/10):** agenzie web o di comunicazione con 2–15 persone, sito proprio
+**Criteri per la seconda tornata di inviti (20/10):** agenzie web o di comunicazione con 2–15 persone, sito proprio
 curato e un servizio chiaro tra rifacimento siti, WordPress/manutenzione, siti per hotel o sicurezza del sito; sede al
 Sud o in Emilia-Romagna (dove il database ha già aziende pronte); un'email o un modulo di contatto con un nome a cui
 scrivere. Mescolare le dimensioni (freelance strutturati, studi da 3–5 persone, agenzie da 10–15). Evitare le grandi

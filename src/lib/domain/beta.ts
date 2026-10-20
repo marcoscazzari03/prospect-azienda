@@ -1,10 +1,10 @@
-// Metriche della beta (decisione del 20/10, soglie in percentuale dal 21/10): per ogni cliente quanto usa davvero il servizio.
+// Metriche della beta (decisione del 20/10, soglie in percentuale dal 20/10 sera): per ogni cliente quanto usa davvero il servizio.
 // L'export è il segnale d'intenzione più forte; gli stati «ha risposto / incontro / cliente»
 // che il cliente imposta sui lead misurano l'esito del contatto.
 
 export const BETA_START = "2026-10-19";
 
-// Soglie fissate prima della decisione sulla seconda ondata (30/10). Dal 21/10 in percentuale:
+// Soglie fissate prima della decisione sulla seconda ondata (30/10). Dal 20/10 sera in percentuale:
 // la beta passa da 3 a circa 13 agenzie invitate e conta solo chi la usa davvero.
 export const BETA_THRESHOLDS = {
   minSearches: 2, // uso reale: almeno 2 ricerche
