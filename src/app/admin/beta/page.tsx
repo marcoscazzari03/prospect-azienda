@@ -45,8 +45,8 @@ export default async function BetaPage({ searchParams }: PageProps<"/admin/beta"
       />
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <Stat label="Clienti attivi" value={v.active} hint="almeno una ricerca" />
-        <Stat label="Hanno esportato" value={v.exporters} hint={`soglia: almeno ${T.goExporters}`} tone={v.exporters >= T.goExporters ? "ledger" : "ink"} />
+        <Stat label="Clienti attivi" value={v.active} hint={`almeno una ricerca; per decidere ne servono ${T.minActive}`} tone={v.enoughData ? "ledger" : "ink"} />
+        <Stat label="Hanno esportato" value={`${v.exporters} (${Math.round(v.exporterShare * 100)}%)`} hint={`soglia: metà degli attivi, almeno ${T.minExporters}`} tone={v.exporters >= T.minExporters && v.exporterShare >= T.minExporterShare ? "ledger" : "ink"} />
         <Stat label="Con una risposta" value={v.responders} hint={`soglia: almeno ${T.goResponders}`} tone={v.responders >= T.goResponders ? "ledger" : "ink"} />
         <Stat label="Lead segnalati" value={`${Math.round(v.reportShare * 100)}%`} hint={`soglia: sotto il ${T.maxReportShare * 100}%`} tone={v.reportShare < T.maxReportShare ? "ledger" : "stamp"} />
       </div>
@@ -54,11 +54,12 @@ export default async function BetaPage({ searchParams }: PageProps<"/admin/beta"
       <Card className="mt-4 p-5 text-sm">
         <p className="font-medium">
           Seconda ondata (Nord):{" "}
-          {v.go ? <Badge tone="ledger">soglie raggiunte</Badge> : <Badge tone="stamp">soglie non ancora raggiunte</Badge>}
+          {v.go ? <Badge tone="ledger">soglie raggiunte</Badge> : !v.enoughData ? <Badge tone="stamp">dati ancora insufficienti</Badge> : <Badge tone="stamp">soglie non ancora raggiunte</Badge>}
         </p>
         <p className="mt-2 text-ink-2">
-          Regola decisa il 20/10: via libera se almeno {T.goExporters} clienti esportano lead, almeno {T.goResponders} ha una risposta
-          da un&apos;azienda contattata e i lead segnalati restano sotto il {T.maxReportShare * 100}%. Le risposte che i clienti non
+          Regola decisa il 20/10, in percentuale dal 21/10 (decisione il 30/10): servono almeno {T.minActive} clienti attivi; via
+          libera se esporta lead almeno la metà di loro (e almeno {T.minExporters}), almeno {T.goResponders} ha una risposta da
+          un&apos;azienda contattata e i lead segnalati restano sotto il {T.maxReportShare * 100}%. Le risposte che i clienti non
           segnano nell&apos;app vanno chieste a voce dopo una settimana. Se nessuno esporta, il problema non è il referente: il lead
           non è abbastanza pronto.
         </p>

@@ -23,7 +23,8 @@ Come tornare indietro, in generale:
 | 20/10 | Nessuna promessa di «contatto senza consenso» nel marketing finché il legale non risponde per iscritto (art. 130 vale anche per le aziende secondo il Garante) | rischio legale |
 | 20/10 | Il listino non promette funzioni che l'app non ha (tolto «Fino a 3 utenti») | fiducia dei clienti |
 | 20/10 | Frase di apertura dei lead: costruita dalla prova, **senza AI** (costo zero, niente dettagli inventati) | qualità e costi |
-| 20/10 | Decisione del 28/10 sulle soglie della pagina Admin → Beta: 2 agenzie su 3 esportano, 1 ha una risposta, segnalati sotto il 10% | decidere sui numeri |
+| 21/10 | Beta allargata a una decina di agenzie in più (Sud ed Emilia-Romagna). Decisione sulla seconda ondata il **30/10** con soglie in percentuale: almeno 3 agenzie attive, esporta almeno la metà (minimo 2), almeno 1 risposta, segnalati sotto il 10% | con 3 agenzie il campione era troppo piccolo |
+| 20/10 | ~~Decisione del 28/10: 2 agenzie su 3 esportano, 1 ha una risposta, segnalati sotto il 10%~~ (sostituita il 21/10) | decidere sui numeri |
 | 20/10 | Ogni modifica e decisione va in questo registro, nello stesso commit | richiesta dell'utente |
 | 19/10 | Niente verifica in due passaggi su Anthropic, Resend, Hostinger, Cloudflare, Icypeas (scelta dell'utente) | — |
 | 19/10 | Sconto beta: −30% per 12 mesi a chi continua dopo la beta | — |
@@ -35,6 +36,17 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — beta allargata (punto 5e)
+
+### Soglie della beta in percentuale · in produzione dopo il push
+- **Cosa:** `src/lib/domain/beta.ts` (`BETA_THRESHOLDS`: `minActive` 3, `minExporterShare` 0,5, `minExporters` 2,
+  `goResponders` 1, `maxReportShare` 0,1; `betaVerdict` restituisce anche `exporterShare` ed `enoughData`), pagina
+  `src/app/admin/beta/page.tsx` («dati ancora insufficienti» sotto i 3 attivi), test in `tests/beta.test.ts`.
+  `docs/10-beta.md`: decisione al 30/10, criteri per scegliere le agenzie, invito senza «cerco 5 agenzie».
+- **Perché:** l'utente vuole invitare una decina di agenzie in più; «2 su 3» non ha senso con 13 invitati.
+- **Indietro:** `git revert` del commit; nessun dato toccato.
+- **Nota:** l'offerta ai nuovi invitati resta il −30% per 12 mesi; il prezzo fondatore dipende dal nuovo listino (5f).
+
 ## 20/10/2026 (sera) — da ricordare: proposta di nuovo listino (da valutare)
 - Proposta esterna: pacchetti 59/249/790 €, abbonamenti Starter 49 / Pro 129 / Agency 249 € con monitoraggio come
   differenza, Scale tolto, lead con solo modulo a 1 credito, niente supplemento AI, 20 crediti di benvenuto, prezzo
@@ -43,7 +55,7 @@ Come tornare indietro, in generale:
   consenso (vedi decisione sul legale); il −30% già promesso alle 3 agenzie resta. Nessuna modifica fatta.
 
 ## 20/10/2026 (sera) — da ricordare: campione della beta troppo piccolo
-- L'utente ritiene troppo ottimistico aver invitato solo 3 agenzie. Proposta (non ancora decisa, se ne parla il 21/10):
+- L'utente ritiene troppo ottimistico aver invitato solo 3 agenzie (deciso il 21/10, vedi sopra). Proposta iniziale:
   altre 5–7 agenzie nelle stesse regioni, soglie del 28/10 in percentuale, eventuale rinvio della decisione.
   Punto 5e della checklist. Nessuna modifica fatta.
 

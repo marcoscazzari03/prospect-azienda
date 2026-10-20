@@ -5,7 +5,7 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `05-da-fare.md`).
 
-Ultimo aggiornamento: 20/10/2026 (sera).
+Ultimo aggiornamento: 21/10/2026.
 
 ## 🔴 Bloccanti per la prima ondata della beta (Sud ed Emilia-Romagna)
 1. ~~**Tu** – Verifica in due passaggi su Supabase, Vercel, GitHub, Stripe, n8n~~ (19/10). Scelta dell'utente: niente
@@ -18,9 +18,9 @@ Ultimo aggiornamento: 20/10/2026 (sera).
 5. ~~**Tu** – Invitate 3 agenzie (Gopher, Mutart, Studio360) con email personalizzate e PDF di esempi reali~~ (19/10)
 5b. **Insieme** – Alle risposte: account, +150 crediti, piano Growth dall'admin, email di benvenuto (`10-beta.md`).
     Se non rispondono, un solo promemoria verso il 27/10.
-5e. **Insieme, il 21/10** – Allargare la beta: 3 agenzie sono poche per decidere. Proposta: altre 5–7 agenzie al Sud e
-    in Emilia-Romagna (dimensioni diverse), soglie in percentuale nella pagina Admin → Beta, decisione spostata di
-    qualche giorno se servono 5–7 giorni d'uso. Da decidere prima di toccare qualcosa.
+5e. ~~**Io** – Beta allargata: soglie in percentuale nella pagina Admin → Beta, decisione spostata al 30/10, criteri e
+    testi dell'invito aggiornati in `10-beta.md`~~ (21/10). **Tu:** trovare e invitare una decina di agenzie al Sud e in
+    Emilia-Romagna; alle risposte, stessa procedura del 5b.
 5f. **Insieme, il 21/10** – Nuovo listino (proposta e valutazione nel registro, 20/10 sera). Prima del lancio a
     pagamento: pacchetti 59/249/790 €, Scale tolto, 20 crediti di benvenuto con i primi lead «forti», lead con solo
     modulo a 1 credito, niente supplemento AI (migrazione). Abbonamenti a pagamento solo con il monitoraggio (punto 36).
@@ -35,8 +35,8 @@ Ultimo aggiornamento: 20/10/2026 (sera).
 8. ~~**Tu** – Casella leads@weborastudio.it attiva e provata~~ (19/10)
 
 ## 🟠 Bloccanti per la seconda ondata (Nord)
-9. **Insieme, il 28/10** – Decidere con le soglie della pagina Admin → Beta: almeno 2 agenzie su 3 esportano, almeno
-   1 ha una risposta, segnalati sotto il 10%. Poi rilanciare `supabase/queries/opportunita_per_regione.sql` e invitare
+9. **Insieme, il 30/10** (era il 28/10) – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive,
+   esporta almeno la metà (e almeno 2), almeno 1 ha una risposta, segnalati sotto il 10%. Poi rilanciare `supabase/queries/opportunita_per_regione.sql` e invitare
    solo dove il servizio ha almeno 40–50 aziende pronte.
 10. ~~**Io** – Popolamento OSM dal Nord, 8 province a notte~~ (19/10). Prima notte: 2.922 aziende lombarde nuove (20/10).
 

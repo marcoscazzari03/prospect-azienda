@@ -1,15 +1,18 @@
-// Metriche della beta (decisione del 20/10): per ogni cliente quanto usa davvero il servizio.
+// Metriche della beta (decisione del 20/10, soglie in percentuale dal 21/10): per ogni cliente quanto usa davvero il servizio.
 // L'export è il segnale d'intenzione più forte; gli stati «ha risposto / incontro / cliente»
 // che il cliente imposta sui lead misurano l'esito del contatto.
 
 export const BETA_START = "2026-10-19";
 
-// Soglie fissate prima della decisione sulla seconda ondata (28/10).
+// Soglie fissate prima della decisione sulla seconda ondata (30/10). Dal 21/10 in percentuale:
+// la beta passa da 3 a circa 13 agenzie invitate e conta solo chi la usa davvero.
 export const BETA_THRESHOLDS = {
   minSearches: 2, // uso reale: almeno 2 ricerche
+  minActive: 3, // sotto i 3 clienti attivi i dati non bastano per decidere
+  minExporterShare: 0.5, // via libera se almeno metà dei clienti attivi esporta…
+  minExporters: 2, // …e comunque almeno 2
+  goResponders: 1, // almeno 1 cliente con una risposta da un'azienda contattata
   maxReportShare: 0.1, // lead segnalati sotto il 10%
-  goExporters: 2, // via libera se almeno 2 clienti esportano…
-  goResponders: 1, // …e almeno 1 ha una risposta da un'azienda contattata
 } as const;
 
 export type BetaOrgRow = {
@@ -67,11 +70,16 @@ export function betaVerdict(rows: BetaOrgRow[]) {
   const delivered = active.reduce((a, r) => a + r.delivered, 0);
   const reports = active.reduce((a, r) => a + r.reports, 0);
   const reportShare = delivered ? reports / delivered : 0;
+  const exporterShare = active.length ? exporters / active.length : 0;
+  const enoughData = active.length >= T.minActive;
   return {
     active: active.length,
     exporters,
+    exporterShare,
     responders,
     reportShare,
-    go: exporters >= T.goExporters && responders >= T.goResponders && reportShare < T.maxReportShare,
+    enoughData,
+    go: enoughData && exporters >= T.minExporters && exporterShare >= T.minExporterShare
+      && responders >= T.goResponders && reportShare < T.maxReportShare,
   };
 }

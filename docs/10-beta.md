@@ -2,9 +2,11 @@
 
 ## Come funziona
 
-- **Chi:** 5–10 agenzie web piccole (2–15 persone), in due ondate:
-  1. subito 2–3 agenzie del Sud o dell'Emilia-Romagna (dati già presenti nel database);
-  2. dopo il 28/10 3–5 agenzie del Nord (popolamento OSM dal Nord dal 20/10). Prima rilanciare
+- **Chi:** agenzie web piccole (2–15 persone), in due ondate:
+  1. 3 agenzie del Sud e dell'Emilia-Romagna invitate il 19/10 (Gopher, Mutart, Studio360), più **una decina** invitate
+     dal 21/10 nelle stesse regioni (decisione del 21/10: con 3 agenzie il campione era troppo piccolo e una risposta è
+     difficile da ottenere);
+  2. dopo il 30/10 3–5 agenzie del Nord (popolamento OSM dal Nord dal 20/10). Prima rilanciare
      `supabase/queries/opportunita_per_regione.sql` e invitare solo dove il servizio dell'agenzia ha almeno
      40–50 aziende pronte nella sua regione.
 - **Accesso:** registrazione normale su leads.weborastudio.it (15 crediti di benvenuto). Dall'admin (Clienti →
@@ -22,20 +24,30 @@
   giornaliero).
 - **Dopo:** con partita IVA, Stripe live e parere legale, offerta del piano a pagamento con lo sconto promesso.
 
-## Come decidiamo il 28/10 (fissato il 20/10)
+## Come decidiamo il 30/10 (fissato il 20/10, in percentuale dal 21/10)
 
 Pagina **Admin → Beta**: per ogni agenzia ricerche, lead, export, righe esportate, contattati, risposte
 (stati «ha risposto», «appuntamento», «cliente» impostati sui lead) e lead segnalati.
 
-Via libera alla seconda ondata (Nord) se:
-- almeno **2 agenzie su 3 esportano** lead (l'export è il segnale d'intenzione più forte);
+Conta solo chi usa davvero il servizio (almeno una ricerca): con meno di **3 agenzie attive** i dati non bastano e
+la decisione si rimanda. Via libera alla seconda ondata (Nord) se:
+- **almeno metà delle agenzie attive esporta** lead, e comunque almeno 2 (l'export è il segnale d'intenzione più forte);
 - almeno **1 agenzia ha una risposta** da un'azienda contattata (dall'app, o chiesta a voce dopo una settimana);
 - i lead segnalati restano **sotto il 10%**.
+
+Decisione spostata dal 28 al **30/10** per dare almeno una settimana d'uso alle agenzie invitate il 21/10.
 
 Se nessuna esporta, il problema non è il referente: il lead non è abbastanza pronto. Nella beta ogni lead con segnale ha
 anche lo **«Spunto per il primo messaggio»** (frase scritta dalla prova, da adattare): chiedere alle agenzie se lo usano.
 
 ## Come troviamo le agenzie
+
+**Criteri per la seconda tornata di inviti (21/10):** agenzie web o di comunicazione con 2–15 persone, sito proprio
+curato e un servizio chiaro tra rifacimento siti, WordPress/manutenzione, siti per hotel o sicurezza del sito; sede al
+Sud o in Emilia-Romagna (dove il database ha già aziende pronte); un'email o un modulo di contatto con un nome a cui
+scrivere. Mescolare le dimensioni (freelance strutturati, studi da 3–5 persone, agenzie da 10–15). Evitare le grandi
+agenzie e chi fa solo social o pubblicità. Un'agenzia per città dove possibile, per non metterle in concorrenza sulle
+stesse aziende.
 
 1. Con Webora Leads stesso: ricerca in target («Agenzia di pubblicità», «Grafica e design», «Informatica e
    software») nella regione giusta, o opportunità «Marketing digitale» / «Grafica e comunicazione» (agenzie che
@@ -64,7 +76,7 @@ Da personalizzare: [Nome], [Agenzia], [città/regione], [servizio] e la riga su 
 
 ### Email (primo contatto)
 
-**Oggetto:** [Nome], cerco 5 agenzie per provare uno strumento per trovare clienti
+**Oggetto:** [Nome], cerco qualche agenzia per provare uno strumento per trovare clienti
 
 Ciao [Nome],
 
@@ -76,7 +88,7 @@ controllo, il sito e il contatto aziendale (email o modulo di contatto del sito)
 Ho visto che lavorate su [servizio] in [città/regione], e il database ha già un buon numero di aziende in
 quella zona: per questo ti scrivo.
 
-Cerco 5 agenzie per una **beta gratuita di 4 settimane**:
+Cerco un piccolo gruppo di agenzie per una **beta gratuita di 4 settimane**:
 - crediti gratuiti per circa 75 aziende con opportunità, più quelli di benvenuto;
 - in cambio: almeno 3 ricerche vere, contattare le aziende che ti interessano e dirmi com'è andata
   (due chiamate da 20 minuti);
@@ -97,8 +109,8 @@ Webora Leads – leads.weborastudio.it
 ### Messaggio LinkedIn (breve)
 
 Ciao [Nome], ho costruito Webora Leads: trova aziende con un segnale concreto per un'agenzia come [Agenzia]
-(sito vecchio, senza HTTPS, non adatto ai cellulari), con la prova e il contatto aziendale. Cerco 5 agenzie per
-una beta gratuita di 4 settimane in [regione]: crediti gratuiti in cambio di un parere sincero. Ti interessa?
+(sito vecchio, senza HTTPS, non adatto ai cellulari), con la prova e il contatto aziendale. Cerco qualche agenzia
+per una beta gratuita di 4 settimane in [regione]: crediti gratuiti in cambio di un parere sincero. Ti interessa?
 Ti mando i dettagli.
 
 ### Riga facoltativa se li abbiamo trovati con Webora Leads
