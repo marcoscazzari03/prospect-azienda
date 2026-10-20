@@ -504,10 +504,18 @@ assert.equal(httpsCert.signals[0].status, 'pass');
 const httpsBoh = valutaFile('site-modern.html', ['no_https'], { error: { message: 'ETIMEDOUT' } });
 assert.equal(httpsBoh.signals[0].status, 'undetermined');
 // Errori veri di n8n (esecuzione del 17/10): il motivo sta in error.cause.
-const sslErr = (cause) => ({ error: { message: "SSL Issue: consider using the 'Ignore SSL issues' option", name: 'NodeSslError', cause: { name: 'Error', message: cause } } });
+// Come in n8n: il motivo compare sia in error.cause sia in details.description.
+const sslErr = (cause) => ({ error: { message: "SSL Issue: consider using the 'Ignore SSL issues' option", name: 'NodeSslError', cause: { name: 'Error', message: cause } }, details: { description: cause } });
 const esitoHttps = (h) => valutaFile('site-modern.html', ['no_https'], h).signals[0];
 assert.equal(esitoHttps(sslErr('certificate has expired')).evidence.detail, 'Certificato HTTPS scaduto');
-assert.equal(esitoHttps(sslErr("Hostname/IP does not match certificate's altnames: Host: nawawax.com. is not in the cert's altnames: DNS:preview.infomaniak.website, DNS:*.infomaniak.site")).status, 'pass', 'certificato di un altro sito');
+const esitoSu = (website, h) => run(valuta, {
+  nodes: { 'Valida richiesta': [jobSito(['no_https'], 'any')], 'Serve controllo sito?': [{ ...prospettoSito, website }], 'HTTP - Sito (segnali)': [{ html: readFileSync(join(fx, 'site-modern.html'), 'utf8') }] },
+  json: h
+}).json.signals[0];
+assert.equal(esitoSu('https://www.prova.it/', sslErr("Hostname/IP does not match certificate's altnames: Host: www.prova.it. is not in the cert's altnames: DNS:webx.aruba.it")).status, 'pass', 'certificato dell\'hosting sul sito vero');
+assert.equal(esitoSu('http://prova.it/', sslErr("Hostname/IP does not match certificate's altnames: Host: prova.it. is not in the cert's altnames: DNS:webx.aruba.it")).status, 'pass', 'sito in http');
+assert.equal(esitoSu('https://nawawax.com/', sslErr("Hostname/IP does not match certificate's altnames: Host: nawawax.com. is not in the cert's altnames: DNS:preview.infomaniak.website, DNS:*.infomaniak.site")).status, 'undetermined', 'dominio nudo: il sito vero può stare sul www');
+assert.equal(esitoSu('http://www.esprinet.it/', sslErr("Hostname/IP does not match certificate's altnames: Host: www.esprinet.it. is not in the cert's altnames: DNS:*.esprinet.com, DNS:esprinet.com")).status, 'undetermined', 'certificato del marchio su un altro dominio');
 assert.equal(esitoHttps(sslErr("Hostname/IP does not match certificate's altnames: Host: prova.it. is not in the cert's altnames: DNS:www.prova.it")).status, 'undetermined', 'il certificato copre il www');
 assert.equal(esitoHttps({ error: { message: 'unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca', code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' } }).status, 'undetermined', 'catena incompleta: i browser la accettano');
 assert.equal(esitoHttps({ error: { message: 'write EPROTO 5073C1A18A7F0000:error:0A000410:SSL routines:ssl3_read_bytes:ssl/tls alert handshake failure', code: 'EPROTO' } }).status, 'undetermined', 'handshake rifiutato');

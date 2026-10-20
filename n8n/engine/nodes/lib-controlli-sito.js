@@ -118,12 +118,19 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
     const nome = /altname|does not match|ERR_TLS_CERT_ALTNAME/i.test(msg);
     const host = ((msg.match(/Host: ([a-z0-9.-]+?)\.? is not/i) || [])[1] || '').toLowerCase();
     const copreWww = host && msg.toLowerCase().includes('dns:www.' + host.replace(/^www\./, ''));
+    // Certificato del marchio su un altro dominio (esprinet.it -> esprinet.com): dominio secondario
+    // di un gruppo, il sito vero è altrove. Sul dominio nudo di un sito salvato in https non si sa
+    // se il sito vero sta sul www (ricontrollo del 19/10): conta solo l'host che il sito usa davvero.
+    const nomi = (msg.toLowerCase().split("cert's altnames:")[1] || '').split(' | ')[0];
+    const etichetta = host.replace(/^www\./, '').split('.')[0];
+    const marchio = etichetta.length >= 4 && nomi.includes(etichetta);
+    const hostVero = /^http:\/\//i.test(website) || /^https?:\/\/www\./i.test(website);
     if (!eseguito) metti('no_https', 'undetermined');
     else if (!h.error) metti('no_https', 'fail');
     else if (/expired|CERT_HAS_EXPIRED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS scaduto');
     else if (/self.signed|SELF_SIGNED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS autofirmato');
-    // Nome sbagliato: conta solo se il certificato non copre nemmeno il www del dominio.
-    else if (nome && !copreWww) metti('no_https', 'pass', 'Certificato HTTPS non valido per questo sito');
+    // Nome sbagliato: conta solo se il certificato non copre il www, non è del marchio e l'host è quello vero.
+    else if (nome && !copreWww && !marchio && hostVero) metti('no_https', 'pass', 'Certificato HTTPS non valido per questo sito');
     else if (/ECONNREFUSED/i.test(msg) && /^http:\/\//i.test(website) && leggibile) metti('no_https', 'pass', 'Il sito non risponde in HTTPS');
     else metti('no_https', 'undetermined');
   }
