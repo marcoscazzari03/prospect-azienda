@@ -38,8 +38,9 @@ Come tornare indietro, in generale:
 ---
 
 ## 20/10/2026 (sera) — da ricordare: tre limiti delle ricerche in target visti cercando le agenzie
-- **Regione vuota = tutta Italia senza avviso.** Ricerca «Informatica e software» per l'Emilia-Romagna partita senza regione:
-  46 lead quasi tutti in Lombardia (il database lì è pieno dal 20/10). Proposta: avviso nel wizard se la regione è vuota.
+- **Regione vuota = tutta Italia senza avviso.** Ricerca «Informatica e software» per l'Emilia-Romagna partita senza regione
+  (dimenticata nel wizard): 38 lead quasi tutti in Lombardia (il database lì è pieno dal 20/10). Proposta: conferma nel wizard se la regione è vuota
+  («Cerchi in tutta Italia?»).
 - **«Campania e Sicilia» è una zona sola.** Il wizard divide solo per virgola; `target_pool` vuole tutte le parole della
   zona, quindi nessuna azienda corrisponde. Proposta: dividere anche su « e » / « ed » tra nomi di regione.
 - **Le «parole chiave del settore» allargano, non restringono.** In `target_pool` (migrazione 029) settore OPPURE parola

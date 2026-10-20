@@ -20,7 +20,9 @@ Ultimo aggiornamento: 20/10/2026 (sera).
     Se non rispondono, un solo promemoria verso il 27/10.
 5e. ~~**Io** – Beta allargata: soglie in percentuale nella pagina Admin → Beta, decisione spostata al 30/10, criteri e
     testi dell'invito aggiornati in `10-beta.md`~~ (20/10). **Tu:** invitare circa 50 agenzie al Sud e in Emilia-Romagna nei
-    prossimi giorni, 10–15 al giorno da leads@ (`10-beta.md`); alle risposte, stessa procedura del 5b.
+    prossimi giorni, 10–15 al giorno da leads@ (`10-beta.md`). Prima lista di 20 agenzie pronta (20/10, file mandato in
+    chat, non nel repository); da rifare la ricerca Emilia-Romagna con la regione e «web agency» nelle parole chiave
+    aggiuntive. Alle risposte, stessa procedura del 5b.
 5f. **Insieme, il 21/10** – Nuovo listino (proposta e valutazione nel registro, 20/10 sera). Prima del lancio a
     pagamento: pacchetti 59/249/790 €, Scale tolto, 20 crediti di benvenuto con i primi lead «forti», lead con solo
     modulo a 1 credito, niente supplemento AI (migrazione). Abbonamenti a pagamento solo con il monitoraggio (punto 36).
