@@ -48,8 +48,8 @@ Ultimo aggiornamento: 19/10/2026 (sera).
 19c. ~~**Tu** – Pubblicati motore e «Aziende | Controllo siti»; eseguita `https_ricontrollo.sql`: 341 prove vecchie
     ricontrollate~~ (19/10). Esito: 68 scaduti, 4 autofirmati, 141 «non valido per questo sito», di cui ~46 falsi
     (domini secondari di gruppi, domini nudi).
-19d. **Tu** – Seconda correzione caricata il 20/10: pubblicare motore e «Aziende | Controllo siti», poi eseguire la parte 3
-    di `https_ricontrollo.sql` (prima il conteggio).
+19d. ~~**Tu** – Seconda correzione pubblicata ed eseguita la parte 3: 160 prove in ricontrollo~~ (20/10).
+    Resta: guardare l'esito nell'analisi giornaliera del 21/10.
 20. **Insieme** – Alla prima ricerca vera: controllare le nuove regole delle email (reservations@, albergo…@, domini
     fratelli).
 21. **Tu** – Giudicare a mano le 24 aziende con il solo modulo di contatto (query `moduli.sql`).
