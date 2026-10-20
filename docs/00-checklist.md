@@ -85,11 +85,15 @@ Ultimo aggiornamento: 21/10/2026.
 53. **Io, il 21/10** – Squadra di agenti. ~~Code Reviewer creato e provato~~ (21/10). ~~QA Tester, Data Quality e Sales & Copy creati~~ (21/10). (decisa il 21/10, dettagli nel registro): prima i controlli automatici su GitHub
     (test app, motore e SQL, lint, tipi a ogni push), poi Code Reviewer (sola lettura), QA Tester, Data Quality, poi
     Sales & Copy (prepara, non invia), infine Designer e Business Analyst (voce del resoconto giornaliero).
-54. **Io, da decidere** – Correzioni trovate dagli agenti (registro, 21/10): zone con città unite da «e» e «… e provincia»;
-    sinonimi di «web agency»; «/» e «&» come separatori; niente segnali sulle pagine anti-bot; no_privacy non con «sito in
-    costruzione»; nome e dominio diversi; pagina contatti prima di «nessuna_email».
-55. **Tu** – Accesso completo alla rete nell'ambiente cloud (menu dell'ambiente → Modifica → Accesso alla rete), così il
-    Data Quality può aprire i siti delle aziende.
+54. **Io, prossima sessione** – Correzioni proposte dagli agenti il 21/10 (dettagli nel registro):
+    a) zone: città unite da «e» («Modena e Reggio Emilia»), «… e provincia», «/» e «&» come separatori (QA);
+    b) «web agency» con i sinonimi «agenzia web», «webagency» (QA);
+    c) niente segnali sulle pagine che sembrano barriere anti-bot (testo corto, niente viewport né copyright) (Data Quality);
+    d) no_privacy non scatta se il sito è «in costruzione» (Data Quality);
+    e) segnalare le aziende con nome e dominio molto diversi (Data Quality);
+    f) pagina contatti prima di scartare per «nessuna_email» (Data Quality).
+    Prima di c)–f): far verificare al Data Quality sui siti veri (ora la rete è aperta) che i problemi ci siano davvero.
+55. ~~**Tu** – Accesso completo alla rete nell'ambiente cloud: il Data Quality può aprire i siti delle aziende~~ (21/10).
 
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo

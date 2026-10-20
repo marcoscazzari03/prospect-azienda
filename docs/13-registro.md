@@ -57,7 +57,7 @@ Come tornare indietro, in generale:
   Web agency Emilia-Romagna: 33 su 33 coerenti nei dati. no_privacy: 28 pass su 532 controlli, 3 sospetti (pagina anti-bot su
   un grande marchio, una web agency, una pagina provvisoria). Proposte (punto 54): niente segnali sulle pagine che sembrano
   barriere anti-bot; no_privacy non scatta se il sito è «in costruzione»; segnalare nome e dominio molto diversi; pagina
-  contatti prima di scartare per «nessuna_email». Per verificare sui siti serve l'accesso completo alla rete dell'ambiente.
+  contatti prima di scartare per «nessuna_email». Il 21/10 l'utente ha aperto l'accesso completo alla rete: ora i siti si aprono.
 - **Indietro:** cancellare il file.
 
 ## 21/10/2026 — secondo agente: QA Tester · creato
