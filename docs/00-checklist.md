@@ -97,8 +97,7 @@ Ultimo aggiornamento: 20/10/2026.
 41. **Insieme** – Consegnare i lead con il solo modulo dopo aver esaurito le aziende con email?
 42. ~~**Io** – Captcha anche su accesso e recupero password, più limite ai tentativi: 10 accessi sbagliati per account e
     30 per connessione ogni 15 minuti; 3 richieste di recupero per indirizzo e 10 per connessione ogni ora~~ (20/10).
-42b. **Tu** – Controllare su Vercel che ci siano NEXT_PUBLIC_TURNSTILE_SITE_KEY e TURNSTILE_SECRET_KEY (senza, il
-    captcha è spento ovunque, anche nella registrazione) e che in Cloudflare Turnstile il dominio sia leads.weborastudio.it.
+42b. ~~**Tu** – Chiavi Turnstile presenti su Vercel, dominio impostato su Cloudflare, captcha visibile in «Accedi»~~ (20/10).
 43. **Io** – Più utenti per account e API.
 44. **Insieme** – Capacità di n8n oltre 50–100 clienti attivi.
 45. **Insieme** – Estero, un paese alla volta (prima il parere legale).
