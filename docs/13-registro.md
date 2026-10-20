@@ -37,6 +37,17 @@ Come tornare indietro, in generale:
 
 ---
 
+## 20/10/2026 (sera) — da ricordare: tre limiti delle ricerche in target visti cercando le agenzie
+- **Regione vuota = tutta Italia senza avviso.** Ricerca «Informatica e software» per l'Emilia-Romagna partita senza regione:
+  46 lead quasi tutti in Lombardia (il database lì è pieno dal 20/10). Proposta: avviso nel wizard se la regione è vuota.
+- **«Campania e Sicilia» è una zona sola.** Il wizard divide solo per virgola; `target_pool` vuole tutte le parole della
+  zona, quindi nessuna azienda corrisponde. Proposta: dividere anche su « e » / « ed » tra nomi di regione.
+- **Le «parole chiave del settore» allargano, non restringono.** In `target_pool` (migrazione 029) settore OPPURE parola
+  chiave: «web agency» non filtra, e la riserva dal database dà negozi di computer e software house. Per restringere oggi
+  si usano le «parole chiave aggiuntive» (ricerca AI, +1 credito). Proposta: chiarire il testo nel wizard o farle
+  diventare un filtro sul nome e sulla descrizione.
+- Nessuna modifica fatta: da decidere (punto 52 della checklist).
+
 ## 20/10/2026 (sera) — beta allargata (punto 5e)
 
 ### Soglie della beta in percentuale · in produzione dopo il push

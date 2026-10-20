@@ -78,6 +78,8 @@ Ultimo aggiornamento: 20/10/2026 (sera).
 29. **Tu, con il legale** – Contratto sul trattamento dei dati (DPA) pronto da firmare per i clienti.
 29b. ~~**Io** – Registro delle modifiche e delle decisioni (`13-registro.md`) e panoramica del sistema
     (`12-panoramica-sistema.md`)~~ (20/10)
+52. **Io, da decidere** – Ricerche in target: avviso con regione vuota, «Campania e Sicilia» divisa in due, parole chiave
+    del settore che restringono invece di allargare (dettagli nel registro, 20/10 sera).
 
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo
