@@ -1,4 +1,5 @@
 import { opportunityScore, signalByCode, signalPhrase, type LeadSignal } from "./signals";
+import { openingLine } from "./opening-line";
 
 // Forma dei lead consegnati (deliveries.data) e conversione per tabelle ed export.
 
@@ -93,6 +94,7 @@ export function flattenDelivery(d: DeliveryRow, offers: Record<string, string | 
     email_ipotizzate: (x.email_patterns ?? []).map((p) => p.address).join(", "),
     segnali: (x.signals ?? []).map((sg) => `${signalByCode(sg.code)?.label ?? sg.code}: ${signalPhrase(sg)}`).join(" | "),
     prove_segnali: (x.signals ?? []).map((sg) => sg.evidence?.url ?? "").filter(Boolean).join(" "),
+    spunto: openingLine(x.signals, offers[d.search_id]),
     punteggio_opportunita: opp ? opp.score : "",
     livello_opportunita: opp ? `Opportunità ${opp.level}` : "",
     qualita: d.quality_score,
@@ -123,6 +125,7 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "email_ipotizzate", label: "Email ipotizzate (non verificate)" },
   { key: "segnali", label: "Perché è in target" },
   { key: "prove_segnali", label: "Prova del segnale" },
+  { key: "spunto", label: "Spunto per il primo messaggio" },
   { key: "punteggio_opportunita", label: "Punteggio opportunità (0-100)" },
   { key: "livello_opportunita", label: "Livello opportunità" },
   { key: "consegnato_il", label: "Consegnato il" },
@@ -133,7 +136,7 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
 // Colonne della persona: solo se almeno un lead ha il referente (in «Solo azienda» mai).
 const PERSON_COLUMNS = new Set(["nome", "cognome", "ruolo", "linkedin", "email_ipotizzate"]);
 // Colonne dell'opportunità: solo se almeno un lead ha un segnale.
-const OPPORTUNITY_COLUMNS = new Set(["punteggio_opportunita", "livello_opportunita"]);
+const OPPORTUNITY_COLUMNS = new Set(["punteggio_opportunita", "livello_opportunita", "spunto"]);
 export function exportColumns(rows: ReturnType<typeof flattenDelivery>[]) {
   const people = rows.some((r) => r.nome);
   const opportunities = rows.some((r) => r.punteggio_opportunita !== "");

@@ -240,6 +240,17 @@ assert.ok(controllo.items.find(x => x.company.domain === 'spento.it').checks.eve
 assert.deepEqual(controllo.items[0].company.technologies, ['wordpress']);
 assert.ok(controllo.items[0].checks.find(c => c.code === 'outdated_cms').evidence.detail.startsWith('WordPress 5.2.4'));
 assert.equal(controllo.stats.unreachable, 1);
+// Email aziendale dalla homepage (20/10): solo caselle d'ufficio del dominio o di un dominio fratello.
+assert.equal(controllo.stats.emails, 0, 'pagine senza email');
+const conEmail = (html, website = 'https://www.ditta.it') => run(codice('09-valuta-siti.js'), {
+  nodes: { 'Siti da controllare': [{ company_id: 'c9', domain: 'ditta.it', name: 'Ditta Srl', website }], 'Controllo HTTPS': [{ https_body: '' }] },
+  input: [{ html: `<html><body><p>${corpo}</p>${html}</body></html>` }]
+})[0].items[0].company.email;
+assert.equal(conEmail('<a href="mailto:info@ditta.it">Scrivici</a>'), 'info@ditta.it', 'info@ del dominio');
+assert.equal(conEmail('commerciale [at] ditta [dot] it'), 'commerciale@ditta.it', 'indirizzo protetto');
+assert.equal(conEmail('<a href="mailto:privacy@ditta.it">x</a> pec: ditta@pec.it, mario.rossi@ditta.it, info@gmail.com, info@altro.it'), undefined, 'privacy, PEC, nominativa, gratuita, altro dominio: nessuna');
+assert.equal(conEmail('info@ditta.com, amministrazione@ditta.it'), 'amministrazione@ditta.it', 'prima il dominio esatto');
+assert.equal(conEmail('ditta@ditta.it'), 'ditta@ditta.it', 'casella col nome del sito');
 console.log('Test controllo siti superati.');
 
 // 9. Popolamento OpenStreetMap, per riquadro di provincia.

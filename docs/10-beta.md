@@ -22,6 +22,19 @@
   giornaliero).
 - **Dopo:** con partita IVA, Stripe live e parere legale, offerta del piano a pagamento con lo sconto promesso.
 
+## Come decidiamo il 28/10 (fissato il 20/10)
+
+Pagina **Admin → Beta**: per ogni agenzia ricerche, lead, export, righe esportate, contattati, risposte
+(stati «ha risposto», «appuntamento», «cliente» impostati sui lead) e lead segnalati.
+
+Via libera alla seconda ondata (Nord) se:
+- almeno **2 agenzie su 3 esportano** lead (l'export è il segnale d'intenzione più forte);
+- almeno **1 agenzia ha una risposta** da un'azienda contattata (dall'app, o chiesta a voce dopo una settimana);
+- i lead segnalati restano **sotto il 10%**.
+
+Se nessuna esporta, il problema non è il referente: il lead non è abbastanza pronto. Nella beta ogni lead con segnale ha
+anche lo **«Spunto per il primo messaggio»** (frase scritta dalla prova, da adattare): chiedere alle agenzie se lo usano.
+
 ## Come troviamo le agenzie
 
 1. Con Webora Leads stesso: ricerca in target («Agenzia di pubblicità», «Grafica e design», «Informatica e

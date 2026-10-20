@@ -24,9 +24,14 @@ Ultimo aggiornamento: 20/10/2026.
 7. ~~**Io** – Piano della beta e testi dell'invito: email, LinkedIn, benvenuto (`10-beta.md`)~~ (19/10)
 8. ~~**Tu** – Casella leads@weborastudio.it attiva e provata~~ (19/10)
 
+5c. ~~**Io** – Metriche della beta (Admin → Beta) con le soglie del 28/10; «Spunto per il primo messaggio» nei lead e
+    nell'export~~ (20/10).
+5d. ~~**Io** – Email aziendali salvate dal controllo siti, riserva che parte da chi ha l'email (migrazione 050)~~ (20/10).
+    **Tu:** eseguire la migrazione 050 e pubblicare «Aziende | Controllo siti».
+
 ## 🟠 Bloccanti per la seconda ondata (Nord)
-9. **Insieme, verso il 28/10** – Rilanciare `supabase/queries/opportunita_per_regione.sql` e invitare solo dove il
-   servizio dell'agenzia ha almeno 40–50 aziende pronte.
+9. **Insieme, verso il 28/10** – Decidere con le soglie della pagina Admin → Beta (`10-beta.md`); poi rilanciare
+   `supabase/queries/opportunita_per_regione.sql` e invitare solo dove il servizio ha almeno 40–50 aziende pronte.
 10. ~~**Io** – Popolamento OSM dal Nord, 8 province a notte~~ (19/10, pubblicato)
 
 ## 🔴 Bloccanti per il lancio a pagamento (non per la beta)

@@ -66,4 +66,12 @@ update companies set email_missed_at = now() - interval '120 days' where domain 
 select pg_temp.check((select r -> 0 ->> 'website' = 'https://dentistavivo14.it' or r -> 1 ->> 'website' = 'https://dentistavivo14.it'
                         from (select target_reserve((select id from s14b), '{}', 40) as r) x), 'email mancata da più di 90 giorni: ancora in riserva');
 
+-- Email già nota dal controllo siti (migrazione 050): prima nella riserva.
+update companies set email_missed_at = null, referente_missed_at = null where domain = 'dentistavivo14.it';
+create temp table w14 as select target_reserve((select id from s14b), '{}', 40) as r;
+update companies set site_email = 'info@' || domain
+ where website = (select r -> 1 ->> 'website' from w14);
+select pg_temp.check((select target_reserve((select id from s14b), '{}', 40) -> 0 ->> 'website' = (select r -> 1 ->> 'website' from w14)),
+                     'email già nota: prima nella riserva');
+
 select 'superati tutti i test riserva target';

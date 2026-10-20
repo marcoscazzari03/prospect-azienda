@@ -99,6 +99,7 @@ con i loro test) e i workflow in `n8n/`, generati da script (`build.py` e `build
     dell'opportunità e qualità;
   - stati e note del cliente, liste, segnalazione di un lead;
   - archiviazione ed eliminazione (un lead eliminato non resta leggibile e non viene riproposto);
+  - «Spunto per il primo messaggio»: frase costruita dalla prova del segnale, con il pulsante «Copia» (anche nell'export);
   - export CSV o Excel.
 - **Tutti i lead:** archivio di tutti i lead ricevuti, con filtri.
 - **Crediti:** saldo, movimenti, acquisto di pacchetti e abbonamenti (Stripe), fatture.
@@ -169,7 +170,7 @@ database non copre.
 | Workflow | Quando | Cosa fa |
 |---|---|---|
 | Aziende \| Popolamento OSM | ogni notte (4:20) | 8 province al giorno, prima il Nord: attività con sito da OpenStreetMap, con il settore ricavato dalla categoria |
-| Aziende \| Controllo siti | ogni ora | 150 siti: HTTPS, software, cellulari, lingue, copyright, «in costruzione», prenotazioni; salva prove e tecnologie (gratis, senza AI) |
+| Aziende \| Controllo siti | ogni ora | 150 siti: HTTPS, software, cellulari, lingue, copyright, «in costruzione», prenotazioni; salva prove, tecnologie e l'email aziendale della homepage (gratis, senza AI) |
 | Annunci \| Raccolta Adzuna | ogni 2 giorni | 67 ricerche per titolo in tutta Italia (ultimi 3 giorni); scarta le agenzie per il lavoro |
 | Annunci \| Siti aziende | ogni 4 ore | trova il sito di 120 aziende degli annunci: prima prova i domini probabili (gratis), poi al massimo 3 ricerche web con Claude Haiku |
 | Annunci \| Settore aziende | ogni 4 ore | classifica il settore dalla homepage con Claude Haiku; esclude chi vende *al* settore («per hotel» non vuol dire hotel) |
@@ -226,6 +227,7 @@ delle email (Icypeas).
 
 ## 9. Admin (solo con verifica in due passaggi)
 
+- **Beta:** per cliente ricerche, lead, export, contattati, risposte e segnalati, con le soglie della decisione del 28/10.
 - **Andamento:** ricavi, costi dei fornitori e margine degli ultimi 30 giorni, più il riquadro «Database aziende».
 - **Clienti:** crediti, piano, crediti regalati.
 - **Ricerche e motore:** giri, errori, costi per ricerca.

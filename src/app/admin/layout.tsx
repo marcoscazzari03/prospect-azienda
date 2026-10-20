@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 const ITEMS: NavItem[] = [
   { href: "/admin", label: "Andamento", icon: "home", exact: true },
+  { href: "/admin/beta", label: "Beta", icon: "chart" },
   { href: "/admin/clienti", label: "Clienti", icon: "users" },
   { href: "/admin/ricerche", label: "Ricerche e motore", icon: "list" },
   { href: "/admin/segnalazioni", label: "Segnalazioni e GDPR", icon: "shield" },

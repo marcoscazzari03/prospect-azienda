@@ -32,4 +32,13 @@ select pg_temp.check((select array_agg(cs.code order by cs.code) = '{no_https,ou
 select pg_temp.check((select technologies = '{wordpress}' and origin = '' and website = 'http://vecchio12.it'
                         from companies where domain = 'vecchio12.it'), 'azienda esistente: dati conservati');
 
+-- Email aziendale dalla homepage (migrazione 050): salvata solo se del dominio, e toglie la memoria «email non trovata».
+update companies set email_missed_at = now() where domain = 'vecchio12.it';
+select store_company_checks(jsonb_build_array(
+  jsonb_build_object('company', jsonb_build_object('domain', 'vecchio12.it', 'email', 'Info@Vecchio12.it'), 'checks', '[]'::jsonb),
+  jsonb_build_object('company', jsonb_build_object('domain', 'altra12.it', 'email', 'info@estraneo.com'), 'checks', '[]'::jsonb)), '{}', 'seed');
+select pg_temp.check((select site_email = 'info@vecchio12.it' and site_email_at is not null and email_missed_at is null
+                        from companies where domain = 'vecchio12.it'), 'email del dominio salvata, memoria tolta');
+select pg_temp.check((select site_email = '' from companies where domain = 'altra12.it'), 'email di un altro dominio ignorata');
+
 select 'superati tutti i test controllo siti';

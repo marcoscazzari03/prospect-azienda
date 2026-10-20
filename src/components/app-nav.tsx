@@ -12,6 +12,7 @@ const ICONS: Record<string, string> = {
   shield: "M10 3l6 2.5V10c0 3.5-2.6 6-6 7-3.4-1-6-3.5-6-7V5.5z",
   target: "M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
   back: "M8 5l-5 5 5 5M3 10h14",
+  chart: "M4 16V9M10 16V4M16 16v-5M3 17h14",
 };
 
 export type NavItem = { href: string; label: string; icon: keyof typeof ICONS; exact?: boolean };

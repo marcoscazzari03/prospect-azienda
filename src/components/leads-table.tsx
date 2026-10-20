@@ -4,6 +4,7 @@ import { reportLead, type ActionState } from "@/app/app/actions";
 import { archiveLeads, deleteLeads, saveLeadNotes, setLeadStage, setListMembership, type LeadActionState } from "@/app/app/lead/actions";
 import { LEAD_STAGES, LEAD_STAGE_LABEL, ROLE_MATCH_LABEL, type DeliveryRow, type LeadStage } from "@/lib/domain/leads";
 import { OPPORTUNITY_RULES, opportunityScore, signalByCode, signalPhrase } from "@/lib/domain/signals";
+import { openingLine } from "@/lib/domain/opening-line";
 import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
 import { Alert, Badge, Button, ProvenanceStamp, Select, cx } from "./ui";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
@@ -306,6 +307,16 @@ export function LeadsTable({ rows, lists, offers = {}, archived = false }: { row
                               {opp.parts.length > 1 ? ` · +${OPPORTUNITY_RULES.extraSignalBonus} per ogni segnale in più` : ""}.
                             </p>
                           )}
+                          {openingLine(d.signals, offers[r.search_id]) && (
+                            <div className="mt-3 rounded-md border border-line bg-card px-3 py-2">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="font-medium uppercase tracking-wider text-muted">Spunto per il primo messaggio</p>
+                                <CopyButton text={openingLine(d.signals, offers[r.search_id])} />
+                              </div>
+                              <p className="mt-1 text-sm text-ink">{openingLine(d.signals, offers[r.search_id])}</p>
+                              <p className="mt-1 text-muted">Scritto dalla prova: controllalo e adattalo prima di inviarlo.</p>
+                            </div>
+                          )}
                           <p className="mt-2 text-muted">I segnali sono fatti pubblici osservati alla data indicata; l&apos;opportunità è una nostra stima e non garantisce che l&apos;azienda abbia bisogno di un servizio.</p>
                         </div>
                       )}
@@ -376,5 +387,21 @@ export function LeadsTable({ rows, lists, offers = {}, archived = false }: { row
       </table>
     </div>
     </>
+  );
+}
+
+// Copia lo spunto negli appunti; «Copiato» per due secondi.
+function CopyButton({ text }: { text: string }) {
+  const [done, setDone] = useState(false);
+  return (
+    <button
+      type="button"
+      className="rounded-md px-2 py-0.5 text-xs text-ledger hover:bg-paper-2"
+      onClick={() => {
+        navigator.clipboard?.writeText(text).then(() => { setDone(true); setTimeout(() => setDone(false), 2000); }, () => {});
+      }}
+    >
+      {done ? "Copiato" : "Copia"}
+    </button>
   );
 }
