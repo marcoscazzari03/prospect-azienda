@@ -4,7 +4,7 @@ Formato (deciso il 19/10): sezioni con colore e titolo, ruolo in grassetto (**Tu
 progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data. Quando l'utente chiede «riscrivimi
 la checklist» si riscrive tutto da qui, fatti compresi. Il dettaglio storico resta in `05-da-fare.md`.
 
-Ultimo aggiornamento: 19/10/2026 (sera).
+Ultimo aggiornamento: 20/10/2026.
 
 ## 🔴 Bloccanti per la prima ondata della beta (Sud ed Emilia-Romagna)
 1. ~~**Tu** – Verifica in due passaggi su Supabase, Vercel, GitHub, Stripe, n8n~~ (19/10). Decisione dell'utente
@@ -13,7 +13,7 @@ Ultimo aggiornamento: 19/10/2026 (sera).
    credenziale n8n esistente~~ (19/10). Resta: eliminare la chiave vecchia dopo la prima prova riuscita;
    ~~credenziale rinominata in «Webora Leads - Anthropic», file del repository aggiornati~~ (19/10).
    Nota: «Prospect | Search» e «Prospect Avvocati | Search» su n8n sono di un altro progetto, ATTIVO (20/10): non
-   toccarli e non proporre di disattivarli. Da verificare (Tu): se usano la stessa credenziale Anthropic di Webora.
+   toccarli e non proporre di disattivarli. ~~Verificato: usano ChatGPT, non la chiave Anthropic di Webora~~ (20/10).
 3. ~~**Tu** – Pubblicare su n8n «Aziende | Popolamento OSM» (Nord prima, 8 province a notte)~~ (19/10)
 4. ~~**Tu** – Sconto per i beta tester: −30% per 12 mesi~~ (19/10)
 5. ~~**Tu** – Scegliere e invitare 3 agenzie: Gopher (Torremaggiore, FG), Mutart (Napoli), Studio360 (Molfetta, BA),
@@ -75,7 +75,7 @@ Ultimo aggiornamento: 19/10/2026 (sera).
 29. **Tu, con il legale** – DPA pronto da firmare per i clienti.
 
 ## ⚪ Email e immagine
-30. **Tu, 20/10** – Logo accanto al mittente: account Google con leads@ («usa il tuo indirizzo email attuale») e
+30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ («usa il tuo indirizzo email attuale») e
     logo 800×800 come foto profilo (file già pronto). Vale soprattutto per chi usa Gmail.
 31. **Tu** – Firma con il logo per leads@ nella webmail di Hostinger.
 32. ~~**Io** – Email dell'app in HTML con logo e grafica Webora, e modelli per le email di accesso di
@@ -102,7 +102,13 @@ Ultimo aggiornamento: 19/10/2026 (sera).
 46. **Insieme** – Referenti: restano spenti, solo dopo il parere legale e su richiesta dei clienti.
 47. **Insieme** – BIMI (logo del mittente su tutti i client): DMARC restrittivo e certificato VMC/CMC a pagamento.
 
-## ✅ Fatto di recente (19/10)
+## ✅ Fatto di recente (20/10)
+- ~~Seconda correzione dei falsi «Senza HTTPS» (domini secondari di gruppi, domini nudi) e ricontrollo di 160 aziende~~
+- ~~Pagina «Sicurezza e privacy»~~
+- ~~Motore: memoria delle aziende senza email (migrazione 047), tolti 3 nodi morti, analisi su ricerche reali~~
+- ~~Analisi giornaliera automatica dei workflow~~
+
+## ✅ Fatto il 19/10
 - ~~Homepage rifatta: opportunità in primo piano, demo simulata, «Per chi è», prezzi dal listino~~
 - ~~Wizard: «Vendi altro?» verso la ricerca in target; nella ricerca opportunità tolti i filtri che il database non applica~~
 - ~~Settore: i clienti dopo «per» non diventano etichette (migrazione 045) e regola nel prompt AI~~
