@@ -27,7 +27,7 @@ Ultimo aggiornamento: 20/10/2026.
 5c. ~~**Io** – Metriche della beta (Admin → Beta) con le soglie del 28/10; «Spunto per il primo messaggio» nei lead e
     nell'export~~ (20/10).
 5d. ~~**Io** – Email aziendali salvate dal controllo siti, riserva che parte da chi ha l'email (migrazione 050)~~ (20/10).
-    **Tu:** eseguire la migrazione 050 e pubblicare «Aziende | Controllo siti».
+    ~~Migrazione 050 eseguita e «Aziende | Controllo siti» pubblicato~~ (20/10).
 
 ## 🟠 Bloccanti per la seconda ondata (Nord)
 9. **Insieme, verso il 28/10** – Decidere con le soglie della pagina Admin → Beta (`10-beta.md`); poi rilanciare
