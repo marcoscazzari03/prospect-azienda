@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { BetaBanner } from "@/components/site-chrome";
+import { BRAND } from "@/lib/config";
 
 // Dinamico: la CSP con nonce richiede il rendering a ogni richiesta.
 export const dynamic = "force-dynamic";
@@ -8,6 +10,8 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
+    <>
+    <BetaBanner />
     <div className="grid min-h-screen md:grid-cols-[1fr_1.1fr]">
       <aside className="ruled relative hidden flex-col justify-between border-r border-line bg-card p-10 md:flex">
         <Logo />
@@ -22,9 +26,13 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         </p>
       </aside>
       <main className="flex flex-col px-4 py-10 sm:px-10">
-        <div className="md:hidden"><Logo /></div>
+        <div className="mb-8 md:hidden">
+          <Logo />
+          <p className="mt-2 text-sm text-ink-2">Un servizio di {BRAND.owner} · Nessuna carta · Paghi solo i lead consegnati</p>
+        </div>
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">{children}</div>
       </main>
     </div>
+    </>
   );
 }

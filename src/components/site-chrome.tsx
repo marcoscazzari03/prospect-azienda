@@ -1,11 +1,25 @@
 import Link from "next/link";
 import { Logo } from "./logo";
 import { ButtonLink } from "./ui";
-import { BRAND } from "@/lib/config";
+import { BETA, BRAND } from "@/lib/config";
+
+// Fascia della beta su invito (punto 56): chi arriva dall'invito deve ritrovare subito la beta gratuita.
+export function BetaBanner() {
+  if (!BETA.open) return null;
+  return (
+    <div className="bg-ledger-soft text-ledger-2">
+      <p className="mx-auto max-w-6xl px-4 py-2 text-center text-sm sm:px-6">
+        {BETA.banner}{" "}
+        <Link href={BETA.signupHref} className="font-medium underline underline-offset-2">Entra nella beta</Link>
+      </p>
+    </div>
+  );
+}
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-line/70 bg-paper/85 backdrop-blur">
+      <BetaBanner />
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Logo />
         <nav className="flex items-center gap-1 text-sm sm:gap-2">
@@ -14,7 +28,7 @@ export function SiteHeader() {
           <Link href="/prezzi" className="rounded-md px-3 py-2 text-ink-2 hover:text-ink">Prezzi</Link>
           <Link href="/#faq" className="hidden rounded-md px-3 py-2 text-ink-2 hover:text-ink md:block">FAQ</Link>
           <Link href="/accedi" className="rounded-md px-3 py-2 text-ink-2 hover:text-ink">Accedi</Link>
-          <span className="hidden sm:block"><ButtonLink href="/registrati" size="sm">Prova gratis</ButtonLink></span>
+          <ButtonLink href="/registrati" size="sm"><span className="sm:hidden">Prova</span><span className="hidden sm:inline">Prova gratis</span></ButtonLink>
         </nav>
       </div>
     </header>

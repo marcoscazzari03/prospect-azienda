@@ -5,7 +5,7 @@ import { requireViewer } from "@/lib/server/dal";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicPlans } from "@/lib/server/catalog";
-import { stripeEnabled } from "@/lib/server/stripe";
+import { checkoutAllowed } from "@/lib/server/stripe";
 import { formatEur, formatNumber } from "@/lib/domain/pricing";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
 import { buyPlan, openPortal } from "../actions";
@@ -28,7 +28,7 @@ export default async function CreditsPage({ searchParams }: PageProps<"/app/cred
     supabase.from("payments").select("id, kind, amount_cents, status, invoice_url, created_at").order("created_at", { ascending: false }).limit(20),
     supabase.from("subscriptions").select("plan_id, status, current_period_end, cancel_at_period_end").maybeSingle(),
   ]);
-  const billing = stripeEnabled();
+  const billing = checkoutAllowed(viewer);
   // Crediti non ancora usati raggruppati per giorno di scadenza (i più vicini prima).
   const expiring = Object.entries(
     (lots ?? [])
@@ -44,8 +44,8 @@ export default async function CreditsPage({ searchParams }: PageProps<"/app/cred
     <>
       <PageHeader title="Crediti e piano" description="Saldo, movimenti, acquisti e fatture." />
       {pagamento === "ok" && <div className="mb-6"><Alert tone="ledger">Pagamento ricevuto: i crediti compaiono qui appena Stripe conferma (di solito pochi secondi).</Alert></div>}
-      {pagamento === "non-attivo" && <div className="mb-6"><Alert>I pagamenti online non sono ancora attivi. Scrivici per acquistare crediti.</Alert></div>}
-      {typeof piano === "string" && piano && <div className="mb-6"><Alert>Hai scelto il piano «{plans.find((p) => p.id === piano)?.name ?? piano}»: completa l&apos;acquisto qui sotto.</Alert></div>}
+      {(pagamento === "non-attivo" || !billing) && <div className="mb-6"><Alert>I pagamenti online non sono ancora attivi: durante la beta i crediti li aggiungiamo noi. Per altri crediti scrivi a leads@weborastudio.it.</Alert></div>}
+      {billing && typeof piano === "string" && piano && <div className="mb-6"><Alert>Hai scelto il piano «{plans.find((p) => p.id === piano)?.name ?? piano}»: completa l&apos;acquisto qui sotto.</Alert></div>}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Stat

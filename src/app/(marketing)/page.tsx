@@ -6,7 +6,7 @@ import { HeroShowcase } from "@/components/home/hero-showcase";
 import { OpportunityDemo } from "@/components/home/opportunity-demo";
 import { SignalCatalog } from "@/components/home/signal-catalog";
 import { creditsPerLead } from "@/components/search-types";
-import { BRAND } from "@/lib/config";
+import { BETA, BRAND } from "@/lib/config";
 import { formatEur } from "@/lib/domain/pricing";
 import { type SignalPrices } from "@/lib/domain/signals";
 import { getPublicPlans } from "@/lib/server/catalog";
@@ -25,7 +25,7 @@ function Section({ id, label, tone = "paper", children, className }: { id?: stri
   return (
     <section
       id={id}
-      className={cx("scroll-mt-16", tone === "card" && "bg-card", tone === "paper" && "bg-paper", tone === "ink" && "bg-ink text-white", className)}
+      className={cx("scroll-mt-32", tone === "card" && "bg-card", tone === "paper" && "bg-paper", tone === "ink" && "bg-ink text-white", className)}
     >
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24">
         {label && <p className={cx("mb-5 font-mono text-xs uppercase tracking-[0.18em]", tone === "ink" ? "text-ledger-bright" : "text-ledger")}>{label}</p>}
@@ -112,15 +112,15 @@ export default async function HomePage() {
               Trova le aziende che hanno un motivo per <span className="text-ledger">sceglierti</span>.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-2">
-              Dicci cosa vendi. Ti consegniamo le aziende con un segnale concreto, come un sito da rifare, un annuncio di lavoro
-              o un sito senza HTTPS, insieme al contatto aziendale e alla prova da citare nel primo messaggio. Il tuo settore non ha
-              ancora segnali? Ricevi comunque le aziende in target.
+              Dicci cosa vendi. Ti consegniamo le aziende con un motivo concreto per sceglierti (un sito datato, un certificato
+              HTTPS scaduto, un annuncio di lavoro), con il contatto aziendale e la prova da citare.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/registrati" size="lg">Prova gratis con {freeCredits} crediti</ButtonLink>
               <ButtonLink href="#demo" size="lg" variant="secondary">Prova la demo</ButtonLink>
             </div>
             <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
+              {BETA.open && <li className="font-medium text-ledger-2">Beta gratuita per le agenzie invitate</li>}
               <li>Nessuna carta di credito</li>
               <li>Paghi solo le aziende consegnate</li>
               <li>Ogni segnale con link e data</li>
@@ -382,7 +382,7 @@ export default async function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-16 sm:px-6 md:flex-row md:items-end md:justify-between md:py-20">
           <div>
             <h2 className="max-w-2xl font-display text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">La tua prossima email, con un motivo per essere letta.</h2>
-            <p className="mt-4 text-white/80">{freeCredits} crediti gratuiti, nessuna carta. La prima ricerca richiede due minuti.</p>
+            <p className="mt-4 text-white">{freeCredits} crediti gratuiti, nessuna carta. La prima ricerca richiede due minuti.</p>
           </div>
           <ButtonLink href="/registrati" size="lg" variant="secondary" className="shrink-0">Prova gratis <span aria-hidden>→</span></ButtonLink>
         </div>

@@ -8,6 +8,13 @@ export const BRAND = {
   domain: "leads.weborastudio.it",
 } as const;
 
+// Beta su invito (dal 19/10): fascia sul sito e testi della registrazione. A fine beta: open = false.
+export const BETA = {
+  open: true,
+  banner: "Beta gratuita per le web agency invitate: 4 settimane, crediti gratuiti, nessuna carta.",
+  signupHref: "/registrati?beta=1",
+} as const;
+
 // Regole operative della ricerca.
 export const SEARCH_RULES = {
   maxAttempts: 5, // primo giro + 4 top-up (di più per le ricerche grandi, vedi maxAttemptsFor)

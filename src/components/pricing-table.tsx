@@ -7,7 +7,7 @@ function PlanCard({ plan, action, current }: { plan: Plan; action: ReactNode; cu
   const perCredit = plan.credits ? plan.price_cents / plan.credits / 100 : 0;
   return (
     <Card className={cx("relative flex flex-col p-6", plan.highlighted && "border-ledger shadow-[0_0_0_1px_var(--color-ledger)]")}>
-      {plan.highlighted && <Badge tone="ledger" className="absolute -top-2.5 left-6">Il più scelto</Badge>}
+      {plan.highlighted && <Badge tone="ledger" className="absolute -top-2.5 left-6">Consigliato</Badge>}
       {current && <Badge tone="stamp" className="absolute -top-2.5 right-6">Il tuo piano</Badge>}
       <p className="font-display text-xl font-semibold">{plan.name}</p>
       <p className="mt-3 flex items-baseline gap-1">

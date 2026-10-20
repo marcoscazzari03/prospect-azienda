@@ -95,12 +95,10 @@ Ultimo aggiornamento: 21/10/2026.
     f) pagina contatti prima di scartare per «nessuna_email» (Data Quality).
     Prima di c)–f): far verificare al Data Quality sui siti veri (ora la rete è aperta) che i problemi ci siano davvero.
 55. ~~**Tu** – Accesso completo alla rete nell'ambiente cloud: il Data Quality può aprire i siti delle aziende~~ (21/10).
-56. **Insieme, prima degli inviti** – Proposte del Designer per chi arriva dall'invito (registro, 21/10), in ordine:
-    a) fascia «Beta gratuita per le agenzie invitate» su sito e registrazione; b) /registrati?beta=1 con testo della beta
-    (link nell'email di benvenuto); c) «Prova gratis» visibile su telefono; d) /prezzi: «Il più scelto» → «Consigliato» o
-    via, riquadro beta, e verificare cosa succede con «Acquista» mentre Stripe è in test; e) hero più corto; f) rassicurazioni
-    su telefono in registrazione e casella dei termini più grande; g) contrasto (`--color-muted`, testo bianco pieno);
-    h) pagina 404 in italiano.
+56. ~~**Io** – Sito per le agenzie invitate: fascia beta, /registrati?beta=1, «Prova» su telefono, prezzi senza «Il più
+    scelto» né «API», hero, rassicurazioni, contrasto, 404 in italiano; acquisti solo per gli admin finché Stripe è in test~~
+    (21/10). **Tu:** controllare in Stripe (test) che nessun cliente non admin abbia comprato; nell'email di benvenuto usare
+    il link /registrati?beta=1; guardare ogni giorno le nuove registrazioni per aggiungere i crediti beta.
 
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo

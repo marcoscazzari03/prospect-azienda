@@ -59,8 +59,8 @@ export function SignUpForm({ plan, captchaKey = "", intro }: { plan?: string; ca
       </div>
       <Field label="Email di lavoro" htmlFor="email"><Input id="email" name="email" type="email" required autoComplete="email" /></Field>
       <Field label="Password" htmlFor="password" hint="Almeno 10 caratteri."><Input id="password" name="password" type="password" required minLength={10} autoComplete="new-password" /></Field>
-      <label className="flex items-start gap-2 text-sm text-ink-2">
-        <input type="checkbox" name="terms" required className="mt-1 accent-[var(--color-ledger)]" />
+      <label className="flex items-start gap-3 py-1 text-sm text-ink-2">
+        <input type="checkbox" name="terms" required className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-ledger)]" />
         <span>Accetto i <Link href="/termini" className="text-ledger underline" target="_blank">termini di servizio</Link> e ho letto l&apos;<Link href="/privacy" className="text-ledger underline" target="_blank">informativa privacy</Link>.</span>
       </label>
       <Captcha siteKey={captchaKey} resetSignal={state} />

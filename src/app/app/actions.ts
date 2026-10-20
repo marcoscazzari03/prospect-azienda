@@ -9,7 +9,7 @@ import { defaultSearchName, nextRepeatAt, searchInputSchema, splitZones, toTarge
 import { aiSearchExtra, jobAdFromDatabaseOnly, targetIsSimple } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 import { startSearch } from "@/lib/server/searches";
-import { createCheckout, createPortal, stripeEnabled } from "@/lib/server/stripe";
+import { checkoutAllowed, createCheckout, createPortal } from "@/lib/server/stripe";
 import { RATE_LIMITS, SEARCH_RULES } from "@/lib/config";
 import { rateHit } from "@/lib/server/rate";
 import { SIGNAL_RULES, offerChoice } from "@/lib/domain/signals";
@@ -207,7 +207,7 @@ export async function reportLead(_: ActionState, form: FormData): Promise<Action
 
 export async function buyPlan(form: FormData) {
   const viewer = await requireViewer();
-  if (!stripeEnabled()) redirect("/app/crediti?pagamento=non-attivo");
+  if (!checkoutAllowed(viewer)) redirect("/app/crediti?pagamento=non-attivo");
   const planId = String(form.get("planId") ?? "");
   const { data: plan } = await createAdminClient().from("plans").select("*").eq("id", planId).eq("active", true).maybeSingle();
   if (!plan || !["pack", "subscription"].includes(plan.kind)) redirect("/app/crediti");
@@ -217,7 +217,7 @@ export async function buyPlan(form: FormData) {
 
 export async function openPortal() {
   const viewer = await requireViewer();
-  if (!stripeEnabled()) redirect("/app/crediti?pagamento=non-attivo");
+  if (!checkoutAllowed(viewer)) redirect("/app/crediti?pagamento=non-attivo");
   const session = await createPortal(viewer);
   redirect(session.url);
 }

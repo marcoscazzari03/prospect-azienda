@@ -23,6 +23,7 @@ Come tornare indietro, in generale:
 | 20/10 | Nessuna promessa di «contatto senza consenso» nel marketing finché il legale non risponde per iscritto (art. 130 vale anche per le aziende secondo il Garante) | rischio legale |
 | 20/10 | Il listino non promette funzioni che l'app non ha (tolto «Fino a 3 utenti») | fiducia dei clienti |
 | 20/10 | Frase di apertura dei lead: costruita dalla prova, **senza AI** (costo zero, niente dettagli inventati) | qualità e costi |
+| 21/10 | **Pagamenti:** finché la chiave Stripe non è live (`sk_live_`/`rk_live_`), acquisti e portale solo per gli amministratori (`checkoutAllowed` in `src/lib/server/stripe.ts`); sul sito i pulsanti dei prezzi portano alla registrazione | con la chiave di test un cliente avrebbe pagato con una carta di prova e ricevuto crediti veri |
 | 21/10 | **Squadra di agenti:** questa chat coordina; per ogni domanda si interpellano gli agenti pertinenti; il `code-reviewer` rivede ogni modifica di codice, SQL o n8n prima di ogni push, e con «NON PRONTO» non si pubblica (regola in `CLAUDE.md`) | richiesta dell'utente |
 | 20/10 | Inviti della beta: invio largo a circa 50 agenzie nei prossimi giorni, anche più nella stessa città; email singole da leads@, 10–15 al giorno (dettagli in `10-beta.md`) | ottenere almeno qualche risposta |
 | 20/10 | Beta allargata a una decina di agenzie in più (Sud ed Emilia-Romagna). Decisione sulla seconda ondata il **30/10** con soglie in percentuale: almeno 3 agenzie attive, esporta almeno la metà (minimo 2), almeno 1 risposta, segnalati sotto il 10% | con 3 agenzie il campione era troppo piccolo |
@@ -37,6 +38,23 @@ Come tornare indietro, in generale:
 | — | Il dettaglio delle vulnerabilità resta solo in `06-audit-sicurezza.md` (escluso dal repository) | repository pubblico |
 
 ---
+
+## 21/10/2026 — sito per le agenzie invitate alla beta (punto 56) · in produzione dopo il push
+- **Cosa:** costante `BETA` in `src/lib/config.ts` (interruttore: `open: false` a fine beta); fascia «Beta gratuita per le web
+  agency invitate…» in `SiteHeader` e nel layout della registrazione (`src/components/site-chrome.tsx`, `src/app/(auth)/layout.tsx`);
+  `/registrati?beta=1` con il testo della beta; «Prova» nell'intestazione anche su telefono; /prezzi con riquadro beta, badge
+  «Consigliato» (era «Il più scelto»), tolta la promessa «API dedicate»; hero più corto; rassicurazioni su telefono in
+  registrazione e casella dei termini più grande; `--color-muted` da #6b7280 a #5b6370 (contrasto); `scroll-mt-32` per le
+  ancore sotto l'intestazione più alta; pagina 404 in italiano (`src/app/not-found.tsx`).
+- **Pagamenti:** `stripeLive` e `checkoutAllowed` in `src/lib/server/stripe.ts`; `buyPlan` e `openPortal` (`src/app/app/actions.ts`),
+  /app/crediti e /app/account/fatturazione li usano: con la chiave di test solo gli admin; agli altri «durante la beta i crediti li
+  aggiungiamo noi». /prezzi: con la chiave di test i pulsanti dicono «Prova gratis» e portano a /registrati.
+- **Perché:** proposte del Designer; il rischio dei pagamenti di prova l'ha intuito il Designer e confermato il Code Reviewer.
+- **Revisione:** Code Reviewer, PRONTO CON RISERVE; applicate: avviso in /app/crediti senza vicolo cieco, pulsanti di /prezzi,
+  ancore, chiavi `rk_live_`. Da controllare: che nessun account non admin abbia già comprato in modalità test (rinnovi).
+- **Da ricordare:** «entro qualche ora aggiungiamo i crediti della beta» vale solo se l'admin guarda le nuove registrazioni ogni
+  giorno. Al passaggio a Stripe live gli acquisti si riaprono da soli.
+- **Indietro:** `git revert` del commit; per i soli pagamenti, `checkoutAllowed` torna `stripeEnabled`.
 
 ## 21/10/2026 — controlli automatici su GitHub · attivi dal push
 - **Cosa:** `.github/workflows/ci.yml` (GitHub Actions, a ogni push e pull request): job «App e motore» (eslint, tipi,

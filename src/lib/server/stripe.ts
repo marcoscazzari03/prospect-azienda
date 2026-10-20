@@ -12,6 +12,10 @@ export function stripe() {
   return client;
 }
 export const stripeEnabled = () => Boolean(env.stripeSecretKey());
+// Con la chiave di test (sk_test_) un cliente pagherebbe con una carta di prova e riceverebbe crediti veri:
+// finché Stripe non è in modalità live, acquisti e portale solo per gli amministratori (collaudi).
+export const stripeLive = () => /^(sk|rk)_live_/.test(env.stripeSecretKey());
+export const checkoutAllowed = (viewer: { isAdmin: boolean }) => stripeEnabled() && (stripeLive() || viewer.isAdmin);
 
 async function ensureCustomer(viewer: Viewer) {
   if (viewer.org.stripe_customer_id) return viewer.org.stripe_customer_id;
