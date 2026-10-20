@@ -52,7 +52,7 @@ con i loro test) e i workflow in `n8n/`, generati da script (`build.py` e `build
 | Pacchetto 500 | 199 € | 500 crediti, validi 12 mesi |
 | Pacchetto 2.000 | 690 € | 2.000 crediti, validi 12 mesi |
 | Starter | 49 €/mese | 150 crediti al mese |
-| Growth | 149 €/mese | 600 crediti al mese; il listino dice «fino a 3 utenti», ma l'invito di altri utenti non esiste ancora |
+| Growth | 149 €/mese | 600 crediti al mese |
 | Scale | 399 €/mese | 2.000 crediti al mese |
 
 - **Crediti degli abbonamenti:** scadono un mese dopo la fine del periodo. Si usano sempre prima quelli più
@@ -264,8 +264,7 @@ Gli errori del server arrivano via email all'admin.
   commerciale ancora in attesa.
 - Il controllo siti gira 150 siti l'ora: dopo un import grande la coda si allunga di un giorno o più.
 - Esecuzioni n8n: circa 700 al mese stimate, contro un tetto di 2.100 (piano 2.500).
-- **Incongruenza:** il piano Growth promette «fino a 3 utenti» (Scale 10), ma l'app non permette di invitare altri
-  utenti: si può fare solo a mano dal database. Va sistemato il listino oppure costruito l'invito.
+- Un account ha un solo utente: l'invito di colleghi non esiste ancora (la promessa è stata tolta dal listino il 20/10).
 - Proposte già annotate:
   - salvare le email trovate dal controllo siti, così la riserva parte da chi ha già l'email;
   - stima dei lead e del costo in euro nel wizard;

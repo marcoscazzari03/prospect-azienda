@@ -99,8 +99,8 @@ Ultimo aggiornamento: 20/10/2026.
 42. ~~**Io** – Captcha anche su accesso e recupero password, più limite ai tentativi: 10 accessi sbagliati per account e
     30 per connessione ogni 15 minuti; 3 richieste di recupero per indirizzo e 10 per connessione ogni ora~~ (20/10).
 42b. ~~**Tu** – Chiavi Turnstile presenti su Vercel, dominio impostato su Cloudflare, captcha visibile in «Accedi»~~ (20/10).
-43. **Io** – Più utenti per account e API. **Attenzione:** il listino di Growth e Scale promette già 3 e 10 utenti,
-    ma l'invito non esiste (20/10): sistemare il listino o costruire l'invito prima del lancio a pagamento.
+43. **Io** – Più utenti per account e API. ~~«Fino a 3 utenti» tolto dal listino di Growth (migrazione 049)~~ (20/10):
+    l'invito di altri utenti non esiste ancora.
 44. **Insieme** – Capacità di n8n oltre 50–100 clienti attivi.
 45. **Insieme** – Estero, un paese alla volta (prima il parere legale).
 46. **Insieme** – Referenti: restano spenti, solo dopo il parere legale e su richiesta dei clienti.
