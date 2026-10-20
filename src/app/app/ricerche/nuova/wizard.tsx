@@ -320,7 +320,8 @@ export function SearchWizard({
       onChange={() => setFormTick((n) => n + 1)}
       onSubmit={(e) => {
         // Regione dimenticata (20/10: «Emilia-Romagna» mancante, lead da tutta Italia): si chiede conferma.
-        if (!regionList.length && !window.confirm(`Nessuna regione o città: cerchi in tutto il paese (${countries.map(countryName).join(", ")}). Continuare?`)) e.preventDefault();
+        // Solo in target: nelle ricerche opportunità tutta Italia è il caso normale.
+        if (!opportunity && !regionList.length && !window.confirm(`Nessuna regione o città: cerchi in tutto il paese (${countries.map(countryName).join(", ")}). Continuare?`)) e.preventDefault();
       }}
       className="grid gap-8 lg:grid-cols-[1fr_320px]"
     >

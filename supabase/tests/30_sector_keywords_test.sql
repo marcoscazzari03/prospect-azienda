@@ -37,3 +37,11 @@ select pg_temp.check(target_availability((select org from o30),
 select pg_temp.check(sector_matches('{"industry_keywords":["di"]}', array['informat'], array['informat'], 'X', ''),
   'parola chiave senza termini utili: ignorata');
 select pg_temp.check(sector_matches('{}', '{}', '{}', 'X', ''), 'nessun settore né parola chiave: nessun filtro');
+select pg_temp.check(target_availability((select org from o30),
+  '{"industry":"Studio","countries":["IT"],"regions":["Puglia"]}', 1) = 0
+  and target_availability((select org from o30), '{"industry":"I.T.","countries":["IT"],"regions":["Puglia"]}', 1) = 0,
+  'settore senza termini utili («Studio», «I.T.»): nessuna azienda, non tutte (053)');
+select pg_temp.check(not sector_matches('{"industry_keywords":["di"]}', '{}', array['informat'], 'X', ''),
+  'senza settore, parole chiave tutte inutili: nessuna corrispondenza (prudente)');
+select pg_temp.check(sector_matches('{"industry":"Informatica"}', array['informat'], null, 'X', '') is not true,
+  'etichette mancanti: nessun errore, nessuna corrispondenza');

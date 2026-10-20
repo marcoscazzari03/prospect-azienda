@@ -42,6 +42,12 @@ Come tornare indietro, in generale:
   di lettura e controlli), aree critiche di Webora, esito PRONTO / PRONTO CON RISERVE / NON PRONTO, dettagli delle
   vulnerabilità mai nel repository. Si carica all'avvio di una sessione: nella sessione in cui è nato si prova con un
   agente generico che legge lo stesso file. Prima prova sul punto 52 (commit 2bc6ccb).
+- **Prima revisione (punto 52): PRONTO CON RISERVE.** Trovato un problema Medio vero: un settore senza termini utili
+  («Studio», «PMI», «I.T.») toglieva ogni filtro nella riserva in target (lead del settore sbagliato). Corretto con la
+  **migrazione 053 · da eseguire** (`sector_matches`: settore scritto senza termini utili = nessuna corrispondenza; test 30
+  ampliato). Seguito anche il dubbio sul wizard: la conferma «nessuna regione» ora solo nelle ricerche in target. Non seguito:
+  ignorare le parole chiave inutili senza settore (toglierebbe ogni filtro, stesso problema). Da tenere d'occhio: velocità
+  del contatore del wizard (`target_availability`), se diventa lenta guardare un `EXPLAIN ANALYZE`.
 - **Indietro:** cancellare il file.
 
 ## 21/10/2026 — da fare: squadra di agenti (punto 53)
