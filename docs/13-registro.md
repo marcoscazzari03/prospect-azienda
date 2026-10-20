@@ -38,6 +38,14 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — quinto agente: UI/UX Designer · creato
+- **Cosa:** `.claude/agents/ui-ux-designer.md`: product designer per un SaaS B2B; apre le pagine con Playwright (sito pubblico
+  in produzione in sola navigazione, o in locale), screenshot da computer e telefono, controlla comprensione in 5 secondi,
+  gerarchia, telefono, accessibilità, attrito nel percorso registrazione → primi lead, fiducia. Rispetta colori e componenti
+  esistenti (`globals.css`, `ui.tsx`). Propone modifiche motivate da usabilità e conversione; non modifica il repository.
+  Prima prova: sito pubblico per le agenzie invitate alla beta.
+- **Indietro:** cancellare il file.
+
 ## 21/10/2026 — quarto agente: Sales & Copy · creato
 - **Cosa:** `.claude/agents/sales-copywriter.md`: bozze per homepage, listino, onboarding, inviti, email e proposte, con
   al massimo 2 varianti motivate e un controllo delle regole a fine risposta (niente funzioni inventate, niente promesse sul
