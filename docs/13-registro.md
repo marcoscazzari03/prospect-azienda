@@ -37,6 +37,13 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — primo agente: Code Reviewer · creato
+- **Cosa:** `.claude/agents/code-reviewer.md`: revisore in sola lettura (strumenti Read, Grep, Glob, Bash solo per comandi
+  di lettura e controlli), aree critiche di Webora, esito PRONTO / PRONTO CON RISERVE / NON PRONTO, dettagli delle
+  vulnerabilità mai nel repository. Si carica all'avvio di una sessione: nella sessione in cui è nato si prova con un
+  agente generico che legge lo stesso file. Prima prova sul punto 52 (commit 2bc6ccb).
+- **Indietro:** cancellare il file.
+
 ## 21/10/2026 — da fare: squadra di agenti (punto 53)
 - Proposta dell'utente (6 agenti) valutata e accettata con correzioni: niente staging (QA in locale, Stripe test, account
   admin di collaudo in produzione); Data Quality senza accesso al database di produzione (legge le esecuzioni n8n e i siti);
