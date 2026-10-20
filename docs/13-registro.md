@@ -53,6 +53,11 @@ Come tornare indietro, in generale:
   «pass» fino a 30) verifica azienda, target, contatto, prove dei segnali e motivi di scarto; corretto / errore confermato /
   non determinabile. Legge solo le esecuzioni n8n (strumenti di lettura) e i siti con WebFetch; nessun accesso al database di
   produzione; i dati delle aziende mai nel repository. Prima prova: segnale no_privacy e web agency dell'Emilia-Romagna.
+- **Prima prova:** dal contenitore nessun sito esterno si apre (regole di rete dell'ambiente): giudizi solo dai dati n8n.
+  Web agency Emilia-Romagna: 33 su 33 coerenti nei dati. no_privacy: 28 pass su 532 controlli, 3 sospetti (pagina anti-bot su
+  un grande marchio, una web agency, una pagina provvisoria). Proposte (punto 54): niente segnali sulle pagine che sembrano
+  barriere anti-bot; no_privacy non scatta se il sito è «in costruzione»; segnalare nome e dominio molto diversi; pagina
+  contatti prima di scartare per «nessuna_email». Per verificare sui siti serve l'accesso completo alla rete dell'ambiente.
 - **Indietro:** cancellare il file.
 
 ## 21/10/2026 — secondo agente: QA Tester · creato
@@ -60,6 +65,10 @@ Come tornare indietro, in generale:
   SQL nella scratchpad), con i test del motore, con l'app in locale e Playwright (solo pagine senza accesso: non c'è un
   Supabase locale) e sulle esecuzioni n8n che gli si passano. Produzione in sola lettura: per le prove lì scrive la
   procedura per l'utente. Esito FUNZIONA / FUNZIONA CON PROBLEMI / NON FUNZIONA; i casi non eseguiti vanno in «Non provato».
+- **Prima prova (punti 52–53): FUNZIONA CON PROBLEMI.** Migrazioni 052 e 053 corrette in sei scenari (web agency, senza
+  parola chiave, opportunità «tutti i settori», settore senza termini utili, magazzino, crediti). Problemi trovati, da
+  decidere (punto 54): città unite da «e» («Modena e Reggio Emilia») e «Napoli e provincia» danno 0 aziende dal database;
+  «web agency» confrontata alla lettera («Agenzia Web», «WebAgency» fuori); «/» e «&» non separano le zone.
 - **Indietro:** cancellare il file.
 
 ## 21/10/2026 — primo agente: Code Reviewer · creato
