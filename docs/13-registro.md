@@ -38,6 +38,14 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — quarto agente: Sales & Copy · creato
+- **Cosa:** `.claude/agents/sales-copywriter.md`: bozze per homepage, listino, onboarding, inviti, email e proposte, con
+  al massimo 2 varianti motivate e un controllo delle regole a fine risposta (niente funzioni inventate, niente promesse sul
+  consenso né confronti con concorrenti, niente accuratezze non dimostrate, «Solo azienda», prezzi veri, −30% della beta,
+  niente esclusiva, testi legali da far rileggere). Non modifica il repository, non invia, non pubblica.
+  Prima prova: email d'invito della beta e follow-up.
+- **Indietro:** cancellare il file.
+
 ## 21/10/2026 — terzo agente: Data Quality · creato
 - **Cosa:** `.claude/agents/data-quality.md`: su un campione (20–30 lead più 10 scarti; per un segnale nuovo tutte le prove
   «pass» fino a 30) verifica azienda, target, contatto, prove dei segnali e motivi di scarto; corretto / errore confermato /
