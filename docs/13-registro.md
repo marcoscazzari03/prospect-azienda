@@ -35,6 +35,11 @@ Come tornare indietro, in generale:
 
 ---
 
+## 20/10/2026 (sera) — da ricordare: campione della beta troppo piccolo
+- L'utente ritiene troppo ottimistico aver invitato solo 3 agenzie. Proposta (non ancora decisa, se ne parla il 21/10):
+  altre 5–7 agenzie nelle stesse regioni, soglie del 28/10 in percentuale, eventuale rinvio della decisione.
+  Punto 5e della checklist. Nessuna modifica fatta.
+
 ## 20/10/2026 (sera) — segnale «Sito senza informativa privacy o cookie» (punto 48)
 
 ### Nuovo segnale indicativo `no_privacy` — migrazione 051 · in produzione (migrazione eseguita e workflow pubblicati il 20/10)

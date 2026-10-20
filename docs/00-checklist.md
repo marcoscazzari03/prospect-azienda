@@ -18,6 +18,9 @@ Ultimo aggiornamento: 20/10/2026 (sera).
 5. ~~**Tu** – Invitate 3 agenzie (Gopher, Mutart, Studio360) con email personalizzate e PDF di esempi reali~~ (19/10)
 5b. **Insieme** – Alle risposte: account, +150 crediti, piano Growth dall'admin, email di benvenuto (`10-beta.md`).
     Se non rispondono, un solo promemoria verso il 27/10.
+5e. **Insieme, il 21/10** – Allargare la beta: 3 agenzie sono poche per decidere. Proposta: altre 5–7 agenzie al Sud e
+    in Emilia-Romagna (dimensioni diverse), soglie in percentuale nella pagina Admin → Beta, decisione spostata di
+    qualche giorno se servono 5–7 giorni d'uso. Da decidere prima di toccare qualcosa.
 5c. ~~**Io** – Metriche della beta (Admin → Beta) con le soglie del 28/10; «Spunto per il primo messaggio» nei lead e
     nell'export~~ (20/10)
 5d. ~~**Io** – Email aziendali salvate dal controllo siti, riserva che parte da chi ha l'email (migrazione 050)~~ (20/10).
