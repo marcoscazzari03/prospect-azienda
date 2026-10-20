@@ -32,7 +32,7 @@ const t = b.target || {};
 // Segnali (opzionali): oggi il motore gestisce "job_ad". I titoli degli annunci
 // arrivano dal backend (catalogo in src/lib/domain/signals.ts), già normalizzati.
 const sg = t.signals && typeof t.signals === 'object' ? t.signals : {};
-const CODICI_SEGNALI = ['job_ad', 'no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
+const CODICI_SEGNALI = ['job_ad', 'no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine', 'no_privacy'];
 const famiglie = (Array.isArray(sg.job_families) ? sg.job_families : []).slice(0, 3).map(f => ({
   code: str(f?.code, 40),
   label: str(f?.label, 80),
@@ -116,7 +116,7 @@ const conSegnaliSito = job.target.signals.codes.some(c => c !== 'job_ad');
 const SEGNALI_SITO = {
   no_https: 'sito senza HTTPS', no_mobile: 'sito non adatto ai cellulari', outdated_cms: 'WordPress/Joomla non aggiornato',
   single_language: 'sito in una sola lingua', stale_copyright: 'sito fermo da anni', under_construction: 'sito in costruzione',
-  no_booking_engine: 'nessun sistema di prenotazione online'
+  no_booking_engine: 'nessun sistema di prenotazione online', no_privacy: 'sito senza informativa privacy o cookie'
 };
 let lotti;
 if (job.target.signals.codes.length) {

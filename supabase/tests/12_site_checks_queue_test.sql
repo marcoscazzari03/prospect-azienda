@@ -41,4 +41,10 @@ select pg_temp.check((select site_email = 'info@vecchio12.it' and site_email_at 
                         from companies where domain = 'vecchio12.it'), 'email del dominio salvata, memoria tolta');
 select pg_temp.check((select site_email = '' from companies where domain = 'altra12.it'), 'email di un altro dominio ignorata');
 
+-- Segnale indicativo no_privacy (migrazione 051): salvato come gli altri controlli.
+select store_company_checks(jsonb_build_array(jsonb_build_object('company', jsonb_build_object('domain', 'vecchio12.it'),
+  'checks', jsonb_build_array(jsonb_build_object('code', 'no_privacy', 'status', 'pass', 'evidence', jsonb_build_object('detail', 'x'))))), '{}', 'seed');
+select pg_temp.check((select count(*) = 1 from company_signals s join companies c on c.id = s.company_id
+                        where c.domain = 'vecchio12.it' and s.code = 'no_privacy'), 'no_privacy: prova salvata');
+
 select 'superati tutti i test controllo siti';

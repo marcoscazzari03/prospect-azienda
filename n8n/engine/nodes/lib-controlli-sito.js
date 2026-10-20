@@ -105,6 +105,16 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
     else metti('no_booking_engine', 'pass', 'Nessun booking engine riconosciuto nella homepage');
   }
 
+  if (richiesti.includes('no_privacy')) {
+    // Segnale indicativo (punto 48 del 20/10): nessuna traccia di informativa privacy o di banner dei cookie
+    // nella homepage. Prudente: basta una parola o un gestore dei consensi noto perché NON scatti, e le pagine
+    // senza testo leggibile (siti costruiti dal browser) restano «non determinabile».
+    const TRACCE = /privacy|cookie|informativa|gdpr|dati personali|protezione dei dati|trattamento dei dati|datenschutz|consent|consenso|iubenda|cookiebot|cookieyes|complianz|onetrust|cookie-?law|termly|usercentrics|quantcast|didomi/i;
+    if (!leggibile || !contenuto) metti('no_privacy', 'undetermined');
+    else if (TRACCE.test(html)) metti('no_privacy', 'fail');
+    else metti('no_privacy', 'pass', "Nessun link all'informativa privacy né banner dei cookie nella homepage");
+  }
+
   if (richiesti.includes('no_https')) {
     // Esito della richiesta HTTPS: presente solo se eseguita.
     const h = https;

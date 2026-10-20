@@ -100,6 +100,16 @@ export const SIGNALS: SignalDef[] = [
     evidence: "Nessun booking engine riconosciuto nella homepage (controllata il {date})",
     freshDays: SIGNAL_RULES.websiteFreshDays,
   },
+  {
+    // Indicativo (20/10): un fatto osservato, non un'accusa di irregolarità. Mai decisivo da solo.
+    code: "no_privacy",
+    source: "website",
+    level: "indicative",
+    label: "Sito senza informativa privacy o cookie",
+    description: "Nella homepage nessun link all'informativa privacy e nessun banner dei cookie.",
+    evidence: "Nessun link all'informativa privacy né banner dei cookie nella homepage (controllata il {date})",
+    freshDays: SIGNAL_RULES.websiteFreshDays,
+  },
 ];
 
 // Tecnologie riconosciute: filtro di segmentazione, non un segnale di bisogno.
@@ -276,7 +286,7 @@ export const OFFERS: OfferDef[] = [
     code: "site_security", area: "web", label: "Sicurezza del sito",
     description: "Per chi mette in sicurezza siti e server.",
     lookFor: "un sito senza connessione sicura (HTTPS) o con software non aggiornato",
-    signals: ["no_https", "outdated_cms"], jobFamilies: [], match: "any",
+    signals: ["no_https", "outdated_cms", "no_privacy"], jobFamilies: [], match: "any",
   },
   {
     code: "it_support", area: "it", label: "Assistenza IT e sistemistica",
@@ -409,6 +419,7 @@ export const SIGNAL_SHORT: Record<string, string> = {
   stale_copyright: "Fermo da tempo",
   under_construction: "In costruzione",
   no_booking_engine: "Senza prenotazioni online",
+  no_privacy: "Senza informativa privacy",
 };
 
 export const VERIFIED_SIGNAL_CODES = SIGNALS.filter((s) => s.level === "verified").map((s) => s.code);
@@ -526,7 +537,7 @@ export const OPPORTUNITY_RULES = {
   // Affidabilità: quanto il fatto indica davvero un bisogno.
   reliability: {
     job_ad: 90, no_https: 90, outdated_cms: 85, under_construction: 70, no_mobile: 65,
-    single_language: 50, no_booking_engine: 45, stale_copyright: 40,
+    single_language: 50, no_booking_engine: 45, stale_copyright: 40, no_privacy: 40,
   } as Record<string, number>,
   // Attinenza al servizio scelto («Cosa vendi?»): il primo segnale del servizio è il principale.
   relevance: { primary: 1, secondary: 0.85, other: 0.7 },

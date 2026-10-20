@@ -8,7 +8,7 @@ const aziende = $('Siti da controllare').all().map(i => i.json);
 const https = $('Controllo HTTPS').all().map(i => i.json);
 const pagine = $input.all().map(i => i.json);
 const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); // AAAA-MM-GG
-const CODICI = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
+const CODICI = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine', 'no_privacy'];
 
 const items = [];
 const stats = { companies: 0, unreachable: 0, signals: {}, emails: 0 };

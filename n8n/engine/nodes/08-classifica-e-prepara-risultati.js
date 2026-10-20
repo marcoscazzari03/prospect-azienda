@@ -29,7 +29,7 @@ const leads = [];
 const rejected = [];
 // Database delle aziende: esito di ogni controllo tecnico sul sito (positivo, negativo,
 // non determinabile) di TUTTE le aziende controllate, anche quelle scartate.
-const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
+const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine', 'no_privacy'];
 const companyChecks = [];
 const richiesti = job.target.signals.codes;
 let lookups = 0;

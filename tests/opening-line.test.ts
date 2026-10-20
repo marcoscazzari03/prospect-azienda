@@ -20,6 +20,9 @@ describe("frase di apertura", () => {
     const s = [sig("stale_copyright", "Copyright fermo al 2019"), sig("no_https", "Certificato HTTPS autofirmato")];
     expect(openingLine(s, "site_security")).toMatch(/notato che il certificato.*non è riconosciuto.*e che il copyright del sito è fermo al 2019/);
   });
+  it("informativa privacy assente", () => {
+    expect(openingLine([sig("no_privacy", "Nessun link all'informativa privacy né banner dei cookie nella homepage")])).toContain("non ho trovato il link all'informativa privacy");
+  });
   it("nessun segnale, nessuna frase", () => {
     expect(openingLine([])).toBe("");
     expect(openingLine(undefined)).toBe("");

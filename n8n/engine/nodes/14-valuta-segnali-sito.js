@@ -13,7 +13,7 @@ const SCANSIONE = MODO === 'SCANSIONA';
 const job = $('Valida richiesta').first().json;
 const base = SCANSIONE ? $('Estrai email homepage').item.json : $('Serve controllo sito?').item.json;
 const sg = job.target.signals;
-const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
+const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine', 'no_privacy'];
 const DECISIVI = ['job_ad', 'no_https', 'no_mobile', 'outdated_cms', 'single_language']; // gli indicativi non decidono mai
 // In una ricerca opportunità i controlli sono già stati fatti prima del referente.
 if (SCANSIONE && sg.codes.length) return { json: base };

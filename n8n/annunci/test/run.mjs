@@ -237,6 +237,7 @@ assert.equal(controllo.items.length, 3, 'tutte salvate, anche il sito spento');
 assert.deepEqual(['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright'].map(c => esitoDi('vecchio.it', c)), ['pass', 'pass', 'pass', 'pass', 'pass']);
 assert.deepEqual(['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright'].map(c => esitoDi('moderno.it', c)), ['fail', 'fail', 'undetermined', 'fail', 'fail']);
 assert.ok(controllo.items.find(x => x.company.domain === 'spento.it').checks.every(c => c.status === 'undetermined'), 'sito spento: niente prove');
+assert.equal(esitoDi('vecchio.it', 'no_privacy'), 'pass', 'nessuna informativa privacy nella homepage');
 assert.deepEqual(controllo.items[0].company.technologies, ['wordpress']);
 assert.ok(controllo.items[0].checks.find(c => c.code === 'outdated_cms').evidence.detail.startsWith('WordPress 5.2.4'));
 assert.equal(controllo.stats.unreachable, 1);

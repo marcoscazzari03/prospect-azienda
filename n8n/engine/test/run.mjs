@@ -459,7 +459,7 @@ console.log('ok  annunci in due passaggi: aziende senza referente, referente dal
 // 9. Segnali dal sito sulle pagine di prova (fase 2)
 const cmsJson = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'src', 'lib', 'domain', 'cms-releases.json'), 'utf8');
 const valuta = src('14-valuta-segnali-sito.js', { __CMS_RELEASES__: cmsJson });
-const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine'];
+const SITO = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine', 'no_privacy'];
 const jobSito = (codes, match = 'any') => ({ ...job, today: '2026-10-13', target: { ...job.target, signals: { codes, match, job_families: [], max_age_days: 60 } } });
 const prospettoSito = { company_name: 'Prova', website: 'https://prova.it/', domain: 'prova.it', signals: [] };
 const valutaFile = (file, codes = SITO, https = undefined, match = 'any') => run(valuta, {
@@ -503,6 +503,17 @@ const httpsCert = valutaFile('site-modern.html', ['no_https'], { error: { messag
 assert.equal(httpsCert.signals[0].status, 'pass');
 const httpsBoh = valutaFile('site-modern.html', ['no_https'], { error: { message: 'ETIMEDOUT' } });
 assert.equal(httpsBoh.signals[0].status, 'undetermined');
+// Informativa privacy o cookie (segnale indicativo, 20/10).
+const testo500 = '<p>' + 'Produciamo serramenti in alluminio e legno per abitazioni e uffici da tre generazioni. '.repeat(6) + '</p>';
+const privacyDi = (corpo) => run(valuta, {
+  nodes: { 'Valida richiesta': [jobSito(['no_privacy'], 'any')], 'Serve controllo sito?': [prospettoSito], 'HTTP - Sito (segnali)': [{ html: `<html><body>${corpo}</body></html>` }] },
+  json: prospettoSito
+}).json.signals[0];
+assert.equal(privacyDi(testo500).status, 'pass', 'nessuna traccia: segnale');
+assert.equal(privacyDi(testo500 + '<a href="/privacy-policy">Privacy</a>').status, 'fail', 'link all informativa');
+assert.equal(privacyDi(testo500 + '<script src="https://cdn.iubenda.com/cs/iubenda_cs.js"></script>').status, 'fail', 'gestore dei consensi');
+assert.equal(privacyDi(testo500 + '<footer>Cookie policy</footer>').status, 'fail', 'cookie policy');
+assert.equal(privacyDi('<div id="root"></div>').status, 'undetermined', 'pagina senza testo: non determinabile');
 // Errori veri di n8n (esecuzione del 17/10): il motivo sta in error.cause.
 // Come in n8n: il motivo compare sia in error.cause sia in details.description.
 const sslErr = (cause) => ({ error: { message: "SSL Issue: consider using the 'Ignore SSL issues' option", name: 'NodeSslError', cause: { name: 'Error', message: cause } }, details: { description: cause } });

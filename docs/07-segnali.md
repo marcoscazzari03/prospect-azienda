@@ -124,8 +124,16 @@ Due famiglie di segnali:
 - **Vale (indicativo) se:** nessuno di questi e la prenotazione avviene solo via email/telefono.
   È indicativo perché il booking può stare in un'altra pagina.
 
+### Sito senza informativa privacy o cookie (`no_privacy`) · indicativo (dal 20/10)
+- **Vale (indicativo) se:** nella homepage leggibile non c'è nessuna traccia di informativa privacy o cookie: né le parole
+  (privacy, cookie, informativa, GDPR, dati personali, consenso…) né un gestore dei consensi noto (iubenda, Cookiebot,
+  CookieYes, Complianz, OneTrust, Usercentrics…).
+- **Non determinabile:** pagina senza testo leggibile (siti costruiti dal browser).
+- **Usato da:** «Sicurezza del sito». Mai decisivo da solo e mai addebitato. Descrive un fatto osservato, non
+  un'irregolarità: l'informativa può stare in una pagina non collegata dalla homepage.
+
 ### Rimandati a dopo il lancio
-Prenotazioni per ristoranti, e-commerce assente, analytics, privacy policy, modulo contatti
+Prenotazioni per ristoranti, e-commerce assente, analytics, modulo contatti
 (servono più pagine o un browser vero); nuove sedi ed espansione all'estero (notizie); appalti
 pubblici vinti (dati aperti ANAC); finanziamenti e bandi.
 

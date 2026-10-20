@@ -38,6 +38,8 @@ function fatto(s: LeadSignal): string {
       return "il sito al momento mostra una pagina provvisoria";
     case "no_booking_engine":
       return "sul sito non c'è un sistema di prenotazione online";
+    case "no_privacy":
+      return "nella homepage non ho trovato il link all'informativa privacy né il banner dei cookie";
     default:
       return "";
   }
