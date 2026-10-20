@@ -21,6 +21,11 @@ Ultimo aggiornamento: 20/10/2026 (sera).
 5e. **Insieme, il 21/10** – Allargare la beta: 3 agenzie sono poche per decidere. Proposta: altre 5–7 agenzie al Sud e
     in Emilia-Romagna (dimensioni diverse), soglie in percentuale nella pagina Admin → Beta, decisione spostata di
     qualche giorno se servono 5–7 giorni d'uso. Da decidere prima di toccare qualcosa.
+5f. **Insieme, il 21/10** – Nuovo listino (proposta e valutazione nel registro, 20/10 sera). Prima del lancio a
+    pagamento: pacchetti 59/249/790 €, Scale tolto, 20 crediti di benvenuto con i primi lead «forti», lead con solo
+    modulo a 1 credito, niente supplemento AI (migrazione). Abbonamenti a pagamento solo con il monitoraggio (punto 36).
+    Niente promesse di funzioni assenti né confronto con Apollo sul consenso; il −30% alle 3 agenzie resta, prezzo
+    fondatore per le nuove (punto 5e). Numeri definitivi con i dati della beta (punto 35).
 5c. ~~**Io** – Metriche della beta (Admin → Beta) con le soglie del 28/10; «Spunto per il primo messaggio» nei lead e
     nell'export~~ (20/10)
 5d. ~~**Io** – Email aziendali salvate dal controllo siti, riserva che parte da chi ha l'email (migrazione 050)~~ (20/10).
