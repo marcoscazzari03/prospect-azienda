@@ -46,8 +46,14 @@ anche lo **«Spunto per il primo messaggio»** (frase scritta dalla prova, da ad
 curato e un servizio chiaro tra rifacimento siti, WordPress/manutenzione, siti per hotel o sicurezza del sito; sede al
 Sud o in Emilia-Romagna (dove il database ha già aziende pronte); un'email o un modulo di contatto con un nome a cui
 scrivere. Mescolare le dimensioni (freelance strutturati, studi da 3–5 persone, agenzie da 10–15). Evitare le grandi
-agenzie e chi fa solo social o pubblicità. Un'agenzia per città dove possibile, per non metterle in concorrenza sulle
-stesse aziende.
+agenzie e chi fa solo social, branding o stampa (non vendono siti).
+
+**Invio (deciso dall'utente il 20/10 sera):** invio largo, circa **50 agenzie** nei prossimi giorni, anche più agenzie
+nella stessa città. Accorgimenti: un'email per destinatario (mai in copia), da leads@ e non da Resend (che serve alle email
+dell'app), 10–15 al giorno, prima riga personalizzata, testo semplice senza tracciamento, una riga per non ricevere altre
+email. Ci si aspetta un 5–10% di risposte. Se le adesioni superano la decina, dare meno crediti beta ai successivi
+(es. 50 invece di 150) per non esaurire le aziende pronte nelle stesse zone. Il rischio art. 130 resta quello già
+annotato (parere del legale, punto 12).
 
 1. Con Webora Leads stesso: ricerca in target («Agenzia di pubblicità», «Grafica e design», «Informatica e
    software») nella regione giusta, o opportunità «Marketing digitale» / «Grafica e comunicazione» (agenzie che
