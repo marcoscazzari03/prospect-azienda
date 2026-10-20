@@ -31,7 +31,7 @@
   | Listino, inviti, testi commerciali | sales-copywriter, business-analyst |
   | Resoconto giornaliero e numeri della beta | business-analyst |
 
-  Agenti esistenti: `code-reviewer`, `qa-tester`, `data-quality`, `sales-copywriter`, `ui-ux-designer` (21/10). Da creare
-  (punto 53): `business-analyst`. Finché un agente non esiste, il suo lavoro lo fa la chat principale.
+  Agenti esistenti (21/10): `code-reviewer`, `qa-tester`, `data-quality`, `sales-copywriter`, `ui-ux-designer`,
+  `business-analyst`. Il resoconto giornaliero programmato (7:52) lo prepara il `business-analyst`.
 
 @AGENTS.md

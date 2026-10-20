@@ -38,6 +38,14 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — sesto agente: Business Analyst · creato; resoconto giornaliero affidato a lui
+- **Cosa:** `.claude/agents/business-analyst.md`: resoconto giornaliero e settimanale (ricerche, qualità, database, costi
+  AI e per lead, esecuzioni n8n del mese, beta rispetto alle soglie del 30/10); ogni numero misurato / stimato / mancante;
+  i dati che stanno solo su Supabase li chiede con una query in sola lettura da far eseguire all'utente. Solo lettura su n8n.
+- **Attività programmata** «Webora Leads – analisi giornaliera» (ogni giorno alle 7:52, in questa sessione): il testo ora fa
+  preparare il resoconto al `business-analyst` (e un controllo breve al `data-quality` se ci sono segnali nuovi).
+- **Indietro:** cancellare il file; nell'attività programmata rimettere il testo del 14/10 (analisi fatta dalla chat).
+
 ## 21/10/2026 — quinto agente: UI/UX Designer · creato
 - **Cosa:** `.claude/agents/ui-ux-designer.md`: product designer per un SaaS B2B; apre le pagine con Playwright (sito pubblico
   in produzione in sola navigazione, o in locale), screenshot da computer e telefono, controlla comprensione in 5 secondi,
