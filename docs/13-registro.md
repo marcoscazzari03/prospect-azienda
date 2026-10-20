@@ -51,7 +51,12 @@ Come tornare indietro, in generale:
   in produzione in sola navigazione, o in locale), screenshot da computer e telefono, controlla comprensione in 5 secondi,
   gerarchia, telefono, accessibilità, attrito nel percorso registrazione → primi lead, fiducia. Rispetta colori e componenti
   esistenti (`globals.css`, `ui.tsx`). Propone modifiche motivate da usabilità e conversione; non modifica il repository.
-  Prima prova: sito pubblico per le agenzie invitate alla beta.
+  Prima prova (sito pubblico, 21/10): nessuno scorrimento orizzontale, nessun errore in console. Problemi, da decidere (punto 56):
+  la beta non compare da nessuna parte (l'invitato trova «15 crediti» e un listino a pagamento); /registrati dice «Inizia
+  con 15 crediti gratuiti» e non spiega che i crediti beta li aggiunge l'admin; su telefono manca «Prova gratis»
+  nell'intestazione; /prezzi con «Acquista» mentre Stripe è in modalità test, e «Il più scelto» su Growth non è dimostrabile;
+  hero troppo generico per le web agency; rassicurazioni nascoste su telefono in registrazione; contrasto di `muted` e del
+  testo bianco all'80% sotto 4,5:1; pagina 404 in inglese senza grafica (e /per-chi-e non esiste: è un'ancora).
 - **Indietro:** cancellare il file.
 
 ## 21/10/2026 — quarto agente: Sales & Copy · creato
