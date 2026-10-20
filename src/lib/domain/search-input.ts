@@ -9,6 +9,23 @@ const list = (max: number, itemMax = 80) =>
     .max(max)
     .transform((a) => [...new Set(a)]);
 
+// Zone scritte dal cliente: si separano con la virgola o a capo; «Campania e Sicilia» diventa due zone
+// solo se ogni parte è una regione italiana («Reggio Emilia», «Bari e provincia» restano intere).
+const REGIONI = new Set(["abruzzo", "basilicata", "calabria", "campania", "emilia romagna", "friuli venezia giulia", "friuli",
+  "lazio", "liguria", "lombardia", "marche", "molise", "piemonte", "puglia", "sardegna", "sicilia", "toscana",
+  "trentino alto adige", "trentino", "alto adige", "umbria", "valle d aosta", "veneto"]);
+const regione = (z: string) => REGIONI.has(z.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]+/g, " ").trim());
+
+export function splitZones(raw: string) {
+  return raw
+    .split(/[\n,;]/)
+    .flatMap((piece) => {
+      const parts = piece.split(/\s+(?:e|ed)\s+/i).map((p) => p.trim()).filter(Boolean);
+      return parts.length > 1 && parts.every(regione) ? parts : [piece.trim()];
+    })
+    .filter(Boolean);
+}
+
 export const CONTACT_OPTIONS = ["email_or_form", "email_only"] as const;
 export type ContactOption = (typeof CONTACT_OPTIONS)[number];
 export const CONTACT_LABEL: Record<ContactOption, string> = {

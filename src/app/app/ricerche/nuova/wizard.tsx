@@ -17,7 +17,7 @@ import {
   type OfferArea,
   type SignalPrices,
 } from "@/lib/domain/signals";
-import { CONTACT_LABEL, CONTACT_OPTIONS, type ContactOption } from "@/lib/domain/search-input";
+import { CONTACT_LABEL, CONTACT_OPTIONS, splitZones, type ContactOption } from "@/lib/domain/search-input";
 import { createSearch, industrySuggestions, searchAvailability, type ActionState, type Availability, type IndustrySuggestion } from "../../actions";
 
 export type WizardDefaults = {
@@ -264,7 +264,7 @@ export function SearchWizard({
 
   // Opportunità: il cliente sceglie il servizio, i segnali li sceglie la regola del servizio.
   const jobAdCountriesOk = countries.every((c) => (JOB_AD_COUNTRIES as readonly string[]).includes(c));
-  const regionList = regions.split(/[\n,]/).map((r) => r.trim()).filter(Boolean);
+  const regionList = splitZones(regions);
   const where = [regionList.join(", "), countries.map(countryName).join(", ")].filter(Boolean)[0] ?? "";
   const signalProblem = !opportunity
     ? ""
@@ -304,7 +304,7 @@ export function SearchWizard({
     ...(opportunity ? [["Servizio", chosen?.label ?? <em key="s" className="text-muted">Da scegliere</em>] as [string, ReactNode]] : []),
     ["Settore", showIndustry ? industry.trim() || <em key="i" className="text-muted">Non specificato</em> : chosen?.sectors?.length ? "Settori adatti al servizio" : "Tutti i settori"],
     ["Paesi", countries.length ? countries.map(countryName).join(", ") : <em key="c" className="text-muted">Nessuno</em>],
-    ["Regioni", regionList.length ? regionList.join(", ") : <em key="r" className="text-muted">Tutto il paese</em>],
+    ["Regioni", regionList.length ? regionList.join(" · ") : <em key="r" className="text-brick">Tutto il paese (nessuna regione)</em>],
     ["Dimensione", opportunity ? "Piccole e medie imprese" : sizes.length ? `${sizes.join(", ")} dipendenti` : <em key="d" className="text-muted">Qualsiasi</em>],
     ...(peopleOn && mode !== "company_only"
       ? [["Ruoli", roles.length || customRoles.length ? [...roles, ...customRoles].join(", ") : <em key="o" className="text-muted">Non specificato</em>] as [string, ReactNode]]
@@ -314,7 +314,16 @@ export function SearchWizard({
   ];
 
   return (
-    <form ref={formRef} action={action} onChange={() => setFormTick((n) => n + 1)} className="grid gap-8 lg:grid-cols-[1fr_320px]">
+    <form
+      ref={formRef}
+      action={action}
+      onChange={() => setFormTick((n) => n + 1)}
+      onSubmit={(e) => {
+        // Regione dimenticata (20/10: «Emilia-Romagna» mancante, lead da tutta Italia): si chiede conferma.
+        if (!regionList.length && !window.confirm(`Nessuna regione o città: cerchi in tutto il paese (${countries.map(countryName).join(", ")}). Continuare?`)) e.preventDefault();
+      }}
+      className="grid gap-8 lg:grid-cols-[1fr_320px]"
+    >
       <div className="flex flex-col gap-6">
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Tipo di ricerca">
           {KINDS.map((k) => (
@@ -593,7 +602,7 @@ export function SearchWizard({
 
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <SectionTitle icon="pin" htmlFor="regions" title="Regione o città" text="Facoltativo. Più zone separate da virgola." />
+              <SectionTitle icon="pin" htmlFor="regions" title="Regione o città" text="Facoltativo, ma consigliato: senza zona si cerca in tutto il paese. Più zone separate da virgola." />
               <Input id="regions" name="regions" value={regions} onChange={(e) => setRegions(e.target.value)} placeholder="Es. Milano, Torino, Lombardia" className="mt-3" />
             </div>
             {/* Opportunità: dimensione, fatturato, parole chiave aggiuntive e note non si chiedono,
@@ -633,7 +642,7 @@ export function SearchWizard({
             </button>
             <div className={cx("mt-4 grid gap-4 rounded-xl bg-paper-2/60 p-4 sm:grid-cols-2", !advanced && "hidden")}>
               {showIndustry && (
-                <Field label="Parole chiave del settore" htmlFor="industryKeywords" hint="Termini usati dalle aziende, anche in lingua locale. Allargano la ricerca.">
+                <Field label="Parole chiave del settore" htmlFor="industryKeywords" hint="Restringono la ricerca: con un settore, solo le aziende che corrispondono anche ad almeno una di queste parole (es. web agency).">
                   <Input id="industryKeywords" name="industryKeywords" defaultValue={defaults.industryKeywords?.join(", ")} placeholder="Es. software gestionale, ERP" />
                 </Field>
               )}

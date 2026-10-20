@@ -37,6 +37,26 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — ricerche in target: parole chiave, zone, regione vuota (punto 52)
+
+### Parole chiave del settore che restringono — migrazione 052 · da eseguire
+- **Cosa:** nuova funzione `sector_matches` (settore E almeno una parola chiave, cercata in etichette, nome e descrizione;
+  senza settore le parole chiave restano alternative). La usano `target_pool` (riserva e contatore delle ricerche in target),
+  `warehouse_candidates` (magazzino) e `opportunity_pool`, ridefinite identiche a 029/037/038 tranne questo controllo.
+  Testo nel wizard: «Restringono la ricerca». Test SQL `30_sector_keywords_test.sql`.
+- **Perché:** «Informatica e software» + «web agency» dava negozi di computer e grandi gruppi. Ora la riserva dal database
+  dà solo le aziende con «web agency» nel nome o nelle etichette; per il resto parte la ricerca AI con le parole nel brief.
+- **Effetto da sapere:** le ricerche già salvate con settore + parole chiave (anche le ripetute) trovano meno aziende nel
+  database e usano di più la ricerca AI.
+- **Indietro:** rieseguire `target_pool` dalla 029, `warehouse_candidates` dalla 037, `opportunity_pool` dalla 038.
+
+### Zone e regione vuota · in produzione dopo il push
+- **Cosa:** `splitZones` in `src/lib/domain/search-input.ts` (usata dal wizard e da `src/app/app/actions.ts`): oltre a virgola
+  e a capo divide anche su punto e virgola e su « e » / « ed » quando ogni parte è una regione italiana («Campania e Sicilia»
+  → due zone; «Reggio Emilia», «Bari e provincia» intere). Wizard: conferma prima di partire senza regione, riepilogo con
+  «Tutto il paese (nessuna regione)» in evidenza. Test in `tests/zones.test.ts`.
+- **Indietro:** `git revert` del commit.
+
 ## 20/10/2026 (sera) — da ricordare: tre limiti delle ricerche in target visti cercando le agenzie
 - **Regione vuota = tutta Italia senza avviso.** Ricerca «Informatica e software» per l'Emilia-Romagna partita senza regione
   (dimenticata nel wizard): 38 lead quasi tutti in Lombardia (il database lì è pieno dal 20/10). Proposta: conferma nel wizard se la regione è vuota
@@ -47,7 +67,7 @@ Come tornare indietro, in generale:
   chiave: «web agency» non filtra, e la riserva dal database dà negozi di computer e software house. Per restringere oggi
   si usano le «parole chiave aggiuntive» (ricerca AI, +1 credito). Proposta: chiarire il testo nel wizard o farle
   diventare un filtro sul nome e sulla descrizione.
-- Nessuna modifica fatta: da decidere (punto 52 della checklist).
+- Corretti il 21/10 (vedi sopra).
 
 ## 20/10/2026 (sera) — beta allargata (punto 5e)
 

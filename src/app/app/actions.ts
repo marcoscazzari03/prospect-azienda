@@ -5,7 +5,7 @@ import { z } from "zod";
 import { requireViewer, type Plan } from "@/lib/server/dal";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { defaultSearchName, nextRepeatAt, searchInputSchema, toTarget, type SearchInput } from "@/lib/domain/search-input";
+import { defaultSearchName, nextRepeatAt, searchInputSchema, splitZones, toTarget, type SearchInput } from "@/lib/domain/search-input";
 import { aiSearchExtra, jobAdFromDatabaseOnly, targetIsSimple } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 import { startSearch } from "@/lib/server/searches";
@@ -43,7 +43,7 @@ async function parseSearchForm(form: FormData): Promise<{ input: SearchInput } |
     industry: form.get("industry"),
     industryKeywords: lines(form.get("industryKeywords")),
     countries: form.getAll("countries").map(String),
-    regions: lines(form.get("regions")),
+    regions: splitZones(String(form.get("regions") ?? "")),
     companySizes: form.getAll("companySizes").map(String),
     revenueRange: form.get("revenueRange") ?? "",
     roles: [...form.getAll("roles").map(String), ...lines(form.get("customRoles"))],

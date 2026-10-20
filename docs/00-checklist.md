@@ -5,7 +5,7 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `05-da-fare.md`).
 
-Ultimo aggiornamento: 20/10/2026 (sera).
+Ultimo aggiornamento: 21/10/2026.
 
 ## 🔴 Bloccanti per la prima ondata della beta (Sud ed Emilia-Romagna)
 1. ~~**Tu** – Verifica in due passaggi su Supabase, Vercel, GitHub, Stripe, n8n~~ (19/10). Scelta dell'utente: niente
@@ -80,10 +80,8 @@ Ultimo aggiornamento: 20/10/2026 (sera).
 29. **Tu, con il legale** – Contratto sul trattamento dei dati (DPA) pronto da firmare per i clienti.
 29b. ~~**Io** – Registro delle modifiche e delle decisioni (`13-registro.md`) e panoramica del sistema
     (`12-panoramica-sistema.md`)~~ (20/10)
-52. **Io, il 21/10** – Ricerche in target: le parole chiave del settore devono **restringere** («web agency» oggi non
-    filtra: arrivano negozi di computer, software house e grandi gruppi come Reply, Lutech, Italiaonline); conferma con
-    regione vuota; «Campania e Sicilia» divisa in due (dettagli nel registro, 20/10 sera).
-
+52. ~~**Io** – Ricerche in target: parole chiave del settore che restringono (migrazione 052), «Campania e Sicilia»
+    divisa in due, conferma con regione vuota~~ (21/10). **Tu:** eseguire la migrazione 052.
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo
     (file pronto).
