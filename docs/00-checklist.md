@@ -46,8 +46,10 @@ Ultimo aggiornamento: 19/10/2026 (sera).
     incompleta ed errori di handshake contati come difetto). Ora controlla l'host del sito e conta solo
     certificato scaduto, autofirmato o di un altro sito~~ (19/10, workflow aggiornati).
 19c. ~~**Tu** – Pubblicati motore e «Aziende | Controllo siti»; eseguita `https_ricontrollo.sql`: 341 prove vecchie
-    tornate «non determinabile» e in ricontrollo~~ (19/10). Resta: rilanciare la parte 1 dopo ~3 ore e
-    guardare quante restano e con che motivo.
+    ricontrollate~~ (19/10). Esito: 68 scaduti, 4 autofirmati, 141 «non valido per questo sito», di cui ~46 falsi
+    (domini secondari di gruppi, domini nudi).
+19d. **Tu** – Seconda correzione caricata il 20/10: pubblicare motore e «Aziende | Controllo siti», poi eseguire la parte 3
+    di `https_ricontrollo.sql` (prima il conteggio).
 20. **Insieme** – Alla prima ricerca vera: controllare le nuove regole delle email (reservations@, albergo…@, domini
     fratelli).
 21. **Tu** – Giudicare a mano le 24 aziende con il solo modulo di contatto (query `moduli.sql`).

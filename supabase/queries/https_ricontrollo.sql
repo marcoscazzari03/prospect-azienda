@@ -22,3 +22,20 @@ select c.detail, count(*) as aziende
 -- )
 -- update companies set site_checked_at = null where id in (select company_id from vecchie);
 -- commit;
+
+-- 3) Seconda passata (20/10): «Certificato HTTPS non valido per questo sito» ora conta solo sull'host
+--    che il sito usa davvero e se il certificato non è del marchio su un altro dominio.
+--    Conteggio (sola lettura):
+select count(*) from company_checks where code = 'no_https' and status = 'pass' and detail = 'Certificato HTTPS non valido per questo sito';
+-- Correzione:
+-- begin;
+-- with vecchie as (
+--   update company_checks
+--      set status = 'undetermined', detail = '', evidence = '{}'::jsonb
+--    where code = 'no_https' and status = 'pass' and detail = 'Certificato HTTPS non valido per questo sito'
+--   returning company_id
+-- ), segnali as (
+--   delete from company_signals s using vecchie v where s.company_id = v.company_id and s.code = 'no_https'
+-- )
+-- update companies set site_checked_at = null where id in (select company_id from vecchie);
+-- commit;
