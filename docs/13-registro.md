@@ -35,6 +35,11 @@ Come tornare indietro, in generale:
 
 ---
 
+## 20/10/2026 (sera) — checklist riscritta
+- Checklist riscritta per intero; aggiunti i punti 48–51 dall'analisi esterna (segnale privacy/cookie, worker per il
+  controllo siti, seconda fonte per gli annunci, ricerche AI notturne mirate) e il prezzo a metà credito dei lead con il
+  solo modulo (punto 35).
+
 ## 20/10/2026 (sera) — tre miglioramenti dall'analisi esterna
 
 ### Metriche della beta · in produzione dopo il push
