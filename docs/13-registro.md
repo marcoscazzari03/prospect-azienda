@@ -35,6 +35,13 @@ Come tornare indietro, in generale:
 
 ---
 
+## 20/10/2026 (sera) — da ricordare: proposta di nuovo listino (da valutare)
+- Proposta esterna: pacchetti 59/249/790 €, abbonamenti Starter 49 / Pro 129 / Agency 249 € con monitoraggio come
+  differenza, Scale tolto, lead con solo modulo a 1 credito, niente supplemento AI, 20 crediti di benvenuto, prezzo
+  fondatore per la beta. Valutazione in chat del 20/10: direzione giusta; il monitoraggio (punto 36) è la condizione per
+  vendere abbonamenti; da togliere le promesse di funzioni che non esistono (utenti, API) e il confronto con Apollo sul
+  consenso (vedi decisione sul legale); il −30% già promesso alle 3 agenzie resta. Nessuna modifica fatta.
+
 ## 20/10/2026 (sera) — da ricordare: campione della beta troppo piccolo
 - L'utente ritiene troppo ottimistico aver invitato solo 3 agenzie. Proposta (non ancora decisa, se ne parla il 21/10):
   altre 5–7 agenzie nelle stesse regioni, soglie del 28/10 in percentuale, eventuale rinvio della decisione.
