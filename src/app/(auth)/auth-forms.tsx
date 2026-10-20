@@ -5,7 +5,7 @@ import { Alert, Button, Field, Input } from "@/components/ui";
 import { Captcha } from "@/components/captcha";
 import { requestReset, signIn, signUp, updatePassword, verifyMfaLogin, type AuthState } from "./actions";
 
-export function SignInForm({ next }: { next?: string }) {
+export function SignInForm({ next, captchaKey = "" }: { next?: string; captchaKey?: string }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(signIn, {});
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -13,6 +13,7 @@ export function SignInForm({ next }: { next?: string }) {
       <input type="hidden" name="next" value={next ?? "/app"} />
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" required autoComplete="email" /></Field>
       <Field label="Password" htmlFor="password"><Input id="password" name="password" type="password" required autoComplete="current-password" /></Field>
+      <Captcha siteKey={captchaKey} resetSignal={state} />
       <Button type="submit" size="lg" disabled={pending}>{pending ? "Accesso…" : "Accedi"}</Button>
       <Link href="/recupera-password" className="text-sm text-ledger underline-offset-4 hover:underline">Password dimenticata?</Link>
     </form>
@@ -69,7 +70,7 @@ export function SignUpForm({ plan, captchaKey = "", intro }: { plan?: string; ca
   );
 }
 
-export function ResetForm({ intro }: { intro?: ReactNode }) {
+export function ResetForm({ intro, captchaKey = "" }: { intro?: ReactNode; captchaKey?: string }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(requestReset, {});
   if (state.info) {
     return (
@@ -84,7 +85,9 @@ export function ResetForm({ intro }: { intro?: ReactNode }) {
     <>
     {intro}
     <form action={action} className="flex flex-col gap-4">
+      {state.error && <Alert tone="brick">{state.error}</Alert>}
       <Field label="Email" htmlFor="email"><Input id="email" name="email" type="email" required autoComplete="email" /></Field>
+      <Captcha siteKey={captchaKey} resetSignal={state} />
       <Button type="submit" size="lg" disabled={pending}>{pending ? "Invio…" : "Invia il link"}</Button>
     </form>
     </>

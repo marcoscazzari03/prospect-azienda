@@ -8,7 +8,8 @@ import { normalizeEmail } from "@/lib/domain/email-norm";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { clientIpHash } from "@/lib/server/request-meta";
 import { verifyCaptcha } from "@/lib/server/captcha";
-import { MFA_FAILURES, rateHit } from "@/lib/server/rate";
+import { LOGIN_FAILURES, MFA_FAILURES, RESET_REQUESTS, rateHit } from "@/lib/server/rate";
+import { sha256Hex } from "@/lib/server/crypto";
 
 // Registrazioni dallo stesso IP nelle ultime 24 ore (audit V4).
 const SIGNUPS_PER_IP_PER_DAY = 3;
@@ -19,12 +20,32 @@ const safeNext = (v: FormDataEntryValue | null) => safeNextPath(v);
 
 const DISPOSABLE = /@(mailinator|guerrillamail|10minutemail|tempmail|temp-mail|yopmail|trashmail|getnada|sharklasers|dispostable)\./i;
 
+const emailKey = (email: string) => sha256Hex(`email:${normalizeEmail(email.toLowerCase())}`);
+
 export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
   const email = String(form.get("email") ?? "").trim();
   const password = String(form.get("password") ?? "");
+  const { ip, ipHash } = await clientIpHash("login");
+  if (!(await verifyCaptcha(form.get("cf-turnstile-response"), ip))) {
+    return { error: "Verifica di sicurezza non riuscita: riprova." };
+  }
+  // Troppi tentativi sbagliati sullo stesso account o dalla stessa connessione: pausa di 15 minuti.
+  const { windowSeconds: w, perAccount, perIp } = LOGIN_FAILURES;
+  const account = emailKey(email);
+  const [okAccount, okIp] = await Promise.all([
+    rateHit(account, "login_fail", w, perAccount, false),
+    ipHash ? rateHit(ipHash, "login_fail_ip", w, perIp, false) : true,
+  ]);
+  if (!okAccount || !okIp) return { error: "Troppi tentativi non riusciti. Attendi 15 minuti o recupera la password." };
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
+    if (!error.message.includes("Email not confirmed")) {
+      await Promise.all([
+        rateHit(account, "login_fail", w, perAccount),
+        ipHash ? rateHit(ipHash, "login_fail_ip", w, perIp) : null,
+      ]);
+    }
     return {
       error: error.message.includes("Email not confirmed")
         ? "Conferma prima l'indirizzo email: ti abbiamo inviato un link."
@@ -131,9 +152,21 @@ export async function signUp(_: AuthState, form: FormData): Promise<AuthState> {
 
 export async function requestReset(_: AuthState, form: FormData): Promise<AuthState> {
   const email = String(form.get("email") ?? "").trim();
+  const { ip, ipHash } = await clientIpHash("reset");
+  if (!(await verifyCaptcha(form.get("cf-turnstile-response"), ip))) {
+    return { error: "Verifica di sicurezza non riuscita: riprova." };
+  }
+  const info = "Se l'indirizzo è registrato, riceverai un'email con il link per scegliere una nuova password.";
+  const { windowSeconds: w, perAccount, perIp } = RESET_REQUESTS;
+  if (ipHash && !(await rateHit(ipHash, "reset_ip", w, perIp))) {
+    return { error: "Troppe richieste da questa connessione. Riprova tra un'ora." };
+  }
+  // Stesso indirizzo chiesto troppe volte: stessa risposta, ma nessuna email in più (non si
+  // rivela se l'account esiste e non si consuma il limite di invio del servizio).
+  if (!(await rateHit(emailKey(email), "reset_mail", w, perAccount))) return { info };
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${env.appUrl()}/auth/conferma?next=/nuova-password` });
-  return { info: "Se l'indirizzo è registrato, riceverai un'email con il link per scegliere una nuova password." };
+  return { info };
 }
 
 export async function updatePassword(_: AuthState, form: FormData): Promise<AuthState> {

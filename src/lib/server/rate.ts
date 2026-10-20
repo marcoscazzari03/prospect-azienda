@@ -17,3 +17,9 @@ export async function rateHit(key: string, kind: string, windowSeconds: number, 
 
 // Codice della verifica in due passaggi: al massimo 5 errori in 15 minuti per utente.
 export const MFA_FAILURES = { windowSeconds: 15 * 60, max: 5 } as const;
+
+// Accesso e recupero password (punto 42). Le chiamate a Supabase partono dal nostro server, quindi
+// il suo limite per IP non distingue i visitatori: i limiti veri sono questi, per account e per
+// connessione. Chiavi solo come impronte (niente email in chiaro nella tabella).
+export const LOGIN_FAILURES = { perAccount: 10, perIp: 30, windowSeconds: 15 * 60 } as const;
+export const RESET_REQUESTS = { perAccount: 3, perIp: 10, windowSeconds: 60 * 60 } as const;
