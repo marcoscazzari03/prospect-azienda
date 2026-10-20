@@ -39,7 +39,7 @@ export function SiteFooter() {
         </div>
         {col("Prodotto", [["/#come-funziona", "Come funziona"], ["/prezzi", "Prezzi"], ["/registrati", "Prova gratis"], ["/accedi", "Accedi"]])}
         {col("Risorse", [["/#faq", "FAQ"], ["/opposizione", "Rimuovi i tuoi dati"]])}
-        {col("Legale", [["/privacy", "Informativa privacy"], ["/termini", "Termini di servizio"]])}
+        {col("Legale", [["/sicurezza", "Sicurezza e privacy"], ["/privacy", "Informativa privacy"], ["/termini", "Termini di servizio"]])}
       </div>
       <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 border-t border-line px-4 py-4 text-xs text-muted sm:px-6">
         <p>© {new Date().getFullYear()} {BRAND.name}, un servizio di {BRAND.owner}. Tutti i diritti riservati.</p>
