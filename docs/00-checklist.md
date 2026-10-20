@@ -81,7 +81,7 @@ Ultimo aggiornamento: 21/10/2026.
 29b. ~~**Io** – Registro delle modifiche e delle decisioni (`13-registro.md`) e panoramica del sistema
     (`12-panoramica-sistema.md`)~~ (20/10)
 52. ~~**Io** – Ricerche in target: parole chiave del settore che restringono (migrazione 052), «Campania e Sicilia»
-    divisa in due, conferma con regione vuota~~ (21/10). **Tu:** eseguire la migrazione 052.
+    divisa in due, conferma con regione vuota~~ (21/10). ~~Migrazione 052 eseguita~~ (21/10).
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo
     (file pronto).

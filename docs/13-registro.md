@@ -39,7 +39,7 @@ Come tornare indietro, in generale:
 
 ## 21/10/2026 — ricerche in target: parole chiave, zone, regione vuota (punto 52)
 
-### Parole chiave del settore che restringono — migrazione 052 · da eseguire
+### Parole chiave del settore che restringono — migrazione 052 · in produzione (eseguita il 21/10)
 - **Cosa:** nuova funzione `sector_matches` (settore E almeno una parola chiave, cercata in etichette, nome e descrizione;
   senza settore le parole chiave restano alternative). La usano `target_pool` (riserva e contatore delle ricerche in target),
   `warehouse_candidates` (magazzino) e `opportunity_pool`, ridefinite identiche a 029/037/038 tranne questo controllo.
