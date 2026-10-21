@@ -41,6 +41,28 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — zone e sinonimi del settore nel wizard (punti 54a e 54b) · in produzione al push (solo app)
+- **Cosa:** `src/lib/domain/search-input.ts`.
+  - `splitZones`: separa con virgola, punto e virgola, a capo, «/», «&», parentesi e su ogni «e»/«ed» («Modena e Reggio
+    Emilia» → due zone); riduce al nome «X e provincia», «provincia di X», «X (prov.)», «X e dintorni/hinterland/cintura/area
+    metropolitana», «tutta la X», «area di X», «X città»; «Italia»/«tutta Italia» = nessuna zona; «Nord», «Nord Est», «Centro»,
+    «Sud», «Isole»… diventano le loro regioni; «Reggio» da solo diventa Reggio Emilia o Reggio Calabria se le altre zone lo
+    dicono; restano intere Pesaro e Urbino, Monza e (della) Brianza e i comuni con «e» nel nome; niente doppioni.
+  - `withSynonyms` in `toTarget`: le parole chiave del settore portano le varianti («web agency» ↔ «agenzia web» ↔
+    «webagency», anche dai plurali; «software house»; «e-commerce»). `withoutSynonyms` le toglie in «Ripeti la ricerca»
+    (`ricerche/nuova/page.tsx`) e nella pagina della ricerca (`ricerche/[id]/page.tsx`).
+  - Messaggi in italiano oltre 20 zone (le macroaree contano come le loro regioni) o 10 parole chiave; tra parentesi
+    «Sud» non è una macroarea («Sardegna (Sud)»).
+- **Perché:** QA del 21/10: «Napoli e provincia» e «Modena e Reggio Emilia» davano 0 aziende dal database (le zone si
+  confrontano con le parole dei luoghi dell'azienda); «web agency» non trovava «Agenzia Web» né «WebAgency».
+- **Revisione:** Code Reviewer PRONTO CON RISERVE e QA FUNZIONA CON PROBLEMI; corretti: «Ripeti la ricerca» bloccata dai
+  sinonimi oltre 10, messaggio in inglese oltre 10 zone, «Reggio» ambiguo, «province» al plurale, macroaree, parentesi,
+  comuni con «ed». Seconda revisione: PRONTO CON RISERVE (macroaree oltre il limite, «Sud» tra parentesi, zona «e»),
+  corretti. Test in `tests/zones.test.ts`.
+- **Da sapere:** le ricerche già salvate (anche le ripetizioni automatiche) tengono le zone di prima. Le sigle di provincia
+  («MO, RE») danno ancora 0 aziende dal database: da fare con la tabella delle province.
+- **Indietro:** `git revert` del commit.
+
 ## 21/10/2026 — inviti della beta, seconda ondata
 - **Cosa:** inviate dall'utente 3 email di invito: SCF Group, La Russa Design, mscompany (lista di 62 agenzie del 21/10, fuori
   dal repository). Esclusa Webapp s.r.l.: non fa siti web, quindi è fuori dal target della beta.
@@ -276,7 +298,7 @@ Come tornare indietro, in generale:
 ### Zone e regione vuota · in produzione dopo il push
 - **Cosa:** `splitZones` in `src/lib/domain/search-input.ts` (usata dal wizard e da `src/app/app/actions.ts`): oltre a virgola
   e a capo divide anche su punto e virgola e su « e » / « ed » quando ogni parte è una regione italiana («Campania e Sicilia»
-  → due zone; «Reggio Emilia», «Bari e provincia» intere). Wizard: conferma prima di partire senza regione, riepilogo con
+  → due zone; «Reggio Emilia», «Bari e provincia» intere; dal 21/10 sera «Bari e provincia» → «Bari», vedi voce dei punti 54a/b). Wizard: conferma prima di partire senza regione, riepilogo con
   «Tutto il paese (nessuna regione)» in evidenza. Test in `tests/zones.test.ts`.
 - **Indietro:** `git revert` del commit.
 

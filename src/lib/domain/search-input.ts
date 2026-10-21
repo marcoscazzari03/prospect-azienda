@@ -3,27 +3,99 @@ import { COMPANY_SIZES, COUNTRY_NAME, EMAIL_MODES } from "./catalog";
 import { BLOCKED_SECTORS_MESSAGE, blockedSector } from "./blocked-sectors";
 import { JOB_AD_COUNTRIES, JOB_FAMILIES, OFFERS, SIGNALS, SIGNAL_RULES, chargesSignal, offerByCode, toSignalsTarget } from "./signals";
 
-const list = (max: number, itemMax = 80) =>
+const list = (max: number, itemMax = 80, message?: string) =>
   z
     .array(z.string().trim().min(1).max(itemMax))
-    .max(max)
+    .max(max, message)
     .transform((a) => [...new Set(a)]);
 
-// Zone scritte dal cliente: si separano con la virgola o a capo; «Campania e Sicilia» diventa due zone
-// solo se ogni parte è una regione italiana («Reggio Emilia», «Bari e provincia» restano intere).
-const REGIONI = new Set(["abruzzo", "basilicata", "calabria", "campania", "emilia romagna", "friuli venezia giulia", "friuli",
-  "lazio", "liguria", "lombardia", "marche", "molise", "piemonte", "puglia", "sardegna", "sicilia", "toscana",
-  "trentino alto adige", "trentino", "alto adige", "umbria", "valle d aosta", "veneto"]);
-const regione = (z: string) => REGIONI.has(z.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z]+/g, " ").trim());
+// Zone scritte dal cliente: si separano con virgola, punto e virgola, a capo, «/», «&» e parentesi. Le parti unite da
+// «e» diventano zone diverse («Modena e Reggio Emilia», «Campania e Sicilia»); «… e provincia», «provincia di …»,
+// «… e dintorni», «tutta la …» si riducono al nome, perché le aziende sono già legate alla loro provincia (QA, 21/10:
+// «Napoli e provincia» dava 0 aziende dal database). Restano intere le province e i comuni che hanno «e» nel nome;
+// «Nord», «Centro», «Sud» e «Isole» diventano le loro regioni.
+const chiave = (z: string) => z.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z]+/g, " ").trim();
+const CON_E = new Set(["pesaro e urbino", "monza e brianza", "monza e della brianza", "massa e cozzile",
+  "trinita d agultu e vignola", "pozzaglio ed uniti", "sesto ed uniti"]);
+const ATTORNO = "(?:la\\s+|le\\s+)?(?:sua\\s+|loro\\s+)?(?:provincia|province|prov\\.?|dintorni|hinterland|cintura|limitrofi|comuni limitrofi|zone limitrofe|province limitrofe|zone vicine|area metropolitana)";
+const VUOTE = new RegExp(`^(?:${ATTORNO}|e|ed|italia|tutta italia|tutta l italia)$`, "i");
+const pulisciZona = (z: string) => z.trim()
+  .replace(/\s*\((?:provincia|prov\.?)\)\s*$/i, "")
+  .replace(new RegExp(`\\s+(?:e|ed)\\s+${ATTORNO}\\s*$`, "i"), "")
+  .replace(/\s+(?:e\s+)?(?:provincia|prov\.?)\s*$/i, "")
+  .replace(/^(?:la\s+|le\s+)?(?:provincia|province|prov\.?)\s+(?:di\s+)?/i, "")
+  .replace(/^(?:tutt[aoie]\s+(?:la\s+|il\s+|l'|le\s+|i\s+)?|(?:area|zona)\s+(?:di\s+)?)/i, "")
+  .replace(/\s+citt[aà]$/i, "")
+  .trim();
+const NORD = ["Lombardia", "Piemonte", "Liguria", "Valle d'Aosta", "Veneto", "Trentino-Alto Adige", "Friuli-Venezia Giulia", "Emilia-Romagna"];
+const CENTRO = ["Toscana", "Marche", "Umbria", "Lazio"];
+const SUD = ["Abruzzo", "Molise", "Campania", "Puglia", "Basilicata", "Calabria"];
+const ISOLE = ["Sicilia", "Sardegna"];
+const MACRO: Record<string, string[]> = {
+  "nord": NORD, "nord italia": NORD, "italia settentrionale": NORD,
+  "nord ovest": ["Lombardia", "Piemonte", "Liguria", "Valle d'Aosta"],
+  "nord est": ["Veneto", "Trentino-Alto Adige", "Friuli-Venezia Giulia", "Emilia-Romagna"],
+  "centro": CENTRO, "centro italia": CENTRO, "italia centrale": CENTRO,
+  "sud": SUD, "sud italia": SUD, "meridione": SUD, "mezzogiorno": [...SUD, ...ISOLE], "italia meridionale": SUD,
+  "isole": ISOLE, "sud e isole": [...SUD, ...ISOLE],
+};
+// «Reggio» da solo vale sia per Reggio Emilia sia per Reggio Calabria: si sceglie dalle altre zone (QA, 21/10).
+const EMILIA = /^(emilia romagna|emilia|modena|parma|piacenza|bologna|ferrara|ravenna|forli|cesena|forli cesena|rimini|carpi|sassuolo)$/;
+const CALABRIA = /^(calabria|catanzaro|cosenza|crotone|vibo valentia|messina|sicilia)$/;
 
 export function splitZones(raw: string) {
-  return raw
-    .split(/[\n,;]/)
-    .flatMap((piece) => {
-      const parts = piece.split(/\s+(?:e|ed)\s+/i).map((p) => p.trim()).filter(Boolean);
-      return parts.length > 1 && parts.every(regione) ? parts : [piece.trim()];
-    })
-    .filter(Boolean);
+  // Il testo tra parentesi precisa la zona («Sardegna (Sud)»): lì «Sud» non è una macroarea (Code Reviewer, 21/10).
+  const segmenti = raw.split(/[\n,;/&]/).flatMap((p) => p.split(/[()]/).map((x, i) => ({ x, tra: i % 2 === 1 })));
+  const pezzi = segmenti.flatMap(({ x, tra }) => {
+    const piece = pulisciZona(x);
+    const parti = piece.split(/\s+(?:e|ed)\s+/i).map(pulisciZona);
+    // Si riuniscono le parti che insieme formano un nome con «e» («Monza e Brianza» anche dentro «Milano e Monza e Brianza»).
+    const unite: string[] = [];
+    for (let i = 0; i < parti.length; i++) {
+      const due = [`${parti[i]} e ${parti[i + 1]}`, `${parti[i]} ed ${parti[i + 1]}`].find((n) => CON_E.has(chiave(n)));
+      if (i + 1 < parti.length && due) { unite.push(due); i++; } else unite.push(parti[i]);
+    }
+    return unite.map((z) => ({ z, tra }));
+  });
+  const zone = pezzi.filter(({ z }) => z && !VUOTE.test(chiave(z))).flatMap(({ z, tra }) => (!tra && MACRO[chiave(z)]) || [z]);
+  const chiavi = zone.map(chiave);
+  const risolte = zone.map((z) => chiave(z) !== "reggio" ? z
+    : chiavi.some((k) => EMILIA.test(k)) ? "Reggio Emilia" : chiavi.some((k) => CALABRIA.test(k)) ? "Reggio Calabria" : z);
+  return risolte.filter((z, i) => risolte.findIndex((x) => chiave(x) === chiave(z)) === i);
+}
+
+// Parole chiave del settore scritte in modi diversi: la corrispondenza con le aziende è sulle parole, quindi
+// «web agency» non trovava «Agenzia Web» né «WebAgency» (QA, 21/10). Ogni parola chiave porta con sé le sue
+// varianti; le parole chiave sono alternative tra loro, quindi la ricerca non si allarga oltre il sinonimo.
+// Le varianti si aggiungono solo al target inviato alla ricerca: «Ripeti la ricerca» e la pagina della ricerca
+// mostrano le parole del cliente (withoutSynonyms).
+const SINONIMI = [
+  ["web agency", "agenzia web", "webagency"],
+  ["software house", "softwarehouse"],
+  ["e-commerce", "ecommerce"],
+];
+// Confronto come nel database (term_stems): senza spazi, trattini e vocale finale («agenzie web» = «agenzia web»).
+const parole = (k: string) => chiave(k).split(" ").map((w) => (w.length >= 5 ? w.replace(/[aeio]$/, "") : w)).join(" ");
+const radice = (k: string) => parole(k).replace(/ /g, "");
+const gruppoDi = (k: string) => SINONIMI.findIndex((g) => g.some((v) => radice(v) === radice(k) || chiave(v).replace(/ /g, "") === chiave(k).replace(/ /g, "")));
+export function withSynonyms(keywords: string[]) {
+  // Doppioni per parole (non per lettere): «web agency» e «webagency» sono parole diverse per il database.
+  const out = new Map(keywords.map((k) => [parole(k), k]));
+  for (const k of keywords) {
+    for (const v of SINONIMI[gruppoDi(k)] ?? []) if (!out.has(parole(v))) out.set(parole(v), v);
+  }
+  return [...out.values()];
+}
+// Il contrario: una sola parola per gruppo di sinonimi (la prima, cioè quella scritta dal cliente).
+export function withoutSynonyms(keywords: string[]) {
+  const visti = new Set<number>();
+  return keywords.filter((k) => {
+    const g = gruppoDi(k);
+    if (g < 0) return true;
+    if (visti.has(g)) return false;
+    visti.add(g);
+    return true;
+  });
 }
 
 export const CONTACT_OPTIONS = ["email_or_form", "email_only"] as const;
@@ -37,11 +109,12 @@ export const searchInputSchema = z.object({
   name: z.string().trim().max(120).optional().default(""),
   // Facoltativo solo nella ricerca opportunità («tutti i settori»): vedi il controllo sotto.
   industry: z.string().trim().max(200).default(""),
-  industryKeywords: list(10),
+  industryKeywords: list(10, 80, "Al massimo 10 parole chiave del settore"),
   countries: list(10, 2)
     .refine((a) => a.length > 0, "Scegli almeno un paese")
     .refine((a) => a.every((c) => c in COUNTRY_NAME), "Paese non valido"),
-  regions: list(10),
+  // 20: «Nord, Sud e Isole» sono già 16 regioni.
+  regions: list(20, 80, "Al massimo 20 zone (Nord, Centro e Sud contano come le loro regioni): unisci le città in una regione o fai due ricerche"),
   companySizes: z.array(z.enum(COMPANY_SIZES)).max(COMPANY_SIZES.length).default([]),
   revenueRange: z.string().trim().max(60).optional().default(""),
   // Ruoli: solo per le modalità con i referenti (vedi il controllo sotto).
@@ -109,7 +182,7 @@ export function toTarget(input: SearchInput) {
   const sectors = !input.industry && !input.industryKeywords.length && input.signals.offer ? offerByCode(input.signals.offer)?.sectors : undefined;
   return {
     industry: input.industry,
-    industry_keywords: sectors ?? input.industryKeywords,
+    industry_keywords: sectors ?? withSynonyms(input.industryKeywords),
     countries: input.countries,
     country_names: input.countries.map((c) => COUNTRY_NAME[c]),
     regions: input.regions,

@@ -6,7 +6,7 @@ import { getEnabledOffers } from "@/lib/server/offer-rules";
 import { getEnabledModes } from "@/lib/server/settings";
 import { createClient } from "@/lib/supabase/server";
 import { SearchWizard, type SearchKind, type WizardDefaults } from "./wizard";
-import type { SearchTarget } from "@/lib/domain/search-input";
+import { withoutSynonyms, type SearchTarget } from "@/lib/domain/search-input";
 import type { EmailMode } from "@/lib/domain/catalog";
 
 export const metadata: Metadata = { title: "Nuova ricerca" };
@@ -24,7 +24,7 @@ export default async function NewSearchPage({ searchParams }: PageProps<"/app/ri
       defaults = {
         name: `${data.name} (2)`,
         industry: t.industry,
-        industryKeywords: t.industry_keywords,
+        industryKeywords: withoutSynonyms(t.industry_keywords ?? []),
         countries: t.countries,
         regions: t.regions,
         companySizes: t.company_size,

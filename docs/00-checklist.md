@@ -92,8 +92,8 @@ Ultimo aggiornamento: 21/10/2026.
     (test app, motore e SQL, lint, tipi a ogni push), poi Code Reviewer (sola lettura), QA Tester, Data Quality, poi
     Sales & Copy (prepara, non invia), infine Designer e Business Analyst (voce del resoconto giornaliero).
 54. **Io, prossima sessione** – Correzioni proposte dagli agenti il 21/10 (dettagli nel registro):
-    a) zone: città unite da «e» («Modena e Reggio Emilia»), «… e provincia», «/» e «&» come separatori (QA);
-    b) «web agency» con i sinonimi «agenzia web», «webagency» (QA);
+    ~~a) zone: città unite da «e» («Modena e Reggio Emilia»), «… e provincia», «/» e «&» come separatori (QA);~~ (21/10)
+    ~~b) «web agency» con i sinonimi «agenzia web», «webagency» (QA);~~ (21/10). **Resta:** sigle di provincia («MO, RE»).
     ~~c) niente segnali sulle pagine che sembrano barriere anti-bot (testo corto, niente viewport né copyright) (Data Quality);~~ (21/10, punto 58)
     ~~d) no_privacy non scatta se il sito è «in costruzione» (Data Quality);~~ (21/10, punto 58)
     e) segnalare le aziende con nome e dominio molto diversi (Data Quality);
@@ -121,7 +121,7 @@ Ultimo aggiornamento: 21/10/2026.
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo
     (file pronto).
-31. **Tu** – Firma con il logo per leads@ nella webmail di Hostinger.
+31. ~~**Tu** – Firma con il logo per leads@ nella webmail di Hostinger~~ (21/10).
 32. ~~**Io** – Email dell'app con la grafica Webora e modelli per le email di accesso~~ (19/10)
 32b. ~~**Tu** – Modelli incollati in Supabase, avvisi di sicurezza attivi, registrazione e recupero password
     provati~~ (19/10)
