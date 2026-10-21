@@ -43,7 +43,7 @@ async function parseSearchForm(form: FormData): Promise<{ input: SearchInput } |
     industry: form.get("industry"),
     industryKeywords: lines(form.get("industryKeywords")),
     countries: form.getAll("countries").map(String),
-    regions: splitZones(String(form.get("regions") ?? "")),
+    regions: splitZones(String(form.get("regions") ?? ""), form.getAll("countries").map(String)),
     companySizes: form.getAll("companySizes").map(String),
     revenueRange: form.get("revenueRange") ?? "",
     roles: [...form.getAll("roles").map(String), ...lines(form.get("customRoles"))],

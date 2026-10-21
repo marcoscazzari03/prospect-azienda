@@ -7,6 +7,9 @@ const FAMIGLIE = __FAMIGLIE__;
 
 const norm = (v) => ` ${String(v ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
   .replace(/&[a-z]+;/g, ' ').replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()} `;
+// Taglio senza spezzare un'emoji: un mezzo carattere (surrogato alto) in fondo rende il JSON non valido per il
+// database (stesso problema del Settore aziende, 21/10).
+const taglia = (t, n) => { const s = String(t).slice(0, n); const c = s.charCodeAt(s.length - 1); return c >= 0xD800 && c <= 0xDBFF ? s.slice(0, -1) : s; };
 const testo = (h) => String(h ?? '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&')
   .replace(/\s+/g, ' ').trim();
 
@@ -55,8 +58,8 @@ $input.all().forEach((item) => {
   for (const a of r.results) {
     stats.results++;
     const id = String(a.id ?? '');
-    const titolo = testo(a.title).slice(0, 200);
-    const azienda = testo(a.company?.display_name).slice(0, 200);
+    const titolo = taglia(testo(a.title), 200);
+    const azienda = taglia(testo(a.company?.display_name), 200);
     const descrizione = testo(a.description);
     if (!id || visti.has(id)) { stats.duplicates++; continue; }
     visti.add(id);
@@ -77,7 +80,7 @@ $input.all().forEach((item) => {
       city: area.length > 2 ? area[area.length - 1] : '',
       posted_at: String(a.created ?? ''),
       url: String(a.redirect_url ?? '').replace(/^http:\/\//, 'https://'),
-      description: descrizione.slice(0, 600),
+      description: taglia(descrizione, 600),
       contract: [a.contract_type, a.contract_time].filter(Boolean).join(' ').slice(0, 40)
     });
   }

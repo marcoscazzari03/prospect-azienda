@@ -264,7 +264,7 @@ export function SearchWizard({
 
   // Opportunità: il cliente sceglie il servizio, i segnali li sceglie la regola del servizio.
   const jobAdCountriesOk = countries.every((c) => (JOB_AD_COUNTRIES as readonly string[]).includes(c));
-  const regionList = splitZones(regions);
+  const regionList = splitZones(regions, countries);
   const where = [regionList.join(", "), countries.map(countryName).join(", ")].filter(Boolean)[0] ?? "";
   const signalProblem = !opportunity
     ? ""

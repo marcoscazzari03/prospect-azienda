@@ -11,9 +11,10 @@ const ogniGiorno = trigger({
   version: 1.3,
   config: {
     name: 'Ogni mattina',
-    // Ogni 4 ore, 120 aziende per giro: con 300 aziende (circa 1.200 pagine in memoria)
-    // l'esecuzione n8n si interrompeva; più spesso no per il tetto di esecuzioni al mese.
-    parameters: { rule: { interval: [{ field: 'hours', hoursInterval: 4, triggerAtMinute: 40 }] } }
+    // Due giri al mattino (7:40 e 11:40), 120 aziende per giro: con 300 aziende (circa 1.200 pagine in memoria)
+    // l'esecuzione n8n si interrompeva. Gli annunci arrivano ogni 2 giorni alle 6:10: gli altri giri ogni 4 ore
+    // finivano in 3 secondi senza aziende (punto 59, 21/10: 4 esecuzioni al giorno in meno).
+    parameters: { rule: { interval: [{ field: 'cronExpression', expression: '40 7,11 * * *' }] } }
   }
 });
 

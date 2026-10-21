@@ -41,6 +41,21 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — sigle di provincia, tagli di testo negli annunci, giri di «Siti aziende» (punti 54, 59) · app in produzione al push; n8n in attesa (pubblicazione di 3 workflow)
+- **Sigle di provincia:** `splitZones` traduce le sigle in maiuscolo («MO, RE», «Bari (BA)») nel nome della provincia
+  (`n8n/annunci/province.json`, gli stessi nomi dei luoghi delle aziende OSM). In minuscolo («no») restano come sono. Sigle,
+  macroaree e «Reggio» valgono solo se la ricerca comprende l'Italia («CA» negli Stati Uniti non è Cagliari; Code Reviewer).
+- **Tagli di testo:** `taglia()` in `n8n/annunci/nodes/02-normalizza-annunci.js` (titolo, azienda, descrizione) e
+  `n8n/engine/nodes/09-verifica-annuncio.js` (titolo): un'emoji spezzata dal taglio lasciava un mezzo carattere, che il
+  database rifiuta nel JSON (stesso problema del Settore aziende). Test in `n8n/annunci/test/run.mjs`.
+- **«Siti aziende»:** due giri al mattino (7:40 e 11:40) invece di ogni 4 ore: gli annunci arrivano ogni 2 giorni alle 6:10 e
+  gli altri giri finivano in 3 secondi senza aziende. 4 esecuzioni al giorno in meno (circa 120 al mese). Il controllo siti
+  resta ogni ora finché non finisce il ricontrollo della migrazione 054; «Settore aziende» resta ogni 4 ore (lavora quasi
+  sempre: anche le aziende OSM senza settore).
+- **54f (pagina contatti prima di «nessuna_email»):** già presente nel motore: homepage e fino a 4 pagine, prima contatti
+  (`05-estrai-email.template.js`); gli scarti controllati il 21/10 erano giusti. Nessuna modifica.
+- **Indietro:** `git revert`; nodi n8n dalla cronologia dei workflow.
+
 ## 21/10/2026 — zone e sinonimi del settore nel wizard (punti 54a e 54b) · in produzione al push (solo app)
 - **Cosa:** `src/lib/domain/search-input.ts`.
   - `splitZones`: separa con virgola, punto e virgola, a capo, «/», «&», parentesi e su ogni «e»/«ed» («Modena e Reggio

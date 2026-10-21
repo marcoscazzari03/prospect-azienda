@@ -37,6 +37,20 @@ describe("zone della ricerca", () => {
     expect(splitZones("Sesto ed Uniti, Trinità d'Agultu e Vignola")).toEqual(["Sesto ed Uniti", "Trinità d'Agultu e Vignola"]);
   });
 
+  it("sigle di provincia in maiuscolo", () => {
+    expect(splitZones("MO, RE")).toEqual(["Modena", "Reggio Emilia"]);
+    expect(splitZones("Bari (BA), Lecce")).toEqual(["Bari", "Lecce"]);
+    expect(splitZones("Mo, no")).toEqual(["Mo", "no"]);
+    expect(splitZones("Reggio (RE)")).toEqual(["Reggio Emilia"]);
+    expect(splitZones("Reggio (RC)")).toEqual(["Reggio Calabria"]);
+  });
+
+  it("fuori dall'Italia niente sigle, macroaree né «Reggio»", () => {
+    expect(splitZones("CA, TX", ["US"])).toEqual(["CA", "TX"]);
+    expect(splitZones("Nord", ["CH"])).toEqual(["Nord"]);
+    expect(splitZones("CA", ["US", "IT"])).toEqual(["Cagliari"]);
+  });
+
   it("macroaree e «Reggio»", () => {
     expect(splitZones("Nord Est")).toEqual(["Veneto", "Trentino-Alto Adige", "Friuli-Venezia Giulia", "Emilia-Romagna"]);
     expect(splitZones("Centro e Sud Italia")).toHaveLength(10);

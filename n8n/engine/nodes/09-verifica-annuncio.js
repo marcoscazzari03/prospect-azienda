@@ -12,6 +12,9 @@ const html = String($json.html ?? '');
 
 const norm = (v) => ` ${String(v ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
   .replace(/&[a-z]+;/g, ' ').replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()} `;
+// Taglio senza spezzare un'emoji: un mezzo carattere (surrogato alto) in fondo rende il JSON non valido per il
+// database (stesso problema del Settore aziende, 21/10).
+const taglia = (t, n) => { const s = String(t).slice(0, n); const c = s.charCodeAt(s.length - 1); return c >= 0xD800 && c <= 0xDBFF ? s.slice(0, -1) : s; };
 const testo = (h) => String(h ?? '').replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ')
   .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/\s+/g, ' ').trim();
 const host = (u) => String(u ?? '').toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split(/[/?#:]/)[0];
@@ -87,9 +90,9 @@ if (!html || corpo.length < 150) {
   const blocchi = [...html.matchAll(/<(h1|h2|h3|li|a|article|div)\b[^>]*>([\s\S]{0,600}?)<\/\1>/gi)].map(m => m[0]);
   const blocco = blocchi.find(b => famigliaDi(testo(b)));
   const titoloPagina = testo((html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1]);
-  const titolo = blocco ? testo(blocco).slice(0, 160) : '';
+  const titolo = blocco ? taglia(testo(blocco), 160) : '';
   if (!titolo) {
-    risultato = esito('reject', 'titolo_fuori_famiglia', { title: titoloPagina.slice(0, 160) });
+    risultato = esito('reject', 'titolo_fuori_famiglia', { title: taglia(titoloPagina, 160) });
   } else if (!sulSito && PER_CLIENTE.test(norm(corpo))) {
     risultato = esito('reject', 'agenzia_per_il_lavoro', { title: titolo });
   } else if (!sulSito && !norm(corpo).includes(norm(p.company_name))) {

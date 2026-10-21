@@ -60,6 +60,13 @@ assert.ok(agenzia('Risorse SpA', 'Graphic designer') && agenzia('ADHR GROUP', ''
 const [cnc] = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
   input: [{ results: [ad('10', 'Programmatore CNC', 'Archimede S.p.A.'), ad('11', 'Programmatore CAD CAM', 'Beta Srl'), ad('12', 'Programmatore PLC', 'Gamma Srl')] }] });
 assert.equal(cnc.stats.off_topic, 3, 'mestieri di officina fuori tema');
+// Emoji spezzata dal taglio della descrizione (600 caratteri): niente mezzo carattere nel JSON verso il database.
+for (const k of [599, 598]) {
+  const [e] = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
+    input: [{ results: [ad('13', 'Sistemista', 'Delta Srl', { description: 'x'.repeat(k) + '🚀 fine' })] }] });
+  const d = JSON.stringify(e).match(/"description":"[^"]*"/g) || [];
+  assert.ok(d.length && d.every(x => !/\\ud83d(?!\\ude80)/i.test(x)), `taglio a ${k}: nessun surrogato orfano`);
+}
 assert.ok(agenzia('WinTime SpA', 'ricerca per importante gruppo ceramico cliente'));
 assert.ok(agenzia('Rl Italia S. R. L.', 'azienda di servizi IT ricerca per notevole cliente un Full Stack'));
 assert.ok(agenzia('Next spa filiale di bologna', 'seleziona per società di trasporti'), 'filiale: seleziona per società');

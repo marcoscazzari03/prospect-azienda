@@ -1,4 +1,5 @@
 import { z } from "zod";
+import PROVINCE from "../../../n8n/annunci/province.json";
 import { COMPANY_SIZES, COUNTRY_NAME, EMAIL_MODES } from "./catalog";
 import { BLOCKED_SECTORS_MESSAGE, blockedSector } from "./blocked-sectors";
 import { JOB_AD_COUNTRIES, JOB_FAMILIES, OFFERS, SIGNALS, SIGNAL_RULES, chargesSignal, offerByCode, toSignalsTarget } from "./signals";
@@ -40,10 +41,17 @@ const MACRO: Record<string, string[]> = {
   "isole": ISOLE, "sud e isole": [...SUD, ...ISOLE],
 };
 // «Reggio» da solo vale sia per Reggio Emilia sia per Reggio Calabria: si sceglie dalle altre zone (QA, 21/10).
-const EMILIA = /^(emilia romagna|emilia|modena|parma|piacenza|bologna|ferrara|ravenna|forli|cesena|forli cesena|rimini|carpi|sassuolo)$/;
-const CALABRIA = /^(calabria|catanzaro|cosenza|crotone|vibo valentia|messina|sicilia)$/;
+const EMILIA = /^(reggio emilia|reggio nell emilia|emilia romagna|emilia|modena|parma|piacenza|bologna|ferrara|ravenna|forli|cesena|forli cesena|rimini|carpi|sassuolo)$/;
+const CALABRIA = /^(reggio calabria|reggio di calabria|calabria|catanzaro|cosenza|crotone|vibo valentia|messina|sicilia)$/;
 
-export function splitZones(raw: string) {
+// Sigle di provincia scritte in maiuscolo («MO, RE», «Bari (BA)»): le aziende hanno il nome della provincia, non la sigla.
+const SIGLE = new Map((PROVINCE as [string, string, string][]).map(([sigla, nome]) => [sigla, nome]));
+const daSigla = (z: string) => (/^[A-Z]{2}$/.test(z) && SIGLE.get(z)) || z;
+
+// Sigle, macroaree e «Reggio» sono italiani: valgono solo se la ricerca comprende l'Italia («CA» negli Stati Uniti
+// non è Cagliari; Code Reviewer, 21/10).
+export function splitZones(raw: string, countries: string[] = ["IT"]) {
+  const italia = countries.includes("IT");
   // Il testo tra parentesi precisa la zona («Sardegna (Sud)»): lì «Sud» non è una macroarea (Code Reviewer, 21/10).
   const segmenti = raw.split(/[\n,;/&]/).flatMap((p) => p.split(/[()]/).map((x, i) => ({ x, tra: i % 2 === 1 })));
   const pezzi = segmenti.flatMap(({ x, tra }) => {
@@ -57,9 +65,9 @@ export function splitZones(raw: string) {
     }
     return unite.map((z) => ({ z, tra }));
   });
-  const zone = pezzi.filter(({ z }) => z && !VUOTE.test(chiave(z))).flatMap(({ z, tra }) => (!tra && MACRO[chiave(z)]) || [z]);
+  const zone = pezzi.filter(({ z }) => z && !VUOTE.test(chiave(z))).flatMap(({ z, tra }) => (italia && !tra && MACRO[chiave(z)]) || [italia ? daSigla(z) : z]);
   const chiavi = zone.map(chiave);
-  const risolte = zone.map((z) => chiave(z) !== "reggio" ? z
+  const risolte = zone.map((z) => !italia || chiave(z) !== "reggio" ? z
     : chiavi.some((k) => EMILIA.test(k)) ? "Reggio Emilia" : chiavi.some((k) => CALABRIA.test(k)) ? "Reggio Calabria" : z);
   return risolte.filter((z, i) => risolte.findIndex((x) => chiave(x) === chiave(z)) === i);
 }

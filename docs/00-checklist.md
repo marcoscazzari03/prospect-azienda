@@ -93,11 +93,11 @@ Ultimo aggiornamento: 21/10/2026.
     Sales & Copy (prepara, non invia), infine Designer e Business Analyst (voce del resoconto giornaliero).
 54. **Io, prossima sessione** – Correzioni proposte dagli agenti il 21/10 (dettagli nel registro):
     ~~a) zone: città unite da «e» («Modena e Reggio Emilia»), «… e provincia», «/» e «&» come separatori (QA);~~ (21/10)
-    ~~b) «web agency» con i sinonimi «agenzia web», «webagency» (QA);~~ (21/10). **Resta:** sigle di provincia («MO, RE»).
+    ~~b) «web agency» con i sinonimi «agenzia web», «webagency» (QA);~~ (21/10). ~~Sigle di provincia~~ (21/10).
     ~~c) niente segnali sulle pagine che sembrano barriere anti-bot (testo corto, niente viewport né copyright) (Data Quality);~~ (21/10, punto 58)
     ~~d) no_privacy non scatta se il sito è «in costruzione» (Data Quality);~~ (21/10, punto 58)
     e) segnalare le aziende con nome e dominio molto diversi (Data Quality);
-    f) pagina contatti prima di scartare per «nessuna_email» (Data Quality).
+    ~~f) pagina contatti prima di scartare per «nessuna_email» (Data Quality)~~ (già presente nel motore, 21/10).
     Prima di c)–f): far verificare al Data Quality sui siti veri (ora la rete è aperta) che i problemi ci siano davvero.
 55. ~~**Tu** – Accesso completo alla rete nell'ambiente cloud: il Data Quality può aprire i siti delle aziende~~ (21/10).
 56. ~~**Io** – Sito per le agenzie invitate: fascia beta, /registrati?beta=1, «Prova» su telefono, prezzi senza «Il più
@@ -112,7 +112,7 @@ Ultimo aggiornamento: 21/10/2026.
     ~~Migrazione 055 eseguita, 3 workflow pubblicati~~ (21/10). **Resta:** nel resoconto del 22/10, prove tolte e controllo siti
     senza errori.
 59. **Insieme, da decidere** – Dal controllo settimanale (registro, 21/10): recuperare Como, Sondrio, Belluno, Padova, Rovigo,
-    Treviso; ridurre i giri a vuoto (Siti aziende 1 volta al giorno, Controllo siti ogni 2 ore dopo il 2/11, irraggiungibili dopo
+    Treviso; ridurre i giri a vuoto (~~Siti aziende 2 giri al mattino~~ 21/10, Controllo siti ogni 2 ore dopo il 2/11, irraggiungibili dopo
     60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; ~~capire perché manca Adzuna del 20/10~~ (21/10: gira ogni 2 giorni).
     **Tu:** query `supabase/queries/popolamento_settimanale.sql`.
 60. ~~**Io** – Email per le aziende controllate prima del 20/10 (migrazione 054); verificati i 14 segnali «annuncio» (non è un
