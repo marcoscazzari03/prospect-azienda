@@ -51,6 +51,8 @@ Come tornare indietro, in generale:
   commit su branch e main, oltre 80 il 21/10) o stesso commit inviato prima al branch e poi a main.
 - **Cosa:** `vercel.json`: niente anteprime per i branch `claude/*`; `ignoreCommand` salta la build se dall'ultima pubblicazione
   riuscita (`VERCEL_GIT_PREVIOUS_SHA`) cambiano solo `docs/`, file `.md`, `supabase/queries` o `.claude` (nel dubbio pubblica).
+- **Correzione:** il primo `ignoreCommand` usciva con 128 («bad object»: il clone di Vercel non contiene il commit precedente) e
+  Vercel l'ha trattato come build fallita (`fa9a3ba`). Ora il comando esce solo con 0 (salta) o 1 (pubblica, anche nel dubbio).
 - **Da controllare:** dopo il push, che su Vercel compaia la pubblicazione di main in produzione.
 - **Indietro:** togliere `git` e `ignoreCommand` da `vercel.json`.
 
