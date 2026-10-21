@@ -180,7 +180,7 @@ export function reserveCompaniesForDatabase(
 // insolite. Usato per i moduli di contatto e per i siti importati (ripasso di sicurezza del 19/10).
 // Dominio pubblico: TLD alfabetico (niente IP), niente nomi interni né servizi DNS «jolly» che puntano a qualsiasi IP
 // (127.0.0.1.nip.io). Stessa regola nei nodi n8n (04-deduplica-candidati, 06-esito-ricerca-web, «Homepage da leggere»);
-// ripasso di sicurezza del 22/10.
+// ripasso di sicurezza del 21/10.
 const DOMAIN_RE = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,24}$/;
 const NOT_PUBLIC = /(^|\.)(localhost|local|internal|intranet|lan|home|corp|localdomain|invalid|test|example|nip\.io|sslip\.io|xip\.io|localtest\.me|lvh\.me|vcap\.me|traefik\.me|lacolhost\.com|localhost\.run)$/;
 export function publicDomain(domain: unknown) {

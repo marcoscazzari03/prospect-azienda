@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     console.error("pending_site_checks", error);
     return NextResponse.json({ error: "lettura non riuscita" }, { status: 500 });
   }
-  // Un dominio non pubblico (IP, nome interno, DNS «jolly») non si apre: oggi le fonti non li scrivono (22/10).
+  // Un dominio non pubblico (IP, nome interno, DNS «jolly») non si apre: oggi le fonti non li scrivono (21/10).
   return NextResponse.json({ companies: (data ?? []).filter((c) => publicDomain(c.domain)) });
 }
 

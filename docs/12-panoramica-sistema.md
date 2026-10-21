@@ -19,7 +19,7 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
 - **Posizionamento: «solo azienda».** Nessun dato di persone: niente nomi, ruoli o email nominative. I referenti
   sono spenti finché non c'è un parere legale.
 - **Pubblico:** agenzie, imprese e professionisti con partita IVA che lavorano da soli (web agency, web designer e grafici,
-  IT, marketing, HR, commerciale, consulenti). Dal 22/10 il sito nomina esplicitamente anche i freelance.
+  IT, marketing, HR, commerciale, consulenti). Dal 21/10 il sito nomina esplicitamente anche i freelance.
   Beta gratuita su invito: prime 3 agenzie il 19/10 (Gopher, Mutart, Studio360), poi inviti a circa 50 agenzie,
   10–15 al giorno (13 al 21/10); decisione sulla seconda ondata il 30/10.
 - **Sito:** leads.weborastudio.it, un servizio di Webora Studio. Casella del servizio: leads@weborastudio.it.

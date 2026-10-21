@@ -16,7 +16,7 @@ Cliente ──► Backend (Next.js) ──POST webhook──► n8n "Lead Engine
 |---|---|---|
 | Backend → n8n | Header Auth sul webhook (credenziale n8n *Lead Engine - Webhook in ingresso*) | URL e segreto solo in variabili d'ambiente server (`N8N_ENGINE_WEBHOOK_URL`, `N8N_ENGINE_SECRET`), mai nel frontend |
 | n8n → Backend | Header `X-Engine-Secret` (credenziale *Lead Engine - Callback verso backend*) **+** `run_token` | Il backend salva solo l'hash del `run_token` (32 byte casuali per run) e lo confronta in tempo costante |
-| Anti-SSRF | `callback_url` accettato solo se è esattamente `https://<host dell'app>/api/engine/callback` (`HOST_APP` in *Valida richiesta*, dal 22/10; al cambio di dominio va aggiunto quello nuovo). Siti e link: niente IP, nomi interni, servizi DNS «jolly» (nip.io, sslip.io…) né porte diverse da 80/443 | Un payload manomesso non può far chiamare a n8n URL arbitrari |
+| Anti-SSRF | `callback_url` accettato solo se è esattamente `https://<host dell'app>/api/engine/callback` (`HOST_APP` in *Valida richiesta*, dal 21/10; al cambio di dominio va aggiunto quello nuovo). Siti e link: niente IP, nomi interni, servizi DNS «jolly» (nip.io, sslip.io…) né porte diverse da 80/443 | Un payload manomesso non può far chiamare a n8n URL arbitrari |
 | Idempotenza | `run_id` univoco; il backend accetta un solo evento `results` per run | I retry di n8n (5 tentativi) non generano doppi addebiti |
 
 ## Richiesta: `POST {N8N_ENGINE_WEBHOOK_URL}` (path `lead-engine/v1/search`)

@@ -242,7 +242,7 @@ export async function toggleAlert(form: FormData) {
   const db = createAdminClient();
   let ok = true;
   if (form.get("on") === "1") {
-    // Attivarlo rifà il calcolo su tutta la riserva: al massimo 20 attivazioni l'ora per account (ripasso del 22/10).
+    // Attivarlo rifà il calcolo su tutta la riserva: al massimo 20 attivazioni l'ora per account (ripasso del 21/10).
     if (!(await rateHit(viewer.org.id, "alert_on", 3600, 20))) redirect(`/app/ricerche/${id.data}?avviso=errore`);
     const { data, error } = await db.rpc("start_search_alert", { p_org: viewer.org.id, p_search: id.data, p_user: viewer.user.id });
     ok = !error && data === true;

@@ -15,7 +15,7 @@ describe("ripasso di sicurezza del 19/10", () => {
     expect(urlOnDomain("https://x.127.0.0.1.nip.io/", "127.0.0.1.nip.io")).toBe(false);
   });
 
-  it("domini pubblici: niente IP, nomi interni o DNS jolly (22/10)", () => {
+  it("domini pubblici: niente IP, nomi interni o DNS jolly (21/10)", () => {
     expect(publicDomain("ditta.it")).toBe(true);
     expect(publicDomain("www.studio-rossi.co.uk")).toBe(true);
     for (const d of ["127.0.0.1", "169.254.169.254.nip.io", "a.sslip.io", "localtest.me", "intranet.corp", "localhost", "-a.it", ""]) {

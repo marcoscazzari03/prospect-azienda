@@ -99,7 +99,7 @@ const signUpSchema = z.object({
 });
 
 // Indirizzo già registrato: stessa risposta di una registrazione riuscita, così il modulo non rivela chi è cliente
-// (V10, ripasso del 22/10). Al titolare della casella arriva invece un'email con accesso e recupero password,
+// (V10, ripasso del 21/10). Al titolare della casella arriva invece un'email con accesso e recupero password,
 // al massimo una al giorno per indirizzo.
 async function alreadyRegistered(email: string): Promise<AuthState> {
   if (!(await rateHit(emailKey(email), "signup_dup", 86_400, 1))) return { info: signUpInfo(email) };

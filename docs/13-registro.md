@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — registrazione, menu e motore (punti 74, 77, 78) · app in produzione al push; workflow n8n da pubblicare
+## 21/10/2026 — registrazione, menu e motore (punti 74, 77, 78) · app in produzione al push; workflow n8n da pubblicare
 - **Registrazione (V10/N3, `src/app/(auth)/actions.ts`):** un indirizzo già registrato riceve la stessa risposta di una
   registrazione riuscita; al titolare arriva un'email «Hai già un account» con accesso e recupero password (al massimo una al
   giorno per indirizzo), oppure di nuovo il link di attivazione se l'account non è mai stato confermato. Rischio residuo
@@ -65,9 +65,15 @@ Come tornare indietro, in generale:
     a parte e resta corretto. Rischio basso (serve un attacco sulla rete di n8n Cloud); si risolve nel worker.
 - **Dove:** workflow «Lead Engine | Search (v1)» (nodi 01, 04, 14), «Aziende | Siti aziende» (06), «Aziende | Settore»
   («Homepage da leggere»). Test in `n8n/engine/test/run.mjs` e `tests/security-review.test.ts`.
+- **Caricati su n8n il 21/10 (da pubblicare):** «Valida richiesta» e «Deduplica candidati» nel motore (verificati identici al
+  repository), «Esito ricerca web» in Siti aziende, «Homepage da leggere» in Settore. **Non caricato:** il filtro delle porte
+  in «Valuta segnali sito» e «Controlli tecnici sito» (nodo 14): il ramo del referente è spento e «Controlli tecnici» non lo
+  usa; si carica alla prossima modifica di quei nodi.
+- **Nota sulle date:** questo lavoro è del 21/10 sera; nei commenti del codice (anche nei nodi n8n e nella migrazione 058, già
+  pubblicati) è scritto per errore «22/10».
 - **Indietro:** `git revert`; sui workflow, la versione precedente dalla cronologia di n8n.
 
-## 22/10/2026 — ripasso di sicurezza (punti 70–71) e testi per i freelance (punto 75) · in produzione al push; migrazione 058 eseguita il 22/10
+## 21/10/2026 — ripasso di sicurezza (punti 70–71) e testi per i freelance (punto 75) · in produzione al push; migrazione 058 eseguita il 21/10
 - **Ripasso:** due revisori indipendenti su tutto ciò che è cambiato dal 19/10 (dettagli fuori dal repository, in
   `06-audit-sicurezza.md`). App e SQL: nessun problema grave; le correzioni del 19/10 sono tutte al loro posto. Motore: un
   problema medio sui redirect, punto 74.

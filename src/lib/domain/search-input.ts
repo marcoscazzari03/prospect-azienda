@@ -53,7 +53,7 @@ const daSigla = (z: string) => (/^[A-Z]{2}$/.test(z) && SIGLE.get(z)) || z;
 export function splitZones(raw: string, countries: string[] = ["IT"]) {
   const italia = countries.includes("IT");
   // Testo tagliato e spazi compattati prima delle espressioni: con migliaia di spazi di fila alcune diventano lentissime
-  // (ripasso di sicurezza del 22/10). 20 zone da 80 caratteri stanno comunque sotto i 2.000.
+  // (ripasso di sicurezza del 21/10). 20 zone da 80 caratteri stanno comunque sotto i 2.000.
   raw = raw.slice(0, 2000).replace(/[^\S\n]+/g, " ");
   // Il testo tra parentesi precisa la zona («Sardegna (Sud)»): lì «Sud» non è una macroarea (Code Reviewer, 21/10).
   const segmenti = raw.split(/[\n,;/&]/).flatMap((p) => p.split(/[()]/).map((x, i) => ({ x, tra: i % 2 === 1 })));
