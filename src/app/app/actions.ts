@@ -1,5 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
+import { reportError } from "@/lib/server/monitoring";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireViewer, type Plan } from "@/lib/server/dal";
@@ -239,10 +240,20 @@ export async function toggleAlert(form: FormData) {
   const id = z.string().uuid().safeParse(form.get("searchId"));
   if (!id.success) return;
   const db = createAdminClient();
-  if (form.get("on") === "1") await db.rpc("start_search_alert", { p_org: viewer.org.id, p_search: id.data, p_user: viewer.user.id });
-  else await db.rpc("stop_search_alert", { p_org: viewer.org.id, p_search: id.data });
+  let ok = true;
+  if (form.get("on") === "1") {
+    const { data, error } = await db.rpc("start_search_alert", { p_org: viewer.org.id, p_search: id.data, p_user: viewer.user.id });
+    ok = !error && data === true;
+    if (error) await reportError("app", error.message, "start_search_alert");
+  } else {
+    const { error } = await db.rpc("stop_search_alert", { p_org: viewer.org.id, p_search: id.data });
+    ok = !error;
+  }
   revalidatePath(`/app/ricerche/${id.data}`);
   revalidatePath("/app/ricerche");
+  // Prima un errore (per esempio il tempo massimo di Supabase) lasciava il pulsante senza risposta. Dopo un'azione
+  // riuscita si torna alla pagina senza il parametro, così il vecchio messaggio d'errore sparisce.
+  redirect(ok ? `/app/ricerche/${id.data}` : `/app/ricerche/${id.data}?avviso=errore`);
 }
 
 // Archivia o ripristina una ricerca (con i suoi lead).

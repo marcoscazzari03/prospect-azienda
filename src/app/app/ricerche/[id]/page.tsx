@@ -19,8 +19,9 @@ import { menuItem } from "@/components/menu-item";
 
 export const metadata: Metadata = { title: "Ricerca" };
 
-export default async function SearchDetailPage({ params }: PageProps<"/app/ricerche/[id]">) {
+export default async function SearchDetailPage({ params, searchParams }: PageProps<"/app/ricerche/[id]">) {
   const { id } = await params;
+  const alertError = (await searchParams).avviso === "errore";
   const viewer = await requireViewer();
   await closeStaleRuns(viewer.org.id);
   const supabase = await createClient();
@@ -126,6 +127,9 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
           </div>
         ) : (
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-card px-5 py-4 text-sm">
+            {alertError && !alert && (
+              <p className="w-full text-brick">L&apos;avviso non si è attivato. Riprova tra qualche minuto; se succede ancora, scrivici.</p>
+            )}
             {alert ? (
               <p>
                 <Badge tone="ledger">Avviso attivo</Badge>{" "}

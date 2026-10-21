@@ -42,6 +42,23 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — ricerche opportunità più veloci (migrazione 057) · in attesa (verifica sui dati veri e migrazione 057)
+- **Cosa:** `supabase/migrations/20261202000057_opportunity_pool_speed.sql` ridefinisce `opportunity_pool` (dalla 052): radici
+  di parole chiave e zone e segnali richiesti calcolati una volta sola invece che per ogni azienda (prima `sector_matches` e
+  `signals_satisfy` per riga), query dinamica pianificata a ogni chiamata con i valori veri. Il pulsante dell'avviso ora
+  mostra un messaggio se l'attivazione non riesce (`toggleAlert`, pagina della ricerca) e registra l'errore.
+- **Perché:** il 21/10 «Avvisami ogni settimana» non faceva niente: in produzione `opportunity_pool` su tutta Italia impiegava
+  9,5 s (Veneto 3,8 s) e Supabase interrompe le chiamate dell'app dopo 8 s (`authenticator`: statement_timeout 8s). La
+  stessa funzione serve al contatore «Disponibili ora», alla riserva delle ricerche opportunità e all'avviso.
+- **Misure (12.000 aziende di prova):** tutta Italia 6,9 → 1,0 s; regione 4,1 → 1,2 s. Risultati identici su 8 ricerche
+  di prova (settore, parole chiave, zone, annunci, «servono tutti», nessun risultato). Test SQL 384 ok.
+- **Verifica sui dati veri prima della migrazione:** `supabase/queries/verifica_057.sql` (copia temporanea, confronto
+  sulle ultime 4 ricerche opportunità, rollback).
+- **Revisione:** Code Reviewer PRONTO CON RISERVE: equivalenza verificata riga per riga con 052/053/016 e su 18 casi di prova
+  (0 differenze). Corretti: messaggio d'errore dell'avviso che restava dopo una disattivazione; script di verifica più leggero
+  (due calcoli per ricerca, confronto delle righe intere).
+- **Indietro:** rieseguire `opportunity_pool` dalla 052.
+
 ## 21/10/2026 — avviso settimanale delle opportunità (punto 36) · in produzione (migrazione 056 eseguita il 21/10); visibile solo agli admin
 - **Cosa:** su una ricerca opportunità, «Avvisami ogni settimana» (riquadro nella pagina della ricerca; etichetta «Avviso»
   nell'elenco). Ogni lunedì il cron notturno (`/api/cron/watchdog` → `src/lib/server/alerts.ts`) conta le aziende che
