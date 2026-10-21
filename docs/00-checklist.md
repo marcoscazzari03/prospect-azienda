@@ -3,7 +3,7 @@
 Formato (deciso il 19/10): sezioni con colore e titolo, ruolo in grassetto (**Tu**, **Io**, **Insieme**), numeri
 progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data. Quando l'utente chiede «riscrivimi
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
-`13-registro.md` (prima del 19/10 in `05-da-fare.md`).
+`13-registro.md` (prima del 19/10 in `archivio/05-da-fare.md`).
 
 Ultimo aggiornamento: 21/10/2026 (riscritta per intero; i numeri restano quelli citati nel registro).
 

@@ -5,7 +5,7 @@ workflow) e **come tornare indietro**. Regola dal 20/10/2026: ogni modifica e og
 nello stesso commit della modifica. Le voci più recenti stanno in alto.
 
 Fonti complementari: `git log` (storia completa del codice, dal 09/10) · `00-checklist.md` (stato dei lavori) ·
-`05-da-fare.md` (storico fino al 19/10) · versioni dei workflow su n8n (cronologia di ogni workflow).
+`archivio/05-da-fare.md` (storico fino al 19/10) · versioni dei workflow su n8n (cronologia di ogni workflow).
 
 Come tornare indietro, in generale:
 - **Codice dell'app:** `git revert <commit>` e push su main (Vercel ripubblica da solo).
@@ -41,6 +41,13 @@ Come tornare indietro, in generale:
 | — | Il dettaglio delle vulnerabilità resta solo in `06-audit-sicurezza.md` (escluso dal repository) | repository pubblico |
 
 ---
+
+## 21/10/2026 — riordino dei documenti (punto 61) · documento
+- **Cosa:** storici spostati in `docs/archivio/` con una nota in cima (01-analisi-workflow, 02-proposta, 05-da-fare,
+  08-messa-in-produzione, 11-analisi-motore); indice `docs/README.md`; README e riferimenti aggiornati (anche nell'agente
+  Business Analyst); regola in `CLAUDE.md`: a ogni modifica si aggiorna il documento vivo che la descrive. Aggiornamento dei
+  contenuti di panoramica, pubblicazione, domande ai consulenti e README in corso (controllo di un agente sul codice).
+- **Indietro:** `git mv` inverso dei cinque file.
 
 ## 21/10/2026 — checklist riscritta per intero · documento
 - **Cosa:** `docs/00-checklist.md` riordinata per stato (questa settimana, decisione del 30/10, lancio a pagamento, durante la
@@ -501,7 +508,7 @@ Come tornare indietro, in generale:
 - `/sicurezza`, link nel piè di pagina. Solo fatti verificati. Da far rileggere al legale.
 
 ### Documenti
-- `docs/11-analisi-motore.md` (numeri del motore), `docs/12-panoramica-sistema.md` (panoramica da incollare in altre chat),
+- `docs/archivio/11-analisi-motore.md` (numeri del motore), `docs/12-panoramica-sistema.md` (panoramica da incollare in altre chat),
   questo registro.
 
 ---

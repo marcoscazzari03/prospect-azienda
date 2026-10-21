@@ -1,6 +1,6 @@
 # 9. Domande per il legale e per il commercialista
 
-Preparato il 18/10 (checklist `08-messa-in-produzione.md`, Fase 0). Da inviare o portare
+Preparato il 18/10 (checklist `archivio/08-messa-in-produzione.md`, Fase 0). Da inviare o portare
 all'incontro così com'è: la prima parte descrive il servizio, poi le domande.
 
 ---

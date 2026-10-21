@@ -8,6 +8,9 @@
   decisione o cosa da ricordare va scritta lì, nello stesso commit: cosa, perché, dove, come tornare indietro, stato
   (in produzione / in attesa di migrazione o pubblicazione). Le decisioni in vigore stanno nella tabella in alto.
   Prima di toccare qualcosa già cambiato in passato, consultare il registro.
+- **Documenti, regola dal 21/10:** indice in `docs/README.md`. A ogni modifica si aggiorna anche il documento vivo che la
+  descrive (panoramica, contratto del motore, segnali, beta, pubblicazione), nello stesso commit. I documenti in
+  `docs/archivio/` sono storici e non si aggiornano.
 - Mai scrivere chiavi o segreti in chat o nel repository (pubblico): le chiavi vanno solo nelle credenziali n8n o
   nelle variabili di Vercel.
 - **Squadra di agenti, regola dal 21/10:** la chat principale è il «cervello»: coordina, decide con l'utente e scrive il

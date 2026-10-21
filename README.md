@@ -8,13 +8,9 @@ Destinazione: **https://leads.weborastudio.it**
 
 ## Documenti
 
-| | |
-|---|---|
-| [docs/01-analisi-workflow.md](docs/01-analisi-workflow.md) | Analisi del workflow n8n originale: cosa si riusa, cosa cambia |
-| [docs/02-proposta.md](docs/02-proposta.md) | Concept, pricing, UX, architettura, MVP, costi, rischi, GDPR, piano |
-| [docs/03-contratto-motore.md](docs/03-contratto-motore.md) | Contratto API tra backend e motore n8n |
-| [docs/04-pubblicazione.md](docs/04-pubblicazione.md) | Guida passo-passo: Supabase, Vercel, n8n, Stripe, dominio |
-| [docs/05-da-fare.md](docs/05-da-fare.md) | Attività aperte prima del lancio |
+Indice completo, con lo stato di ogni documento: [docs/README.md](docs/README.md). I principali:
+[checklist](docs/00-checklist.md) · [registro](docs/13-registro.md) · [panoramica del sistema](docs/12-panoramica-sistema.md) ·
+[contratto del motore](docs/03-contratto-motore.md) · [segnali](docs/07-segnali.md) · [beta](docs/10-beta.md).
 
 ## Architettura
 

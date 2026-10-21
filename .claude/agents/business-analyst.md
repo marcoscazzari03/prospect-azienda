@@ -32,7 +32,7 @@ italiano, breve e concreto.
 - Esecuzioni di n8n del mese: tetto di sicurezza 2.100 (piano 2.500); proietta il totale del mese.
 - Limiti noti: Adzuna 5.000 chiamate al mese.
 - Documenti: `docs/13-registro.md` (decisioni e storico), `docs/10-beta.md` (beta e soglie del 30/10),
-  `docs/11-analisi-motore.md` (costi misurati del motore), `docs/12-panoramica-sistema.md` (piani, crediti, listino),
+  `docs/archivio/11-analisi-motore.md` (costi misurati del motore), `docs/12-panoramica-sistema.md` (piani, crediti, listino),
   `src/lib/domain/beta.ts` (soglie: almeno 3 agenzie attive, export da almeno metà e almeno 2, almeno 1 risposta,
   segnalati sotto il 10%).
 - Costo AI: calcolalo dai token e dalle ricerche web di `usage` con i prezzi del modello indicati nel codice o nel

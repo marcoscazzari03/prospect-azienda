@@ -1,3 +1,5 @@
+> **Storico fino al 19/10/2026, non aggiornato: sostituito da `docs/00-checklist.md` (cose da fare) e `docs/13-registro.md` (storia).**
+
 # 5. Da fare prima dell'apertura al pubblico
 
 Lista aggiornata delle attività aperte (spuntare man mano).

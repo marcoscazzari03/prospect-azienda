@@ -1,3 +1,5 @@
+> **Storico (9/10/2026), non aggiornato: analisi del workflow di partenza. Lo stato attuale è in `docs/12-panoramica-sistema.md`.**
+
 # 1. Analisi del workflow "Prospect Avvocati | Search"
 
 File: [`n8n/legacy/prospect-avvocati-search.json`](../n8n/legacy/prospect-avvocati-search.json)

@@ -1,3 +1,5 @@
+> **Storico (9/10/2026), non aggiornato: proposta iniziale del prodotto. Le decisioni in vigore sono nella tabella in alto di `docs/13-registro.md`.**
+
 # 2. Proposta: piattaforma SaaS di lead generation B2B
 
 > Nome di lavoro: **Tracciato** — "Lead B2B con la fonte". Da sostituire con il brand legato al

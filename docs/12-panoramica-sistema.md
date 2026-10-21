@@ -223,7 +223,7 @@ delle email (Icypeas).
 | Opportunità dal database | circa 40 s | 17 per 3 richiesti | zero | circa 115 |
 
 - Tra il 40 e il 57% delle aziende provate non ha un'email sul sito: dal 20/10 il motore se lo ricorda.
-- Dettagli in `docs/11-analisi-motore.md`.
+- Dettagli in `docs/archivio/11-analisi-motore.md`.
 
 ## 9. Admin (solo con verifica in due passaggi)
 
@@ -278,5 +278,5 @@ Gli errori del server arrivano via email all'admin.
 ## 13. Documenti di riferimento nel repository
 
 `00-checklist.md` (stato dei lavori) · `03-contratto-motore.md` (contratto app–motore) · `07-segnali.md` (regole
-dei segnali) · `10-beta.md` (piano della beta) · `11-analisi-motore.md` (numeri del motore) ·
+dei segnali) · `10-beta.md` (piano della beta) · `archivio/11-analisi-motore.md` (numeri del motore) ·
 `09-domande-consulenti.md` (domande per legale e commercialista).

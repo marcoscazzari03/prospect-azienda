@@ -1,3 +1,5 @@
+> **Storico (19/10/2026), non aggiornato: le voci ancora aperte sono nella checklist (`docs/00-checklist.md`, sezione «Bloccanti per il lancio a pagamento»).**
+
 # 8. Messa in produzione – checklist
 
 Preparata il 17/10, da seguire passo per passo a partire dal 18/10.

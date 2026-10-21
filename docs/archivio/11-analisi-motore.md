@@ -1,3 +1,5 @@
+> **Storico (20/10/2026), non aggiornato: analisi delle ricerche reali di quel giorno. Le modifiche successive sono in `docs/13-registro.md`.**
+
 # Analisi del motore (20/10)
 
 Punto 27 della checklist: ottimizzazioni e parti non usate di «Lead Engine | Search (v1)».
