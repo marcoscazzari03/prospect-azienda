@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — ritorno alla coda della 054 (migrazione 061) · in attesa di migrazione
+## 21/10/2026 — ritorno alla coda della 054 (migrazione 061) · in produzione (eseguita il 21/10 sera)
 - **Problema:** dopo la 060 «Aziende | Controllo siti» è fallita alle 17:25 (esecuzione 3953, «lettura non riuscita», 500
   dall'app dopo 3 tentativi): sui dati veri `pending_site_checks` supera gli 8 secondi di Supabase. Sul banco di prova (12.000
   aziende) impiegava 0,5 s: la differenza con i dati veri va capita prima di riproporla.
