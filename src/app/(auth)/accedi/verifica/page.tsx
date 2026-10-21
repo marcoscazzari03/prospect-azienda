@@ -18,7 +18,7 @@ export default async function MfaLoginPage({ searchParams }: PageProps<"/accedi/
   return (
     <>
       <h1 className="font-display text-3xl font-semibold">Verifica in due passaggi</h1>
-      <p className="mb-8 mt-2 text-ink-2">Apri l&apos;app di autenticazione sul telefono e scrivi il codice di Webora Leads.</p>
+      <p className="mb-8 mt-2 text-ink-2">Apri l&apos;app di autenticazione sul telefono e scrivi il codice di {BRAND.name}.</p>
       <MfaLoginForm next={safeNextPath(next)} />
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-sm">
         <form action={cancelMfaLogin}>

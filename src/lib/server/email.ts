@@ -5,7 +5,7 @@ import { renderEmail, type EmailContent } from "@/lib/email/layout";
 
 // Email transazionali via Resend. Senza chiave configurata non fa nulla
 // (le notifiche sono un di più, non devono bloccare il flusso).
-// Con un EmailContent parte l'email con la grafica Webora (HTML + testo semplice);
+// Con un EmailContent parte l'email con la grafica del prodotto (HTML + testo semplice);
 // con una stringa solo testo (avvisi interni).
 export async function sendEmail(to: string, subject: string, body: string | EmailContent) {
   const key = env.resendApiKey();

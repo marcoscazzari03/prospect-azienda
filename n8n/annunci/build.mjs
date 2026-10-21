@@ -29,6 +29,9 @@ export const scegliSito = (livello) => codice('04-scegli-sito.js', livello === 2
   ? { __METODO__: 'guess', __CANDIDATI__: 'Domini candidati', __ELENCO__: "($('Aziende senza sito').first().json.companies || [])" }
   : { __METODO__: 'web', __CANDIDATI__: 'Esito ricerca web', __ELENCO__: "$('Esito ricerca web').all().map(i => i.json)" });
 
+// Indirizzo dell'app e firma del bot: al cambio di nome si cambiano qui (e HOST_APP in n8n/engine/nodes/01-valida-richiesta.js).
+const APP = 'https://leads.weborastudio.it';
+const BOT = `WeboraLeads/1.0 (+${APP})`;
 const ADZUNA = "{ id: '9uw7ry3Mp3ULA4fe', name: 'Adzuna API' }";
 const CALLBACK = "{ id: 'kaAuSs06rml1sMA9', name: 'Lead Engine - Callback verso backend' }";
 const ERRORI = 'LOw3fRo49WKvrF6z';
@@ -127,7 +130,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/job-ads',
+      url: '${APP}/api/engine/job-ads',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,
@@ -192,7 +195,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies?limit=120',
+      url: '${APP}/api/engine/job-ads/companies?limit=120',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -346,7 +349,7 @@ const salvaWeb = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies',
+      url: '${APP}/api/engine/job-ads/companies',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,
@@ -370,7 +373,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies',
+      url: '${APP}/api/engine/job-ads/companies',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,
@@ -438,7 +441,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries?limit=120',
+      url: '${APP}/api/engine/job-ads/industries?limit=120',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -543,7 +546,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/industries',
+      url: '${APP}/api/engine/job-ads/industries',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,
@@ -609,7 +612,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=150',
+      url: '${APP}/api/engine/site-checks?limit=150',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -709,7 +712,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/site-checks',
+      url: '${APP}/api/engine/site-checks',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,
@@ -784,7 +787,7 @@ const overpass = node({
       sendHeaders: true,
       headerParameters: { parameters: [
         // Overpass rifiuta (406) le richieste senza un User-Agent che identifichi il servizio.
-        { name: 'User-Agent', value: 'WeboraLeads/1.0 (+https://leads.weborastudio.it)' },
+        { name: 'User-Agent', value: '${BOT}' },
         { name: 'Accept', value: 'application/json' }
       ] },
       sendBody: true,
@@ -828,7 +831,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/companies-import',
+      url: '${APP}/api/engine/companies-import',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,

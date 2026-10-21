@@ -1,5 +1,6 @@
 import "server-only";
 import { supabaseUrl } from "@/lib/supabase/url";
+import { BRAND } from "@/lib/config";
 
 // Variabili d'ambiente lette solo sul server, al momento dell'uso
 // (così la build non fallisce se una variabile facoltativa manca).
@@ -26,5 +27,5 @@ export const env = {
   alertEmail: () => process.env.ALERT_EMAIL ?? "", // destinatario degli avvisi di errore (facoltativo: altrimenti gli admin)
   // Facoltativo: verifica delle caselle con MillionVerifier (https://www.millionverifier.com).
   emailVerifierKey: () => (process.env.MILLIONVERIFIER_API_KEY ?? "").trim(),
-  emailFrom: () => process.env.EMAIL_FROM ?? "Webora Leads <leads@weborastudio.it>",
+  emailFrom: () => process.env.EMAIL_FROM ?? `${BRAND.name} <${BRAND.supportEmail}>`,
 };

@@ -104,6 +104,18 @@ IVA: vedi la nota fiscale nel README. Con la chiave di test acquisti e portale s
    crediti addebitati e restituiti, costi in *Amministrazione → Andamento*.
 5. Prova un acquisto in modalità test da *Crediti e piano* (con l'account admin).
 
+## 7. Cambio di nome o di dominio (preparato il 21/10 per Avvisto)
+
+Nel codice il nome e gli indirizzi stanno in pochi punti:
+- `src/lib/config.ts` → `BRAND` (nome, parte verde del logo, titolare, email di supporto, dominio): da qui prendono il nome
+  sito, email, modelli di Supabase (`WRITE_TEMPLATES=1 npx vitest run tests/email-templates.test.ts`, poi da incollare in
+  Supabase), file Excel e app di autenticazione;
+- logo: `src/components/logo.tsx` (simbolo) e `public/email/logo.png` (email);
+- n8n: `APP` e `BOT` in `n8n/annunci/build.mjs`; `HOST_APP` in `n8n/engine/nodes/01-valida-richiesta.js` (va **aggiunto** il
+  dominio nuovo, tenendo il vecchio finché il rinvio è attivo); poi build e caricamento dei nodi;
+- fuori dal codice: `APP_URL` ed `EMAIL_FROM` su Vercel, dominio su Vercel e su Resend (SPF/DKIM), Site URL e Redirect URLs su
+  Supabase, Turnstile (domini ammessi), webhook di Stripe, rinvio permanente dal vecchio dominio.
+
 ## Sviluppo locale
 
 ```bash

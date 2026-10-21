@@ -16,7 +16,7 @@ export function Logo({ href = "/" }: { href?: string }) {
       <LogoMark />
       <span className="whitespace-nowrap font-display text-lg font-semibold tracking-tight">
         {BRAND.short}
-        <span className="text-ledger"> Leads</span>
+        {BRAND.suffix && <span className="text-ledger">{BRAND.suffix}</span>}
       </span>
     </Link>
   );

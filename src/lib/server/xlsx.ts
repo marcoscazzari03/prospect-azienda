@@ -1,5 +1,6 @@
 import "server-only";
 import ExcelJS from "exceljs";
+import { BRAND } from "@/lib/config";
 
 // File Excel pronto all'uso: intestazione bloccata, filtri, larghezze adatte,
 // link cliccabili per siti ed email.
@@ -10,7 +11,7 @@ export async function toXlsx<T extends Record<string, unknown>>(
   notes: readonly string[] = [],
 ) {
   const wb = new ExcelJS.Workbook();
-  wb.creator = "Webora Leads";
+  wb.creator = BRAND.name;
   const ws = wb.addWorksheet(sheetName, { views: [{ state: "frozen", ySplit: 1 }] });
   ws.columns = columns.map((c) => ({
     header: c.label,

@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { env } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
+import { BRAND } from "@/lib/config";
 
 export type AccountState = { error?: string; info?: string };
 
@@ -80,7 +81,7 @@ export async function startMfa(): Promise<MfaSetup> {
   for (const f of list?.all ?? []) {
     if (f.factor_type === "totp" && f.status !== "verified") await supabase.auth.mfa.unenroll({ factorId: f.id });
   }
-  const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: "Webora Leads", issuer: "Webora Leads" });
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: BRAND.name, issuer: BRAND.name });
   if (error || !data) return { error: "Non è stato possibile avviare l'attivazione. Riprova tra poco." };
   return { factorId: data.id, qr: data.totp.qr_code, secret: data.totp.secret };
 }

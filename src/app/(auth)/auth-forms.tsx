@@ -4,6 +4,7 @@ import { useActionState, type ReactNode } from "react";
 import { Alert, Button, Field, Input } from "@/components/ui";
 import { Captcha } from "@/components/captcha";
 import { requestReset, signIn, signUp, updatePassword, verifyMfaLogin, type AuthState } from "./actions";
+import { BRAND } from "@/lib/config";
 
 export function SignInForm({ next, captchaKey = "" }: { next?: string; captchaKey?: string }) {
   const [state, action, pending] = useActionState<AuthState, FormData>(signIn, {});
@@ -42,7 +43,7 @@ export function SignUpForm({ plan, captchaKey = "", intro }: { plan?: string; ca
     return (
       <EmailSent title="Controlla la tua email">
         <p>{state.info}</p>
-        <p className="text-sm">L&apos;email arriva da leads@weborastudio.it. Se non la vedi entro qualche minuto, guarda nella posta indesiderata o nelle promozioni.</p>
+        <p className="text-sm">L&apos;email arriva da {BRAND.supportEmail}. Se non la vedi entro qualche minuto, guarda nella posta indesiderata o nelle promozioni.</p>
         <p className="text-sm">Hai già confermato? <Link href="/accedi" className="text-ledger underline">Accedi</Link>.</p>
       </EmailSent>
     );

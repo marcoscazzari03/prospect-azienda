@@ -28,8 +28,8 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     dettagli in `06-audit-sicurezza.md`, fuori dal repository)
 71. **Io** – Correzione di quello che esce dal punto 70, con revisione e test, poi le voci del Tecnico aperto (63, 39, 40, 54e,
     19e) e la pulizia dei dati di collaudo (punto 19).
-72. **Io** – Nome in un solo punto del codice (`config.ts`): «Webora Leads» e gli indirizzi diventano impostazioni, così il
-    passaggio ad Avvisto è un cambio di configurazione più logo e testi.
+72. ~~**Io** – Nome in un solo punto del codice (`config.ts`): «Webora Leads» e gli indirizzi diventano impostazioni, così il
+    passaggio ad Avvisto è un cambio di configurazione più logo e testi.~~ (21/10: elenco dei passaggi in `04-pubblicazione.md`, sezione 7)
 73. **Tu** – Controlli a mano: avvisi di spesa (punto 18), Deployment Protection su Vercel, conservazione breve delle
     esecuzioni su n8n, rotazione del segreto del motore (punto 17, insieme). Supabase Pro rinviato alla messa in produzione (punto 15).
 74. **Io, poi Tu** – ~~Motore e workflow n8n: nomi DNS «jolly» bloccati, porte e indirizzi IP scartati anche nel Settore e nella

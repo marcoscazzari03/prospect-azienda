@@ -45,6 +45,15 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — nome in un solo punto del codice (punto 72) · in produzione al push (nessun cambiamento visibile)
+- **Cosa:** i «Webora Leads» e gli indirizzi scritti a mano nell'app ora vengono da `BRAND` (`src/lib/config.ts`), con il nuovo
+  campo `suffix` (la parte verde del logo, vuota con un nome di una parola); in `n8n/annunci/build.mjs` l'indirizzo dell'app e
+  la firma del bot sono le costanti `APP` e `BOT` (workflow generati identici: niente da ricaricare).
+- **Perché:** il passaggio ad Avvisto diventa un cambio di configurazione più logo e testi.
+- **Dove:** config, logo, layout delle email, FAQ, crediti, 404, registrazione, verifica in due passaggi, Excel, `env.ts`;
+  passaggi completi in `04-pubblicazione.md` (sezione 7). Modelli email di Supabase rigenerati: identici.
+- **Indietro:** `git revert`.
+
 ## 21/10/2026 — registrazione, menu e motore (punti 74, 77, 78) · in produzione (workflow pubblicati il 21/10)
 - **Registrazione (V10/N3, `src/app/(auth)/actions.ts`):** un indirizzo già registrato riceve la stessa risposta di una
   registrazione riuscita; al titolare arriva un'email «Hai già un account» con accesso e recupero password (al massimo una al

@@ -1,7 +1,10 @@
 // Identità del prodotto: un solo punto da cambiare per il rebranding.
+// Nome e indirizzi del prodotto: al cambio di nome si cambiano qui (più logo in src/components/logo.tsx e public/email/logo.png,
+// EMAIL_FROM e APP_URL su Vercel, n8n/annunci/build.mjs e HOST_APP nel motore; elenco nel punto 67 della checklist).
 export const BRAND = {
   name: "Webora Leads",
   short: "Webora",
+  suffix: " Leads", // seconda parte del logo, in verde (vuota con un nome di una parola)
   tagline: "Trova aziende in target e scopri nuove opportunità commerciali verificate",
   owner: "Webora Studio",
   supportEmail: "leads@weborastudio.it",
