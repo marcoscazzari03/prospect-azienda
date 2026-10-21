@@ -53,7 +53,8 @@ Come tornare indietro, in generale:
   immobiliarevenezia, globalmediaservice, globalsmile, golfclub-boutique. La regola del trasloco con «nuovo sito» da solo dava
   2 falsi negativi (borgoverde.eu, lineatende.it): ristretta. Non si usa «ora ci trovi su» (Code Reviewer: homepage vere).
 - **Cosa (Settore aziende):** `n8n/annunci/nodes/07-prepara-settore.js` toglie i surrogati orfani lasciati dal taglio del testo
-  (emoji spezzata = JSON non valido verso Claude). Stesso rischio, non corretto, nei tagli di `02-normalizza-annunci.js` (600) e
+  (emoji spezzata = JSON non valido verso Claude). Scritto con un ciclo sui codici, senza sequenze `\u` nel codice: inviandolo
+  a n8n verrebbero trasformate nei caratteri (Code Reviewer: PRONTO). Stesso rischio, non corretto, nei tagli di `02-normalizza-annunci.js` (600) e
   `09-verifica-annuncio.js` (160): finora nessun errore.
 - **Adzuna:** nessun problema; la raccolta gira ogni 2 giorni per scelta, quindi il 20/10 non c'era. Il limite di Adzuna è
   **2.500 chiamate al mese** (il «5.000» nella checklist era sbagliato).

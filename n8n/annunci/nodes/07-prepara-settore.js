@@ -16,7 +16,18 @@ const meta = (html, nome) => pulisci((html.match(new RegExp(`<meta[^>]+(?:name|p
 
 // Un taglio a lunghezza fissa può spezzare un'emoji (coppia di surrogati UTF-16): il mezzo carattere rimasto fa
 // rifiutare a Claude l'intera richiesta («unexpected end of hex escape», 21/10: 38 aziende su 301 perse).
-const senzaOrfani = (t) => t.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '');
+// Senza sequenze di escape nel codice: l'editor di n8n le trasformerebbe nei caratteri.
+const senzaOrfani = (t) => {
+  let r = '';
+  for (let i = 0; i < t.length; i++) {
+    const c = t.charCodeAt(i);
+    if (c >= 0xD800 && c <= 0xDBFF) {
+      const d = t.charCodeAt(i + 1);
+      if (d >= 0xDC00 && d <= 0xDFFF) { r += t[i] + t[i + 1]; i++; }
+    } else if (c < 0xDC00 || c > 0xDFFF) r += t[i];
+  }
+  return r;
+};
 
 const leggibili = [];
 const senzaTesto = [];
