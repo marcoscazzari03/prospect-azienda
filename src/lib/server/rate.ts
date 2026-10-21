@@ -15,8 +15,12 @@ export async function rateHit(key: string, kind: string, windowSeconds: number, 
   return data !== false;
 }
 
-// Codice della verifica in due passaggi: al massimo 5 errori in 15 minuti per utente.
-export const MFA_FAILURES = { windowSeconds: 15 * 60, max: 5 } as const;
+// Codice della verifica in due passaggi: al massimo 10 tentativi in 15 minuti per utente. Si contano i tentativi, non
+// solo gli errori, e si registrano prima della verifica: inviati in parallelo non superano il tetto (ripasso del 22/10).
+export const MFA_ATTEMPTS = { windowSeconds: 15 * 60, max: 10 } as const;
+
+// Password attuale nel cambio password: 5 tentativi in 15 minuti per utente (ripasso del 22/10).
+export const PASSWORD_CHECKS = { windowSeconds: 15 * 60, max: 5 } as const;
 
 // Accesso e recupero password (punto 42). Le chiamate a Supabase partono dal nostro server, quindi
 // il suo limite per IP non distingue i visitatori: i limiti veri sono questi, per account e per

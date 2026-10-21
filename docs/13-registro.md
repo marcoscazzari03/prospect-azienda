@@ -45,6 +45,29 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — ripasso di sicurezza (punti 70–71) e testi per i freelance (punto 75) · in produzione al push; migrazione 058 da eseguire
+- **Ripasso:** due revisori indipendenti su tutto ciò che è cambiato dal 19/10 (dettagli fuori dal repository, in
+  `06-audit-sicurezza.md`). App e SQL: nessun problema grave; le correzioni del 19/10 sono tutte al loro posto. Motore: un
+  problema medio sui redirect, punto 74.
+- **Corretto nell'app:**
+  - `splitZones` (`src/lib/domain/search-input.ts`): testo tagliato a 2.000 caratteri e spazi compattati prima delle espressioni
+    regolari; prima migliaia di spazi tenevano occupato il server per secondi. Test in `tests/zones.test.ts`.
+  - Verifica in due passaggi (`src/app/(auth)/actions.ts`, `src/app/app/account/actions.ts`): si contano i tentativi
+    all'ingresso (10 in 15 minuti, `MFA_ATTEMPTS` in `src/lib/server/rate.ts`) invece degli errori dopo, così non si supera il
+    tetto inviando codici in parallelo.
+  - Cambio password: 5 tentativi in 15 minuti (`PASSWORD_CHECKS`). Avviso settimanale: 20 attivazioni l'ora per account.
+- **Migrazione 058** (`20261203000058_security_review_22_10.sql`): `rate_hit` sotto un lock per chiave; tabelle dell'avviso
+  senza permessi per i client; `search_alerts` sotto la regola della verifica in due passaggi. Test `34_security_review_22_10_test.sql`.
+  L'app funziona anche prima della migrazione (stessa funzione, stessi parametri).
+- **Da decidere:** la registrazione risponde in modo diverso se l'indirizzo esiste già (si scopre se qualcuno è cliente).
+  Impatto basso per un servizio B2B con captcha; proposta: accettarlo fino al lancio.
+- **Testi per i freelance** (decisione del 21/10, Sales & Copy e Designer): «Per chi vende alle aziende, anche da solo»
+  sopra il titolo, «Che tu sia un'agenzia, un'impresa o un professionista con partita IVA» in «Per chi è», «web designer e
+  grafici» nella riga delle web agency, prima domanda delle FAQ «Lavoro da solo con partita IVA: fa per me?», riga per chi
+  lavora da solo nella pagina prezzi, «Azienda o attività» con suggerimento nella registrazione, descrizione per i motori
+  di ricerca (`src/app/layout.tsx`). Listino e funzioni invariati.
+- **Indietro:** `git revert` del commit; per la 058, rieseguire `rate_hit` della 046 (i revoke e la policy non servono all'app).
+
 ## 21/10/2026 — nome nuovo e costi di Hostinger (punti 65–69) · decisione, nessuna modifica all'app
 
 - **Cosa:** piano per il cambio di nome e controllo dei costi. Oggi Hostinger costa circa 234 €/anno: dominio weborastudio.it

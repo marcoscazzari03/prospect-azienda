@@ -18,7 +18,8 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
   - un sito senza HTTPS.
 - **Posizionamento: «solo azienda».** Nessun dato di persone: niente nomi, ruoli o email nominative. I referenti
   sono spenti finché non c'è un parere legale.
-- **Pubblico:** agenzie e professionisti B2B (web agency, IT, marketing, HR, commerciale, consulenti).
+- **Pubblico:** agenzie, imprese e professionisti con partita IVA che lavorano da soli (web agency, web designer e grafici,
+  IT, marketing, HR, commerciale, consulenti). Dal 22/10 il sito nomina esplicitamente anche i freelance.
   Beta gratuita su invito: prime 3 agenzie il 19/10 (Gopher, Mutart, Studio360), poi inviti a circa 50 agenzie,
   10–15 al giorno (13 al 21/10); decisione sulla seconda ondata il 30/10.
 - **Sito:** leads.weborastudio.it, un servizio di Webora Studio. Casella del servizio: leads@weborastudio.it.
@@ -36,8 +37,8 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
 | Captcha | Cloudflare Turnstile | registrazione, accesso, recupero password |
 | Fonti di dati | OpenStreetMap (ODbL), Adzuna (annunci), siti ufficiali delle aziende | |
 
-Il codice è un unico repository. Contiene l'app in `src/`, il database in `supabase/migrations/` (57 migrazioni,
-fino alla 057, con i loro test; a ogni push GitHub Actions esegue lint, tipi, test dell'app, del motore e SQL,
+Il codice è un unico repository. Contiene l'app in `src/`, il database in `supabase/migrations/` (58 migrazioni,
+fino alla 058, con i loro test; a ogni push GitHub Actions esegue lint, tipi, test dell'app, del motore e SQL,
 `.github/workflows/ci.yml`) e i workflow in `n8n/`, generati da script (`build.py` e `build.mjs`) con i loro test.
 
 ## 3. Piani, crediti e prezzi

@@ -8,7 +8,7 @@ import { normalizeEmail } from "@/lib/domain/email-norm";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { clientIpHash } from "@/lib/server/request-meta";
 import { verifyCaptcha } from "@/lib/server/captcha";
-import { LOGIN_FAILURES, MFA_FAILURES, RESET_REQUESTS, rateHit } from "@/lib/server/rate";
+import { LOGIN_FAILURES, MFA_ATTEMPTS, RESET_REQUESTS, rateHit } from "@/lib/server/rate";
 import { sha256Hex } from "@/lib/server/crypto";
 
 // Registrazioni dallo stesso IP nelle ultime 24 ore (audit V4).
@@ -72,15 +72,12 @@ export async function verifyMfaLogin(_: AuthState, form: FormData): Promise<Auth
   // e qui l'IP è quello del server).
   const { data: auth } = await supabase.auth.getUser();
   const userId = auth.user?.id ?? "";
-  if (!(await rateHit(userId, "mfa_fail", MFA_FAILURES.windowSeconds, MFA_FAILURES.max, false))) {
+  if (!(await rateHit(userId, "mfa_try", MFA_ATTEMPTS.windowSeconds, MFA_ATTEMPTS.max))) {
     await supabase.auth.signOut({ scope: "local" });
     return { error: "Troppi codici non validi. Attendi 15 minuti e accedi di nuovo." };
   }
   const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
-  if (error) {
-    await rateHit(userId, "mfa_fail", MFA_FAILURES.windowSeconds, MFA_FAILURES.max);
-    return { error: "Codice non valido o scaduto: controlla l'ora del telefono e riprova." };
-  }
+  if (error) return { error: "Codice non valido o scaduto: controlla l'ora del telefono e riprova." };
   redirect(safeNext(form.get("next")));
 }
 

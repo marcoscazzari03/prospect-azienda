@@ -80,6 +80,15 @@ describe("zone della ricerca", () => {
   });
 });
 
+describe("zone: testo molto lungo", () => {
+  it("con migliaia di spazi risponde subito", () => {
+    const t = Date.now();
+    expect(splitZones("Modena" + " ".repeat(50000) + "e provincia")).toEqual(["Modena"]);
+    expect(splitZones("a" + " \t".repeat(30000) + "b, Bologna")).toEqual(["a"]); // oltre i 2.000 caratteri si taglia
+    expect(Date.now() - t).toBeLessThan(200);
+  });
+});
+
 describe("sinonimi delle parole chiave del settore", () => {
   it("«web agency» porta «agenzia web» e «webagency»", () => {
     expect(withSynonyms(["web agency"])).toEqual(["web agency", "agenzia web", "webagency"]);

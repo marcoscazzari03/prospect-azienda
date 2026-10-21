@@ -44,7 +44,7 @@ const Lead = ({ children, className }: { children: ReactNode; className?: string
 );
 
 const PAINS = [
-  ["Ore a cercare", "Mappe, elenchi, siti uno per uno. Il tempo che passi a cercare aziende è tempo tolto alla vendita."],
+  ["Ore a cercare", "Mappe, elenchi, siti uno per uno. Il tempo che passi a cercare aziende è tempo tolto alla vendita e al lavoro per i clienti."],
   ["Liste che non c'entrano", "Elenchi comprati con aziende fuori zona, chiuse o di un altro settore, e nessuna fonte per verificare."],
   ["Nessun motivo per scrivere", "Anche con l'azienda giusta, il primo messaggio è generico: «Ci occupiamo di…». Ed è facile da ignorare."],
 ] as const;
@@ -66,7 +66,7 @@ const AUDIENCES = [
   { who: "Fornitori industriali", clients: "Aziende manifatturiere del tuo settore e della tua zona", example: "Carpenterie metalliche · Brescia" },
   { who: "Agenzie per il lavoro e selezione", clients: "Aziende che stanno assumendo", offer: "recruiting" },
   { who: "Commercialisti e consulenti", clients: "Aziende che cercano un contabile o un amministrativo", offer: "accounting" },
-  { who: "Web agency, IT e marketing", clients: "Aziende con un sito datato, senza HTTPS o con software vecchio", offer: "web_redesign" },
+  { who: "Web agency, web designer e grafici, IT e marketing", clients: "Aziende con un sito datato, senza HTTPS o con software vecchio", offer: "web_redesign" },
 ] as const;
 
 const OBJECTIONS = (prices: SignalPrices, freeCredits: number) => [
@@ -79,6 +79,7 @@ const OBJECTIONS = (prices: SignalPrices, freeCredits: number) => [
 ] as const;
 
 const FAQ = [
+  ["Lavoro da solo con partita IVA: fa per me?", "Sì. Ti basta un account: inizi con i crediti gratuiti senza carta, poi compri un pacchetto quando ti serve, senza abbonamento, con crediti validi 12 mesi. Paghi solo le aziende consegnate."],
   ["Posso usare i contatti per l'email marketing?", "Le regole cambiano da paese a paese: in Italia l'invio di email promozionali richiede in genere il consenso, anche verso caselle aziendali, e un indirizzo pubblicato sul sito non equivale a un consenso. Sei tu a decidere come contattare le aziende e a rispettare la normativa. Webora Leads è pensato per contatti mirati, uno per azienda, con un motivo concreto."],
   ["Perché non ci sono i nomi dei referenti?", `È una scelta di prodotto: ${BRAND.name} ti dice quali aziende sono in target, perché sono un'opportunità e come raggiungerle tramite i loro canali aziendali. Non raccogliamo né vendiamo dati di persone.`],
   ["In quali paesi funziona?", "Il nostro database e gli annunci di lavoro coprono l'Italia. Per gli altri paesi europei usiamo la ricerca estesa sul web, che costa 1 credito in più per azienda."],
@@ -107,7 +108,7 @@ export default async function HomePage() {
       <section className="ruled border-b border-line">
         <div className="mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-12 sm:px-6 md:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pb-24">
           <div className="animate-row-in">
-            <p className="mb-5 font-mono text-xs uppercase tracking-[0.18em] text-ledger">Per chi vende alle aziende</p>
+            <p className="mb-5 font-mono text-xs uppercase tracking-[0.18em] text-ledger">Per chi vende alle aziende, anche da solo</p>
             <h1 className="font-display text-[2.6rem] font-semibold leading-[1.04] tracking-tight sm:text-6xl">
               Trova le aziende che hanno un motivo per <span className="text-ledger">sceglierti</span>.
             </h1>
@@ -206,7 +207,7 @@ export default async function HomePage() {
         <div className="grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-end">
           <Title>Vendi alle aziende? Ti aiutiamo a trovarle.</Title>
           <p className="text-ink-2">
-            La ricerca in target funziona per qualunque settore: descrivi le aziende che vuoi come clienti e la zona. Le opportunità le
+            Che tu sia un&apos;agenzia, un&apos;impresa o un professionista con partita IVA. La ricerca in target funziona per qualunque settore: descrivi le aziende che vuoi come clienti e la zona. Le opportunità le
             aggiungiamo un servizio alla volta, solo quando c&apos;è un segnale che possiamo verificare.
           </p>
         </div>

@@ -55,7 +55,7 @@ export function SignUpForm({ plan, captchaKey = "", intro }: { plan?: string; ca
       <input type="hidden" name="plan" value={plan ?? ""} />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nome e cognome" htmlFor="fullName"><Input id="fullName" name="fullName" required autoComplete="name" /></Field>
-        <Field label="Azienda" htmlFor="company"><Input id="company" name="company" required autoComplete="organization" /></Field>
+        <Field label="Azienda o attività" htmlFor="company" hint="Se lavori da solo, il tuo nome o quello della tua attività."><Input id="company" name="company" required autoComplete="organization" /></Field>
       </div>
       <Field label="Email di lavoro" htmlFor="email"><Input id="email" name="email" type="email" required autoComplete="email" /></Field>
       <Field label="Password" htmlFor="password" hint="Almeno 10 caratteri."><Input id="password" name="password" type="password" required minLength={10} autoComplete="new-password" /></Field>

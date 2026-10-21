@@ -37,6 +37,7 @@ export default async function PricingPage() {
           <div>
             <p className="font-display text-xl font-semibold">Inizia gratis</p>
             <p className="text-ink-2">{free.credits} crediti per provare il servizio su un target reale, senza carta di credito.</p>
+            <p className="mt-1 text-sm text-muted">Lavori da solo o fai ricerche ogni tanto? Dopo la prova basta un pacchetto: niente abbonamento, crediti validi 12 mesi.</p>
           </div>
           <ButtonLink href="/registrati">Crea l&apos;account</ButtonLink>
         </Card>

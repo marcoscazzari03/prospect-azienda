@@ -23,14 +23,21 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     ottimistico finché non risponde qualcuno; si fa alla prima risposta, punto 20).
 
 ## 🛡️ Tecnico e sicurezza: 22–25/10 (deciso il 21/10 sera)
-70. **Io, 22/10** – Nuovo ripasso di sicurezza di tutto ciò che è cambiato dal 19/10 (migrazioni 047–057, avviso settimanale,
-    wizard, Admin → Beta, nodi del motore) e stato delle voci aperte del ripasso del 19/10; dipendenze (`npm audit`).
+70. ~~**Io, 22/10** – Nuovo ripasso di sicurezza di tutto ciò che è cambiato dal 19/10 (migrazioni 047–057, avviso settimanale,
+    wizard, Admin → Beta, nodi del motore) e stato delle voci aperte del ripasso del 19/10; dipendenze (`npm audit`).~~ (22/10: app e SQL senza problemi gravi, un problema medio corretto; motore con un problema medio aperto, punto 74;
+    dettagli in `06-audit-sicurezza.md`, fuori dal repository)
 71. **Io** – Correzione di quello che esce dal punto 70, con revisione e test, poi le voci del Tecnico aperto (63, 39, 40, 54e,
     19e) e la pulizia dei dati di collaudo (punto 19).
 72. **Io** – Nome in un solo punto del codice (`config.ts`): «Webora Leads» e gli indirizzi diventano impostazioni, così il
     passaggio ad Avvisto è un cambio di configurazione più logo e testi.
 73. **Tu** – Controlli a mano: avvisi di spesa (punto 18), Deployment Protection su Vercel, conservazione breve delle
     esecuzioni su n8n, rotazione del segreto del motore (punto 17, insieme). Supabase Pro rinviato alla messa in produzione (punto 15).
+74. **Io, poi Tu** – Motore e workflow n8n: nomi DNS «jolly» bloccati, porte e indirizzi IP scartati anche nel Settore e nella
+    pagina del referente, domini validati anche nelle route dell'app; certificati non validi tolti con ripiego su www. Il
+    controllo completo dei redirect e degli IP si fa con il worker (punto 49). **Tu:** pubblicare i workflow.
+75. ~~**Io** – Testi del sito anche per i professionisti con partita IVA (decisione del 21/10): «anche da solo» sopra il titolo,
+    «Per chi è», domanda nelle FAQ, riga nei prezzi, «Azienda o attività» nella registrazione~~ (22/10)
+76. **Tu** – Eseguire la migrazione 058 (limiti sui tentativi sotto lock, permessi delle tabelle dell'avviso).
 
 ## 🟠 Decisione della beta
 9. **Insieme, il 30/10** – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive, esporta almeno la metà

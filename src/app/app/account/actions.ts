@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireViewer } from "@/lib/server/dal";
-import { MFA_FAILURES, rateHit } from "@/lib/server/rate";
+import { MFA_ATTEMPTS, PASSWORD_CHECKS, rateHit } from "@/lib/server/rate";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { env } from "@/lib/env";
@@ -40,6 +40,9 @@ export async function changePassword(_: AccountState, form: FormData): Promise<A
   if (next.length < 10 || next.length > 200) return { error: "La nuova password deve avere almeno 10 caratteri." };
   if (next !== confirm) return { error: "Le due password non coincidono." };
   if (next === current) return { error: "La nuova password deve essere diversa da quella attuale." };
+  if (!(await rateHit(viewer.user.id, "pwd_check", PASSWORD_CHECKS.windowSeconds, PASSWORD_CHECKS.max))) {
+    return { error: "Troppi tentativi. Riprova tra 15 minuti." };
+  }
   // Controllo della password attuale con un client a parte: non tocca la sessione in uso
   // (che con la verifica in due passaggi tornerebbe al solo livello password).
   const check = createSupabaseClient(env.supabaseUrl(), env.supabaseAnonKey(), { auth: { persistSession: false, autoRefreshToken: false } });
@@ -105,14 +108,11 @@ export async function disableMfa(_: AccountState, form: FormData): Promise<Accou
   const { data: list } = await supabase.auth.mfa.listFactors();
   const factors = (list?.totp ?? []).filter((f) => f.status === "verified");
   if (!factors.length) return { info: "La verifica in due passaggi non è attiva." };
-  if (!(await rateHit(viewer.user.id, "mfa_fail", MFA_FAILURES.windowSeconds, MFA_FAILURES.max, false))) {
+  if (!(await rateHit(viewer.user.id, "mfa_try", MFA_ATTEMPTS.windowSeconds, MFA_ATTEMPTS.max))) {
     return { error: "Troppi codici non validi. Riprova tra 15 minuti." };
   }
   const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factors[0].id, code: code.data });
-  if (error) {
-    await rateHit(viewer.user.id, "mfa_fail", MFA_FAILURES.windowSeconds, MFA_FAILURES.max);
-    return { error: "Codice non valido o scaduto." };
-  }
+  if (error) return { error: "Codice non valido o scaduto." };
   for (const f of factors) {
     const { error: e } = await supabase.auth.mfa.unenroll({ factorId: f.id });
     if (e) return { error: "Non è stato possibile disattivarla. Riprova." };
