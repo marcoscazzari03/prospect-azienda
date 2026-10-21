@@ -108,7 +108,7 @@ export default async function HomePage() {
       <section className="ruled border-b border-line">
         <div className="mx-auto grid max-w-6xl gap-12 px-4 pb-16 pt-12 sm:px-6 md:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16 lg:pb-24">
           <div className="animate-row-in">
-            <p className="mb-5 font-mono text-xs uppercase tracking-[0.18em] text-ledger">Per chi vende alle aziende, anche da solo</p>
+            <p className="mb-5 text-balance font-mono text-xs uppercase tracking-[0.18em] text-ledger">Per chi vende alle aziende, anche&nbsp;da&nbsp;solo</p>
             <h1 className="font-display text-[2.6rem] font-semibold leading-[1.04] tracking-tight sm:text-6xl">
               Trova le aziende che hanno un motivo per <span className="text-ledger">sceglierti</span>.
             </h1>
