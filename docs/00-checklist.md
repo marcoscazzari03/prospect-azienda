@@ -5,170 +5,142 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `05-da-fare.md`).
 
-Ultimo aggiornamento: 21/10/2026.
+Ultimo aggiornamento: 21/10/2026 (riscritta per intero; i numeri restano quelli citati nel registro).
 
-## 🔴 Bloccanti per la prima ondata della beta (Sud ed Emilia-Romagna)
-1. ~~**Tu** – Verifica in due passaggi su Supabase, Vercel, GitHub, Stripe, n8n~~ (19/10). Scelta dell'utente: niente
-   verifica in due passaggi su Anthropic, Resend, Hostinger, Cloudflare e Icypeas.
-2. ~~**Tu** – Chiave Anthropic dedicata con limite di spesa, credenziale «Webora Leads - Anthropic», chiave vecchia
-   eliminata~~ (19/10). «Prospect | Search» e «Prospect Avvocati | Search» sono di un altro progetto attivo: non
-   toccarli. ~~Verificato: usano ChatGPT, non la chiave di Webora~~ (20/10).
-3. ~~**Tu** – Pubblicato «Aziende | Popolamento OSM» (Nord prima, 8 province a notte)~~ (19/10)
-4. ~~**Tu** – Sconto per i beta tester: −30% per 12 mesi~~ (19/10)
-5. ~~**Tu** – Invitate 3 agenzie (Gopher, Mutart, Studio360) con email personalizzate e PDF di esempi reali~~ (19/10)
-5b. **Insieme** – Alle risposte: account, +150 crediti, piano Growth dall'admin, email di benvenuto (`10-beta.md`).
-    Se non rispondono, un solo promemoria il **24–25/10** (deciso il 21/10, prima era il 27/10). Ogni «sì» attivato in giornata.
-5g. **Tu, 22–24/10** – 15 inviti al giorno (ne mancano 37 per arrivare a 50; 13 fatti al 21/10), prima chi ha l'email.
-5h. **Io + Tu** – Prima delle ricerche delle agenzie: query `opportunita_per_regione.sql` (Tu) e una ricerca di prova
-    nella zona e nel servizio di ogni agenzia che accetta (Io), così la prima ricerca non torna vuota.
-5e. ~~**Io** – Beta allargata: soglie in percentuale nella pagina Admin → Beta, decisione spostata al 30/10, criteri e
-    testi dell'invito aggiornati in `10-beta.md`~~ (20/10). **Tu:** invitare circa 50 agenzie al Sud e in Emilia-Romagna nei
-    prossimi giorni, 10–15 al giorno da leads@ (`10-beta.md`). Lista di 62 agenzie pronta (21/10: 48 con email, 14 dal
-    modulo; file mandato in chat, non nel repository). ~~21/10: 10 inviti~~; esclusa
-    Webapp s.r.l. (non fa siti). Alle risposte, stessa procedura del 5b.
-5f. **Insieme, il 21/10** – Nuovo listino (proposta e valutazione nel registro, 20/10 sera). Prima del lancio a
-    pagamento: pacchetti 59/249/790 €, Scale tolto, 20 crediti di benvenuto con i primi lead «forti», lead con solo
-    modulo a 1 credito, niente supplemento AI (migrazione). Abbonamenti a pagamento solo con il monitoraggio (punto 36).
-    Niente promesse di funzioni assenti né confronto con Apollo sul consenso; il −30% alle 3 agenzie resta, prezzo
-    fondatore per le nuove (punto 5e). Numeri definitivi con i dati della beta (punto 35).
-5c. ~~**Io** – Metriche della beta (Admin → Beta) con le soglie del 28/10; «Spunto per il primo messaggio» nei lead e
-    nell'export~~ (20/10)
-5d. ~~**Io** – Email aziendali salvate dal controllo siti, riserva che parte da chi ha l'email (migrazione 050)~~ (20/10).
-    ~~Migrazione eseguita e workflow pubblicato~~ (20/10).
-6. ~~**Io** – Clausola «Riservatezza delle ricerche» nei termini~~ (19/10)
-7. ~~**Io** – Piano della beta e testi dell'invito (`10-beta.md`)~~ (19/10)
-8. ~~**Tu** – Casella leads@weborastudio.it attiva e provata~~ (19/10)
+## 🔴 Beta in corso: questa settimana
+5g. **Tu, 22–24/10** – 15 inviti al giorno da leads@ (ne mancano 37 per arrivare a 50; 13 fatti al 21/10), prima le
+    agenzie con l'email, poi quelle con il solo modulo. Lista aggiornata in chat (`agenzie_beta.csv`, fuori dal repository).
+5b. **Insieme** – A ogni «sì», in giornata: account, +150 crediti e piano Growth dall'admin, email di benvenuto
+    (`10-beta.md`, link /registrati?beta=1).
+5i. **Tu, 24–25/10** – Un solo promemoria a Gopher, Mutart e Studio360 (testo in `10-beta.md`, scritto il 21/10).
+56b. **Tu, ogni giorno** – Guardare le nuove registrazioni per aggiungere i crediti beta; controllare in Stripe (test) che
+    nessun cliente non admin abbia comprato.
+57b. **Io, 22/10 mattina** – Nel resoconto: notte del recupero OSM (Sondrio, Belluno) e salvataggio a pezzi; prove false tolte
+    dal controllo siti (punto 58); primo giro di «Siti aziende» dopo Adzuna (se il giro delle 11:40 è pieno, un terzo giro).
+5h. ~~**Io + Tu** – Ricerca di prova nella zona di ogni agenzia invitata~~ (21/10: non si fa, decisione dell'utente: troppo
+    ottimistico finché non risponde qualcuno; si fa alla prima risposta, punto 20).
 
-## 🟠 Bloccanti per la seconda ondata (Nord)
-9. **Insieme, il 30/10** (era il 28/10) – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive,
-   esporta almeno la metà (e almeno 2), almeno 1 ha una risposta, segnalati sotto il 10%. Poi rilanciare `supabase/queries/opportunita_per_regione.sql` e invitare
-   solo dove il servizio ha almeno 40–50 aziende pronte. Se le agenzie attive sono meno di 3: rinvio già fissato al **6/11**
-   (deciso il 21/10).
-10. ~~**Io** – Popolamento OSM dal Nord, 8 province a notte~~ (19/10). Prima notte: 2.922 aziende lombarde nuove (20/10).
+## 🟠 Decisione della beta
+9. **Insieme, il 30/10** – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive, esporta almeno la metà
+   (e almeno 2), almeno 1 ha una risposta, segnalati sotto il 10%. Poi rilanciare `supabase/queries/opportunita_per_regione.sql`
+   e invitare il Nord solo dove il servizio ha almeno 40–50 aziende pronte. Se le agenzie attive sono meno di 3: rinvio già
+   fissato al **6/11** (deciso il 21/10).
 
 ## 🔴 Bloccanti per il lancio a pagamento (non per la beta)
 11. **Tu** – Partita IVA, regime fiscale, fatturazione elettronica (SDI), con il commercialista.
-12. **Tu** – Parere del legale (`09-domande-consulenti.md`): caso Lusha, art. 130 (vale anche per le caselle
-    aziendali?), LIA/DPIA, ODbL, Adzuna, DPA, revisione di informativa, termini e pagina «Sicurezza e privacy»,
-    chiusura dell'account. Niente promesse di «contatto senza consenso» finché non risponde per iscritto.
+12. **Tu** – Parere del legale (`09-domande-consulenti.md`): caso Lusha, art. 130 (vale anche per le caselle aziendali?),
+    LIA/DPIA, ODbL, Adzuna, DPA, revisione di informativa, termini e pagina «Sicurezza e privacy», chiusura dell'account,
+    riga «rispondete no» e firma delle email. Niente promesse di «contatto senza consenso» finché non risponde per iscritto.
 13. **Tu** – Conferma scritta di Adzuna sull'uso commerciale degli annunci (mail del 18/10, in attesa).
-14. **Insieme** – Stripe con pagamenti reali e un acquisto vero di prova. Controllare che le descrizioni dei prodotti
-    non promettano più utenti.
+14. **Insieme** – Stripe con pagamenti reali e un acquisto vero di prova; poi togliere il blocco «acquisti solo admin».
 15. **Tu, poi Insieme** – Supabase Pro (backup giornalieri) e prova di ripristino.
 16. **Tu** – Repository GitHub privato.
 17. **Insieme** – Rotazione del segreto del motore.
 18. **Tu** – Avvisi di spesa su Anthropic, Vercel, Supabase.
 19. **Insieme** – Pulizia dei dati di collaudo, compreso l'account di prova delle email.
+29. **Tu, con il legale** – Contratto sul trattamento dei dati (DPA) pronto da firmare per i clienti.
+5f. **Insieme, dopo la beta** – Nuovo listino (proposta nel registro, 20/10 sera): pacchetti 59/249/790 €, Scale tolto,
+    20 crediti di benvenuto, lead con solo modulo a 1 credito, niente supplemento AI; abbonamenti a pagamento con l'avviso
+    settimanale (punto 36). Prezzo fondatore per le nuove agenzie, −30% per 12 mesi a chi ha fatto la beta. Numeri
+    definitivi con i dati della beta (punto 35).
 
 ## 🟡 Durante la beta
-19b. ~~**Io** – Falsi «Senza HTTPS», prima correzione: indirizzo vero del sito, solo certificati scaduti, autofirmati o
-    di un altro sito~~ (19/10)
-19c. ~~**Tu** – Ricontrollo di 341 aziende: 68 scaduti, 4 autofirmati, 141 «non valido per questo sito»~~ (19/10)
-19d. ~~**Io + Tu** – Seconda correzione (domini secondari di gruppi, domini nudi) e ricontrollo di 160 aziende~~ (20/10).
-    **Resta:** l'esito nell'analisi giornaliera.
-20. **Insieme** – Alla prima ricerca vera: controllare le regole delle email (reservations@, albergo…@, domini fratelli).
+20. **Insieme** – Alla prima agenzia che accetta: una ricerca di prova nella sua zona e nel suo servizio; controllare le
+    regole delle email (reservations@, albergo…@, domini fratelli).
 21. **Tu** – Giudicare a mano le 24 aziende con il solo modulo di contatto (query `moduli.sql`).
-22. **Insieme** – Seguire la pagina Admin → Beta: export, risposte, segnalazioni, costo dell'AI. Chiedere alle agenzie
-    se usano lo «Spunto per il primo messaggio».
+22. **Insieme** – Seguire la pagina Admin → Beta: export, risposte, segnalazioni, costo dell'AI. Chiedere alle agenzie se
+    usano lo «Spunto per il primo messaggio».
 23. **Insieme** – Seguire il riquadro «Database aziende» e le chiamate Adzuna (limite 2.500 al mese, raccolta ogni 2 giorni).
 24. **Insieme** – MillionVerifier solo se i rimbalzi superano 2–3 ogni 100 lead.
 25. **Insieme** – La domanda chiave: senza il nome del referente, lo pagherebbero?
+19e. **Io** – Esito delle correzioni dei falsi «Senza HTTPS» nell'analisi giornaliera.
+61. **Insieme** – Riordino della cartella `docs` (proposta del 21/10: documenti vivi, storici in `docs/archivio/`, indice).
 
-## 🔵 Analisi e miglioramenti tecnici
-26. ~~**Io** – Ripasso di sicurezza, migrazione 046, workflow pubblicati~~ (19/10)
+## 🔵 Tecnico aperto
+54e. **Io, dopo il 30/10** – Segnalare le aziende con nome e dominio molto diversi (Data Quality).
+59. **Insieme** – Giri a vuoto e province: ~~Siti aziende 2 giri al mattino~~ (21/10); controllo siti ogni 2 ore dopo il 2/11
+    (finito il ricontrollo della 054); irraggiungibili ricontrollati dopo 60–90 giorni; OSM più lento dopo il primo giro;
+    lotto del Settore aziende; recuperare Como, Sondrio, Belluno, Padova, Rovigo, Treviso (in corso, notti 22–24/10).
+    **Tu:** query `supabase/queries/popolamento_settimanale.sql` ogni settimana.
+60. **Insieme, da decidere** – Magazzino con gli annunci di `job_ads`; prova dell'annuncio solo se ancora visibile su Adzuna
+    (`last_seen_at`).
+62. **Insieme, da decidere** – «CMS vecchio» sulle pagine provvisorie: resta valutato o diventa non determinabile?
+63. **Io** – Stesso trucco della 057 (radici calcolate una volta) per le ricerche in target (`target_pool`, contatore e
+    riserva), se diventano lente.
 26b. **Io, dopo la beta** – Motore: seguire a mano i rimandi da un sito all'altro, ricontrollando ogni volta l'indirizzo.
-27. ~~**Io** – Motore: analisi delle ricerche reali, memoria delle aziende senza email (migrazione 047), tolti 3 nodi
-    morti~~ (20/10). Dettagli in `11-analisi-motore.md`.
-27b. ~~**Tu** – Migrazione 047 eseguita, motore pubblicato~~ (20/10)
-28. ~~**Io** – Pagina «Sicurezza e privacy» (`/sicurezza`)~~ (20/10). Da far rileggere al legale.
-29. **Tu, con il legale** – Contratto sul trattamento dei dati (DPA) pronto da firmare per i clienti.
-29b. ~~**Io** – Registro delle modifiche e delle decisioni (`13-registro.md`) e panoramica del sistema
-    (`12-panoramica-sistema.md`)~~ (20/10)
-52. ~~**Io** – Ricerche in target: parole chiave del settore che restringono (migrazione 052), «Campania e Sicilia»
-    divisa in due, conferma con regione vuota~~ (21/10). ~~Migrazione 052 eseguita~~ (21/10). ~~Migrazione 053 eseguita~~
-    (21/10, correzione trovata dal Code Reviewer).
-53. ~~**Io** – Squadra di agenti~~. ~~Code Reviewer creato e provato~~ (21/10). ~~QA Tester, Data Quality, Sales & Copy, Designer e Business Analyst creati~~ (21/10). ~~Controlli automatici
-    su GitHub~~ (21/10). (decisa il 21/10, dettagli nel registro): prima i controlli automatici su GitHub
-    (test app, motore e SQL, lint, tipi a ogni push), poi Code Reviewer (sola lettura), QA Tester, Data Quality, poi
-    Sales & Copy (prepara, non invia), infine Designer e Business Analyst (voce del resoconto giornaliero).
-54. **Io, prossima sessione** – Correzioni proposte dagli agenti il 21/10 (dettagli nel registro):
-    ~~a) zone: città unite da «e» («Modena e Reggio Emilia»), «… e provincia», «/» e «&» come separatori (QA);~~ (21/10)
-    ~~b) «web agency» con i sinonimi «agenzia web», «webagency» (QA);~~ (21/10). ~~Sigle di provincia~~ (21/10).
-    ~~c) niente segnali sulle pagine che sembrano barriere anti-bot (testo corto, niente viewport né copyright) (Data Quality);~~ (21/10, punto 58)
-    ~~d) no_privacy non scatta se il sito è «in costruzione» (Data Quality);~~ (21/10, punto 58)
-    e) segnalare le aziende con nome e dominio molto diversi (Data Quality);
-    ~~f) pagina contatti prima di scartare per «nessuna_email» (Data Quality)~~ (già presente nel motore, 21/10).
-    Prima di c)–f): far verificare al Data Quality sui siti veri (ora la rete è aperta) che i problemi ci siano davvero.
-55. ~~**Tu** – Accesso completo alla rete nell'ambiente cloud: il Data Quality può aprire i siti delle aziende~~ (21/10).
-56. ~~**Io** – Sito per le agenzie invitate: fascia beta, /registrati?beta=1, «Prova» su telefono, prezzi senza «Il più
-    scelto» né «API», hero, rassicurazioni, contrasto, 404 in italiano; acquisti solo per gli admin finché Stripe è in test~~
-    (21/10). **Tu:** controllare in Stripe (test) che nessun cliente non admin abbia comprato; nell'email di benvenuto usare
-    il link /registrati?beta=1; guardare ogni giorno le nuove registrazioni per aggiungere i crediti beta.
-57. ~~**Io** – Popolamento OSM: salvataggio a pezzi di 250 nell'app; recupero delle province perse (notti 22–24/10) caricato
-    su n8n~~ (21/10). ~~Workflow pubblicato~~ (21/10). **Resta:** verificare la notte del 22/10; controllo siti
-    meno frequente quando la coda è vuota.
-58. ~~**Io** – Dal Data Quality (21/10): niente segnali sulle pagine d'errore o anti-bot, sui traslochi e sulle pagine
-    provvisorie; www del sito salvato; vecchie prove tolte (migrazione 055); giro Settore aziende con JSON non valido~~ (21/10).
-    ~~Migrazione 055 eseguita, 3 workflow pubblicati~~ (21/10). **Resta:** nel resoconto del 22/10, prove tolte e controllo siti
-    senza errori.
-59. **Insieme, da decidere** – Dal controllo settimanale (registro, 21/10): recuperare Como, Sondrio, Belluno, Padova, Rovigo,
-    Treviso; ridurre i giri a vuoto (~~Siti aziende 2 giri al mattino~~ 21/10, Controllo siti ogni 2 ore dopo il 2/11, irraggiungibili dopo
-    60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; ~~capire perché manca Adzuna del 20/10~~ (21/10: gira ogni 2 giorni).
-    **Tu:** query `supabase/queries/popolamento_settimanale.sql`.
-60. ~~**Io** – Email per le aziende controllate prima del 20/10 (migrazione 054); verificati i 14 segnali «annuncio» (non è un
-    difetto, query Q3b)~~ (21/10). ~~Migrazione 054 eseguita~~ (21/10). **Da decidere:** magazzino con gli annunci di
-    `job_ads`; prova dell'annuncio solo se ancora visibile su Adzuna (`last_seen_at`).
+39. **Io** – Coda del controllo siti con priorità.
+40. **Io** – Wizard: stima realistica dei lead e costo in euro.
+
 ## ⚪ Email e immagine
-30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo
-    (file pronto).
-31. ~~**Tu** – Firma con il logo per leads@ nella webmail di Hostinger~~ (21/10).
-32. ~~**Io** – Email dell'app con la grafica Webora e modelli per le email di accesso~~ (19/10)
-32b. ~~**Tu** – Modelli incollati in Supabase, avvisi di sicurezza attivi, registrazione e recupero password
-    provati~~ (19/10)
+30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo (file pronto).
 33. **Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027.
+47. **Insieme** – BIMI (logo del mittente su tutti i programmi di posta): DMARC restrittivo e certificato a pagamento.
 
 ## ⚪ Dopo la beta
 34. **Io** – Tarare i pesi del punteggio delle opportunità con i giudizi dei clienti.
-35. **Insieme** – Listino definitivo con i costi misurati; valutare i lead con il solo modulo di contatto a metà
-    credito.
-36. ~~**Io** – Avviso settimanale gratuito delle nuove opportunità (migrazione 056), solo admin durante la beta~~ (21/10).
-    ~~Migrazione 056 eseguita~~ (21/10). Pulsante senza effetto su ricerche larghe (calcolo oltre 8 s): migrazione 057.
-    ~~Verifica sui dati veri (0 differenze) e migrazione 057~~ (21/10). **Dopo la beta:** aprirlo a tutti, link di disattivazione nell'email, soglia a scelta.
+35. **Insieme** – Listino definitivo con i costi misurati; valutare i lead con il solo modulo di contatto a metà credito.
+36b. **Io** – Avviso settimanale aperto a tutti: link di disattivazione nell'email, soglia a scelta del cliente, riepilogo ogni
+    4 settimane, più di 50 avvisi a notte, tempi su ricerche molto larghe.
 37. **Io** – Nuovi servizi: «Sito nuovo» e «Prenotazioni online per hotel».
 38. **Insieme** – Segnale «nuova apertura / nuova sede».
-39. **Io** – Coda del controllo siti con priorità.
-39b. ~~**Io** – Import OSM: contatore «nuove / aggiornate» robusto alle chiamate ripetute (migrazione 048)~~ (20/10)
-40. **Io** – Wizard: stima realistica dei lead e costo in euro.
 41. **Insieme** – Lead con il solo modulo di contatto dopo aver esaurito quelli con email?
-42. ~~**Io** – Captcha e limite ai tentativi su accesso e recupero password~~ (20/10). ~~Chiavi e dominio verificati~~
-    (20/10).
-43. **Io** – Più utenti per account e API. ~~«Fino a 3 utenti» tolto dal listino di Growth (migrazione 049)~~ (20/10).
+43. **Io** – Più utenti per account e API.
 44. **Insieme** – Capacità di n8n oltre 50–100 clienti attivi.
 45. **Insieme** – Estero, un paese alla volta (prima il parere legale).
 46. **Insieme** – Referenti: restano spenti, solo dopo il parere legale.
-47. **Insieme** – BIMI (logo del mittente su tutti i programmi di posta): DMARC restrittivo e certificato a pagamento.
-48. ~~**Io** – Segnale indicativo «Sito senza informativa privacy o cookie» (migrazione 051), nel servizio «Sicurezza del
-    sito»~~ (20/10). ~~Nodi caricati su n8n, migrazione 051 eseguita, motore e controllo siti
-    pubblicati~~ (20/10).
-49. **Io** – Controllo siti su un piccolo worker fuori da n8n: libera ~720 esecuzioni al mese e permette i segnali
-    PageSpeed e «certificato in scadenza entro 30 giorni». Deciso il 21/10: sul VPS Hetzner dell'utente (1 vCPU, 2 GB,
-    14 €/mese, già pagato; il progetto che c'era è abbandonato, si può reinstallare). Dopo il 30/10.
-50. **Insieme** – Seconda fonte per gli annunci (leggere i termini di Jooble e Careerjet) e pagine «Lavora con noi»
-    come fonte, per non dipendere solo da Adzuna.
-51. **Insieme** – Ricerche AI notturne mirate sulle province e i settori dei clienti (circa 15–20 € ogni 1.000
-    aziende), per irrobustire il database oltre OpenStreetMap.
+49. **Io** – Controllo siti su un worker fuori da n8n, sul VPS Hetzner dell'utente da reinstallare (deciso il 21/10): libera
+    ~720 esecuzioni al mese e permette i segnali «certificato in scadenza entro 30 giorni» e PageSpeed. Dopo il 30/10.
+50. **Insieme** – Seconda fonte per gli annunci (termini di Jooble e Careerjet) e pagine «Lavora con noi».
+51. **Insieme** – Ricerche AI notturne mirate su province e settori dei clienti (circa 15–20 € ogni 1.000 aziende).
+
+## ✅ Fatto il 21/10
+- 5e. ~~**Io** – Beta allargata: soglie in percentuale, decisione al 30/10, criteri e testi dell'invito~~ (20/10);
+  ~~**Tu** – 10 inviti del 21/10 (esclusa Webapp s.r.l., non fa siti)~~ (21/10)
+- 5i. ~~**Io** – Promemoria per le agenzie del 19/10 e benvenuto aggiornato (Sales & Copy)~~
+- 31. ~~**Tu** – Firma con il logo per leads@ nella webmail di Hostinger~~
+- 36. ~~**Io** – Avviso settimanale gratuito delle nuove opportunità, solo admin in beta (migrazione 056)~~; ~~migrazioni 056 e
+  057 eseguite~~; ~~testi «su invito» e «se ci sono aziende nuove»~~
+- 52. ~~**Io** – Ricerche in target: parole chiave del settore che restringono (migrazioni 052 e 053)~~
+- 53. ~~**Io** – Squadra di agenti (Code Reviewer, QA Tester, Data Quality, Sales & Copy, Designer, Business Analyst) e
+  controlli automatici su GitHub~~
+- 54. ~~**Io** – Zone del wizard («Modena e Reggio Emilia», «… e provincia», «/», «&», macroaree, sigle di provincia), sinonimi
+  del settore («web agency», «software house», «e-commerce»), pagine anti-bot e provvisorie; pagina contatti già nel motore~~
+- 55. ~~**Tu** – Accesso completo alla rete nell'ambiente cloud~~
+- 56. ~~**Io** – Sito per le agenzie invitate: fascia beta, /registrati?beta=1, prezzi, 404 in italiano; acquisti solo admin
+  finché Stripe è in test~~
+- 57. ~~**Io** – Popolamento OSM: salvataggio a pezzi di 250, recupero delle province perse (notti 22–24/10)~~
+- 58. ~~**Io** – Niente segnali sulle pagine d'errore, anti-bot, di trasloco o provvisorie; www del sito salvato; vecchie prove
+  tolte (migrazione 055); Settore aziende senza JSON non valido~~; ~~migrazione 055 e 3 workflow pubblicati~~
+- 59a. ~~**Io** – Tagli di testo negli annunci senza mezze emoji; «Siti aziende» due giri al mattino; Adzuna ogni 2 giorni
+  (limite 2.500 al mese)~~
+- 60a. ~~**Io** – Email per le aziende controllate prima del 20/10 (migrazione 054); verificati i 14 segnali «annuncio»~~
+- 64. ~~**Io** – Ricerche opportunità circa 7 volte più veloci (migrazione 057, verificata sui dati veri: 0 differenze)~~
 
 ## ✅ Fatto il 20/10
-- ~~Seconda correzione dei falsi «Senza HTTPS» e ricontrollo di 160 aziende~~
-- ~~Pagina «Sicurezza e privacy»~~
-- ~~Motore: memoria delle aziende senza email, 3 nodi morti tolti, analisi delle ricerche reali~~
-- ~~Captcha e limiti su accesso e recupero password~~
-- ~~Contatore dell'import OSM e listino senza «Fino a 3 utenti»~~
-- ~~Metriche della beta, spunto per il primo messaggio, email aziendali dal controllo siti~~
-- ~~Registro delle modifiche, panoramica del sistema, analisi giornaliera automatica~~
-- ~~Segnale indicativo «Sito senza informativa privacy o cookie» (migrazione 051)~~
+- 5c. ~~Metriche della beta (Admin → Beta) e «Spunto per il primo messaggio» nei lead e nell'export~~
+- 5d. ~~Email aziendali salvate dal controllo siti, riserva che parte da chi ha l'email (migrazione 050)~~
+- 10. ~~Popolamento OSM dal Nord, 8 province a notte~~ (prima notte: 2.922 aziende lombarde)
+- 19d. ~~Seconda correzione dei falsi «Senza HTTPS» e ricontrollo di 160 aziende~~
+- 27. ~~Motore: analisi delle ricerche reali, memoria delle aziende senza email (migrazione 047), 3 nodi morti tolti~~
+- 28. ~~Pagina «Sicurezza e privacy» (`/sicurezza`)~~ (da far rileggere al legale)
+- 29b. ~~Registro delle modifiche e panoramica del sistema~~
+- 39b. ~~Contatore dell'import OSM robusto (migrazione 048)~~
+- 42. ~~Captcha e limiti su accesso e recupero password~~
+- 43a. ~~«Fino a 3 utenti» tolto dal listino di Growth (migrazione 049)~~
+- 48. ~~Segnale indicativo «Sito senza informativa privacy o cookie» (migrazione 051)~~
 
 ## ✅ Fatto il 19/10
+- 1. ~~**Tu** – Verifica in due passaggi su Supabase, Vercel, GitHub, Stripe, n8n~~ (scelta: non su Anthropic, Resend,
+  Hostinger, Cloudflare, Icypeas)
+- 2. ~~**Tu** – Chiave Anthropic dedicata con limite di spesa~~ («Prospect | Search» e «Prospect Avvocati | Search» sono di un
+  altro progetto attivo: non toccarli)
+- 3. ~~**Tu** – «Aziende | Popolamento OSM» pubblicato~~
+- 4. ~~**Tu** – Sconto per i beta tester: −30% per 12 mesi~~
+- 5. ~~**Tu** – Invitate 3 agenzie (Gopher, Mutart, Studio360) con PDF di esempi reali~~
+- 6. ~~**Io** – Clausola «Riservatezza delle ricerche» nei termini~~
+- 7. ~~**Io** – Piano della beta e testi dell'invito (`10-beta.md`)~~
+- 8. ~~**Tu** – Casella leads@weborastudio.it attiva e provata~~
+- 19b–19c. ~~Falsi «Senza HTTPS», prima correzione, e ricontrollo di 341 aziende~~
+- 26. ~~Ripasso di sicurezza (migrazione 046)~~
+- 32–32b. ~~Email dell'app con la grafica Webora; modelli di accesso incollati in Supabase~~
 - ~~Homepage rifatta, «Per chi è», wizard con «Vendi altro?», regole sul settore (migrazione 045)~~
-- ~~Ripasso di sicurezza (migrazione 046), chiave Anthropic dedicata, inviti della beta inviati~~
-- ~~Email con la grafica Webora e schermata «Controlla la tua email»~~
