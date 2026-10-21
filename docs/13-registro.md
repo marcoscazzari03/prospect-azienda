@@ -42,6 +42,12 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — checklist riscritta per intero · documento
+- **Cosa:** `docs/00-checklist.md` riordinata per stato (questa settimana, decisione del 30/10, lancio a pagamento, durante la
+  beta, tecnico aperto, dopo la beta, fatto per giorno). Numeri invariati; nuovi: 5i (promemoria), 56b, 57b, 61 (riordino di
+  `docs`), 62 (CMS vecchio sulle pagine provvisorie), 63 (velocità delle ricerche in target), 64 (migrazione 057). Il 5h (ricerca
+  di prova per ogni agenzia invitata) non si fa: decisione dell'utente.
+
 ## 21/10/2026 — testi: fascia della beta e riquadro dell'avviso · in produzione al push
 - **Cosa:** fascia del sito «Beta gratuita su invito: 4 settimane, crediti gratuiti, nessuna carta.» (prima «per le web agency
   invitate»: gli inviti potranno andare anche a studi grafici e altri; `src/lib/config.ts`), e in homepage «Beta gratuita su invito». Riquadro dell'avviso: «se ci sono
