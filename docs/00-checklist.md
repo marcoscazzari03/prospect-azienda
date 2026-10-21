@@ -73,8 +73,8 @@ Ultimo aggiornamento: 21/10/2026 sera (nome nuovo e costi di Hostinger, punti 64
 40. **Io** – Wizard: stima realistica dei lead e costo in euro.
 
 ## 🟣 Nome nuovo e costi di Hostinger (deciso il 21/10)
-64. **Insieme, ora** – Scegliere il nome di una parola, staccato da Webora (in prova: Prosperia, prosperia.it; altre idee nel
-    registro). Prima di comprare: marchio libero su UIBM ed EUIPO (classi 35 e 42), nessuna azienda nota con lo stesso nome nel
+64. **Insieme, ora** – Scegliere il nome di una parola, staccato da Webora (scelto in prova il 21/10: **Avvisto**, avvisto.it libero su
+    Hostinger; avvisto.com occupato). Prima di comprare: marchio libero su UIBM ed EUIPO (classi 35 e 42), nessuna azienda nota con lo stesso nome nel
     settore, profili social liberi. Nota: prosperia.com è già registrato.
 65. **Tu, scelto il nome** – Comprare il dominio .it su Hostinger (circa 16 €/anno) e aggiungerlo al Business Web Hosting
     (regge più domini): niente server nuovo. L'app resta su Vercel.

@@ -54,6 +54,8 @@ Come tornare indietro, in generale:
   42), dominio e social.
 - **Domini (controllo DNS del 21/10, da confermare all'acquisto):** occupati pista, spunto, prosperia, indizio, varco, fiuto (.it).
   Risultano liberi: avvisto.it, scovia.it, spuntia.it e .com, fiutia.it e .com, opportia.it, pistia.it.
+- **Scelta in prova (21/10):** **Avvisto** («ho avvistato un'occasione»); avvisto.it confermato libero su Hostinger. Restano da fare
+  il controllo del marchio e l'acquisto del dominio (checklist 64–65).
 - **Passaggio (dopo il 30/10):** DNS verso Vercel, rinvio permanente da leads.weborastudio.it, dominio su Resend, indirizzi in
   Supabase, Stripe, Turnstile e callback di n8n, casella email nuova con leads@ inoltrata, firma, testi e documenti.
 - **Dove:** `docs/00-checklist.md` (punti 64–68; il 33 assorbito dal 67).
