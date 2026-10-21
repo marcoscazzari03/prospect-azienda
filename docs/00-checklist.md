@@ -104,7 +104,7 @@ Ultimo aggiornamento: 21/10/2026.
     meno frequente quando la coda è vuota.
 58. ~~**Io** – Dal Data Quality (21/10): niente segnali sulle pagine d'errore o anti-bot, sui traslochi e sulle pagine
     provvisorie; www del sito salvato; vecchie prove tolte (migrazione 055); giro Settore aziende con JSON non valido~~ (21/10).
-    **Tu:** eseguire la migrazione 055 e pubblicare «Motore lead», «Aziende | Controllo siti» e «Aziende | Settore».
+    **Tu:** eseguire la migrazione 055 e pubblicare «Lead Engine | Search (v1)», «Aziende | Controllo siti» e «Annunci | Settore aziende» (bozze caricate il 21/10).
 59. **Insieme, da decidere** – Dal controllo settimanale (registro, 21/10): recuperare Como, Sondrio, Belluno, Padova, Rovigo,
     Treviso; ridurre i giri a vuoto (Siti aziende 1 volta al giorno, Controllo siti ogni 2 ore dopo il 2/11, irraggiungibili dopo
     60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; ~~capire perché manca Adzuna del 20/10~~ (21/10: gira ogni 2 giorni).
