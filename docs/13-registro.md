@@ -45,6 +45,19 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — coda del controllo siti con priorità (punto 39, migrazione 060) · in attesa di migrazione
+- **Cosa:** `pending_site_checks` ordina le aziende da controllare così: prima quelle nella zona e nel settore (o in una delle
+  parole chiave) di una ricerca degli ultimi 30 giorni o di un avviso settimanale attivo, o nella zona di una ricerca
+  senza settore (opportunità «tutti i settori»); poi quelle nella zona di una ricerca di un altro settore; poi le altre, come
+  prima. Al massimo le 200 ricerche più recenti, senza doppioni (Code Reviewer: il tempo cresce con il numero di ricerche). Chi va controllato non cambia
+  (25 giorni, ricontrollo della 054, opposizioni, aziende chiuse).
+- **Perché:** il controllo orario (150 siti) le prendeva solo per anzianità: le aziende delle zone cercate dai clienti della
+  beta potevano aspettare settimane.
+- **Prove:** test `35_site_checks_priority_test.sql` (ordine con e senza ricerca recente) e test 12 e 31 invariati; 392 «ok».
+  Tempo sul banco di prova (12.000 aziende da controllare): circa 0,5 s con 40 ricerche (prima 0,4 s), 1,7 s con 2.000.
+- **Dove:** `supabase/migrations/20261205000060_site_checks_priority.sql`. Nessuna modifica all'app né a n8n.
+- **Indietro:** rieseguire `pending_site_checks` dalla 054.
+
 ## 21/10/2026 — ricerche in target più veloci (punto 63, migrazione 059) · in produzione (verifica sui dati veri: 0 differenze; migrazione eseguita il 21/10)
 - **Cosa:** `target_pool` riscritta come la 057: radici di settore, parole chiave, zone ed esclusioni calcolate una volta sola
   invece che per ogni azienda, e query pianificata a ogni chiamata con i valori veri (plpgsql con `execute … using`). Una ricerca
