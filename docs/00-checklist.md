@@ -90,8 +90,8 @@ Ultimo aggiornamento: 21/10/2026.
 54. **Io, prossima sessione** – Correzioni proposte dagli agenti il 21/10 (dettagli nel registro):
     a) zone: città unite da «e» («Modena e Reggio Emilia»), «… e provincia», «/» e «&» come separatori (QA);
     b) «web agency» con i sinonimi «agenzia web», «webagency» (QA);
-    c) niente segnali sulle pagine che sembrano barriere anti-bot (testo corto, niente viewport né copyright) (Data Quality);
-    d) no_privacy non scatta se il sito è «in costruzione» (Data Quality);
+    ~~c) niente segnali sulle pagine che sembrano barriere anti-bot (testo corto, niente viewport né copyright) (Data Quality);~~ (21/10, punto 58)
+    ~~d) no_privacy non scatta se il sito è «in costruzione» (Data Quality);~~ (21/10, punto 58)
     e) segnalare le aziende con nome e dominio molto diversi (Data Quality);
     f) pagina contatti prima di scartare per «nessuna_email» (Data Quality).
     Prima di c)–f): far verificare al Data Quality sui siti veri (ora la rete è aperta) che i problemi ci siano davvero.
