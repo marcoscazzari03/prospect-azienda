@@ -5,10 +5,12 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `archivio/05-da-fare.md`).
 
-Ultimo aggiornamento: 21/10/2026 sera (nome nuovo e costi di Hostinger, punti 64–68).
+Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico e sicurezza, nome nuovo Avvisto; punti 65–73).
 
 ## 🔴 Beta in corso: questa settimana
-5g. **Tu, 22–24/10** – 15 inviti al giorno da leads@ (ne mancano 37 per arrivare a 50; 13 fatti al 21/10), prima le
+5g. **In pausa dal 21/10 sera** (decisione dell'utente: 3–4 giorni per vedere se rispondono le 13 agenzie invitate; se nessuno
+    risponde si passa al nome nuovo, punto 67; intanto si sistema tutto il lato tecnico e di sicurezza, sezione 🛡️).
+    Prima: **Tu, 22–24/10** – 15 inviti al giorno da leads@ (ne mancano 37 per arrivare a 50; 13 fatti al 21/10), prima le
     agenzie con l'email, poi quelle con il solo modulo. Lista aggiornata in chat (`agenzie_beta.csv`, fuori dal repository).
 5b. **Insieme** – A ogni «sì», in giornata: account, +150 crediti e piano Growth dall'admin, email di benvenuto
     (`10-beta.md`, link /registrati?beta=1).
@@ -19,6 +21,17 @@ Ultimo aggiornamento: 21/10/2026 sera (nome nuovo e costi di Hostinger, punti 64
     dal controllo siti (punto 58); primo giro di «Siti aziende» dopo Adzuna (se il giro delle 11:40 è pieno, un terzo giro).
 5h. ~~**Io + Tu** – Ricerca di prova nella zona di ogni agenzia invitata~~ (21/10: non si fa, decisione dell'utente: troppo
     ottimistico finché non risponde qualcuno; si fa alla prima risposta, punto 20).
+
+## 🛡️ Tecnico e sicurezza: 22–25/10 (deciso il 21/10 sera)
+70. **Io, 22/10** – Nuovo ripasso di sicurezza di tutto ciò che è cambiato dal 19/10 (migrazioni 047–057, avviso settimanale,
+    wizard, Admin → Beta, nodi del motore) e stato delle voci aperte del ripasso del 19/10; dipendenze (`npm audit`).
+71. **Io** – Correzione di quello che esce dal punto 70, con revisione e test, poi le voci del Tecnico aperto (63, 39, 40, 54e,
+    19e) e la pulizia dei dati di collaudo (punto 19).
+72. **Io** – Nome in un solo punto del codice (`config.ts`): «Webora Leads» e gli indirizzi diventano impostazioni, così il
+    passaggio ad Avvisto è un cambio di configurazione più logo e testi.
+73. **Tu** – Controlli a mano: avvisi di spesa (punto 18), Deployment Protection su Vercel, conservazione breve delle
+    esecuzioni su n8n, rotazione del segreto del motore (punto 17, insieme), Supabase Pro e backup (punto 15, da decidere per il
+    costo).
 
 ## 🟠 Decisione della beta
 9. **Insieme, il 30/10** – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive, esporta almeno la metà
@@ -72,27 +85,27 @@ Ultimo aggiornamento: 21/10/2026 sera (nome nuovo e costi di Hostinger, punti 64
 39. **Io** – Coda del controllo siti con priorità.
 40. **Io** – Wizard: stima realistica dei lead e costo in euro.
 
-## 🟣 Nome nuovo e costi di Hostinger (deciso il 21/10)
-64. **Insieme, ora** – Scegliere il nome di una parola, staccato da Webora (scelto in prova il 21/10: **Avvisto**, avvisto.it libero su
+## 🟣 Nome nuovo «Avvisto» e costi di Hostinger (deciso il 21/10)
+65. **Insieme** – ~~Scegliere il nome di una parola, staccato da Webora (scelto in prova il 21/10: **Avvisto**, avvisto.it libero su
     Hostinger; avvisto.com occupato). Prima di comprare: marchio libero su UIBM ed EUIPO (classi 35 e 42), nessuna azienda nota con lo stesso nome nel
-    settore, profili social liberi. Nota: prosperia.com è già registrato.
-65. **Tu, scelto il nome** – Comprare il dominio .it su Hostinger (circa 16 €/anno) e aggiungerlo al Business Web Hosting
+    settore, profili social liberi. Nota: prosperia.com è già registrato.~~ (21/10: Avvisto, marchio verificato libero dall'utente)
+66. **Tu, scelto il nome** – Comprare il dominio .it su Hostinger (circa 16 €/anno) e aggiungerlo al Business Web Hosting
     (regge più domini): niente server nuovo. L'app resta su Vercel.
-66. **Insieme, dopo il 30/10** – Passaggio al nome nuovo con la seconda ondata. **Tu:** record DNS verso Vercel dal
+67. **Insieme, dal 25/10 circa** – Passaggio al nome nuovo se le agenzie invitate non rispondono (decisione del 21/10 sera). **Tu:** record DNS verso Vercel dal
     pannello Hostinger, casella email sul dominio nuovo, leads@weborastudio.it attiva o inoltrata alla nuova. **Io:** dominio
     su Vercel, rinvio permanente da leads.weborastudio.it (i link già inviati continuano a funzionare), dominio su Resend,
     indirizzi in Supabase (accesso), Stripe, Turnstile e callback di n8n, logo, firma, testi, email e documenti.
-67. **Tu, prima dei rinnovi** – Costi Hostinger di oggi: circa 234 €/anno (circa 250 con il dominio nuovo).
+68. **Tu, prima dei rinnovi** – Costi Hostinger di oggi: circa 234 €/anno (circa 250 con il dominio nuovo).
     - dominio weborastudio.it 15,99 €, rinnovo il 20/01/2027;
     - Business Web Hosting 203,88 €, rinnovo il 02/02/2027: controllare il prezzo vero del rinnovo (quello di oggi potrebbe
       essere in promozione);
     - Starter Business Email (prova) 14,16 €, rinnovo il 19/02/2027: vedere se leads@ sta su questo prodotto o sulle caselle
       incluse nell'hosting; nel secondo caso togliere il rinnovo automatico (sostituisce il punto 33).
-68. **Tu** – VPS Hetzner (circa 14 €/mese): spegnerlo finché non serve al worker del punto 49 (circa 170 €/anno risparmiati).
+69. **Tu** – VPS Hetzner (circa 14 €/mese): spegnerlo finché non serve al worker del punto 49 (circa 170 €/anno risparmiati).
 
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo (file pronto).
-33. ~~**Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027~~ (21/10: assorbito dal punto 67).
+33. ~~**Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027~~ (21/10: assorbito dal punto 68).
 47. **Insieme** – BIMI (logo del mittente su tutti i programmi di posta): DMARC restrittivo e certificato a pagamento.
 
 ## ⚪ Dopo la beta
