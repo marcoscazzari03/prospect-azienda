@@ -41,7 +41,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — avviso settimanale delle opportunità (punto 36) · in attesa (migrazione 056); visibile solo agli admin
+## 21/10/2026 — avviso settimanale delle opportunità (punto 36) · in produzione (migrazione 056 eseguita il 21/10); visibile solo agli admin
 - **Cosa:** su una ricerca opportunità, «Avvisami ogni settimana» (riquadro nella pagina della ricerca; etichetta «Avviso»
   nell'elenco). Ogni lunedì il cron notturno (`/api/cron/watchdog` → `src/lib/server/alerts.ts`) conta le aziende che
   soddisfano la ricerca, non consegnate all'account e mai segnalate da quell'avviso; se sono almeno 3 manda un'email
