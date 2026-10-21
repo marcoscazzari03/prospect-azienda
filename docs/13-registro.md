@@ -45,6 +45,14 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — VPS Hetzner: prima configurazione (punto 49, preparazione) · script pronto, da eseguire sul server
+- **Cosa:** `scripts/vps/setup.sh`: aggiornamenti (anche automatici), firewall con la sola porta SSH, fail2ban, utente
+  `worker` con la chiave SSH di root, SSH solo con chiave e senza root, Node.js 22 e git. Nessun segreto nello script.
+- **Perché:** il server sarà pronto per il worker del controllo siti; il worker si scrive dopo il 30/10, come deciso.
+- **Prima:** reinstallazione del VPS con Ubuntu 24.04 dalla console Hetzner (cancella il vecchio progetto abbandonato,
+  confermato dall'utente il 21/10) con la propria chiave SSH.
+- **Indietro:** reinstallare il VPS.
+
 ## 21/10/2026 — aziende con nome e dominio molto diversi (punto 54e, migrazione 062) · in produzione (verifica: 107 business.site e 14 portali; eseguita il 21/10)
 - **Misura (Data Quality):** 6.939 aziende controllate dal 14 al 21/10; nome e dominio molto diversi in 234 aziende OSM (3,8%),
   0 su 681 degli annunci (domini indovinati o cercati), 6 su 317 del motore. Tutte le 234 aperte dal vivo: 98 siti giusti
