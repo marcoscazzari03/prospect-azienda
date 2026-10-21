@@ -3,6 +3,7 @@ import { z } from "zod";
 import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { safeEqual } from "@/lib/server/crypto";
+import { publicDomain } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 
 // Controllo dei siti del database, per il workflow n8n «Aziende | Controllo siti»
@@ -24,7 +25,8 @@ export async function GET(request: Request) {
     console.error("pending_site_checks", error);
     return NextResponse.json({ error: "lettura non riuscita" }, { status: 500 });
   }
-  return NextResponse.json({ companies: data ?? [] });
+  // Un dominio non pubblico (IP, nome interno, DNS «jolly») non si apre: oggi le fonti non li scrivono (22/10).
+  return NextResponse.json({ companies: (data ?? []).filter((c) => publicDomain(c.domain)) });
 }
 
 const schema = z.object({
@@ -49,7 +51,7 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "esiti non validi" }, { status: 400 });
   const { data, error } = await createAdminClient().rpc("store_company_checks", {
-    p_items: parsed.data.items as Json,
+    p_items: parsed.data.items.filter((i) => publicDomain(i.company.domain)) as Json,
     p_target: {},
     p_origin: "seed",
   });

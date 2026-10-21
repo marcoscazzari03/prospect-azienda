@@ -10,6 +10,8 @@ import { clientIpHash } from "@/lib/server/request-meta";
 import { verifyCaptcha } from "@/lib/server/captcha";
 import { LOGIN_FAILURES, MFA_ATTEMPTS, RESET_REQUESTS, rateHit } from "@/lib/server/rate";
 import { sha256Hex } from "@/lib/server/crypto";
+import { sendEmail } from "@/lib/server/email";
+import { BRAND } from "@/lib/config";
 
 // Registrazioni dallo stesso IP nelle ultime 24 ore (audit V4).
 const SIGNUPS_PER_IP_PER_DAY = 3;
@@ -96,6 +98,33 @@ const signUpSchema = z.object({
   terms: z.literal("on", { message: "Devi accettare termini e informativa" }),
 });
 
+// Indirizzo già registrato: stessa risposta di una registrazione riuscita, così il modulo non rivela chi è cliente
+// (V10, ripasso del 22/10). Al titolare della casella arriva invece un'email con accesso e recupero password,
+// al massimo una al giorno per indirizzo.
+async function alreadyRegistered(email: string): Promise<AuthState> {
+  if (!(await rateHit(emailKey(email), "signup_dup", 86_400, 1))) return { info: signUpInfo(email) };
+  // Account mai confermato: si rimanda il link di attivazione invece dell'email «hai già un account».
+  const db = createAdminClient();
+  const { data: profile } = await db.from("profiles").select("user_id").eq("email_norm", normalizeEmail(email)).maybeSingle();
+  const { data: user } = profile ? await db.auth.admin.getUserById(profile.user_id) : { data: null };
+  if (user?.user && !user.user.email_confirmed_at && user.user.email?.toLowerCase() === email.toLowerCase()) {
+    await (await createClient()).auth.resend({ type: "signup", email });
+  } else {
+    await sendEmail(email, `Hai già un account ${BRAND.name}`, {
+      heading: "Hai già un account",
+      paragraphs: [
+        "Qualcuno, probabilmente tu, ha provato a creare un nuovo account con questo indirizzo, che è già registrato.",
+        "Puoi accedere con la tua password. Se non la ricordi, scegline una nuova dalla pagina di recupero.",
+      ],
+      cta: { label: "Accedi", url: `${env.appUrl()}/accedi` },
+      after: [`Password dimenticata: ${env.appUrl()}/recupera-password`],
+      footer: "Se non sei stato tu, puoi ignorare questa email: il tuo account non è cambiato.",
+    });
+  }
+  return { info: signUpInfo(email) };
+}
+const signUpInfo = (email: string) => `Ti abbiamo inviato un'email a ${email}: apri il link per attivare l'account.`;
+
 export async function signUp(_: AuthState, form: FormData): Promise<AuthState> {
   const parsed = signUpSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
@@ -118,9 +147,7 @@ export async function signUp(_: AuthState, form: FormData): Promise<AuthState> {
     return { error: "Troppe registrazioni da questa connessione. Riprova domani o scrivici." };
   }
   // Varianti dello stesso indirizzo (nome+1@, punti in Gmail): un solo account.
-  if ((sameEmail ?? 0) > 0) {
-    return { error: "Non è possibile creare un account con questo indirizzo. Se ne hai già uno, accedi o recupera la password." };
-  }
+  if ((sameEmail ?? 0) > 0) return alreadyRegistered(email);
 
   const supabase = await createClient();
   const plan = String(form.get("plan") ?? "");
@@ -136,15 +163,18 @@ export async function signUp(_: AuthState, form: FormData): Promise<AuthState> {
   if (error) {
     console.error("signUp", error.status, error.code, error.message);
     const m = error.message.toLowerCase();
-    if (m.includes("registered")) return { error: "Non è possibile creare un account con questo indirizzo. Se ne hai già uno, accedi o recupera la password." };
+    if (m.includes("registered")) return alreadyRegistered(email);
     if (m.includes("rate limit")) return { error: "Troppe email inviate in poco tempo: riprova tra qualche minuto." };
     if (m.includes("database error")) return { error: "Errore del database durante la creazione dell'account (codice: DB_SIGNUP)." };
     if (m.includes("signups not allowed") || m.includes("disabled")) return { error: "Le registrazioni sono disattivate." };
     return { error: `Registrazione non riuscita (${error.code ?? error.status ?? "errore"}). Riprova.` };
   }
+  // Con la conferma email attiva Supabase non dà errore per un indirizzo già confermato: restituisce un utente senza
+  // identità.
+  if (data.user && !data.user.identities?.length) return alreadyRegistered(email);
   if (data.user && ipHash) await db.from("profiles").update({ signup_ip_hash: ipHash }).eq("user_id", data.user.id);
   if (data.session) redirect(next);
-  return { info: `Ti abbiamo inviato un'email a ${email}: apri il link per attivare l'account.` };
+  return { info: signUpInfo(email) };
 }
 
 export async function requestReset(_: AuthState, form: FormData): Promise<AuthState> {

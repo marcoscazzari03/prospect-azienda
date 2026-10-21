@@ -37,6 +37,9 @@ assert.equal(job.valida, true, job.errori.join(', '));
 assert.ok(job.lotti_previsti >= 2);
 const [bad] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, callback_url: 'https://weborastudio.it.evil.com/api/engine/callback' } }] }).map(i => i.json);
 assert.equal(bad.valida, false);
+for (const u of ['https://evil.weborastudio.it/api/engine/callback', 'http://leads.weborastudio.it/api/engine/callback']) {
+  assert.equal(run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, callback_url: u } }] })[0].json.valida, false, u);
+}
 const senzaSettore = (signals) => run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, target: { ...body.target, industry: '', industry_keywords: [], signals } } }] })[0].json;
 assert.equal(senzaSettore({ codes: ['outdated_cms'] }).valida, true, 'opportunità senza settore: valida');
 assert.match(senzaSettore({ codes: ['outdated_cms'] }).brief, /Settore: qualsiasi/);
@@ -76,11 +79,12 @@ console.log('ok  URL con caratteri invisibili ripuliti, URL non validi scartati'
 const ssrf = run(src('04-deduplica-candidati.js'), { nodes: { 'Valida richiesta': [job] }, input: [{ candidates: [
   ['http://169.254.169.254/latest/meta-data', 'Ip Uno'], ['http://127.0.0.1:8080/', 'Ip Due'], ['https://10.0.0.5', 'Ip Tre'],
   ['http://intranet.corp/', 'Corp Quattro'], ['http://server.local/', 'Local Cinque'], ['https://acme.it:8443/', 'Porta Sei'],
-  ['http://localhost/', 'Host Sette'], ['https://[::1]/', 'Sei Otto'], ['https://buona.it:443/chi-siamo', 'Buona Nove']
+  ['http://localhost/', 'Host Sette'], ['https://[::1]/', 'Sei Otto'], ['https://buona.it:443/chi-siamo', 'Buona Nove'],
+  ['http://169.254.169.254.nip.io/latest', 'Jolly Dieci'], ['https://x.sslip.io/', 'Jolly Undici'], ['http://localtest.me/', 'Jolly Dodici']
 ].map(([website, full_name]) => ({ company_name: full_name, website, full_name, job_title: 'CEO', source_url: 'https://fonte.it/x' })) }] }).map(i => i.json);
 assert.equal(ssrf.length, 1);
 assert.equal(ssrf[0].website, 'https://buona.it/chi-siamo');
-console.log('ok  anti-SSRF: IP, localhost, domini interni e porte non standard scartati');
+console.log('ok  anti-SSRF: IP, localhost, domini interni, DNS jolly e porte non standard scartati');
 const conRuoli = (roles, title) => run(src('04-deduplica-candidati.js'), {
   nodes: { 'Valida richiesta': [{ ...job, target: { ...job.target, roles } }] },
   input: [{ candidates: [{ company_name: 'Acme', website: 'https://acme.it', full_name: 'Mario Rossi', job_title: title, source_url: 'https://acme.it' }] }]

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { safeEqual } from "@/lib/server/crypto";
+import { publicDomain } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 
 // Sito delle aziende degli annunci, per il workflow n8n «Annunci | Siti aziende»
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
   if (!authorized(request)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "esiti non validi" }, { status: 400 });
-  const { data, error } = await createAdminClient().rpc("store_company_resolutions", { p_items: parsed.data.results as Json });
+  const { data, error } = await createAdminClient().rpc("store_company_resolutions", { p_items: parsed.data.results.map((r) => (r.domain && !publicDomain(r.domain) ? { ...r, domain: "" } : r)) as Json });
   if (error) {
     console.error("store_company_resolutions", error);
     return NextResponse.json({ error: "salvataggio non riuscito" }, { status: 500 });

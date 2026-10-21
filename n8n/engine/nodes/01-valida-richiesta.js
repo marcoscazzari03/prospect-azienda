@@ -2,12 +2,10 @@
 // Il backend ha già controllato piano e crediti: qui ci limitiamo a
 // rifiutare payload incompleti e a preparare il brief per l'AI.
 // URL di callback ammessi: SOLO il backend della piattaforma (anti-SSRF).
-// Dominio della piattaforma (anche sottodomini, es. leads.weborastudio.it).
-const DOMINIO_PIATTAFORMA = 'weborastudio.it';
-const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const CALLBACK_AMMESSI = [
-  new RegExp(`^https://([a-z0-9-]+\\.)?${esc(DOMINIO_PIATTAFORMA)}/api/engine/callback$`, 'i')
-];
+// Host esatti dell'app (ripasso di sicurezza del 22/10: prima valeva qualsiasi sottodominio di weborastudio.it).
+// Al cambio di nome si aggiunge qui il dominio nuovo.
+const HOST_APP = ['leads.weborastudio.it'];
+const CALLBACK_AMMESSI = HOST_APP.map((h) => `https://${h}/api/engine/callback`);
 
 // Modello AI del motore: per cambiare basta questa riga (es. 'claude-opus-5-5').
 // Il ritorno a OpenAI: AI_PROVIDER = "openai" in n8n/engine/build.py (i nodi OpenAI sono stati tolti il 20/10).
@@ -100,7 +98,7 @@ job.reserve = job.reserve.filter(r => r.company_name && r.website && (r.signals.
 if (!/^[0-9a-f-]{8,64}$/i.test(job.job_id)) errori.push('job_id mancante o non valido');
 if (!job.run_id) errori.push('run_id mancante');
 if (job.run_token.length < 24) errori.push('run_token mancante');
-if (!CALLBACK_AMMESSI.some(r => r.test(job.callback_url))) errori.push('callback_url non ammesso');
+if (!CALLBACK_AMMESSI.includes(String(job.callback_url || '').toLowerCase())) errori.push('callback_url non ammesso');
 // Ricerca opportunità «tutti i settori»: senza settore, ma con almeno un segnale.
 const tuttiISettori = !job.target.industry && !job.target.industry_keywords.length;
 if (tuttiISettori && !job.target.signals.codes.length) errori.push('settore mancante');

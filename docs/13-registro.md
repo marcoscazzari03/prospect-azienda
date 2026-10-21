@@ -45,6 +45,28 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — registrazione, menu e motore (punti 74, 77, 78) · app in produzione al push; workflow n8n da pubblicare
+- **Registrazione (V10/N3, `src/app/(auth)/actions.ts`):** un indirizzo già registrato riceve la stessa risposta di una
+  registrazione riuscita; al titolare arriva un'email «Hai già un account» con accesso e recupero password (al massimo una al
+  giorno per indirizzo), oppure di nuovo il link di attivazione se l'account non è mai stato confermato. Rischio residuo
+  accettato: il limite di 3 registrazioni al giorno per connessione lo fa capire solo creando account veri (Code Reviewer).
+- **Menu del sito (`src/components/site-chrome.tsx`):** sotto i 360px «Prezzi» resta solo nel piè di pagina; a 320px il menu
+  sbordava di 54px (QA).
+- **Motore e workflow (punto 74):**
+  - nomi DNS «jolly» (nip.io, sslip.io, localtest.me e simili) scartati in `04-deduplica-candidati.js`,
+    `06-esito-ricerca-web.js` e «Homepage da leggere» del Settore, che ora scarta anche gli IP e i nomi interni;
+  - pagina del referente senza porte strane (`14-valuta-segnali-sito.js`);
+  - callback del motore solo verso `https://leads.weborastudio.it/api/engine/callback` (`01-valida-richiesta.js`, `HOST_APP`):
+    **al cambio di nome va aggiunto il dominio nuovo**;
+  - nell'app `publicDomain()` (`src/lib/domain/engine.ts`) usata da `urlOnDomain` e dalle route `api/engine/*`.
+  - **Non fatto, con motivo:** i redirect verso indirizzi interni e la verifica dell'IP non si possono controllare dentro n8n:
+    si fanno con il worker sul VPS (punto 49). I certificati non validi restano accettati nei nodi che leggono le pagine
+    (siti con il certificato solo su www): togliere l'opzione farebbe perdere molti siti; il segnale «Senza HTTPS» si misura
+    a parte e resta corretto. Rischio basso (serve un attacco sulla rete di n8n Cloud); si risolve nel worker.
+- **Dove:** workflow «Lead Engine | Search (v1)» (nodi 01, 04, 14), «Aziende | Siti aziende» (06), «Aziende | Settore»
+  («Homepage da leggere»). Test in `n8n/engine/test/run.mjs` e `tests/security-review.test.ts`.
+- **Indietro:** `git revert`; sui workflow, la versione precedente dalla cronologia di n8n.
+
 ## 22/10/2026 — ripasso di sicurezza (punti 70–71) e testi per i freelance (punto 75) · in produzione al push; migrazione 058 eseguita il 22/10
 - **Ripasso:** due revisori indipendenti su tutto ciò che è cambiato dal 19/10 (dettagli fuori dal repository, in
   `06-audit-sicurezza.md`). App e SQL: nessun problema grave; le correzioni del 19/10 sono tutte al loro posto. Motore: un

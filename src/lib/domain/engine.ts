@@ -178,11 +178,20 @@ export function reserveCompaniesForDatabase(
 // Punteggio più basso delle aziende con email, che restano davanti nell'ordine di consegna.
 // URL sul sito dell'azienda (dominio o suo sottodominio), solo http(s), senza credenziali né porte
 // insolite. Usato per i moduli di contatto e per i siti importati (ripasso di sicurezza del 19/10).
-const DOMAIN_RE = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/;
+// Dominio pubblico: TLD alfabetico (niente IP), niente nomi interni né servizi DNS «jolly» che puntano a qualsiasi IP
+// (127.0.0.1.nip.io). Stessa regola nei nodi n8n (04-deduplica-candidati, 06-esito-ricerca-web, «Homepage da leggere»);
+// ripasso di sicurezza del 22/10.
+const DOMAIN_RE = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,24}$/;
+const NOT_PUBLIC = /(^|\.)(localhost|local|internal|intranet|lan|home|corp|localdomain|invalid|test|example|nip\.io|sslip\.io|xip\.io|localtest\.me|lvh\.me|vcap\.me|traefik\.me|lacolhost\.com|localhost\.run)$/;
+export function publicDomain(domain: unknown) {
+  const d = String(domain ?? "").trim().toLowerCase();
+  return d.length <= 200 && DOMAIN_RE.test(d) && !d.split(".").some((p) => p.startsWith("-") || p.endsWith("-")) && !NOT_PUBLIC.test(d);
+}
+
 export function urlOnDomain(raw: unknown, domain: unknown) {
   const d = String(domain ?? "").trim().toLowerCase();
   const s = String(raw ?? "").trim();
-  if (!DOMAIN_RE.test(d) || !/^https?:\/\//i.test(s) || /[\\\s]/.test(s)) return false;
+  if (!publicDomain(d) || !/^https?:\/\//i.test(s) || /[\\\s]/.test(s)) return false;
   try {
     const u = new URL(s);
     if (u.username || u.password || (u.port && u.port !== "80" && u.port !== "443")) return false;

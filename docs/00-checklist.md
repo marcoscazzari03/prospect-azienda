@@ -32,12 +32,15 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     passaggio ad Avvisto è un cambio di configurazione più logo e testi.
 73. **Tu** – Controlli a mano: avvisi di spesa (punto 18), Deployment Protection su Vercel, conservazione breve delle
     esecuzioni su n8n, rotazione del segreto del motore (punto 17, insieme). Supabase Pro rinviato alla messa in produzione (punto 15).
-74. **Io, poi Tu** – Motore e workflow n8n: nomi DNS «jolly» bloccati, porte e indirizzi IP scartati anche nel Settore e nella
-    pagina del referente, domini validati anche nelle route dell'app; certificati non validi tolti con ripiego su www. Il
-    controllo completo dei redirect e degli IP si fa con il worker (punto 49). **Tu:** pubblicare i workflow.
+74. **Io, poi Tu** – ~~Motore e workflow n8n: nomi DNS «jolly» bloccati, porte e indirizzi IP scartati anche nel Settore e nella
+    pagina del referente, domini validati anche nelle route dell'app, callback solo verso leads.weborastudio.it~~ (22/10).
+    **Tu:** pubblicare i 3 workflow (motore, Siti aziende, Settore). Redirect, IP e certificati: con il worker (punto 49).
 75. ~~**Io** – Testi del sito anche per i professionisti con partita IVA (decisione del 21/10): «anche da solo» sopra il titolo,
     «Per chi è», domanda nelle FAQ, riga nei prezzi, «Azienda o attività» nella registrazione~~ (22/10)
 76. ~~**Tu** – Eseguire la migrazione 058 (limiti sui tentativi sotto lock, permessi delle tabelle dell'avviso)~~ (22/10)
+77. ~~**Io** – Registrazione: stessa risposta per gli indirizzi già registrati, con email «hai già un account» o nuovo link di
+    attivazione~~ (22/10)
+78. ~~**Io** – Menu del sito che non sborda sui telefoni stretti (320px)~~ (22/10)
 
 ## 🟠 Decisione della beta
 9. **Insieme, il 30/10** – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive, esporta almeno la metà

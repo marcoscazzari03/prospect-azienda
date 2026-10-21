@@ -21,7 +21,8 @@ const hostPubblico = (h) => {
   const x = String(h || '').toLowerCase();
   if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,24}$/.test(x)) return false; // richiede un TLD alfabetico: esclude gli IP
   if (x.split('.').some((p) => !p || p.startsWith('-') || p.endsWith('-'))) return false;
-  return !/(^|\.)(localhost|local|internal|intranet|lan|home|corp|localdomain|invalid|test|example)$/.test(x);
+  // Anche i servizi DNS «jolly» che puntano a qualsiasi IP (127.0.0.1.nip.io; ripasso di sicurezza del 22/10).
+  return !/(^|\.)(localhost|local|internal|intranet|lan|home|corp|localdomain|invalid|test|example|nip\.io|sslip\.io|xip\.io|localtest\.me|lvh\.me|vcap\.me|traefik\.me|lacolhost\.com|localhost\.run)$/.test(x);
 };
 // URL: niente spazi né invisibili, e deve essere un indirizzo http(s) valido.
 // (Niente `new URL`: nella sandbox dei Code node di n8n non è disponibile.)
