@@ -99,8 +99,9 @@ Ultimo aggiornamento: 21/10/2026.
     scelto» né «API», hero, rassicurazioni, contrasto, 404 in italiano; acquisti solo per gli admin finché Stripe è in test~~
     (21/10). **Tu:** controllare in Stripe (test) che nessun cliente non admin abbia comprato; nell'email di benvenuto usare
     il link /registrati?beta=1; guardare ogni giorno le nuove registrazioni per aggiungere i crediti beta.
-57. ~~**Io** – Popolamento OSM: salvataggio a pezzi di 250 nell'app (21/10)~~. **Resta:** verificare stanotte che vada; decidere
-    se recuperare subito Como, Sondrio, Belluno, Padova, Rovigo e Treviso; controllo siti meno frequente quando la coda è vuota.
+57. ~~**Io** – Popolamento OSM: salvataggio a pezzi di 250 nell'app; recupero delle province perse (notti 22–24/10) caricato
+    su n8n~~ (21/10). **Tu:** pubblicare «Aziende | Popolamento OSM». **Resta:** verificare la notte del 22/10; controllo siti
+    meno frequente quando la coda è vuota.
 58. **Io, da decidere** – Dal Data Quality (21/10): niente segnali sulle pagine d'errore o anti-bot (status HTTP nel nodo
     «Apri sito»), host giusto (www) e URL letto davvero nella prova, pagine di trasloco come provvisorie, segnali a «non
     determinabile» se il sito è «in costruzione», motivo di scarto preciso; giro Settore aziende con JSON non valido.
