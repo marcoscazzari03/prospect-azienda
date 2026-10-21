@@ -42,7 +42,14 @@ select cs.code as segnale,
  group by cs.code
  order by fresche desc;
 
--- Q4 Aziende e prove fresche per regione (zona dai luoghi dell'azienda, come le ricerche; senza filtro di settore)
+-- Q3b Annunci: la fonte vera è job_ads, non company_signals (21/10, Data Quality). In company_signals job_ad c'è solo
+-- per i lead consegnati con l'annuncio; le ricerche opportunità leggono job_ads (opportunity_pool).
+select coalesce(j.family, 'TOTALE') as famiglia, count(distinct j.company_id) as aziende_con_annuncio_60gg
+  from job_ads j
+ where j.company_id is not null and j.posted_at >= now() - interval '60 days'
+ group by rollup (j.family) order by 2 desc;
+
+-- Q4 Aziende e prove fresche per regione (la colonna con_annuncio conta solo i lead consegnati con l'annuncio: vedi Q3b) (zona dai luoghi dell'azienda, come le ricerche; senza filtro di settore)
 with reg as (select distinct regione, term_stems(regione) as st from it_provinces),
      f as (select cs.company_id, cs.code from company_signals cs where signal_is_fresh(cs.code, cs.evidence, cs.checked_at))
 select reg.regione,

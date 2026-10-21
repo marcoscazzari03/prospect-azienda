@@ -7,7 +7,8 @@ import type { Json } from "@/lib/supabase/database.types";
 
 // Controllo dei siti del database, per il workflow n8n «Aziende | Controllo siti»
 // (stesso segreto condiviso del callback del motore).
-//   GET  ?limit=80  -> aziende da controllare (mai controllate o da più di 25 giorni)
+//   GET  ?limit=80  -> aziende da controllare (mai controllate o da più di 25 giorni; poi, dalla 054, quelle
+//                      controllate prima dell'email dal sito, il 20/10, senza email)
 //   POST { items }  -> esiti dei controlli, salvati da store_company_checks (origine «seed»)
 
 function authorized(request: Request) {

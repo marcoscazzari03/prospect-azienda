@@ -39,12 +39,29 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — email per le aziende controllate prima del 20/10 (migrazione 054) e segnale «annuncio» · migrazione da eseguire
+- **Cosa:** `supabase/migrations/20261129000054_site_email_backfill.sql` ridefinisce `pending_site_checks` (dalla 035): dopo le
+  aziende dovute mette in coda quelle controllate prima del 20/10 12:25 UTC, con il sito leggibile e senza email. Si esaurisce
+  da sola (il ricontrollo aggiorna la data anche senza email). Circa 9.000 aziende, 150 l'ora: circa 60 ore, senza esecuzioni
+  n8n in più (i giri oggi sono a vuoto). Effetti: email, no_privacy e prove rinnovate o cancellate come in un ricontrollo
+  normale; scadenze di metà novembre più distribuite. Test `supabase/tests/31_site_email_backfill_test.sql`; commento della
+  route `src/app/api/engine/site-checks/route.ts` aggiornato.
+- **Revisione:** Code Reviewer, PRONTO CON RISERVE; applicate: registro, commento della route, test più robusto. Da sapere:
+  a giro finito la condizione resta e la tabella si legge tutta ogni ora (millisecondi); si può togliere in futuro.
+- **Indietro:** rieseguire `pending_site_checks` dalla 035.
+- **Annunci (Data Quality):** le 14 prove job_ad non sono un difetto. In `company_signals` job_ad nasce solo con i lead
+  consegnati con l'annuncio; le ricerche opportunità leggono direttamente `job_ads` (`opportunity_pool`), quindi le 1.244
+  aziende collegate sono già usabili. Corretto il conteggio: nuova query Q3b in `supabase/queries/popolamento_settimanale.sql`.
+  Da decidere: il magazzino (`warehouse_candidates`) non vede gli annunci di `job_ads` (impatto piccolo, query per misurarlo nel
+  rapporto del 21/10); la prova dell'annuncio dalla riserva ha la data di oggi e non controlla che l'annuncio sia ancora visibile
+  (`last_seen_at`): proposta di richiedere `last_seen_at` negli ultimi 7 giorni dopo un controllo a mano di 20–30 annunci.
+
 ## 21/10/2026 — numeri del database (query Q1–Q8 eseguite dall'utente)
 - **Aziende:** 11.956 (OSM 10.485, Adzuna 1.217, target 180), con settore 11.337; tutte controllate, coda vuota; 2.154
   irraggiungibili (18%); **solo 710 con email dal sito**, perché l'estrazione dell'email nel controllo siti esiste dal 20/10
   12:25 e le aziende controllate prima la prendono solo al ricontrollo (25 giorni).
 - **Prove fresche:** no_booking_engine 8.120, single_language 4.749, stale_copyright 1.275, outdated_cms 1.072, no_mobile 646,
-  no_https 231, no_privacy 125, under_construction 99, **job_ad 14** (contro 6.551 annunci, 1.244 aziende collegate: da capire).
+  no_https 231, no_privacy 125, under_construction 99, job_ad 14 (non è un difetto: vedi sopra, la fonte degli annunci è `job_ads`).
 - **Per regione:** Lombardia 3.207 (rifacimento 627), Puglia 2.867 (696), Campania 2.137 (477), Sicilia 1.296 (280),
   **Emilia-Romagna 743 (154)**, Veneto 61. L'Emilia-Romagna, regione della beta, entra nella rotazione OSM il 22–23/10.
 - **Ricerche della settimana:** tutte dell'admin (34; 3 opportunità fallite, «Sicurezza del sito» hotel in Toscana con 39
