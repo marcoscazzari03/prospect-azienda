@@ -150,7 +150,8 @@ Ultimo aggiornamento: 21/10/2026.
     sito»~~ (20/10). ~~Nodi caricati su n8n, migrazione 051 eseguita, motore e controllo siti
     pubblicati~~ (20/10).
 49. **Io** – Controllo siti su un piccolo worker fuori da n8n: libera ~720 esecuzioni al mese e permette i segnali
-    PageSpeed e «certificato in scadenza entro 30 giorni».
+    PageSpeed e «certificato in scadenza entro 30 giorni». Deciso il 21/10: sul VPS Hetzner dell'utente (1 vCPU, 2 GB,
+    14 €/mese, già pagato; il progetto che c'era è abbandonato, si può reinstallare). Dopo il 30/10.
 50. **Insieme** – Seconda fonte per gli annunci (leggere i termini di Jooble e Careerjet) e pagine «Lavora con noi»
     come fonte, per non dipendere solo da Adzuna.
 51. **Insieme** – Ricerche AI notturne mirate sulle province e i settori dei clienti (circa 15–20 € ogni 1.000
