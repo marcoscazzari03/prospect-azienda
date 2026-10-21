@@ -133,7 +133,7 @@ export default async function SearchDetailPage({ params, searchParams }: PagePro
             {alert ? (
               <p>
                 <Badge tone="ledger">Avviso attivo</Badge>{" "}
-                Prossimo avviso <span className="font-mono">{new Date(alert.next_run_at).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "numeric", timeZone: "Europe/Rome" })}</span>{alert.user_id === viewer.user.id && <> a {viewer.email}</>}, se ci sono almeno 3 aziende nuove.
+                Prossimo avviso <span className="font-mono">{new Date(alert.next_run_at).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "numeric", timeZone: "Europe/Rome" })}</span>{alert.user_id === viewer.user.id && <> a {viewer.email}</>}, se ci sono aziende nuove.
               </p>
             ) : (
               <p>

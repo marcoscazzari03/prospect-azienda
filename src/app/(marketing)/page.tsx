@@ -120,7 +120,7 @@ export default async function HomePage() {
               <ButtonLink href="#demo" size="lg" variant="secondary">Prova la demo</ButtonLink>
             </div>
             <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted">
-              {BETA.open && <li className="font-medium text-ledger-2">Beta gratuita per le agenzie invitate</li>}
+              {BETA.open && <li className="font-medium text-ledger-2">Beta gratuita su invito</li>}
               <li>Nessuna carta di credito</li>
               <li>Paghi solo le aziende consegnate</li>
               <li>Ogni segnale con link e data</li>

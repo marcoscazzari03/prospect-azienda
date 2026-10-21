@@ -42,6 +42,12 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — testi: fascia della beta e riquadro dell'avviso · in produzione al push
+- **Cosa:** fascia del sito «Beta gratuita su invito: 4 settimane, crediti gratuiti, nessuna carta.» (prima «per le web agency
+  invitate»: gli inviti potranno andare anche a studi grafici e altri; `src/lib/config.ts`), e in homepage «Beta gratuita su invito». Riquadro dell'avviso: «se ci sono
+  aziende nuove» (prima «almeno 3»; la soglia di 3 resta nel database). Richiesta dell'utente.
+- **Indietro:** `git revert`.
+
 ## 21/10/2026 — ricerche opportunità più veloci (migrazione 057) · in produzione (verifica sui dati veri: 0 differenze; migrazione eseguita il 21/10)
 - **Cosa:** `supabase/migrations/20261202000057_opportunity_pool_speed.sql` ridefinisce `opportunity_pool` (dalla 052): radici
   di parole chiave e zone e segnali richiesti calcolati una volta sola invece che per ogni azienda (prima `sector_matches` e

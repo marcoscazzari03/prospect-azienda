@@ -11,7 +11,7 @@ export const BRAND = {
 // Beta su invito (dal 19/10): fascia sul sito e testi della registrazione. A fine beta: open = false.
 export const BETA = {
   open: true,
-  banner: "Beta gratuita per le web agency invitate: 4 settimane, crediti gratuiti, nessuna carta.",
+  banner: "Beta gratuita su invito: 4 settimane, crediti gratuiti, nessuna carta.",
   signupHref: "/registrati?beta=1",
 } as const;
 
