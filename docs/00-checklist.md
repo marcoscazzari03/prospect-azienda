@@ -21,7 +21,8 @@ Ultimo aggiornamento: 21/10/2026.
 5e. ~~**Io** – Beta allargata: soglie in percentuale nella pagina Admin → Beta, decisione spostata al 30/10, criteri e
     testi dell'invito aggiornati in `10-beta.md`~~ (20/10). **Tu:** invitare circa 50 agenzie al Sud e in Emilia-Romagna nei
     prossimi giorni, 10–15 al giorno da leads@ (`10-beta.md`). Lista di 62 agenzie pronta (21/10: 48 con email, 14 dal
-    modulo; file mandato in chat, non nel repository). Alle risposte, stessa procedura del 5b.
+    modulo; file mandato in chat, non nel repository). ~~21/10: 3 inviti (SCF Group, La Russa Design, mscompany)~~; esclusa
+    Webapp s.r.l. (non fa siti). Alle risposte, stessa procedura del 5b.
 5f. **Insieme, il 21/10** – Nuovo listino (proposta e valutazione nel registro, 20/10 sera). Prima del lancio a
     pagamento: pacchetti 59/249/790 €, Scale tolto, 20 crediti di benvenuto con i primi lead «forti», lead con solo
     modulo a 1 credito, niente supplemento AI (migrazione). Abbonamenti a pagamento solo con il monitoraggio (punto 36).
@@ -104,7 +105,8 @@ Ultimo aggiornamento: 21/10/2026.
     meno frequente quando la coda è vuota.
 58. ~~**Io** – Dal Data Quality (21/10): niente segnali sulle pagine d'errore o anti-bot, sui traslochi e sulle pagine
     provvisorie; www del sito salvato; vecchie prove tolte (migrazione 055); giro Settore aziende con JSON non valido~~ (21/10).
-    **Tu:** eseguire la migrazione 055 e pubblicare «Lead Engine | Search (v1)», «Aziende | Controllo siti» e «Annunci | Settore aziende» (bozze caricate il 21/10).
+    ~~Migrazione 055 eseguita, 3 workflow pubblicati~~ (21/10). **Resta:** nel resoconto del 22/10, prove tolte e controllo siti
+    senza errori.
 59. **Insieme, da decidere** – Dal controllo settimanale (registro, 21/10): recuperare Como, Sondrio, Belluno, Padova, Rovigo,
     Treviso; ridurre i giri a vuoto (Siti aziende 1 volta al giorno, Controllo siti ogni 2 ore dopo il 2/11, irraggiungibili dopo
     60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; ~~capire perché manca Adzuna del 20/10~~ (21/10: gira ogni 2 giorni).

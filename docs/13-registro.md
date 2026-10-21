@@ -40,7 +40,12 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — falsi segnali dalle pagine che non sono il sito, errore del Settore aziende, Adzuna (punti 58–59) · in attesa (migrazione 055 e pubblicazione di 3 workflow)
+## 21/10/2026 — inviti della beta, seconda ondata
+- **Cosa:** inviate dall'utente 3 email di invito: SCF Group, La Russa Design, mscompany (lista di 62 agenzie del 21/10, fuori
+  dal repository). Esclusa Webapp s.r.l.: non fa siti web, quindi è fuori dal target della beta.
+- **Prossimo passo:** alle risposte, procedura del punto 5b (account, +150 crediti, piano Growth, email di benvenuto).
+
+## 21/10/2026 — falsi segnali dalle pagine che non sono il sito, errore del Settore aziende, Adzuna (punti 58–59) · in produzione (migrazione 055 eseguita e workflow pubblicati il 21/10)
 - **Cosa (segnali):** `n8n/engine/nodes/lib-controlli-sito.js` (nodi «Valuta segnali sito» e «Controlli tecnici sito» del motore,
   «Valuta siti» di «Aziende | Controllo siti»). Pagine di blocco o d'errore (CloudFront, Cloudflare, 403, dominio in vendita,
   pagina di prova di Apache, anti-robot, «no SSL certificate configured», errore critico di WordPress), traslochi verso un altro
