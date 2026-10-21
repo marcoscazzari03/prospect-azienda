@@ -41,6 +41,34 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — avviso settimanale delle opportunità (punto 36) · in attesa (migrazione 056); visibile solo agli admin
+- **Cosa:** su una ricerca opportunità, «Avvisami ogni settimana» (riquadro nella pagina della ricerca; etichetta «Avviso»
+  nell'elenco). Ogni lunedì il cron notturno (`/api/cron/watchdog` → `src/lib/server/alerts.ts`) conta le aziende che
+  soddisfano la ricerca, non consegnate all'account e mai segnalate da quell'avviso; se sono almeno 3 manda un'email
+  («N nuove aziende con opportunità per "X"», pulsante che apre la ricerca precompilata, `?da=`). Nessun credito: si spende
+  solo se il cliente avvia la ricerca. Nessun nome di azienda nell'email.
+- **Dove:** migrazione `20261201000056_search_alerts.sql` (tabelle `search_alerts`, `search_alert_domains`, `search_alert_runs`;
+  funzioni `start_search_alert`, `stop_search_alert`, `due_search_alerts`, `run_search_alert`, `next_alert_monday`),
+  `toggleAlert` in `src/app/app/actions.ts`, pagina e elenco delle ricerche, tipi in `database.types.ts`. Test SQL
+  `supabase/tests/33_search_alerts_test.sql`.
+- **Perché così:** Business Analyst: «nuove» = mai segnalate (le prove si rinnovano ogni 25 giorni e le stesse aziende
+  sembrerebbero nuove ogni mese); all'attivazione le aziende già disponibili si segnano come viste; soglia 3; ogni giro
+  registrato per misurare l'uso. Designer: solo nella pagina della ricerca (non nel wizard, dove c'è già la ripetizione
+  automatica); mai insieme alla ripetizione automatica; parole «avviso» e «gratis».
+- **Revisione:** Code Reviewer PRONTO CON RISERVE, QA FUNZIONA CON PROBLEMI. Corretti: conteggio con gli stessi filtri
+  della riserva (piattaforme, pagine ospitate, aziende fuori target); tutte le aziende nuove segnate, senza tetto (oltre 500
+  tornavano «nuove» la settimana dopo); avviso rimasto fermo (ricerca ripristinata, organizzazione riattivata) riparte dal
+  lunedì senza email fuori giorno; avviso solo a chi è ancora nell'organizzazione; avviso tolto quando la ricerca si
+  archivia o si elimina; email: pulsante «Apri la ricerca» e frase «le aziende si scelgono tra tutte quelle disponibili»
+  (la ricerca avviata pesca dall'intero bacino); invio fallito registrato tra gli errori; grant a service_role.
+- **Da sapere:** se l'invio fallisce le aziende restano segnate come segnalate (errore registrato). Tempo di
+  `opportunity_pool` per ricerche larghe da misurare prima di aprire a tutti (fino a 50 avvisi a notte nel cron da 300 s).
+  Seconda revisione del Code Reviewer: PRONTO. Prima di aprire a tutti: oltre 50 avvisi scaduti in una notte gli altri
+  slittano e vengono saltati (alzare il limite o ripetere la chiamata); i giri saltati non finiscono in `search_alert_runs`.
+- **Da fare dopo la beta:** aprirlo a tutti (togliere il controllo admin in pagina e in `toggleAlert`), link di
+  disattivazione diretto nell'email, soglia scelta dal cliente, riepilogo ogni 4 settimane senza novità.
+- **Indietro:** `git revert`; drop delle tabelle e funzioni della 056.
+
 ## 21/10/2026 — sigle di provincia, tagli di testo negli annunci, giri di «Siti aziende» (punti 54, 59) · in produzione (workflow pubblicati il 21/10)
 - **Sigle di provincia:** `splitZones` traduce le sigle in maiuscolo («MO, RE», «Bari (BA)») nel nome della provincia
   (`n8n/annunci/province.json`, gli stessi nomi dei luoghi delle aziende OSM). In minuscolo («no») restano come sono. Sigle,

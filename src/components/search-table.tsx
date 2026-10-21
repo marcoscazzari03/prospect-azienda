@@ -5,6 +5,7 @@ import { SearchRowMenu } from "./search-row-menu";
 
 export type SearchListItem = {
   id: string;
+  alert?: boolean;
   name: string;
   status: string;
   email_mode: string;
@@ -76,6 +77,7 @@ export function SearchTable({
                     {s.repeat && s.repeat !== "none" && (
                       <span className="text-ledger" title="Ricerca ricorrente">↻ {s.repeat === "weekly" ? "settimanale" : "mensile"}</span>
                     )}
+                    {s.alert && <Badge tone="ledger" title="Avviso settimanale gratuito attivo">Avviso</Badge>}
                   </div>
                 </td>
                 <td className="px-4 py-3">

@@ -12,7 +12,7 @@ import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
 import type { DeliveryRow } from "@/lib/domain/leads";
 import { REPEAT_LABEL, withoutSynonyms, type Repeat, type SearchTarget } from "@/lib/domain/search-input";
 import { describeOffer, describeOpportunity, offerByCode, signalByCode } from "@/lib/domain/signals";
-import { archiveSearch, deleteSearch, stopRepeat } from "../../actions";
+import { archiveSearch, deleteSearch, stopRepeat, toggleAlert } from "../../actions";
 import { ConfirmSubmit } from "@/components/confirm-submit";
 import { ActionMenu } from "@/components/action-menu";
 import { menuItem } from "@/components/menu-item";
@@ -24,11 +24,12 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
   const viewer = await requireViewer();
   await closeStaleRuns(viewer.org.id);
   const supabase = await createClient();
-  const [{ data: search }, { data: events }, { data: leads }, { data: lists }] = await Promise.all([
+  const [{ data: search }, { data: events }, { data: leads }, { data: lists }, { data: alert }] = await Promise.all([
     supabase.from("searches").select("*").eq("id", id).maybeSingle(),
     supabase.from("search_events").select("id, stage, message, created_at").eq("search_id", id).order("created_at", { ascending: false }).limit(30),
     supabase.from("deliveries").select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, archived_at, lead_list_items(list_id)").eq("search_id", id).is("deleted_at", null).order("quality_score", { ascending: false }),
     supabase.from("lead_lists").select("id, name").order("name"),
+    supabase.from("search_alerts").select("next_run_at, user_id").eq("search_id", id).maybeSingle(),
   ]);
   if (!search || search.deleted_at) notFound();
 
@@ -108,6 +109,41 @@ export default async function SearchDetailPage({ params }: PageProps<"/app/ricer
             <Button type="submit" size="sm" variant="secondary">Ferma la ripetizione</Button>
           </form>
         </div>
+      )}
+
+      {/* Avviso settimanale gratuito (migrazione 056): durante la beta solo per gli amministratori. */}
+      {viewer.isAdmin && !!t.signals?.codes.length && !search.archived_at && (
+        search.repeat !== "none" ? (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
+            <p>Questa ricerca si ripete già da sola: l&apos;avviso settimanale non serve.</p>
+            {alert && (
+              <form action={toggleAlert}>
+                <input type="hidden" name="searchId" value={search.id} />
+                <input type="hidden" name="on" value="0" />
+                <Button type="submit" size="sm" variant="secondary">Disattiva l&apos;avviso</Button>
+              </form>
+            )}
+          </div>
+        ) : (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-card px-5 py-4 text-sm">
+            {alert ? (
+              <p>
+                <Badge tone="ledger">Avviso attivo</Badge>{" "}
+                Prossimo avviso <span className="font-mono">{new Date(alert.next_run_at).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "numeric", timeZone: "Europe/Rome" })}</span>{alert.user_id === viewer.user.id && <> a {viewer.email}</>}, se ci sono almeno 3 aziende nuove.
+              </p>
+            ) : (
+              <p>
+                <span className="font-medium">Avviso settimanale (gratis)</span>
+                <span className="block text-ink-2">Ogni lunedì ti scriviamo quante aziende nuove hanno un&apos;opportunità per questa ricerca. Non spendi crediti: decidi tu se riceverle.</span>
+              </p>
+            )}
+            <form action={toggleAlert}>
+              <input type="hidden" name="searchId" value={search.id} />
+              <input type="hidden" name="on" value={alert ? "0" : "1"} />
+              <Button type="submit" size="sm" variant="secondary">{alert ? "Disattiva l'avviso" : "Avvisami ogni settimana"}</Button>
+            </form>
+          </div>
+        )
       )}
 
       {!!t.signals?.codes.length && (

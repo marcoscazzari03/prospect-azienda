@@ -131,8 +131,8 @@ Ultimo aggiornamento: 21/10/2026.
 34. **Io** – Tarare i pesi del punteggio delle opportunità con i giudizi dei clienti.
 35. **Insieme** – Listino definitivo con i costi misurati; valutare i lead con il solo modulo di contatto a metà
     credito.
-36. **Io** – Monitoraggio continuo delle opportunità («nuove opportunità ogni settimana», partendo dalla ripetizione
-    automatica delle ricerche): la funzione che giustifica l'abbonamento. Prima di API e più utenti.
+36. ~~**Io** – Avviso settimanale gratuito delle nuove opportunità (migrazione 056), solo admin durante la beta~~ (21/10).
+    **Tu:** eseguire la migrazione 056. **Dopo la beta:** aprirlo a tutti, link di disattivazione nell'email, soglia a scelta.
 37. **Io** – Nuovi servizi: «Sito nuovo» e «Prenotazioni online per hotel».
 38. **Insieme** – Segnale «nuova apertura / nuova sede».
 39. **Io** – Coda del controllo siti con priorità.

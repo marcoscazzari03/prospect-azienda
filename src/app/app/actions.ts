@@ -232,12 +232,27 @@ export async function stopRepeat(form: FormData) {
   revalidatePath("/app/ricerche");
 }
 
+// Avviso settimanale gratuito (migrazione 056). Durante la beta solo per gli amministratori.
+export async function toggleAlert(form: FormData) {
+  const viewer = await requireViewer();
+  if (!viewer.isAdmin) return;
+  const id = z.string().uuid().safeParse(form.get("searchId"));
+  if (!id.success) return;
+  const db = createAdminClient();
+  if (form.get("on") === "1") await db.rpc("start_search_alert", { p_org: viewer.org.id, p_search: id.data, p_user: viewer.user.id });
+  else await db.rpc("stop_search_alert", { p_org: viewer.org.id, p_search: id.data });
+  revalidatePath(`/app/ricerche/${id.data}`);
+  revalidatePath("/app/ricerche");
+}
+
 // Archivia o ripristina una ricerca (con i suoi lead).
 export async function archiveSearch(form: FormData) {
   const viewer = await requireViewer();
   const id = z.string().uuid().safeParse(form.get("searchId"));
   if (!id.success) return;
   await createAdminClient().rpc("archive_search", { p_org: viewer.org.id, p_search: id.data, p_archive: form.get("archive") === "1" });
+  // Una ricerca archiviata non manda più l'avviso settimanale (migrazione 056).
+  if (form.get("archive") === "1") await createAdminClient().rpc("stop_search_alert", { p_org: viewer.org.id, p_search: id.data });
   revalidatePath(`/app/ricerche/${id.data}`);
   revalidatePath("/app/ricerche");
   revalidatePath("/app/lead");
@@ -250,6 +265,7 @@ export async function deleteSearch(form: FormData) {
   if (!id.success) return;
   const { error } = await createAdminClient().rpc("forget_search", { p_org: viewer.org.id, p_search: id.data });
   if (error) return;
+  await createAdminClient().rpc("stop_search_alert", { p_org: viewer.org.id, p_search: id.data });
   revalidatePath("/app/ricerche");
   revalidatePath("/app/lead");
   redirect("/app/ricerche");

@@ -513,6 +513,18 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"search_alerts": {
+                  Row: {
+                    "created_at": string,"last_run_at": string | null,"last_sent_at": string | null,"min_new": number,"next_run_at": string,"org_id": string,"search_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"last_run_at"?: string | null,"last_sent_at"?: string | null,"min_new"?: number,"next_run_at": string,"org_id": string,"search_id": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"last_run_at"?: string | null,"last_sent_at"?: string | null,"min_new"?: number,"next_run_at"?: string,"org_id"?: string,"search_id"?: string,"user_id"?: string
+                  }
+                  Relationships: []
                 },"search_events": {
                   Row: {
                     "counters": NonNullable<Json>,"created_at": string,"id": number,"message": string,"run_id": string | null,"search_id": string,"stage": string
@@ -842,6 +854,22 @@ isOneToOne: false
                            },
 "normalize_email":
 { Args: { "p": string }; Returns: string
+                           },
+"due_search_alerts":
+{ Args: { "p_limit": number }; Returns: {
+              "name": string,"org_id": string,"search_id": string,"user_id": string
+            }[]
+                           },
+"run_search_alert":
+{ Args: { "p_search": string }; Returns: {
+              "new_count": number,"sent": boolean
+            }[]
+                           },
+"start_search_alert":
+{ Args: { "p_org": string,"p_search": string,"p_user": string }; Returns: boolean
+                           },
+"stop_search_alert":
+{ Args: { "p_org": string,"p_search": string }; Returns: undefined
                            },
 "opportunity_availability":
 { Args: { "p_contacts": number,"p_org": string,"p_target": Json }; Returns: number

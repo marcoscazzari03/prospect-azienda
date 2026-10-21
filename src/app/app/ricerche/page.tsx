@@ -19,7 +19,13 @@ export default async function SearchesPage({ searchParams }: PageProps<"/app/ric
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(1000);
-  const { data } = await (archivio ? base.not("archived_at", "is", null) : base.is("archived_at", null));
+  const [{ data: rows }, { data: alerts }] = await Promise.all([
+    archivio ? base.not("archived_at", "is", null) : base.is("archived_at", null),
+    supabase.from("search_alerts").select("search_id"),
+  ]);
+  // Avviso settimanale attivo (migrazione 056): etichetta accanto al nome.
+  const withAlert = new Set((alerts ?? []).map((a) => a.search_id));
+  const data = rows?.map((r) => ({ ...r, alert: withAlert.has(r.id) }));
   return (
     <>
       <PageHeader
