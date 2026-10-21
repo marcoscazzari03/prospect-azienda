@@ -100,7 +100,7 @@ Ultimo aggiornamento: 21/10/2026.
     (21/10). **Tu:** controllare in Stripe (test) che nessun cliente non admin abbia comprato; nell'email di benvenuto usare
     il link /registrati?beta=1; guardare ogni giorno le nuove registrazioni per aggiungere i crediti beta.
 57. ~~**Io** – Popolamento OSM: salvataggio a pezzi di 250 nell'app; recupero delle province perse (notti 22–24/10) caricato
-    su n8n~~ (21/10). **Tu:** pubblicare «Aziende | Popolamento OSM». **Resta:** verificare la notte del 22/10; controllo siti
+    su n8n~~ (21/10). ~~Workflow pubblicato~~ (21/10). **Resta:** verificare la notte del 22/10; controllo siti
     meno frequente quando la coda è vuota.
 58. **Io, da decidere** – Dal Data Quality (21/10): niente segnali sulle pagine d'errore o anti-bot (status HTTP nel nodo
     «Apri sito»), host giusto (www) e URL letto davvero nella prova, pagine di trasloco come provvisorie, segnali a «non
@@ -110,7 +110,7 @@ Ultimo aggiornamento: 21/10/2026.
     60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; capire perché manca Adzuna del 20/10.
     **Tu:** query `supabase/queries/popolamento_settimanale.sql`.
 60. ~~**Io** – Email per le aziende controllate prima del 20/10 (migrazione 054); verificati i 14 segnali «annuncio» (non è un
-    difetto, query Q3b)~~ (21/10). **Tu:** eseguire la migrazione 054. **Da decidere:** magazzino con gli annunci di
+    difetto, query Q3b)~~ (21/10). ~~Migrazione 054 eseguita~~ (21/10). **Da decidere:** magazzino con gli annunci di
     `job_ads`; prova dell'annuncio solo se ancora visibile su Adzuna (`last_seen_at`).
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo

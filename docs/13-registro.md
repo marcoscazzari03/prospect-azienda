@@ -39,7 +39,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — email per le aziende controllate prima del 20/10 (migrazione 054) e segnale «annuncio» · migrazione da eseguire
+## 21/10/2026 — email per le aziende controllate prima del 20/10 (migrazione 054) e segnale «annuncio» · in produzione (migrazione eseguita il 21/10)
 - **Cosa:** `supabase/migrations/20261129000054_site_email_backfill.sql` ridefinisce `pending_site_checks` (dalla 035): dopo le
   aziende dovute mette in coda quelle controllate prima del 20/10 12:25 UTC, con il sito leggibile e senza email. Si esaurisce
   da sola (il ricontrollo aggiorna la data anche senza email). Circa 9.000 aziende, 150 l'ora: circa 60 ore, senza esecuzioni
@@ -69,7 +69,7 @@ Come tornare indietro, in generale:
 - **Proposte (punto 60):** usare i giri a vuoto del controllo siti per ricontrollare subito le aziende controllate prima del
   20/10 senza email (circa 9.000: email e no_privacy in 2–3 giorni); capire i soli 14 segnali job_ad.
 
-## 21/10/2026 — recupero delle province perse il 21/10 · nodo caricato su n8n, da pubblicare
+## 21/10/2026 — recupero delle province perse il 21/10 · in produzione (workflow pubblicato il 21/10)
 - **Cosa:** `n8n/annunci/nodes/10-prepara-osm.js` («Prepara richieste OSM» di «Aziende | Popolamento OSM»): lista `RECUPERO`
   per tre notti, dopo le riprove e prima della rotazione: 22/10 Sondrio, Belluno; 23/10 Rovigo, Como, Treviso, Varese; 24/10
   Padova, Monza, Pavia; dal 25/10 niente. Non dipende dalla lista delle riprove (dopo un'esecuzione in errore potrebbe non
