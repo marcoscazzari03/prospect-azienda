@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — ricerche in target più veloci (punto 63, migrazione 059) · in attesa di migrazione
+## 21/10/2026 — ricerche in target più veloci (punto 63, migrazione 059) · in produzione (verifica sui dati veri: 0 differenze; migrazione eseguita il 21/10)
 - **Cosa:** `target_pool` riscritta come la 057: radici di settore, parole chiave, zone ed esclusioni calcolate una volta sola
   invece che per ogni azienda, e query pianificata a ogni chiamata con i valori veri (plpgsql con `execute … using`). Una ricerca
   non «semplice» esce subito senza leggere le aziende.

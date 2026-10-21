@@ -93,8 +93,8 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     (`last_seen_at`).
 62. **Insieme, da decidere** – «CMS vecchio» sulle pagine provvisorie: resta valutato o diventa non determinabile?
 63. ~~**Io** – Stesso trucco della 057 (radici calcolate una volta) per le ricerche in target (`target_pool`, contatore e
-    riserva)~~ (21/10, migrazione 059: da 1,5 a 5 volte più veloce, stessi risultati). **Tu:** eseguire
-    `supabase/queries/verifica_059.sql` (atteso 0 differenze), poi la migrazione 059.
+    riserva)~~ (21/10, migrazione 059: da 1,5 a 5 volte più veloce, stessi risultati). ~~**Tu:** eseguire
+    `supabase/queries/verifica_059.sql` (atteso 0 differenze), poi la migrazione 059~~ (21/10: 0 differenze, eseguita).
 26b. **Io, dopo la beta** – Motore: seguire a mano i rimandi da un sito all'altro, ricontrollando ogni volta l'indirizzo.
 39. **Io** – Coda del controllo siti con priorità.
 40. **Io** – Wizard: stima realistica dei lead e costo in euro.
