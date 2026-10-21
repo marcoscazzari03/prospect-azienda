@@ -31,9 +31,9 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 5i. **Sospeso il 21/10 sera** (decisione dell'utente, come gli inviti). Prima: **Tu, 24–25/10** – Un solo promemoria a Gopher, Mutart e Studio360 (testo in `10-beta.md`, scritto il 21/10).
 56b. **Tu, ogni giorno** – Guardare le nuove registrazioni per aggiungere i crediti beta; controllare in Stripe (test) che
     nessun cliente non admin abbia comprato.
-80. **Io, 21/10 alle 18:40** – Controllare che «Aziende | Controllo siti» sia ripartito dopo la migrazione 061.
-79. **Io, 22/10 mattina** – Pubblicare su Vercel la versione di main bloccata dal limite di 100 pubblicazioni al giorno (testi per i
-    freelance, limiti, registrazione, menu, nome in un solo punto) e controllarla online.
+80. ~~**Io** – Controllare che «Aziende | Controllo siti» sia ripartito dopo la migrazione 061~~ (21/10: giro delle 18:25 riuscito).
+79. ~~**Io** – Pubblicare su Vercel la versione di main bloccata dal limite di 100 pubblicazioni al giorno (testi per i
+    freelance, limiti, registrazione, menu, nome in un solo punto) e controllarla online~~ (21/10, 23:30: online, verificato).
 57b. **Io, 22/10 mattina** – Nel resoconto: notte del recupero OSM (Sondrio, Belluno) e salvataggio a pezzi; prove false tolte
     dal controllo siti (punto 58); primo giro di «Siti aziende» dopo Adzuna (se il giro delle 11:40 è pieno, un terzo giro).
 5h. ~~**Io + Tu** – Ricerca di prova nella zona di ogni agenzia invitata~~ (21/10: non si fa, decisione dell'utente: troppo

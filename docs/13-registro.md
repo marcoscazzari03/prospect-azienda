@@ -133,8 +133,8 @@ Come tornare indietro, in generale:
 - **Causa confermata (stati dei commit su GitHub):** «Deployment rate limited — retry in 24 hours» dalle 13:21 UTC: limite del
   piano Hobby di 100 pubblicazioni nelle 24 ore (anteprime comprese). Online resta `b5947ca` fino alla prossima pubblicazione
   riuscita di main; il motore n8n non ne dipende.
-- **Da fare il 22/10 mattina:** pubblicare main (push o «Create Deployment» su Vercel) e controllare online i testi nuovi.
-  D'ora in poi il codice va su main a gruppi.
+- **Risolto il 21/10 alle 23:30:** push di main (`5a178be`) pubblicato da Vercel; online verificati homepage («anche da solo»,
+  FAQ per chi lavora da solo), /prezzi e /registrati («Azienda o attività»). D'ora in poi il codice va su main a gruppi.
 - **Indietro:** togliere `git` e `ignoreCommand` da `vercel.json`.
 
 ## 21/10/2026 — nome in un solo punto del codice (punto 72) · in produzione al push (nessun cambiamento visibile)
