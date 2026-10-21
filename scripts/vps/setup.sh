@@ -8,11 +8,10 @@
 set -euo pipefail
 
 if [ "$(id -u)" -ne 0 ]; then echo "Eseguire come root."; exit 1; fi
-if [ ! -s /root/.ssh/authorized_keys ]; then
-  echo "Manca la chiave SSH di root (/root/.ssh/authorized_keys): aggiungila dalla console Hetzner prima di continuare,"
-  echo "altrimenti dopo questo script non potresti più entrare."
-  exit 1
-fi
+# Senza chiave SSH (scelta dell'utente, 21/10): resta l'accesso di root con password, protetto da fail2ban; con la chiave
+# l'accesso diventa solo con chiave e con l'utente «worker».
+CHIAVE=0
+if [ -s /root/.ssh/authorized_keys ]; then CHIAVE=1; fi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
@@ -30,6 +29,7 @@ ufw --force enable
 
 systemctl enable --now fail2ban
 
+if [ "$CHIAVE" = 1 ]; then
 # Utente del worker, con la stessa chiave SSH di root e sudo.
 if ! id worker >/dev/null 2>&1; then
   adduser --disabled-password --gecos "" worker
@@ -49,14 +49,21 @@ PermitRootLogin no
 CONF
 sshd -t
 systemctl reload ssh
+fi
 
 # Node.js 22 (pacchetto ufficiale NodeSource).
 curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 apt-get install -yq nodejs
 
 echo
-echo "Fatto. Da ora si entra con: ssh worker@$(curl -fsS -4 https://ifconfig.me 2>/dev/null || echo IP-DEL-SERVER)"
 echo "Node: $(node -v)  ·  firewall: $(ufw status | head -1)"
+if [ "$CHIAVE" = 0 ]; then
+  echo "Fatto (senza chiave SSH). Si entra ancora con: ssh root@IP-DEL-SERVER e la password di root."
+  echo "Usa una password lunga e unica (passwd); fail2ban blocca per 10 minuti chi sbaglia 5 volte."
+  echo "Poi riavvia una volta (reboot) per caricare il kernel aggiornato."
+  exit 0
+fi
+echo "Fatto. Da ora si entra con: ssh worker@$(curl -fsS -4 https://ifconfig.me 2>/dev/null || echo IP-DEL-SERVER)"
 echo "IMPORTANTE: prima di chiudere questa sessione, prova l'accesso come worker da una seconda finestra. Root non entra più"
 echo "via SSH e non ci sono password: se l'accesso come worker non funzionasse, resterebbe solo il rescue system di Hetzner."
 echo "Poi riavvia una volta (sudo reboot) per caricare il kernel aggiornato."

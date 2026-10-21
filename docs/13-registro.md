@@ -51,6 +51,8 @@ Come tornare indietro, in generale:
 - **Perché:** il server sarà pronto per il worker del controllo siti; il worker si scrive dopo il 30/10, come deciso.
 - **Prima:** reinstallazione del VPS con Ubuntu 24.04 dalla console Hetzner (cancella il vecchio progetto abbandonato,
   confermato dall'utente il 21/10) con la propria chiave SSH.
+- **Senza chiave SSH (scelta dell'utente, 21/10):** lo script salta utente `worker` e indurimento di SSH e lascia l'accesso di
+  root con password, protetto da fail2ban. Server ridimensionato a CX23 (6,70 €/mese invece di circa 14).
 - **Indietro:** reinstallare il VPS.
 
 ## 21/10/2026 — aziende con nome e dominio molto diversi (punto 54e, migrazione 062) · in produzione (verifica: 107 business.site e 14 portali; eseguita il 21/10)
