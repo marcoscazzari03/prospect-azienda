@@ -87,11 +87,14 @@ export async function startMfa(): Promise<MfaSetup> {
 
 // Secondo passo: il primo codice dell'app conferma il fattore (e porta la sessione al livello aal2).
 export async function confirmMfa(_: AccountState, form: FormData): Promise<AccountState> {
-  await requireViewer();
+  const viewer = await requireViewer();
   const factorId = z.string().uuid().safeParse(form.get("factorId"));
   const code = codeSchema.safeParse(form.get("code"));
   if (!factorId.success) return { error: "Ricomincia l'attivazione." };
   if (!code.success) return { error: code.error.issues[0]?.message };
+  if (!(await rateHit(viewer.user.id, "mfa_try", MFA_ATTEMPTS.windowSeconds, MFA_ATTEMPTS.max))) {
+    return { error: "Troppi tentativi. Riprova tra 15 minuti." };
+  }
   const supabase = await createClient();
   const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factorId.data, code: code.data });
   if (error) return { error: "Codice non valido o scaduto: controlla l'ora del telefono e riprova." };
@@ -109,7 +112,7 @@ export async function disableMfa(_: AccountState, form: FormData): Promise<Accou
   const factors = (list?.totp ?? []).filter((f) => f.status === "verified");
   if (!factors.length) return { info: "La verifica in due passaggi non è attiva." };
   if (!(await rateHit(viewer.user.id, "mfa_try", MFA_ATTEMPTS.windowSeconds, MFA_ATTEMPTS.max))) {
-    return { error: "Troppi codici non validi. Riprova tra 15 minuti." };
+    return { error: "Troppi tentativi. Riprova tra 15 minuti." };
   }
   const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factors[0].id, code: code.data });
   if (error) return { error: "Codice non valido o scaduto." };

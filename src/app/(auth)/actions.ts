@@ -68,13 +68,13 @@ export async function verifyMfaLogin(_: AuthState, form: FormData): Promise<Auth
   const { data: list } = await supabase.auth.mfa.listFactors();
   const factor = list?.totp?.find((f) => f.status === "verified");
   if (!factor) redirect(safeNext(form.get("next")));
-  // Troppi codici sbagliati: si esce e si riparte dalla password (il limite di Supabase è per IP,
+  // Troppi tentativi: si esce e si riparte dalla password (il limite di Supabase è per IP,
   // e qui l'IP è quello del server).
   const { data: auth } = await supabase.auth.getUser();
   const userId = auth.user?.id ?? "";
   if (!(await rateHit(userId, "mfa_try", MFA_ATTEMPTS.windowSeconds, MFA_ATTEMPTS.max))) {
     await supabase.auth.signOut({ scope: "local" });
-    return { error: "Troppi codici non validi. Attendi 15 minuti e accedi di nuovo." };
+    return { error: "Troppi tentativi. Attendi 15 minuti e accedi di nuovo." };
   }
   const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
   if (error) return { error: "Codice non valido o scaduto: controlla l'ora del telefono e riprova." };

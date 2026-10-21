@@ -53,7 +53,7 @@ Come tornare indietro, in generale:
   - `splitZones` (`src/lib/domain/search-input.ts`): testo tagliato a 2.000 caratteri e spazi compattati prima delle espressioni
     regolari; prima migliaia di spazi tenevano occupato il server per secondi. Test in `tests/zones.test.ts`.
   - Verifica in due passaggi (`src/app/(auth)/actions.ts`, `src/app/app/account/actions.ts`): si contano i tentativi
-    all'ingresso (10 in 15 minuti, `MFA_ATTEMPTS` in `src/lib/server/rate.ts`) invece degli errori dopo, così non si supera il
+    all'ingresso, anche quando la si attiva (10 in 15 minuti, `MFA_ATTEMPTS` in `src/lib/server/rate.ts`) invece degli errori dopo, così non si supera il
     tetto inviando codici in parallelo.
   - Cambio password: 5 tentativi in 15 minuti (`PASSWORD_CHECKS`). Avviso settimanale: 20 attivazioni l'ora per account.
 - **Migrazione 058** (`20261203000058_security_review_22_10.sql`): `rate_hit` sotto un lock per chiave; tabelle dell'avviso
