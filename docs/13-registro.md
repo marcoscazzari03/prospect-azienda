@@ -52,8 +52,8 @@ Come tornare indietro, in generale:
   perché evoca finanza e promesse di guadagno più che prove concrete e ha l'accento incerto. Alternative: Pista e Spunto (le due
   migliori), Indizio, Varco, Fiuto, Traccia. Scelta finale dell'utente, dopo il controllo di marchio (UIBM/EUIPO, classi 35 e
   42), dominio e social.
-- **Domini (controllo DNS del 21/10, da confermare all'acquisto):** occupati pista, spunto, prosperia, indizio, varco, fiuto,
-  traccia (.it). Risultano liberi: avvisto.it, scovia.it, spuntia.it e .com, fiutia.it e .com, opportia.it, pistia.it.
+- **Domini (controllo DNS del 21/10, da confermare all'acquisto):** occupati pista, spunto, prosperia, indizio, varco, fiuto (.it).
+  Risultano liberi: avvisto.it, scovia.it, spuntia.it e .com, fiutia.it e .com, opportia.it, pistia.it.
 - **Passaggio (dopo il 30/10):** DNS verso Vercel, rinvio permanente da leads.weborastudio.it, dominio su Resend, indirizzi in
   Supabase, Stripe, Turnstile e callback di n8n, casella email nuova con leads@ inoltrata, firma, testi e documenti.
 - **Dove:** `docs/00-checklist.md` (punti 64–68; il 33 assorbito dal 67).
