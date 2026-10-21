@@ -79,7 +79,7 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
 24. **Insieme** – MillionVerifier solo se i rimbalzi superano 2–3 ogni 100 lead.
 25. **Insieme** – La domanda chiave: senza il nome del referente, lo pagherebbero?
 19e. ~~**Io** – Esito delle correzioni dei falsi «Senza HTTPS» nell'analisi giornaliera~~ (21/10: 12% falsi su 139, ridotti a
-    circa 3% con le correzioni; i siti con HTTPS ora risultano «no»). **Tu:** pubblicare «Controllo siti» e il motore.
+    circa 3% con le correzioni; i siti con HTTPS ora risultano «no»). **Tu:** pubblicare «Aziende | Controllo siti».
 61. ~~**Io** – Riordino della cartella `docs`: storici in `docs/archivio/`, indice `docs/README.md`, panoramica, pubblicazione,
     domande ai consulenti e README aggiornati~~ (21/10).
 
