@@ -5,7 +5,21 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `archivio/05-da-fare.md`).
 
-Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico e sicurezza, nome nuovo Avvisto; punti 65–73).
+Ultimo aggiornamento: 21/10/2026 sera (ordine di priorità in cima; migrazioni 059–062; punti 65–80).
+
+## 🧭 Ordine di priorità delle cose aperte (21/10 sera)
+Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione qui sotto.
+1. **Stasera e domattina (Io):** 80 (controllo siti ripartito dopo la 061, verifica alle 18:40), 79 (pubblicazione su
+   Vercel alle 23:30, altrimenti alle 9:30), 57b (resoconto: OSM, «HTTPS presente», nuovi portali esclusi).
+2. **Tecnico 22–25/10:** 40 wizard (Io), 39 coda con priorità misurata sui dati veri (Io), 73 controlli a mano (Tu) con 18 e 17,
+   19 pulizia dei dati di collaudo (Insieme), 21 aziende con il solo modulo (Tu), 62 e 60 da decidere (Insieme), 59 query
+   settimanale (Tu), 30 logo accanto al mittente (Tu).
+3. **Verso il 25/10:** se un'agenzia risponde, 5b e 20; altrimenti 66 dominio avvisto.it (Tu) e 67 passaggio ad Avvisto
+   (Insieme), con 16 repository privato. Ogni giorno 56b (Tu).
+4. **Il 30/10 (o il 6/11):** 9 decisione della beta, poi 5g ed eventuale seconda ondata.
+5. **Prima del lancio a pagamento:** 11, 12, 13, 14, 15, 29, 5f e 35.
+6. **Dopo la beta:** 49 worker sul VPS (con 26b, 54e seconda parte, 59 controllo ogni 2 ore), 36b, 34, 37, 38, 41, 43, 44, 45,
+   46, 47, 50, 51; 68 rinnovi Hostinger (gennaio–febbraio 2027); 69 VPS Hetzner.
 
 ## 🔴 Beta in corso: questa settimana
 5g. **In pausa dal 21/10 sera** (decisione dell'utente: 3–4 giorni per vedere se rispondono le 13 agenzie invitate; se nessuno
@@ -17,6 +31,7 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
 5i. **Sospeso il 21/10 sera** (decisione dell'utente, come gli inviti). Prima: **Tu, 24–25/10** – Un solo promemoria a Gopher, Mutart e Studio360 (testo in `10-beta.md`, scritto il 21/10).
 56b. **Tu, ogni giorno** – Guardare le nuove registrazioni per aggiungere i crediti beta; controllare in Stripe (test) che
     nessun cliente non admin abbia comprato.
+80. **Io, 21/10 alle 18:40** – Controllare che «Aziende | Controllo siti» sia ripartito dopo la migrazione 061.
 79. **Io, 22/10 mattina** – Pubblicare su Vercel la versione di main bloccata dal limite di 100 pubblicazioni al giorno (testi per i
     freelance, limiti, registrazione, menu, nome in un solo punto) e controllarla online.
 57b. **Io, 22/10 mattina** – Nel resoconto: notte del recupero OSM (Sondrio, Belluno) e salvataggio a pezzi; prove false tolte
@@ -85,7 +100,7 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
 
 ## 🔵 Tecnico aperto
 54e. ~~**Io** – Segnalare le aziende con nome e dominio molto diversi (Data Quality)~~ (21/10: 28 portali e 6 siti di altre
-    aziende su 234; portali e business.site esclusi con la 062). **Tu:** `verifica_062.sql`, poi la migrazione 062. **Dopo:**
+    aziende su 234; portali e business.site esclusi con la 062). ~~**Tu:** `verifica_062.sql`, poi la migrazione 062~~ (21/10: 107 business.site e 14 portali esclusi). **Dopo:**
     sospendere email e segnali quando il nome non compare nella homepage.
 59. **Insieme** – Giri a vuoto e province: ~~Siti aziende 2 giri al mattino~~ (21/10); controllo siti ogni 2 ore dopo il 2/11
     (finito il ricontrollo della 054); irraggiungibili ricontrollati dopo 60–90 giorni; OSM più lento dopo il primo giro;

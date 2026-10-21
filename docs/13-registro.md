@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — aziende con nome e dominio molto diversi (punto 54e, migrazione 062) · in attesa di migrazione
+## 21/10/2026 — aziende con nome e dominio molto diversi (punto 54e, migrazione 062) · in produzione (verifica: 107 business.site e 14 portali; eseguita il 21/10)
 - **Misura (Data Quality):** 6.939 aziende controllate dal 14 al 21/10; nome e dominio molto diversi in 234 aziende OSM (3,8%),
   0 su 681 degli annunci (domini indovinati o cercati), 6 su 317 del motore. Tutte le 234 aperte dal vivo: 98 siti giusti
   (marchio, sigla, gruppo), 28 pagine di portali, 6 siti di un'altra azienda (3 domini scaduti e riusati), 102 non
