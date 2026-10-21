@@ -28,8 +28,13 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
   // Pagine di prova del server, verifiche anti-robot: frasi inequivocabili, ma pagine più lunghe (pagina di prova
   // di Apache 1984 caratteri, «Visitor anti-robot validation» 2258: Data Quality, 21/10).
   const BLOCCO_LUNGO = /test page for the apache|web server (installed )?at this site is working properly|welcome to nginx|apache2 (ubuntu|debian) default page|no ssl certificate (is )?configured|anti-robot validation|please enable js and disable any ad ?blocker|checking your request/i;
+  // Dominio in vendita o parcheggiato: il sito non esiste, quindi neanche il suo HTTPS conta. Nidoma (http rimanda a
+  // parking.nidoma.com) ha una pagina lunga, ma il titolo non lascia dubbi (Data Quality, 21/10). Le altre pagine di blocco
+  // (anti-bot, «no SSL certificate configured» dell'hosting) restano: lì l'errore del certificato è vero (Code Reviewer).
+  const inVendita = /^\s*domain information [^<]*- nidoma\s*$/i.test(titolo)
+    || segno(/\b[a-z0-9-]+\.[a-z]{2,6} is for sale|this domain (is|may be) for sale|questo dominio [^.]{0,30}in vendita|il dominio [a-z0-9-]+\.[a-z]{2,6} [eè] in vendita|questo dominio [eè] (registrato|parcheggiato)|domain (is )?parked|parked (free|domain)|dominio (registrato|parcheggiato) (con|da|presso)/i, 1500);
   // Pagine predefinite del server riconosciute solo dal titolo («It works!» può stare in una homepage vera).
-  const bloccata = segno(BLOCCO, 1500) || segno(BLOCCO_LUNGO, 3000)
+  const bloccata = segno(BLOCCO, 1500) || segno(BLOCCO_LUNGO, 3000) || inVendita
     || (testo.length < 1500 && /^\s*(it works!?|welcome to nginx!?|apache2? [^<]*default page|index of \/)/i.test(titolo));
   // Errore momentaneo del server: segnali non determinabili, ma le prove già salvate restano (Code Reviewer, 21/10).
   const guasto = !bloccata && segno(/404 not found|500 internal server error|502 bad gateway|503 service (temporarily )?unavailable|504 gateway time-?out|briefly unavailable for scheduled maintenance|errore critico sul tuo sito|critical error on (this|your) website/i, 3000);
@@ -157,7 +162,7 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
   if (richiesti.includes('no_https')) {
     // Esito della richiesta HTTPS: presente solo se eseguita.
     const h = https;
-    const eseguito = h && (h.https_body !== undefined || h.error !== undefined);
+    const eseguito = h && (h.eseguito === true || h.https_body !== undefined || h.error !== undefined);
     // n8n mette il motivo vero in error.cause o in description («SSL Issue: …» da solo non dice nulla).
     const e = h?.error;
     const msg = [e?.message ?? e, e?.cause?.message, e?.description, h?.details?.description, e?.code].filter(Boolean).map(String).join(' | ');
@@ -174,7 +179,13 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
     const etichetta = host.replace(/^www\./, '').split('.')[0];
     const marchio = etichetta.length >= 4 && nomi.includes(etichetta);
     const hostVero = /^http:\/\//i.test(website) || /^https?:\/\/www\./i.test(website);
-    if (!eseguito) metti('no_https', 'undetermined');
+    // Il sito dichiara come indirizzo vero un https su un altro dominio (canonical o og:url): l'HTTPS va giudicato
+    // lì, non sul dominio salvato (Data Quality, 21/10: 6 falsi su 139, nessun vero perso).
+    const radice = (u) => String(u || '').toLowerCase().replace(/^https?:\/\//, '').split(/[/?#:]/)[0].replace(/^www\./, '');
+    const dichiarato = radice((html.match(/<link[^>]+rel=["']canonical["'][^>]*href=["'](https:\/\/[^"'/]+)/i)
+      || html.match(/<meta[^>]+property=["']og:url["'][^>]*content=["'](https:\/\/[^"'/]+)/i) || [])[1]);
+    const altroSito = dichiarato && dichiarato !== radice(website) && !dichiarato.endsWith('.' + radice(website));
+    if (!eseguito || inVendita || trasloco || altroSito) metti('no_https', 'undetermined');
     else if (!h.error) metti('no_https', 'fail');
     else if (/expired|CERT_HAS_EXPIRED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS scaduto');
     else if (/self.signed|SELF_SIGNED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS autofirmato');
@@ -189,7 +200,8 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
   const HOME = ['no_mobile', 'single_language', 'stale_copyright', 'no_booking_engine', 'no_privacy', 'outdated_cms', 'under_construction'];
   const motivo = bloccata ? 'Pagina di blocco o di errore, non il sito' : trasloco ? 'Pagina di trasloco verso un altro sito' : '';
   for (const e of Object.values(esiti)) {
-    if (e.status !== 'undetermined' || !HOME.includes(e.code)) continue;
+    // Anche l'HTTPS se il dominio è in vendita o il sito ha traslocato: la vecchia prova va tolta (21/10).
+    if (e.status !== 'undetermined' || !(HOME.includes(e.code) || (e.code === 'no_https' && (inVendita || trasloco)))) continue;
     if (guasto) e.evidence = { ...e.evidence, detail: 'Errore momentaneo del server' };
     else if (motivo) e.evidence = { ...e.evidence, detail: motivo, invalid_page: true };
     else if (provvisoria && e.code !== 'outdated_cms' && e.code !== 'under_construction') e.evidence = { ...e.evidence, detail: 'Pagina provvisoria', invalid_page: true };

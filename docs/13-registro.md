@@ -45,6 +45,23 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — falsi «Senza HTTPS» (punto 19e) · in attesa di pubblicazione dei workflow
+- **Misura (Data Quality):** dalle esecuzioni di «Controllo siti» dopo la seconda correzione (dalla 3893, 2.681 siti), 139 segnali
+  «Senza HTTPS» ricontrollati tutti dal vivo: 118 veri (85%), 17 falsi (12%), 4 non determinabili. Falsi: 9 siti che con http
+  rimandano a un altro dominio con HTTPS valido, 7 domini in vendita su Nidoma, 1 dominio nudo con certificato vecchio.
+  Scoperto anche che **nessun sito risultava mai «no»**: la HEAD riuscita restituisce `{}` e il codice la leggeva come «non
+  eseguita» (2.258 siti con HTTPS funzionante «non determinabili»), quindi le vecchie prove sbagliate non si toglievano.
+- **Cosa:** `n8n/annunci/nodes/09-valuta-siti.js` segna la richiesta come eseguita; `n8n/engine/nodes/lib-controlli-sito.js`:
+  pagina di Nidoma riconosciuta dal titolo come «non è il sito»; «Senza HTTPS» non determinabile su domini in vendita o parcheggiati e su pagine
+  di trasloco (con `invalid_page`, la vecchia prova si toglie; non sulle altre pagine di blocco, dove l'errore del certificato
+  dell'hosting è vero: Code Reviewer) e quando `canonical`/`og:url` indicano un https su un altro dominio.
+  Test in `n8n/annunci/test/run.mjs`. Restano 4 falsi su 139: servono il rimando di http (worker, punto 49).
+- **Effetto atteso:** al prossimo controllo di ogni sito (ogni 25 giorni circa) le prove sbagliate spariscono; i siti con HTTPS
+  funzionante risultano «no».
+- **Dove:** workflow «Aziende | Controllo siti» («Valuta siti») e motore («Valuta segnali sito», «Controlli tecnici sito»,
+  che usano lo stesso codice; nel motore entra anche il filtro delle porte del 21/10 rimasto da caricare).
+- **Indietro:** versione precedente dei workflow nella cronologia di n8n; `git revert`.
+
 ## 21/10/2026 — Vercel non pubblicava main · configurazione
 - **Problema:** dalle 13:10 circa i push su main non hanno creato pubblicazioni (ultima in produzione: `b5947ca`); testi per i
   freelance, limiti e registrazione erano su GitHub ma non online. Probabile causa: troppe pubblicazioni in un giorno (ogni

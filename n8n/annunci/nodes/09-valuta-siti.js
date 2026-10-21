@@ -5,7 +5,9 @@
 // (tutti «non determinabile»): si riprova tra 25 giorni.
 // Anche l'email aziendale trovata nella homepage (20/10): la riserva del motore parte da chi ce l'ha.
 const aziende = $('Siti da controllare').all().map(i => i.json);
-const https = $('Controllo HTTPS').all().map(i => i.json);
+// La richiesta HEAD riuscita restituisce {}: senza il segno «eseguito» ogni sito con HTTPS funzionante restava «non
+// determinabile» invece di «no», e le vecchie prove sbagliate non venivano mai tolte (Data Quality, 21/10).
+const https = $('Controllo HTTPS').all().map(i => ({ eseguito: true, ...i.json }));
 const pagine = $input.all().map(i => i.json);
 const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' }); // AAAA-MM-GG
 const CODICI = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'stale_copyright', 'under_construction', 'no_booking_engine', 'no_privacy'];

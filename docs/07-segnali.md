@@ -102,7 +102,14 @@ Il controllo siti apre l'indirizzo con il protocollo e il www del sito salvato (
 - **Non determinabile:** sito irraggiungibile in entrambi i modi; errori di rete temporanei
   (si riprova una volta); catena del certificato incompleta («unable to verify the first
   certificate») ed errori di handshake (EPROTO), che i browser di solito accettano; certificato
-  per il solo www del dominio.
+  per il solo www del dominio; dominio in vendita o parcheggiato (per esempio su Nidoma) o pagina di trasloco (la vecchia
+  prova viene tolta; le pagine d'errore dell'hosting no: lì l'errore del certificato è vero); sito che dichiara come indirizzo vero un https su un altro dominio (`canonical` o `og:url`), perché
+  l'HTTPS va giudicato lì (21/10).
+- **No (assente):** la richiesta HTTPS riesce. Nel Controllo siti è una HEAD, che restituisce una risposta vuota: fino al 21/10
+  veniva letta come «non determinabile» e le vecchie prove sbagliate non si toglievano mai.
+- **Misura del 21/10 (Data Quality):** 139 segnali dati dopo le correzioni del 19–20/10, ricontrollati dal vivo: 118 veri (85%),
+  17 falsi (12%), 4 non determinabili. Le correzioni del 21/10 ne tolgono 13; restano 4 falsi di siti che con http rimandano a
+  un altro dominio, da risolvere leggendo il rimando (con il worker, punto 49).
 - **Prova:** tipo di problema («nessun HTTPS» / «certificato scaduto il …»), data del controllo.
 
 ### Sito non adatto ai cellulari (`no_mobile`) · verificato

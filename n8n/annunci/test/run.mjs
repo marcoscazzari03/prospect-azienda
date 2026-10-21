@@ -248,6 +248,28 @@ assert.equal(esitoDi('vecchio.it', 'no_privacy'), 'pass', 'nessuna informativa p
 assert.deepEqual(controllo.items[0].company.technologies, ['wordpress']);
 assert.ok(controllo.items[0].checks.find(c => c.code === 'outdated_cms').evidence.detail.startsWith('WordPress 5.2.4'));
 assert.equal(controllo.stats.unreachable, 1);
+// «Senza HTTPS» (Data Quality, 21/10): la HEAD riuscita dà {} e vale «no»; dominio in vendita su Nidoma e sito vero su un
+// altro dominio (canonical) non danno il segnale, e sulla pagina in vendita la vecchia prova va tolta.
+const nome = (h) => ({ error: { message: 'SSL Issue', cause: { message: `Hostname/IP does not match certificate's altnames: Host: ${h}. is not in the cert's altnames: DNS:webx.aruba.it` } } });
+const sitiH = [
+  { company_id: 'h1', domain: 'ok.it', name: 'Ok', website: 'https://www.ok.it' },
+  { company_id: 'h2', domain: 'invendita.it', name: 'In vendita', website: 'http://www.invendita.it' },
+  { company_id: 'h3', domain: 'vecchiodominio.it', name: 'Trasferita', website: 'http://www.vecchiodominio.it' },
+  { company_id: 'h4', domain: 'hosting.it', name: 'Hosting', website: 'https://www.hosting.it' }
+];
+const nidoma = `<html><head><title>Domain information invendita.it - Nidoma</title></head><body><p>${'Welcome to the Nidoma Marketplace invendita.it It is for sale on our platform. '.repeat(30)}</p></body></html>`;
+const senzaCert = '<html><head><title>Error</title></head><body><p>There is no SSL certificate configured for this domain.</p></body></html>';
+const canonical = `<html lang="it"><head><link rel="canonical" href="https://www.nuovodominio.com/"></head><body><p>${corpo}</p></body></html>`;
+const [ctrlH] = run(codice('09-valuta-siti.js'), {
+  nodes: { 'Siti da controllare': sitiH, 'Controllo HTTPS': [{}, nome('www.invendita.it'), nome('www.vecchiodominio.it'), nome('www.hosting.it')] },
+  input: [{ html: paginaModerna }, { html: nidoma }, { html: canonical }, { html: senzaCert }]
+});
+const httpsDi = (dom) => ctrlH.items.find(x => x.company.domain === dom).checks.find(c => c.code === 'no_https');
+assert.equal(httpsDi('ok.it').status, 'fail', 'HEAD riuscita: HTTPS presente');
+assert.equal(httpsDi('invendita.it').status, 'undetermined', 'dominio in vendita');
+assert.equal(httpsDi('invendita.it').evidence.invalid_page, true, 'la vecchia prova va tolta');
+assert.equal(httpsDi('vecchiodominio.it').status, 'undetermined', 'sito vero su un altro dominio');
+assert.equal(httpsDi('hosting.it').status, 'pass', 'pagina d\'errore dell\'hosting: l\'errore del certificato resta vero (Code Reviewer)');
 // Email aziendale dalla homepage (20/10): solo caselle d'ufficio del dominio o di un dominio fratello.
 assert.equal(controllo.stats.emails, 0, 'pagine senza email');
 const conEmail = (html, website = 'https://www.ditta.it') => run(codice('09-valuta-siti.js'), {
