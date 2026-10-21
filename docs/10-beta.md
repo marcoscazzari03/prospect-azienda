@@ -145,7 +145,7 @@ Webora Leads, un servizio di Webora Studio · leads.weborastudio.it
 
 Se non vi interessa, rispondete «no» e non vi scriverò più.
 
-**Follow-up (uno solo, dopo 5–6 giorni, nella stessa conversazione; mai a chi ha risposto «no»)**
+**Follow-up per l'invio largo (uno solo, dopo 5–6 giorni, nella stessa conversazione; mai a chi ha risposto «no»)**
 
 Oggetto: Re: [oggetto originale]
 
@@ -158,6 +158,28 @@ Se vi è utile, rispondete «sì» e vi mando l'accesso. Se non è il momento, n
 
 [Tuo nome]
 Webora Leads, un servizio di Webora Studio · leads.weborastudio.it
+
+**Promemoria per le agenzie del 19/10 (Gopher, Mutart, Studio360), il 24–25/10** — scritto il 21/10 dall'agente Sales & Copy.
+Avevano ricevuto un'email personalizzata con il PDF di esempi: il promemoria parte da lì. Uno solo; poi non si ricontattano.
+
+Oggetto: Re: [oggetto originale]
+
+Buongiorno,
+
+vi riscrivo una sola volta per la prova di Webora Leads che vi ho proposto il 19/10, con il PDF di esempi.
+
+Gli esempi del PDF sono aziende vere. Nella prova ne cercate altre come quelle, sul vostro servizio e nella vostra zona: per
+ognuna avete il motivo, con il link e la data del controllo, e il contatto aziendale.
+
+La prova dura 4 settimane ed è gratuita, senza carta. Se poi continuate, avete il 30% di sconto per 12 mesi.
+
+Se vi interessa, rispondete «sì» e vi mando l'accesso. Se non è il momento, non serve rispondere: non vi scriverò più.
+
+Marco Scazzari · Webora Leads · leads.weborastudio.it
+
+Variante corta (per chi ha letto l'invito e se n'è solo dimenticato): «vi avevo scritto il 19/10 con alcuni esempi di aziende
+con il sito da aggiornare. La proposta resta valida: 4 settimane di prova gratuita, senza carta, e il 30% di sconto per 12
+mesi se continuate. Vi interessa? Basta un «sì». Altrimenti non serve rispondere: è l'ultima email che vi mando.»
 
 **Correzioni rispetto al testo del 19/10:** tolto «non li vede nessun altro cliente» (non è vero: i dati pubblici delle
 aziende consegnate entrano nel database comune e possono andare ad altri clienti, come dicono i termini); «sito senza HTTPS»
@@ -176,15 +198,26 @@ Ti mando i dettagli.
 
 P.S. Vi ho trovati proprio con Webora Leads: cercando agenzie [della vostra zona / che stanno assumendo].
 
-### Dopo il sì (email di benvenuto)
+### Dopo il sì (email di benvenuto) — aggiornata il 21/10 dall'agente Sales & Copy
 
-Ciao [Nome], grazie! Ecco come partire:
-1. registrati su https://leads.weborastudio.it/registrati con questa email: ti aggiungo i crediti della beta
-   appena vedo l'iscrizione;
-2. «Nuova ricerca» → «Trova aziende con opportunità» → scegli il tuo servizio e la tua zona: il contatore ti dice
-   quante aziende sono già pronte;
-3. sui lead che contatti segna lo stato (contattata, ha risposto, appuntamento): è il dato che mi serve di più;
-4. se un lead è sbagliato (email che rimbalza, fuori zona, segnale non corretto) segnalalo dall'app: i crediti
-   tornano.
+**Oggetto:** Re: [oggetto originale] (meglio nella stessa conversazione); altrimenti «Il vostro accesso a Webora Leads».
 
-Ti scrivo tra due settimane per la prima chiamata. Per qualsiasi cosa: leads@weborastudio.it.
+Buongiorno [Nome],
+
+grazie! Ecco come partire:
+
+1. Registratevi qui, con l'email a cui vi ho scritto: https://leads.weborastudio.it/registrati?beta=1. Appena vedo
+   l'iscrizione vi aggiungo i crediti della prova. Durante la prova non c'è nulla da pagare e non serve la carta.
+2. Cliccate «Trova aziende con opportunità» e scegliete il vostro servizio e la zona. La zona potete scriverla come vi
+   viene, per esempio «Modena e Reggio Emilia» o «Napoli e provincia».
+3. Sulle aziende che contattate segnate lo stato (contattata, ha risposto, appuntamento). È il dato che mi serve di più.
+4. Se un lead è sbagliato (email che rimbalza, fuori zona, motivo non corretto), usate «Segnala» nella scheda del lead:
+   se la segnalazione è confermata, i crediti vi tornano.
+
+Tra due settimane vi scrivo per fissare la prima chiamata, 20 minuti. Per qualsiasi cosa rispondete a questa email.
+
+Marco Scazzari · Webora Leads · leads.weborastudio.it
+
+Scelte: link con `?beta=1` (pagina di registrazione della beta); nessun numero di aziende promesso; nessun tempo promesso
+per i crediti (li aggiunge l'utente a mano); «voi» come negli inviti, «tu» se ha risposto una persona per nome. Dopo l'invio:
+Admin → Clienti → scheda: +150 crediti beta e piano Growth.

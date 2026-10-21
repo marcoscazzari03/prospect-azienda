@@ -83,6 +83,8 @@ Come tornare indietro, in generale:
   Creative Idea, Fashion-web, Kreativeweb, Diginetica, MAG Web Agency, Marco Loprete Web Agency (lista di 62 agenzie del 21/10,
   fuori dal repository). Esclusa Webapp s.r.l.: non fa siti web, quindi è fuori dal target della beta.
 - **Prossimo passo:** alle risposte, procedura del punto 5b (account, +150 crediti, piano Growth, email di benvenuto).
+- **Testi (Sales & Copy, 21/10):** in `docs/10-beta.md` il promemoria per Gopher, Mutart e Studio360 (24–25/10, parte dal
+  PDF già mandato) e il benvenuto aggiornato (link /registrati?beta=1, nessun numero di aziende promesso, firma senza telefono).
 
 ## 21/10/2026 — falsi segnali dalle pagine che non sono il sito, errore del Settore aziende, Adzuna (punti 58–59) · in produzione (migrazione 055 eseguita e workflow pubblicati il 21/10)
 - **Cosa (segnali):** `n8n/engine/nodes/lib-controlli-sito.js` (nodi «Valuta segnali sito» e «Controlli tecnici sito» del motore,
