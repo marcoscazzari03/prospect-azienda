@@ -29,8 +29,17 @@ const giorno = Math.max(0, Math.floor((oggi - new Date(2026, 9, 20)) / 86400000)
 const rotazione = Array.from({ length: PER_GIORNO }, (_, k) => PROVINCE[(giorno * PER_GIORNO + k) % PROVINCE.length]);
 // Al massimo 4 riprove al giorno (divise in 3 parti ognuna): con 8 province nuove la notte resta breve.
 const daRiprovare = PROVINCE.filter(([s]) => riprova.includes(s)).slice(0, 4);
+// Recupero una tantum (21/10): province perse nella notte del 21/10 (errore 500 al salvataggio, blocco da
+// 2.000 aziende troppo grande, corretto nell'app) o uscite dalle riprove (al massimo 4 al giorno: Varese).
+// Non dipende dalla lista delle riprove, che dopo un'esecuzione in errore potrebbe non essere salvata.
+// Notti leggere quando le riprove sono già tante; dal 25/10 più niente.
+const RECUPERO = [['SO', 'BL'], ['RO', 'CO', 'TV', 'VA'], ['PD', 'MB', 'PV']];
+const notteRecupero = Math.floor((oggi - new Date(2026, 9, 22)) / 86400000);
+const recupero = RECUPERO[notteRecupero] || [];
+const daRecuperare = PROVINCE.filter(([s]) => recupero.includes(s) && !daRiprovare.some(([r]) => r === s));
+const gia = (s) => daRiprovare.some(([r]) => r === s) || daRecuperare.some(([r]) => r === s);
 const scelte = programmato
-  ? [...daRiprovare, ...rotazione.filter(([s]) => !daRiprovare.some(([r]) => r === s))]
+  ? [...daRiprovare, ...daRecuperare, ...rotazione.filter(([s]) => !gia(s))]
   : PROVINCE.filter(([s]) => s === 'MO');
 
 const TIPI = ['office', 'craft', 'shop', 'amenity', 'tourism', 'healthcare', 'industrial'];

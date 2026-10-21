@@ -275,6 +275,31 @@ for (let g = 0; g < 5; g++) {
 }
 assert.ok(nordOsm.every(s => primiGiorni.has(s)), 'il Nord nei primi 5 giorni');
 const el = (tags) => ({ type: 'node', id: Math.random(), tags });
+// Recupero una tantum delle province perse il 21/10 (anche Varese, uscita dalle riprove), su tre notti.
+const notteOsm = (giorno, statico = { osm_tentativi: [] }) => {
+  const finta = new VeraData(2026, 9, giorno, 4, 20);
+  globalThis.Date = class extends VeraData { constructor(...a) { super(...(a.length ? a : [finta])); } };
+  try { return run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico }).map(r => r.sigla); } finally { globalThis.Date = VeraData; }
+};
+const PERSE = ['SO', 'BL', 'RO', 'CO', 'TV', 'VA', 'PD', 'MB', 'PV'];
+const recuperate = (g, statico) => PERSE.filter(s => new Set(notteOsm(g, statico)).has(s));
+assert.deepEqual(recuperate(22), ['SO', 'BL'], 'notte del 22/10: due piccole');
+assert.deepEqual(recuperate(23), ['RO', 'CO', 'TV', 'VA'], 'notte del 23/10: Varese compresa');
+assert.deepEqual(recuperate(24), ['PD', 'MB', 'PV'], 'notte del 24/10');
+assert.equal(new Set(notteOsm(25)).size, 8, 'dal 25/10 di nuovo solo la rotazione');
+const conRiprove = { osm_tentativi: [['BS', 1], ['MI', 1], ['MB', 1], ['PV', 1], ['VA', 1]], osm_riprova: ['BS', 'MI', 'MB', 'PV', 'VA'] };
+const notte22 = notteOsm(22, conRiprove);
+assert.deepEqual([...new Set(notte22)].slice(0, 6), ['BS', 'MI', 'MB', 'PV', 'SO', 'BL'], 'prima le riprove (al massimo 4), poi il recupero');
+const lista20 = { osm_tentativi: [['BS', 1], ['CO', 1], ['MI', 1]], osm_riprova: ['BS', 'CO', 'MI'] };
+assert.deepEqual([...new Set(notteOsm(22, lista20))].slice(0, 5), ['BS', 'CO', 'MI', 'SO', 'BL'], 'lista del 20/10 non sostituita: riprove e recupero');
+for (const [g, statico] of [22, 23, 24].flatMap(g => [[g, conRiprove], [g, lista20]])) {
+  const sigle = notteOsm(g, statico);
+  const prov = [];
+  for (const s of sigle) if (prov.at(-1) !== s) prov.push(s);
+  assert.equal(prov.length, new Set(prov).size, `notte del ${g}/10: nessuna provincia due volte`);
+}
+assert.deepEqual(recuperate(24, { osm_tentativi: [['MB', 1]], osm_riprova: ['MB'] }), ['PD', 'MB', 'PV'], 'se è tra le riprove passa una volta sola');
+
 const [osm] = run(codice('11-normalizza-osm.js'), {
   nodes: { 'Prepara richieste OSM': [{ sigla: 'MO', provincia: 'Modena', regione: 'Emilia-Romagna' }, { sigla: 'XX', provincia: 'Altrove', regione: 'Altrove' }] },
   input: [

@@ -39,6 +39,17 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — recupero delle province perse il 21/10 · nodo caricato su n8n, da pubblicare
+- **Cosa:** `n8n/annunci/nodes/10-prepara-osm.js` («Prepara richieste OSM» di «Aziende | Popolamento OSM»): lista `RECUPERO`
+  per tre notti, dopo le riprove e prima della rotazione: 22/10 Sondrio, Belluno; 23/10 Rovigo, Como, Treviso, Varese; 24/10
+  Padova, Monza, Pavia; dal 25/10 niente. Non dipende dalla lista delle riprove (dopo un'esecuzione in errore potrebbe non
+  essere salvata). Varese era uscita dalle riprove per il limite di 4 al giorno. Brescia e Milano restano nelle riprove.
+  Test in `n8n/annunci/test/run.mjs` (con la lista del 21/10 salvata e con quella del 20/10).
+- **Revisione:** Code Reviewer, due giri, PRONTO CON RISERVE. Accettato: Monza e Pavia (o Como) possono essere scaricate in due
+  notti diverse (riprova e recupero); il salvataggio è ripetibile, costa solo un po' di carico. Notte del 22/10 circa il doppio
+  di una normale (28 richieste a Overpass): guardare la mattina del 22/10 durata, salvataggio e log di Vercel.
+- **Indietro:** versione precedente nella cronologia di n8n, o lasciare scadere (dal 25/10 il recupero non aggiunge niente).
+
 ## 21/10/2026 — controllo settimanale del popolamento (Business Analyst)
 - **Numeri (14–21/10):** 280 esecuzioni n8n, a regime 44–48 al giorno (circa 1.400 al mese, tetto 2.100); circa 66 giri a vuoto a
   settimana (Controllo siti 30%, Siti aziende 44%). OSM: almeno 5.023 aziende nuove salvate, 7.303 perse la notte del 21/10;
