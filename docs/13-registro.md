@@ -39,6 +39,21 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — primo resoconto del Business Analyst e controllo del Data Quality sui siti veri
+- **Resoconto (ultime 24 ore):** nessuna ricerca di clienti; 5 esecuzioni del motore, tutte dell'admin, costo AI 0,49 €
+  (tariffe della migrazione 020). Problemi: **popolamento OSM fallito** (esecuzione 3927: 7.303 aziende pronte, salvataggio
+  su `/api/engine/companies-import` in errore 500 dopo 3 tentativi; 5 province lombarde senza risposta da Overpass);
+  **controllo siti a vuoto** dalle 00:25 UTC (coda finita); **giro Settore aziende**: 38 aziende su 301 fallite per JSON
+  non valido verso Claude (ipotesi: testo tagliato a metà di una sequenza `\u` in `07-prepara-settore.js`). Controllo
+  siti: 2.632 aziende, 40% con email, no_privacy 6,3%. Limite Adzuna nel codice 2.500 al mese, non 5.000: da chiarire.
+- **Data Quality (no_privacy sui siti veri):** 7 pass su 10 corretti; 2 falsi positivi perché il controllo legge una pagina
+  diversa dal sito (macron.com: pagina 403 anti-bot di CloudFront; golfclub-boutique.com: host senza www con certificato
+  autofirmato) e 1 pagina di trasloco (palmabit.com). Gli stessi casi danno anche no_mobile e single_language falsi. I fail
+  sono corretti. Le web agency scartate per «nessuna_email» avevano solo Gmail o un indirizzo personale: scarti giusti.
+  Confermate le proposte del punto 54 c) e d), più: aprire l'host giusto e salvare l'URL letto davvero; pagine di trasloco
+  come provvisorie; motivo di scarto più preciso («solo email gratuita / personale»).
+- Nessuna modifica fatta: da decidere (punti 57–58 della checklist).
+
 ## 21/10/2026 — sito per le agenzie invitate alla beta (punto 56) · in produzione dopo il push
 - **Cosa:** costante `BETA` in `src/lib/config.ts` (interruttore: `open: false` a fine beta); fascia «Beta gratuita per le web
   agency invitate…» in `SiteHeader` e nel layout della registrazione (`src/components/site-chrome.tsx`, `src/app/(auth)/layout.tsx`);
