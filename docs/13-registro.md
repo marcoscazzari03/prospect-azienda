@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — falsi «Senza HTTPS» (punto 19e) · Controllo siti da pubblicare
+## 21/10/2026 — falsi «Senza HTTPS» (punto 19e) · in produzione (Controllo siti pubblicato il 21/10)
 - **Misura (Data Quality):** dalle esecuzioni di «Controllo siti» dopo la seconda correzione (dalla 3893, 2.681 siti), 139 segnali
   «Senza HTTPS» ricontrollati tutti dal vivo: 118 veri (85%), 17 falsi (12%), 4 non determinabili. Falsi: 9 siti che con http
   rimandano a un altro dominio con HTTPS valido, 7 domini in vendita su Nidoma, 1 dominio nudo con certificato vecchio.
@@ -58,8 +58,8 @@ Come tornare indietro, in generale:
   Test in `n8n/annunci/test/run.mjs`. Restano 4 falsi su 139: servono il rimando di http (worker, punto 49).
 - **Effetto atteso:** al prossimo controllo di ogni sito (ogni 25 giorni circa) le prove sbagliate spariscono; i siti con HTTPS
   funzionante risultano «no».
-- **Dove:** workflow «Aziende | Controllo siti» («Valuta siti»): caricato il 21/10 e verificato identico al repository, **da
-  pubblicare**. Il motore («Valuta segnali sito», «Controlli tecnici sito») usa lo stesso codice ma non è stato ricaricato: lì
+- **Dove:** workflow «Aziende | Controllo siti» («Valuta siti»): caricato il 21/10, verificato identico al repository e
+  pubblicato. Il motore («Valuta segnali sito», «Controlli tecnici sito») usa lo stesso codice ma non è stato ricaricato: lì
   la HEAD non c'è e i domini in vendita contano poco; si carica alla prossima modifica del motore, insieme al filtro delle
   porte del 21/10.
 - **Indietro:** versione precedente dei workflow nella cronologia di n8n; `git revert`.
