@@ -65,7 +65,7 @@ Ultimo aggiornamento: 21/10/2026.
 21. **Tu** – Giudicare a mano le 24 aziende con il solo modulo di contatto (query `moduli.sql`).
 22. **Insieme** – Seguire la pagina Admin → Beta: export, risposte, segnalazioni, costo dell'AI. Chiedere alle agenzie
     se usano lo «Spunto per il primo messaggio».
-23. **Insieme** – Seguire il riquadro «Database aziende» e le chiamate Adzuna (limite 5.000 al mese).
+23. **Insieme** – Seguire il riquadro «Database aziende» e le chiamate Adzuna (limite 2.500 al mese, raccolta ogni 2 giorni).
 24. **Insieme** – MillionVerifier solo se i rimbalzi superano 2–3 ogni 100 lead.
 25. **Insieme** – La domanda chiave: senza il nome del referente, lo pagherebbero?
 
@@ -102,12 +102,12 @@ Ultimo aggiornamento: 21/10/2026.
 57. ~~**Io** – Popolamento OSM: salvataggio a pezzi di 250 nell'app; recupero delle province perse (notti 22–24/10) caricato
     su n8n~~ (21/10). ~~Workflow pubblicato~~ (21/10). **Resta:** verificare la notte del 22/10; controllo siti
     meno frequente quando la coda è vuota.
-58. **Io, da decidere** – Dal Data Quality (21/10): niente segnali sulle pagine d'errore o anti-bot (status HTTP nel nodo
-    «Apri sito»), host giusto (www) e URL letto davvero nella prova, pagine di trasloco come provvisorie, segnali a «non
-    determinabile» se il sito è «in costruzione», motivo di scarto preciso; giro Settore aziende con JSON non valido.
+58. ~~**Io** – Dal Data Quality (21/10): niente segnali sulle pagine d'errore o anti-bot, sui traslochi e sulle pagine
+    provvisorie; www del sito salvato; vecchie prove tolte (migrazione 055); giro Settore aziende con JSON non valido~~ (21/10).
+    **Tu:** eseguire la migrazione 055 e pubblicare «Motore lead», «Aziende | Controllo siti» e «Aziende | Settore».
 59. **Insieme, da decidere** – Dal controllo settimanale (registro, 21/10): recuperare Como, Sondrio, Belluno, Padova, Rovigo,
     Treviso; ridurre i giri a vuoto (Siti aziende 1 volta al giorno, Controllo siti ogni 2 ore dopo il 2/11, irraggiungibili dopo
-    60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; capire perché manca Adzuna del 20/10.
+    60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; ~~capire perché manca Adzuna del 20/10~~ (21/10: gira ogni 2 giorni).
     **Tu:** query `supabase/queries/popolamento_settimanale.sql`.
 60. ~~**Io** – Email per le aziende controllate prima del 20/10 (migrazione 054); verificati i 14 segnali «annuncio» (non è un
     difetto, query Q3b)~~ (21/10). ~~Migrazione 054 eseguita~~ (21/10). **Da decidere:** magazzino con gli annunci di

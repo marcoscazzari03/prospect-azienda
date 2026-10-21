@@ -39,6 +39,28 @@ Due famiglie di segnali:
 
 ## Schede
 
+**Pagine che non sono il sito (dal 21/10, `n8n/engine/nodes/lib-controlli-sito.js`).** Prima di valutare i segnali della
+homepage si scartano le pagine che non dicono niente del sito vero:
+- **blocco anti-bot o pagina del server** («Request blocked», «Access denied», «Just a moment…», 403, dominio in vendita o
+  parcheggiato, pagina di prova di Apache o nginx, verifica anti-robot, «no SSL certificate configured»), con la frase nel titolo
+  oppure nel testo di una pagina senza menu (al massimo 2 link interni), sotto i 1.500 caratteri (3.000 per le pagine di prova e
+  anti-robot): tutti i segnali della homepage sono **non determinabili**. «Appartamenti in vendita» in una homepage con il menu
+  non conta;
+- **errore momentaneo** (404, 500, 502, 503, 504, manutenzione di WordPress, «errore critico» di WordPress): non determinabili,
+  ma le prove già salvate restano;
+- **trasloco** verso un altro dominio (meno di 2.000 caratteri, al massimo 2 link interni, almeno un link `<a>` verso un altro
+  dominio che non sia un social o un servizio, frase esplicita come «vai al nuovo sito», «ci siamo trasferiti», «we've moved»;
+  non basta «nuovo sito» da solo, e una pagina provvisoria non è mai un trasloco): idem;
+- **pagina provvisoria** («in costruzione», «sito in manutenzione»… nel titolo o nell'h1, oppure in una pagina sotto gli 800
+  caratteri senza menu): vale `under_construction`; `no_mobile`, `single_language`, `stale_copyright`, `no_booking_engine` e
+  `no_privacy` sono non determinabili; `outdated_cms` e `no_https` restano valutati (riguardano il software e il server).
+
+Su queste pagine la prova porta `invalid_page: true` e il salvataggio toglie la vecchia prova del segnale, come per «fail»
+(migrazione 055); un «non determinabile» per altri motivi (sito spento, errore momentaneo, pagina vuota) la lascia.
+
+Il controllo siti apre l'indirizzo con il protocollo e il www del sito salvato (sempre sul dominio validato), così la pagina letta
+è quella dell'indirizzo riportato nella prova.
+
 ### Annuncio di lavoro (`job_ad`) · verificato
 - **Cosa dice al cliente:** «Sta assumendo una figura»: annuncio negli ultimi 60 giorni per la
   figura scelta (famiglie in `JOB_FAMILIES`: sistemista/IT, sviluppatore, sicurezza, marketing

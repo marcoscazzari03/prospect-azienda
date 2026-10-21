@@ -664,8 +664,10 @@ const apri = node({
   config: {
     name: 'Apri sito',
     parameters: {
-      // Dal dominio validato, non dal sito salvato (ripasso di sicurezza del 19/10).
-      url: expr("https://{{ $('Siti da controllare').item.json.domain }}"),
+      // Dal dominio validato, non dal sito salvato (ripasso di sicurezza del 19/10), ma con il protocollo e il www
+      // del sito salvato: il dominio nudo può essere un altro host (golfclub-boutique.com, certificato autofirmato
+      // e pagina diversa dal sito vero, 21/10) e la prova riporta l'indirizzo del sito.
+      url: expr("{{ (String($('Siti da controllare').item.json.website || '').toLowerCase().startsWith('http://') ? 'http://' : 'https://') + (String($('Siti da controllare').item.json.website || '').toLowerCase().includes('://www.') ? 'www.' : '') + $('Siti da controllare').item.json.domain + '/' }}"),
       sendHeaders: true,
       headerParameters: { parameters: [
         { name: 'User-Agent', value: '${UA}' },

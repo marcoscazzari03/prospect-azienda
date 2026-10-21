@@ -24,6 +24,7 @@ Come tornare indietro, in generale:
 | 20/10 | Il listino non promette funzioni che l'app non ha (tolto «Fino a 3 utenti») | fiducia dei clienti |
 | 20/10 | Frase di apertura dei lead: costruita dalla prova, **senza AI** (costo zero, niente dettagli inventati) | qualità e costi |
 | 21/10 | **Pagamenti:** finché la chiave Stripe non è live (`sk_live_`/`rk_live_`), acquisti e portale solo per gli amministratori (`checkoutAllowed` in `src/lib/server/stripe.ts`); sul sito i pulsanti dei prezzi portano alla registrazione | con la chiave di test un cliente avrebbe pagato con una carta di prova e ricevuto crediti veri |
+| 21/10 | **Pagine che non sono il sito** (blocco anti-bot, dominio in vendita, pagina del server, trasloco, pagina provvisoria): segnali della homepage non determinabili e vecchie prove tolte (`invalid_page`, migrazione 055). Gli errori momentanei (404, 5xx) danno non determinabile ma **non** tolgono le prove | prove false ai clienti senza perdere prove vere per un guasto passeggero |
 | 21/10 | **Squadra di agenti:** questa chat coordina; per ogni domanda si interpellano gli agenti pertinenti; il `code-reviewer` rivede ogni modifica di codice, SQL o n8n prima di ogni push, e con «NON PRONTO» non si pubblica (regola in `CLAUDE.md`) | richiesta dell'utente |
 | 20/10 | Inviti della beta: invio largo a circa 50 agenzie nei prossimi giorni, anche più nella stessa città; email singole da leads@, 10–15 al giorno (dettagli in `10-beta.md`) | ottenere almeno qualche risposta |
 | 20/10 | Beta allargata a una decina di agenzie in più (Sud ed Emilia-Romagna). Decisione sulla seconda ondata il **30/10** con soglie in percentuale: almeno 3 agenzie attive, esporta almeno la metà (minimo 2), almeno 1 risposta, segnalati sotto il 10% | con 3 agenzie il campione era troppo piccolo |
@@ -38,6 +39,32 @@ Come tornare indietro, in generale:
 | — | Il dettaglio delle vulnerabilità resta solo in `06-audit-sicurezza.md` (escluso dal repository) | repository pubblico |
 
 ---
+
+## 21/10/2026 — falsi segnali dalle pagine che non sono il sito, errore del Settore aziende, Adzuna (punti 58–59) · in attesa (migrazione 055 e pubblicazione di 3 workflow)
+- **Cosa (segnali):** `n8n/engine/nodes/lib-controlli-sito.js` (nodi «Valuta segnali sito» e «Controlli tecnici sito» del motore,
+  «Valuta siti» di «Aziende | Controllo siti»). Pagine di blocco o d'errore (CloudFront, Cloudflare, 403, dominio in vendita,
+  pagina di prova di Apache, anti-robot, «no SSL certificate configured», errore critico di WordPress), traslochi verso un altro
+  dominio (solo frasi esplicite, mai su pagine provvisorie) e pagine provvisorie: i segnali della homepage diventano «non
+  determinabile» con `evidence.invalid_page = true` (sulle provvisorie resta `under_construction`, e `outdated_cms`).
+  Migrazione `20261130000055_invalid_page_signals.sql`: `store_company_checks` (dalla 050) toglie la vecchia prova anche su
+  «non determinabile» con `invalid_page`. «Apri sito» (`n8n/annunci/build.mjs`) apre l'indirizzo con il protocollo e il www del
+  sito salvato (golfclub-boutique.com: senza www risponde la pagina di prova di Apache). Regole in `docs/07-segnali.md`.
+- **Perché:** Data Quality su 10 homepage e 281 siti reali: prove false su macron, palmabit, radiciviaggi, kellanova,
+  immobiliarevenezia, globalmediaservice, globalsmile, golfclub-boutique. La regola del trasloco con «nuovo sito» da solo dava
+  2 falsi negativi (borgoverde.eu, lineatende.it): ristretta. Non si usa «ora ci trovi su» (Code Reviewer: homepage vere).
+- **Cosa (Settore aziende):** `n8n/annunci/nodes/07-prepara-settore.js` toglie i surrogati orfani lasciati dal taglio del testo
+  (emoji spezzata = JSON non valido verso Claude). Stesso rischio, non corretto, nei tagli di `02-normalizza-annunci.js` (600) e
+  `09-verifica-annuncio.js` (160): finora nessun errore.
+- **Adzuna:** nessun problema; la raccolta gira ogni 2 giorni per scelta, quindi il 20/10 non c'era. Il limite di Adzuna è
+  **2.500 chiamate al mese** (il «5.000» nella checklist era sbagliato).
+- **Test:** `n8n/annunci/test/run.mjs` (blocchi, traslochi, provvisorie, casi di Data Quality, emoji), SQL
+  `supabase/tests/32_invalid_page_test.sql`.
+- **Revisione:** QA (prove vecchie che restavano: segno `invalid_page` e migrazione 055; pagina di manutenzione più lunga),
+  Data Quality (281 siti reali: 2 falsi negativi del trasloco, 4 blocchi non riconosciuti; corretti), Code Reviewer NON PRONTO:
+  «in vendita» e «plesk» scartavano homepage vere corte, un 503 momentaneo cancellava le prove. Corretto: frase nel titolo o in
+  pagina senza menu, «in vendita» solo col dominio, errori 404/5xx non determinabili senza cancellare. Seconda revisione: PRONTO CON RISERVE; applicata la riserva («dominio agricolo … in vendita», «plesk»). Ricontrollo sulle 281
+  pagine: 15 cambi, tutti pagine di blocco, d'errore o provvisorie; nessuna prova vera persa.
+- **Indietro:** nodi n8n dalla versione precedente nella cronologia dei workflow; `store_company_checks` dalla 050.
 
 ## 21/10/2026 — email per le aziende controllate prima del 20/10 (migrazione 054) e segnale «annuncio» · in produzione (migrazione eseguita il 21/10)
 - **Cosa:** `supabase/migrations/20261129000054_site_email_backfill.sql` ridefinisce `pending_site_checks` (dalla 035): dopo le

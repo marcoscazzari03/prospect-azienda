@@ -14,6 +14,10 @@ const testo = (h) => pulisci(String(h ?? '').replace(/<script[\s\S]*?<\/script>|
 const meta = (html, nome) => pulisci((html.match(new RegExp(`<meta[^>]+(?:name|property)=["']${nome}["'][^>]+content=["']([^"']*)`, 'i'))
   || html.match(new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+(?:name|property)=["']${nome}["']`, 'i')) || [])[1]);
 
+// Un taglio a lunghezza fissa può spezzare un'emoji (coppia di surrogati UTF-16): il mezzo carattere rimasto fa
+// rifiutare a Claude l'intera richiesta («unexpected end of hex escape», 21/10: 38 aziende su 301 perse).
+const senzaOrfani = (t) => t.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '');
+
 const leggibili = [];
 const senzaTesto = [];
 aziende.forEach((a, i) => {
@@ -22,8 +26,8 @@ aziende.forEach((a, i) => {
   const descrizione = meta(html, 'description') || meta(html, 'og:description');
   const intestazioni = [...html.matchAll(/<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>/gi)].map(m => testo(m[1])).filter(t => t.length > 2).slice(0, 6);
   const corpo = testo(html).slice(0, 700);
-  const scheda = [titolo && `Titolo: ${titolo.slice(0, 150)}`, descrizione && `Descrizione: ${descrizione.slice(0, 300)}`,
-    intestazioni.length && `Intestazioni: ${intestazioni.join(' | ').slice(0, 300)}`, corpo && `Testo: ${corpo}`].filter(Boolean).join('\n');
+  const scheda = senzaOrfani([titolo && `Titolo: ${titolo.slice(0, 150)}`, descrizione && `Descrizione: ${descrizione.slice(0, 300)}`,
+    intestazioni.length && `Intestazioni: ${intestazioni.join(' | ').slice(0, 300)}`, corpo && `Testo: ${corpo}`].filter(Boolean).join('\n'));
   if (html.length < 500 || scheda.length < 80) senzaTesto.push(a.company_id);
   else leggibili.push({ company_id: a.company_id, company_name: a.company_name, scheda });
 });
