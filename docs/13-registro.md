@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — ripasso di sicurezza (punti 70–71) e testi per i freelance (punto 75) · in produzione al push; migrazione 058 da eseguire
+## 22/10/2026 — ripasso di sicurezza (punti 70–71) e testi per i freelance (punto 75) · in produzione al push; migrazione 058 eseguita il 22/10
 - **Ripasso:** due revisori indipendenti su tutto ciò che è cambiato dal 19/10 (dettagli fuori dal repository, in
   `06-audit-sicurezza.md`). App e SQL: nessun problema grave; le correzioni del 19/10 sono tutte al loro posto. Motore: un
   problema medio sui redirect, punto 74.
