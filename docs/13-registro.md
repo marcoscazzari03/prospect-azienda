@@ -39,6 +39,20 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — controllo settimanale del popolamento (Business Analyst)
+- **Numeri (14–21/10):** 280 esecuzioni n8n, a regime 44–48 al giorno (circa 1.400 al mese, tetto 2.100); circa 66 giri a vuoto a
+  settimana (Controllo siti 30%, Siti aziende 44%). OSM: almeno 5.023 aziende nuove salvate, 7.303 perse la notte del 21/10;
+  Overpass fallisce sulle province grandi (MI, BS, MB, PV, VA). Controllo siti: circa 12.000 controlli, 20,8% irraggiungibili,
+  email al 40%; no_https al 2,7% dopo la correzione (312 positivi venivano da 4 giri prima della correzione). Settore aziende:
+  circa 240 classificate al giorno contro 800–2.000 senza settore a notte: la coda cresce. Nessuna raccolta Adzuna il 20/10.
+- **Valutazione:** le aziende non sono troppe: l'offerta supera di oltre 20 volte la domanda della beta; il vincolo è il consumo
+  per cliente in una zona e servizio (un'azienda non torna allo stesso cliente) e, con 50–100 clienti, le esecuzioni n8n
+  (si supera 2.100): il carico di servizio va ridotto prima che arrivino i clienti.
+- **Proposte (punto 59):** recuperare le 6 province perse; meno giri a vuoto (Siti aziende una volta al giorno, Controllo siti ogni
+  2 ore dopo il primo giro d'Italia, irraggiungibili ricontrollati dopo 60–90 giorni, OSM più lento dopo il primo giro);
+  concentrare su Sud ed Emilia-Romagna per la beta; alzare il lotto del Settore aziende.
+- Query in `supabase/queries/popolamento_settimanale.sql` (Q1–Q8). Nessuna modifica ai workflow.
+
 ## 21/10/2026 — popolamento OSM fallito: salvataggio a pezzi · in produzione dopo il push (nessuna migrazione)
 - **Cosa:** `src/app/api/engine/companies-import/route.ts` chiama `store_imported_companies` a pezzi di 250 invece che con
   l'intero blocco da 2.000 di n8n; somma i conteggi; `maxDuration = 120`; in caso di errore risponde 500 con `saved_before` e

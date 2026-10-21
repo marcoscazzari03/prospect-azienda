@@ -104,6 +104,10 @@ Ultimo aggiornamento: 21/10/2026.
 58. **Io, da decidere** – Dal Data Quality (21/10): niente segnali sulle pagine d'errore o anti-bot (status HTTP nel nodo
     «Apri sito»), host giusto (www) e URL letto davvero nella prova, pagine di trasloco come provvisorie, segnali a «non
     determinabile» se il sito è «in costruzione», motivo di scarto preciso; giro Settore aziende con JSON non valido.
+59. **Insieme, da decidere** – Dal controllo settimanale (registro, 21/10): recuperare Como, Sondrio, Belluno, Padova, Rovigo,
+    Treviso; ridurre i giri a vuoto (Siti aziende 1 volta al giorno, Controllo siti ogni 2 ore dopo il 2/11, irraggiungibili dopo
+    60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; capire perché manca Adzuna del 20/10.
+    **Tu:** query `supabase/queries/popolamento_settimanale.sql`.
 
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo
