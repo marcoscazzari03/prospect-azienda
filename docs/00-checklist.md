@@ -54,7 +54,8 @@ Ultimo aggiornamento: 21/10/2026 (riscritta per intero; i numeri restano quelli 
 24. **Insieme** – MillionVerifier solo se i rimbalzi superano 2–3 ogni 100 lead.
 25. **Insieme** – La domanda chiave: senza il nome del referente, lo pagherebbero?
 19e. **Io** – Esito delle correzioni dei falsi «Senza HTTPS» nell'analisi giornaliera.
-61. **Insieme** – Riordino della cartella `docs` (proposta del 21/10: documenti vivi, storici in `docs/archivio/`, indice).
+61. ~~**Io** – Riordino della cartella `docs`: storici in `docs/archivio/`, indice `docs/README.md`, panoramica, pubblicazione,
+    domande ai consulenti e README aggiornati~~ (21/10).
 
 ## 🔵 Tecnico aperto
 54e. **Io, dopo il 30/10** – Segnalare le aziende con nome e dominio molto diversi (Data Quality).
