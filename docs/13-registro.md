@@ -45,8 +45,11 @@ Come tornare indietro, in generale:
 ## 21/10/2026 — riordino dei documenti (punto 61) · documento
 - **Cosa:** storici spostati in `docs/archivio/` con una nota in cima (01-analisi-workflow, 02-proposta, 05-da-fare,
   08-messa-in-produzione, 11-analisi-motore); indice `docs/README.md`; README e riferimenti aggiornati (anche nell'agente
-  Business Analyst); regola in `CLAUDE.md`: a ogni modifica si aggiorna il documento vivo che la descrive. Aggiornamento dei
-  contenuti di panoramica, pubblicazione, domande ai consulenti e README in corso (controllo di un agente sul codice).
+  Business Analyst); regola in `CLAUDE.md`: a ogni modifica si aggiorna il documento vivo che la descrive. Contenuti aggiornati dopo il
+  confronto di un agente con il codice: panoramica (beta, Stripe solo admin, 57 migrazioni, segnale privacy, pagine che non
+  sono il sito, orari dei workflow, pagine del motore, avviso settimanale, limiti Adzuna ed esecuzioni n8n, «Come
+  lavoriamo»), pubblicazione (piano n8n, Turnstile, workflow attivi, Stripe, cron, controlli su GitHub), domande ai
+  consulenti (stato «Solo azienda», domande G sull'avviso e sul segnale privacy), README.
 - **Indietro:** `git mv` inverso dei cinque file.
 
 ## 21/10/2026 — checklist riscritta per intero · documento

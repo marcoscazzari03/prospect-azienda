@@ -3,6 +3,11 @@
 Preparato il 18/10 (checklist `archivio/08-messa-in-produzione.md`, Fase 0). Da inviare o portare
 all'incontro così com'è: la prima parte descrive il servizio, poi le domande.
 
+> **Stato al 21/10/2026:** è attiva solo la modalità «Solo azienda»: nessun nome, ruolo o email di persona; Icypeas e
+> le ricerche di referenti sono spenti. Un lead vale 1 credito di base, più i supplementi per i segnali verificati indicati
+> nell'app. Beta gratuita su invito (circa 50 agenzie invitate, 10–15 al giorno), pagamenti non ancora attivi per i
+> clienti. Le domande sui referenti e sulle modalità con email nominative valgono per un'eventuale riattivazione.
+
 ---
 
 ## Il servizio in breve
@@ -43,7 +48,8 @@ esclusione permanente.
 mensili da 49 € in su; piano gratuito da 15 crediti). Un lead costa da 1 a 3 crediti secondo la
 modalità e i dati inclusi. Clienti solo professionisti/imprese, Italia e UE in prima battuta.
 
-**Volumi attesi all'avvio:** beta su invito con 5–10 aziende, qualche migliaio di lead al mese.
+**Volumi attesi all'avvio:** beta gratuita su invito (circa 50 agenzie invitate a ottobre 2026), pagamenti non ancora
+attivi; qualche migliaio di lead al mese a regime.
 
 ---
 
@@ -143,6 +149,12 @@ regola consolidata.
     Anthropic, Icypeas, Stripe, Resend): bastano i DPA standard che accettiamo online?
 
 ---
+
+### G. Novità del 21/10
+1. Avviso settimanale via email al cliente con il solo numero di aziende nuove per la sua ricerca (nessun nome): servono
+   cautele, una base giuridica o un consenso specifico per questa email?
+2. Segnale «sito senza informativa privacy o cookie» mostrato ai clienti come motivo per proporre un servizio: come
+   descriverlo senza che sembri un'accusa di irregolarità verso l'azienda?
 
 ## Domande per il commercialista
 

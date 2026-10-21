@@ -1,13 +1,15 @@
 # 4. Pubblicazione: da zero a leads.weborastudio.it
 
-Tempo stimato: 1-2 ore. Tutti i servizi hanno un piano gratuito sufficiente per la beta.
+Tempo stimato: 1-2 ore. n8n Cloud richiede un piano a pagamento (2.500 esecuzioni al mese); gli altri servizi bastano
+gratuiti per la beta. Aggiornata al 21/10/2026.
 Il sito attuale su `weborastudio.it` **non viene toccato**: la piattaforma vive sul
 sottodominio `leads.weborastudio.it`.
 
 ## 1. Supabase (database e login)
 
 1. Crea un account su <https://supabase.com> e un progetto nella regione **Frankfurt (eu-central-1)**.
-2. *SQL Editor*: esegui in ordine i file in `supabase/migrations/` (copia e incolla, uno alla volta).
+2. *SQL Editor*: esegui in ordine i file in `supabase/migrations/` (copia e incolla, uno alla volta; 57 a oggi). Le
+   migrazioni nuove si eseguono sempre prima di pubblicare l'app che le usa.
 3. *Authentication → URL Configuration*:
    - Site URL: `https://leads.weborastudio.it`
    - Redirect URLs: `https://leads.weborastudio.it/auth/conferma`
@@ -47,12 +49,20 @@ sottodominio `leads.weborastudio.it`.
 | `CRON_SECRET` | Una stringa casuale lunga |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Resend, punto 5 (facoltativo) |
 | `MILLIONVERIFIER_API_KEY` | Facoltativo: verifica delle caselle (millionverifier.com → API) |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile (captcha su registrazione, accesso e recupero password) |
 
 Per generare i segreti casuali: `openssl rand -hex 32` (oppure un generatore di password, 64 caratteri).
 
 ## 3. n8n (motore di ricerca)
 
-Workflow: **Lead Engine | Search (v1)** (già creato, inattivo).
+Workflow attivi (sorgenti e build nel repository: `n8n/engine` per il motore, `n8n/annunci` per gli altri):
+**Lead Engine | Search (v1)** e **Lead Engine | Errori**; **Aziende | Popolamento OSM** (ogni notte alle 4:20),
+**Aziende | Controllo siti** (ogni ora), **Annunci | Raccolta Adzuna** (ogni 2 giorni alle 6:10), **Annunci | Siti aziende**
+(7:40 e 11:40), **Annunci | Settore aziende** (ogni 4 ore). Credenziali: Anthropic «Webora Leads - Anthropic», callback
+«Lead Engine - Callback verso backend», Adzuna. «Prospect | Search» e «Prospect Avvocati | Search» sono di un altro
+progetto: non toccarli.
+
+Per il motore:
 
 1. Nodo *Webhook: nuova ricerca* → credenziale **Header Auth** nuova:
    nome header = valore di `N8N_ENGINE_HEADER_NAME` (es. `X-Engine-Key`), valore = `N8N_ENGINE_HEADER_VALUE`.
@@ -60,7 +70,7 @@ Workflow: **Lead Engine | Search (v1)** (già creato, inattivo).
 2. Nodi *Notifica: ricerca avviata*, *Notifica: verifica email*, *Invia risultati al backend* →
    credenziale **Header Auth** "Lead Engine - Callback verso backend" con
    Name `X-Engine-Secret` e Value = valore di `ENGINE_CALLBACK_SECRET`.
-3. Verifica che i nodi OpenAI e Icypeas usino le tue credenziali (Icypeas: Header Auth `Authorization` = chiave API, il secret non serve).
+3. Verifica che i nodi Claude usino la credenziale Anthropic di Webora. Icypeas è spento («Solo azienda»: niente referenti).
 4. **Attiva** il workflow (Publish) solo dopo il primo test dal punto 6.
 
 ## 4. Stripe (pagamenti) — in modalità test finché non apri la partita IVA
@@ -75,7 +85,8 @@ Workflow: **Lead Engine | Search (v1)** (già creato, inattivo).
 5. Pagamenti di prova con la carta `4242 4242 4242 4242`, qualsiasi data futura e CVC.
 
 Il passaggio a pagamenti reali (chiavi `sk_live_…`) va fatto **dopo** l'apertura della partita
-IVA: vedi la nota fiscale nel README.
+IVA: vedi la nota fiscale nel README. Con la chiave di test acquisti e portale sono solo per gli admin
+(`checkoutAllowed` in `src/lib/server/stripe.ts`); con `sk_live_`/`rk_live_` si riaprono a tutti da soli.
 
 ## 5. Resend (email transazionali, facoltativo)
 
@@ -88,10 +99,10 @@ IVA: vedi la nota fiscale nel README.
 
 1. Registrati su `https://leads.weborastudio.it/registrati` e conferma l'email.
 2. Renditi admin (punto 1.6).
-3. Con n8n **attivo**, avvia una ricerca da 3-5 lead in modalità "Email generiche incluse".
+3. Con n8n **attivo**, avvia una ricerca da 3-5 lead («Solo azienda», l'unica modalità attiva).
 4. Controlla: avanzamento nella pagina della ricerca, esecuzione in n8n, lead consegnati,
    crediti addebitati e restituiti, costi in *Amministrazione → Andamento*.
-5. Prova un acquisto in modalità test da *Crediti e piano*.
+5. Prova un acquisto in modalità test da *Crediti e piano* (con l'account admin).
 
 ## Sviluppo locale
 
@@ -103,3 +114,7 @@ npm test                     # test della logica applicativa
 npm run test:engine          # test dei nodi n8n
 PGHOST=... PGUSER=... npm run test:sql   # test delle funzioni SQL su un Postgres locale
 ```
+
+Gli stessi controlli girano a ogni push su GitHub (`.github/workflows/ci.yml`). Il cron di Vercel (`vercel.json`, ogni
+notte alle 3:00 UTC) chiama `/api/cron/watchdog`: giri bloccati, scadenze dei crediti, ricerche ricorrenti, avviso
+settimanale del lunedì, pulizia del magazzino.

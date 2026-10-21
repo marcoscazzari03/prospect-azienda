@@ -1,7 +1,7 @@
 # Webora Leads: panoramica completa del sistema
 
 Documento da incollare in una nuova conversazione per ragionare su miglioramenti.
-Aggiornato al 20/10/2026. Descrive come funziona oggi: prodotto, sito, app, database, workflow n8n, numeri.
+Aggiornato al 21/10/2026. Descrive come funziona oggi: prodotto, sito, app, database, workflow n8n, numeri.
 Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori dal repository).
 
 ---
@@ -19,7 +19,8 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
 - **Posizionamento: «solo azienda».** Nessun dato di persone: niente nomi, ruoli o email nominative. I referenti
   sono spenti finché non c'è un parere legale.
 - **Pubblico:** agenzie e professionisti B2B (web agency, IT, marketing, HR, commerciale, consulenti).
-  La beta parte con 3 web agency del Sud (Gopher, Mutart, Studio360), invitate il 19/10.
+  Beta gratuita su invito: prime 3 agenzie il 19/10 (Gopher, Mutart, Studio360), poi inviti a circa 50 agenzie,
+  10–15 al giorno (13 al 21/10); decisione sulla seconda ondata il 30/10.
 - **Sito:** leads.weborastudio.it, un servizio di Webora Studio. Casella del servizio: leads@weborastudio.it.
 
 ## 2. Tecnologia
@@ -30,13 +31,14 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
 | Database e accesso | Supabase (Postgres) | Francoforte; regole di accesso per riga (RLS); verifica in due passaggi per gli utenti |
 | Motore e lavori automatici | n8n Cloud | 7 workflow di Webora (sezione 7) |
 | Intelligenza artificiale | Anthropic Claude | Sonnet per la ricerca, Haiku per settore e siti; spazio di lavoro dedicato con limite di spesa |
-| Pagamenti | Stripe | oggi in modalità di prova |
+| Pagamenti | Stripe | in modalità di prova: finché la chiave non è live, acquisti e portale solo per gli admin; i crediti della beta li aggiunge l'admin |
 | Email del servizio | Resend | modelli con la grafica Webora |
 | Captcha | Cloudflare Turnstile | registrazione, accesso, recupero password |
 | Fonti di dati | OpenStreetMap (ODbL), Adzuna (annunci), siti ufficiali delle aziende | |
 
-Il codice è un unico repository. Contiene l'app in `src/`, il database in `supabase/migrations/` (48 migrazioni
-con i loro test) e i workflow in `n8n/`, generati da script (`build.py` e `build.mjs`) con i loro test.
+Il codice è un unico repository. Contiene l'app in `src/`, il database in `supabase/migrations/` (57 migrazioni,
+fino alla 057, con i loro test; a ogni push GitHub Actions esegue lint, tipi, test dell'app, del motore e SQL,
+`.github/workflows/ci.yml`) e i workflow in `n8n/`, generati da script (`build.py` e `build.mjs`) con i loro test.
 
 ## 3. Piani, crediti e prezzi
 
@@ -102,7 +104,9 @@ con i loro test) e i workflow in `n8n/`, generati da script (`build.py` e `build
   - «Spunto per il primo messaggio»: frase costruita dalla prova del segnale, con il pulsante «Copia» (anche nell'export);
   - export CSV o Excel.
 - **Tutti i lead:** archivio di tutti i lead ricevuti, con filtri.
-- **Crediti:** saldo, movimenti, acquisto di pacchetti e abbonamenti (Stripe), fatture.
+- **Crediti:** saldo, movimenti, acquisto di pacchetti e abbonamenti (Stripe; durante la beta solo per gli admin), fatture.
+- **Avviso settimanale (solo admin durante la beta):** su una ricerca opportunità, «Avvisami ogni settimana»: il lunedì
+  un'email gratuita con il numero di aziende nuove (almeno 3) e il pulsante per aprire la ricerca.
 - **Account:** profilo, sicurezza (password, uscita da tutti i dispositivi, verifica in due passaggi),
   fatturazione, assistenza.
 - **Email automatiche:** ricerca pronta o non riuscita, ripetizione non avviata, avvisi di sicurezza. Hanno tutte
@@ -122,6 +126,10 @@ con i loro test) e i workflow in `n8n/`, generati da script (`build.py` e `build
 | Sito in una sola lingua | nessuna versione in altre lingue | 50 |
 | Nessun sistema di prenotazione | per gli hotel: nessun motore di prenotazione riconosciuto | 45 |
 | Sito fermo da tempo | copyright fermo da 3 anni o più | 40 (solo indicativo) |
+| Sito senza informativa privacy o cookie | nessuna traccia di privacy o cookie né gestore dei consensi in homepage | 40 (solo indicativo) |
+
+Pagine che non sono il sito (blocchi anti-bot, dominio in vendita, pagine del server, traslochi, pagine provvisorie):
+segnali della homepage non determinabili e vecchie prove tolte (migrazione 055; regole in `07-segnali.md`).
 
 **Servizi** («Cosa vendi?»):
 
@@ -129,7 +137,7 @@ con i loro test) e i workflow in `n8n/`, generati da script (`build.py` e `build
 |---|---|---|
 | Siti web | Rifacimento del sito | software vecchio, cellulari, copyright |
 | Siti web | Manutenzione WordPress | software vecchio |
-| Siti web | Sicurezza del sito | HTTPS, software vecchio |
+| Siti web | Sicurezza del sito | HTTPS, software vecchio, privacy (indicativo) |
 | IT e sistemistica | Assistenza IT | annuncio per sistemista |
 | IT e sistemistica | Sviluppo software | annuncio per sviluppatore |
 | IT e sistemistica | Sicurezza informatica | annuncio IT o sicurezza, HTTPS, software vecchio |
@@ -152,7 +160,7 @@ con i loro test) e i workflow in `n8n/`, generati da script (`build.py` e `build
 
 ## 7. Il database delle aziende e i workflow che lo riempiono
 
-Il cuore del prodotto è un **database comune delle aziende**: circa 11.800 aziende al 20/10, in crescita ogni
+Il cuore del prodotto è un **database comune delle aziende**: circa 12.000 aziende al 21/10 (OSM 10.485, Adzuna 1.217), in crescita ogni
 notte. Le ricerche lo usano per primo (giro detto «database first»); la ricerca AI parte solo per la parte che il
 database non copre.
 
@@ -170,9 +178,9 @@ database non copre.
 | Workflow | Quando | Cosa fa |
 |---|---|---|
 | Aziende \| Popolamento OSM | ogni notte (4:20) | 8 province al giorno, prima il Nord: attività con sito da OpenStreetMap, con il settore ricavato dalla categoria |
-| Aziende \| Controllo siti | ogni ora | 150 siti: HTTPS, software, cellulari, lingue, copyright, «in costruzione», prenotazioni; salva prove, tecnologie e l'email aziendale della homepage (gratis, senza AI) |
-| Annunci \| Raccolta Adzuna | ogni 2 giorni | 67 ricerche per titolo in tutta Italia (ultimi 3 giorni); scarta le agenzie per il lavoro |
-| Annunci \| Siti aziende | ogni 4 ore | trova il sito di 120 aziende degli annunci: prima prova i domini probabili (gratis), poi al massimo 3 ricerche web con Claude Haiku |
+| Aziende \| Controllo siti | ogni ora | 150 siti: HTTPS, software, cellulari, lingue, copyright, «in costruzione», prenotazioni; salva prove, tecnologie e l'email aziendale della homepage (gratis, senza AI); fino a esaurimento ricontrolla anche le circa 9.000 aziende controllate prima del 20/10 senza email (migrazione 054) |
+| Annunci \| Raccolta Adzuna | ogni 2 giorni alle 6:10 | 67 ricerche per titolo in tutta Italia (ultimi 3 giorni); scarta le agenzie per il lavoro |
+| Annunci \| Siti aziende | alle 7:40 e alle 11:40 | trova il sito di 120 aziende degli annunci: prima prova i domini probabili (gratis), poi al massimo 3 ricerche web con Claude Haiku |
 | Annunci \| Settore aziende | ogni 4 ore | classifica il settore dalla homepage con Claude Haiku; esclude chi vende *al* settore («per hotel» non vuol dire hotel) |
 | Lead Engine \| Search (v1) | a ogni ricerca | il motore (sezione 8) |
 | Lead Engine \| Errori | quando il motore si blocca | chiude la ricerca e restituisce i crediti |
@@ -181,7 +189,8 @@ Su n8n ci sono anche due workflow di un **altro progetto** («Prospect | Search�
 non vanno toccati.
 
 **Copertura:** il Sud e l'Emilia-Romagna sono ricchi di aziende con segnali; il Nord è in arrivo (Lombardia
-importata il 20/10, circa 2.900 aziende nuove). Il 28/10 si decide la seconda ondata della beta (Nord).
+importata il 20/10, circa 2.900 aziende nuove). Il 30/10 si decide la seconda ondata della beta (soglie in percentuale), con rinvio al 6/11 se le agenzie attive
+sono meno di 3.
 
 ## 8. Il motore di ricerca (Lead Engine | Search)
 
@@ -202,7 +211,7 @@ importata il 20/10, circa 2.900 aziende nuove). Il 28/10 si decide la seconda on
    - controlli tecnici sulla homepage e richiesta HTTPS;
    - chi non ha il segnale viene scartato prima di qualunque altro costo.
 7. **Email dal sito ufficiale:**
-   - homepage, poi fino a 3 pagine (contatti, note legali…);
+   - homepage, poi fino a 4 pagine (prima i contatti, poi chi siamo, note legali…);
    - solo email del dominio dell'azienda, mai ipotizzate;
    - regole per caselle d'ufficio e domini fratelli;
    - se manca l'email, il modulo di contatto.
@@ -227,7 +236,7 @@ delle email (Icypeas).
 
 ## 9. Admin (solo con verifica in due passaggi)
 
-- **Beta:** per cliente ricerche, lead, export, contattati, risposte e segnalati, con le soglie della decisione del 28/10.
+- **Beta:** per cliente ricerche, lead, export, contattati, risposte e segnalati, con le soglie della decisione del 30/10.
 - **Andamento:** ricavi, costi dei fornitori e margine degli ultimi 30 giorni, più il riquadro «Database aziende».
 - **Clienti:** crediti, piano, crediti regalati.
 - **Ricerche e motore:** giri, errori, costi per ricerca.
@@ -241,6 +250,8 @@ Cron giornaliero (5:00 con l'ora legale, 4:00 d'inverno):
 - chiude i giri senza notizie e restituisce i crediti;
 - fa scadere i crediti scaduti;
 - avvia le ricerche ricorrenti;
+- il lunedì manda l'avviso settimanale delle opportunità (solo ricerche degli admin durante la beta; email se ci sono
+  almeno 3 aziende nuove; migrazione 056, `src/lib/server/alerts.ts`);
 - cancella dal magazzino i dati non riverificati da 24 mesi;
 - pulisce il registro degli errori dopo 90 giorni.
 
@@ -250,8 +261,9 @@ Gli errori del server arrivano via email all'admin.
 
 - **Dati delle aziende:** solo pubblici, con fonte e data; niente persone e niente caselle gratuite. Riverifica
   o cancellazione entro 24 mesi.
-- **Riservatezza delle ricerche:** quello che il cliente cerca e riceve non lo vede nessun altro, e Webora Studio
-  non lo usa per sé.
+- **Riservatezza delle ricerche:** le ricerche del cliente (cosa cerca, filtri, esiti) non le vede nessun altro, e
+  Webora Studio non le usa per sé. I dati pubblici delle aziende consegnate restano nel database comune e possono
+  andare anche ad altri clienti (come dicono i termini).
 - **Responsabilità del cliente:** l'uso dei contatti è a carico del cliente. Le email promozionali in Italia
   richiedono in genere il consenso (art. 130 del Codice Privacy): è scritto nei termini.
 - **Da chiudere con legale e commercialista:** parere del legale, contratto sul trattamento dei dati (DPA),
@@ -262,16 +274,17 @@ Gli errori del server arrivano via email all'admin.
 - Quasi metà delle aziende non ha un'email sul sito; con il solo modulo di contatto il lead vale meno.
 - Senza il nome del referente non sappiamo se i clienti pagheranno: è la domanda chiave della beta.
 - Il Nord è ancora poco coperto da segnali; la seconda ondata della beta dipende da questo.
-- L'annuncio di lavoro dipende da Adzuna, con un limite di 5.000 chiamate al mese e la conferma sull'uso
+- L'annuncio di lavoro dipende da Adzuna, con un limite di 2.500 chiamate al mese e la conferma sull'uso
   commerciale ancora in attesa.
 - Il controllo siti gira 150 siti l'ora: dopo un import grande la coda si allunga di un giorno o più.
-- Esecuzioni n8n: circa 700 al mese stimate, contro un tetto di 2.100 (piano 2.500).
+- Esecuzioni n8n: circa 1.400 al mese misurate (44–48 al giorno) contro un tetto di 2.100 (piano 2.500); con 50–100
+  clienti si supera. Il controllo siti passerà su un worker sul VPS Hetzner dopo il 30/10 (circa 720 esecuzioni in meno).
 - Un account ha un solo utente: l'invito di colleghi non esiste ancora (la promessa è stata tolta dal listino il 20/10).
 - Proposte già annotate:
-  - salvare le email trovate dal controllo siti, così la riserva parte da chi ha già l'email;
+  - ~~salvare le email trovate dal controllo siti~~ (fatto dal 20/10);
   - stima dei lead e del costo in euro nel wizard;
   - più utenti per account e API;
-  - monitoraggio continuo delle opportunità;
+  - ~~monitoraggio continuo delle opportunità~~ (avviso settimanale dal 21/10, per ora solo admin);
   - nuovi servizi («Sito nuovo», «Prenotazioni online per hotel»);
   - segnale «nuova apertura».
 
@@ -279,4 +292,13 @@ Gli errori del server arrivano via email all'admin.
 
 `00-checklist.md` (stato dei lavori) · `03-contratto-motore.md` (contratto app–motore) · `07-segnali.md` (regole
 dei segnali) · `10-beta.md` (piano della beta) · `archivio/11-analisi-motore.md` (numeri del motore) ·
-`09-domande-consulenti.md` (domande per legale e commercialista).
+`09-domande-consulenti.md` (domande per legale e commercialista) · `13-registro.md` (registro delle modifiche e delle
+decisioni) · `README.md` (indice dei documenti).
+
+## 14. Come lavoriamo
+
+- Ogni modifica e decisione va in `docs/13-registro.md`, nello stesso commit; le cose da fare in `docs/00-checklist.md`.
+- Squadra di agenti in `.claude/agents/` (code-reviewer, qa-tester, data-quality, sales-copywriter, ui-ux-designer,
+  business-analyst): il code-reviewer rivede ogni push con codice, SQL o n8n (regola in `CLAUDE.md`).
+- Le migrazioni le esegue l'utente; l'app va su main solo dopo le migrazioni da cui dipende. I workflow n8n li pubblica
+  l'utente dopo che il codice è stato caricato e verificato.

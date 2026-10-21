@@ -1,8 +1,8 @@
 # Webora Leads — lead generation B2B con la fonte
 
-Piattaforma SaaS in cui aziende, agenzie e professionisti descrivono il cliente ideale e
-ricevono prospect B2B reali, ognuno con la fonte verificabile e lo stato dell'email
-(trovata sul sito / verificata / ipotizzata), pagando solo i lead consegnati.
+Piattaforma SaaS in cui agenzie e professionisti descrivono il cliente ideale e ricevono aziende in target
+(«Solo azienda»: nessun dato di persone), con la fonte, l'email aziendale trovata sul sito (mai ipotizzata) o il modulo
+di contatto e, nelle ricerche opportunità, segnali verificati con prova e data. Si pagano solo i lead consegnati.
 
 Destinazione: **https://leads.weborastudio.it**
 
@@ -19,7 +19,8 @@ Browser ── Next.js 16 (Vercel, fra1) ── Supabase (Postgres + Auth + RLS,
                  │        ▲
      webhook ────┘        └──── callback (progress / results)
                  ▼
-          n8n "Lead Engine | Search (v1)" ── OpenAI web search, siti aziendali, Icypeas
+          n8n "Lead Engine | Search (v1)" ── Claude (ricerca web), siti aziendali
+          + workflow che riempiono il database: OSM, Controllo siti, Adzuna, Siti aziende, Settore
 Stripe ── webhook ──► crediti, abbonamenti, ricevute
 ```
 
@@ -28,7 +29,7 @@ Stripe ── webhook ──► crediti, abbonamenti, ricevute
   eseguibili solo dal server.
 - **Isolamento clienti**: Row Level Security su ogni tabella; il magazzino dei lead non è mai
   leggibile dai browser.
-- **Mai due volte lo stesso contatto**: vincolo `UNIQUE(org_id, person_key)` sulle consegne.
+- **Mai due volte la stessa azienda allo stesso cliente**: vincolo `UNIQUE(org_id, person_key)` sulle consegne.
 - **Opposizione GDPR**: lista di esclusione globale (solo impronte SHA-256).
 
 ## Struttura
@@ -43,7 +44,8 @@ src/lib               dominio (puro, testato), server (DAL, ricerche, Stripe), S
 supabase/migrations   schema, funzioni, RLS, catalogo
 supabase/tests        test SQL end-to-end (senza Docker)
 n8n/engine            sorgenti e test del motore n8n
-n8n/legacy            workflow originale "Prospect Avvocati | Search"
+n8n/annunci           popolamento OSM, controllo siti, annunci Adzuna, siti e settore delle aziende
+n8n/legacy            workflow originale "Prospect Avvocati | Search" (di un altro progetto: non toccare)
 ```
 
 ## Comandi
@@ -57,9 +59,12 @@ npm run test:sql       # test SQL (PGHOST/PGPORT/PGUSER verso un Postgres 15+)
 npm run typecheck      # tipi di route + TypeScript
 ```
 
+Gli stessi controlli girano a ogni push su GitHub (`.github/workflows/ci.yml`). Prima di ogni push con codice, SQL o n8n
+serve la revisione del code-reviewer (`.claude/agents/`, regola in `CLAUDE.md`).
+
 ## Nota fiscale
 
 Vendere un servizio online in modo continuativo richiede la partita IVA **prima** di incassare:
-non è possibile "dichiarare dopo". Finché non è aperta, Stripe resta in modalità test e la
-piattaforma può essere usata in beta gratuita. Da verificare con un commercialista
+non è possibile "dichiarare dopo". Finché non è aperta, Stripe resta in modalità test (acquisti solo per gli
+admin; ai beta tester i crediti li assegna l'admin) e la piattaforma si usa in beta gratuita su invito. Da verificare con un commercialista
 (regime forfettario, codice ATECO, fatturazione elettronica).
