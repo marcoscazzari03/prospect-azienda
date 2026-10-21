@@ -5,7 +5,7 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `archivio/05-da-fare.md`).
 
-Ultimo aggiornamento: 21/10/2026 (riscritta per intero; i numeri restano quelli citati nel registro).
+Ultimo aggiornamento: 21/10/2026 sera (nome nuovo e costi di Hostinger, punti 64–68).
 
 ## 🔴 Beta in corso: questa settimana
 5g. **Tu, 22–24/10** – 15 inviti al giorno da leads@ (ne mancano 37 per arrivare a 50; 13 fatti al 21/10), prima le
@@ -72,9 +72,27 @@ Ultimo aggiornamento: 21/10/2026 (riscritta per intero; i numeri restano quelli 
 39. **Io** – Coda del controllo siti con priorità.
 40. **Io** – Wizard: stima realistica dei lead e costo in euro.
 
+## 🟣 Nome nuovo e costi di Hostinger (deciso il 21/10)
+64. **Insieme, ora** – Scegliere il nome di una parola, staccato da Webora (in prova: Prosperia, prosperia.it; altre idee nel
+    registro). Prima di comprare: marchio libero su UIBM ed EUIPO (classi 35 e 42), nessuna azienda nota con lo stesso nome nel
+    settore, profili social liberi. Nota: prosperia.com è già registrato.
+65. **Tu, scelto il nome** – Comprare il dominio .it su Hostinger (circa 16 €/anno) e aggiungerlo al Business Web Hosting
+    (regge più domini): niente server nuovo. L'app resta su Vercel.
+66. **Insieme, dopo il 30/10** – Passaggio al nome nuovo con la seconda ondata. **Tu:** record DNS verso Vercel dal
+    pannello Hostinger, casella email sul dominio nuovo, leads@weborastudio.it attiva o inoltrata alla nuova. **Io:** dominio
+    su Vercel, rinvio permanente da leads.weborastudio.it (i link già inviati continuano a funzionare), dominio su Resend,
+    indirizzi in Supabase (accesso), Stripe, Turnstile e callback di n8n, logo, firma, testi, email e documenti.
+67. **Tu, prima dei rinnovi** – Costi Hostinger di oggi: circa 234 €/anno (circa 250 con il dominio nuovo).
+    - dominio weborastudio.it 15,99 €, rinnovo il 20/01/2027;
+    - Business Web Hosting 203,88 €, rinnovo il 02/02/2027: controllare il prezzo vero del rinnovo (quello di oggi potrebbe
+      essere in promozione);
+    - Starter Business Email (prova) 14,16 €, rinnovo il 19/02/2027: vedere se leads@ sta su questo prodotto o sulle caselle
+      incluse nell'hosting; nel secondo caso togliere il rinnovo automatico (sostituisce il punto 33).
+68. **Tu** – VPS Hetzner (circa 14 €/mese): spegnerlo finché non serve al worker del punto 49 (circa 170 €/anno risparmiati).
+
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo (file pronto).
-33. **Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027.
+33. ~~**Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027~~ (21/10: assorbito dal punto 67).
 47. **Insieme** – BIMI (logo del mittente su tutti i programmi di posta): DMARC restrittivo e certificato a pagamento.
 
 ## ⚪ Dopo la beta

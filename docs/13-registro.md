@@ -25,6 +25,7 @@ Come tornare indietro, in generale:
 | 20/10 | Frase di apertura dei lead: costruita dalla prova, **senza AI** (costo zero, niente dettagli inventati) | qualità e costi |
 | 21/10 | **Pagamenti:** finché la chiave Stripe non è live (`sk_live_`/`rk_live_`), acquisti e portale solo per gli amministratori (`checkoutAllowed` in `src/lib/server/stripe.ts`); sul sito i pulsanti dei prezzi portano alla registrazione | con la chiave di test un cliente avrebbe pagato con una carta di prova e ricevuto crediti veri |
 | 21/10 | Il futuro worker del controllo siti (punto 49) girerà sul VPS Hetzner dell'utente, da reinstallare; n8n Cloud resta per motore, Adzuna, OSM e settore. Dopo il 30/10 | niente tetto di esecuzioni, segnali «certificato in scadenza» e PageSpeed, costo già sostenuto |
+| 21/10 | **Nome nuovo:** una parola, staccato da Webora; dominio .it a parte su Hostinger, aggiunto al Business Web Hosting che c'è già (niente server nuovo); l'app resta su Vercel; passaggio dopo il 30/10, con la seconda ondata (checklist 64–68) | costo minimo (circa 16 €/anno in più) e nessun cambio a metà beta |
 | 21/10 | Beta: inviti a 15 al giorno dal 22 al 24/10; promemoria alle agenzie del 19/10 il 24–25/10 (non il 27/10); se il 30/10 le agenzie attive sono meno di 3, decisione rinviata al **6/11** | arrivare al 30/10 con abbastanza giorni d'uso (Business Analyst) |
 | 21/10 | **Pagine che non sono il sito** (blocco anti-bot, dominio in vendita, pagina del server, trasloco, pagina provvisoria): segnali della homepage non determinabili e vecchie prove tolte (`invalid_page`, migrazione 055). Gli errori momentanei (404, 5xx) danno non determinabile ma **non** tolgono le prove | prove false ai clienti senza perdere prove vere per un guasto passeggero |
 | 21/10 | **Squadra di agenti:** questa chat coordina; per ogni domanda si interpellano gli agenti pertinenti; il `code-reviewer` rivede ogni modifica di codice, SQL o n8n prima di ogni push, e con «NON PRONTO» non si pubblica (regola in `CLAUDE.md`) | richiesta dell'utente |
@@ -41,6 +42,20 @@ Come tornare indietro, in generale:
 | — | Il dettaglio delle vulnerabilità resta solo in `06-audit-sicurezza.md` (escluso dal repository) | repository pubblico |
 
 ---
+
+## 21/10/2026 — nome nuovo e costi di Hostinger (punti 64–68) · decisione, nessuna modifica all'app
+
+- **Cosa:** piano per il cambio di nome e controllo dei costi. Oggi Hostinger costa circa 234 €/anno: dominio weborastudio.it
+  15,99 € (rinnovo 20/01/2027), Business Web Hosting 203,88 € (rinnovo 02/02/2027), Starter Business Email in prova 14,16 €
+  (rinnovo 19/02/2027). Con il dominio nuovo sono circa 250 €/anno.
+- **Nome:** l'utente propone Prosperia (prosperia.it); prosperia.com risulta già registrato. Parere di Sales & Copy: sconsigliato,
+  perché evoca finanza e promesse di guadagno più che prove concrete e ha l'accento incerto. Alternative: Pista e Spunto (le due
+  migliori), Indizio, Varco, Fiuto, Traccia. Scelta finale dell'utente, dopo il controllo di marchio (UIBM/EUIPO, classi 35 e
+  42), dominio e social.
+- **Passaggio (dopo il 30/10):** DNS verso Vercel, rinvio permanente da leads.weborastudio.it, dominio su Resend, indirizzi in
+  Supabase, Stripe, Turnstile e callback di n8n, casella email nuova con leads@ inoltrata, firma, testi e documenti.
+- **Dove:** `docs/00-checklist.md` (punti 64–68; il 33 assorbito dal 67).
+- **Come tornare indietro:** nessuna modifica tecnica; si tolgono i punti dalla checklist.
 
 ## 21/10/2026 — riordino dei documenti (punto 61) · documento
 - **Cosa:** storici spostati in `docs/archivio/` con una nota in cima (01-analisi-workflow, 02-proposta, 05-da-fare,
