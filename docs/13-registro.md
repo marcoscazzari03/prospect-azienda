@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — coda del controllo siti con priorità (punto 39, migrazione 060) · in attesa di migrazione
+## 21/10/2026 — coda del controllo siti con priorità (punto 39, migrazione 060) · in produzione (migrazione eseguita il 21/10)
 - **Cosa:** `pending_site_checks` ordina le aziende da controllare così: prima quelle nella zona e nel settore (o in una delle
   parole chiave) di una ricerca degli ultimi 30 giorni o di un avviso settimanale attivo, o nella zona di una ricerca
   senza settore (opportunità «tutti i settori»); poi quelle nella zona di una ricerca di un altro settore; poi le altre, come

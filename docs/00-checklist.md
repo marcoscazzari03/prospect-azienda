@@ -97,7 +97,7 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     `supabase/queries/verifica_059.sql` (atteso 0 differenze), poi la migrazione 059~~ (21/10: 0 differenze, eseguita).
 26b. **Io, dopo la beta** – Motore: seguire a mano i rimandi da un sito all'altro, ricontrollando ogni volta l'indirizzo.
 39. ~~**Io** – Coda del controllo siti con priorità~~ (21/10, migrazione 060: prima zona e settore delle ricerche
-    recenti e degli avvisi, poi la sola zona). **Tu:** eseguire la migrazione 060.
+    recenti e degli avvisi, poi la sola zona). ~~**Tu:** eseguire la migrazione 060~~ (21/10).
 40. **Io** – Wizard: stima realistica dei lead e costo in euro.
 
 ## 🟣 Nome nuovo «Avvisto» e costi di Hostinger (deciso il 21/10)
