@@ -45,6 +45,15 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — Vercel non pubblicava main · configurazione
+- **Problema:** dalle 13:10 circa i push su main non hanno creato pubblicazioni (ultima in produzione: `b5947ca`); testi per i
+  freelance, limiti e registrazione erano su GitHub ma non online. Probabile causa: troppe pubblicazioni in un giorno (ogni
+  commit su branch e main, oltre 80 il 21/10) o stesso commit inviato prima al branch e poi a main.
+- **Cosa:** `vercel.json`: niente anteprime per i branch `claude/*`; `ignoreCommand` salta la build se dall'ultima pubblicazione
+  riuscita (`VERCEL_GIT_PREVIOUS_SHA`) cambiano solo `docs/`, file `.md`, `supabase/queries` o `.claude` (nel dubbio pubblica).
+- **Da controllare:** dopo il push, che su Vercel compaia la pubblicazione di main in produzione.
+- **Indietro:** togliere `git` e `ignoreCommand` da `vercel.json`.
+
 ## 21/10/2026 — nome in un solo punto del codice (punto 72) · in produzione al push (nessun cambiamento visibile)
 - **Cosa:** i «Webora Leads» e gli indirizzi scritti a mano nell'app ora vengono da `BRAND` (`src/lib/config.ts`), con il nuovo
   campo `suffix` (la parte verde del logo, vuota con un nome di una parola); in `n8n/annunci/build.mjs` l'indirizzo dell'app e
