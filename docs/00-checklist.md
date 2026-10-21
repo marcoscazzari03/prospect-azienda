@@ -18,13 +18,13 @@ Ultimo aggiornamento: 21/10/2026.
 5. ~~**Tu** – Invitate 3 agenzie (Gopher, Mutart, Studio360) con email personalizzate e PDF di esempi reali~~ (19/10)
 5b. **Insieme** – Alle risposte: account, +150 crediti, piano Growth dall'admin, email di benvenuto (`10-beta.md`).
     Se non rispondono, un solo promemoria il **24–25/10** (deciso il 21/10, prima era il 27/10). Ogni «sì» attivato in giornata.
-5g. **Tu, 22–24/10** – 15 inviti al giorno (ne mancano 44 per arrivare a 50; 6 fatti al 21/10), prima chi ha l'email.
+5g. **Tu, 22–24/10** – 15 inviti al giorno (ne mancano 37 per arrivare a 50; 13 fatti al 21/10), prima chi ha l'email.
 5h. **Io + Tu** – Prima delle ricerche delle agenzie: query `opportunita_per_regione.sql` (Tu) e una ricerca di prova
     nella zona e nel servizio di ogni agenzia che accetta (Io), così la prima ricerca non torna vuota.
 5e. ~~**Io** – Beta allargata: soglie in percentuale nella pagina Admin → Beta, decisione spostata al 30/10, criteri e
     testi dell'invito aggiornati in `10-beta.md`~~ (20/10). **Tu:** invitare circa 50 agenzie al Sud e in Emilia-Romagna nei
     prossimi giorni, 10–15 al giorno da leads@ (`10-beta.md`). Lista di 62 agenzie pronta (21/10: 48 con email, 14 dal
-    modulo; file mandato in chat, non nel repository). ~~21/10: 3 inviti (SCF Group, La Russa Design, mscompany)~~; esclusa
+    modulo; file mandato in chat, non nel repository). ~~21/10: 10 inviti~~; esclusa
     Webapp s.r.l. (non fa siti). Alle risposte, stessa procedura del 5b.
 5f. **Insieme, il 21/10** – Nuovo listino (proposta e valutazione nel registro, 20/10 sera). Prima del lancio a
     pagamento: pacchetti 59/249/790 €, Scale tolto, 20 crediti di benvenuto con i primi lead «forti», lead con solo
