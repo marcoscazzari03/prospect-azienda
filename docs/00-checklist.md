@@ -133,7 +133,7 @@ Ultimo aggiornamento: 21/10/2026.
     credito.
 36. ~~**Io** – Avviso settimanale gratuito delle nuove opportunità (migrazione 056), solo admin durante la beta~~ (21/10).
     ~~Migrazione 056 eseguita~~ (21/10). Pulsante senza effetto su ricerche larghe (calcolo oltre 8 s): migrazione 057.
-    **Tu:** query `verifica_057.sql`, poi migrazione 057. **Dopo la beta:** aprirlo a tutti, link di disattivazione nell'email, soglia a scelta.
+    ~~Verifica sui dati veri (0 differenze) e migrazione 057~~ (21/10). **Dopo la beta:** aprirlo a tutti, link di disattivazione nell'email, soglia a scelta.
 37. **Io** – Nuovi servizi: «Sito nuovo» e «Prenotazioni online per hotel».
 38. **Insieme** – Segnale «nuova apertura / nuova sede».
 39. **Io** – Coda del controllo siti con priorità.

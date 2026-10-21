@@ -42,7 +42,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — ricerche opportunità più veloci (migrazione 057) · in attesa (verifica sui dati veri e migrazione 057)
+## 21/10/2026 — ricerche opportunità più veloci (migrazione 057) · in produzione (verifica sui dati veri: 0 differenze; migrazione eseguita il 21/10)
 - **Cosa:** `supabase/migrations/20261202000057_opportunity_pool_speed.sql` ridefinisce `opportunity_pool` (dalla 052): radici
   di parole chiave e zone e segnali richiesti calcolati una volta sola invece che per ogni azienda (prima `sector_matches` e
   `signals_satisfy` per riga), query dinamica pianificata a ogni chiamata con i valori veri. Il pulsante dell'avviso ora
