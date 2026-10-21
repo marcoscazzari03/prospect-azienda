@@ -45,6 +45,20 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — aziende con nome e dominio molto diversi (punto 54e, migrazione 062) · in attesa di migrazione
+- **Misura (Data Quality):** 6.939 aziende controllate dal 14 al 21/10; nome e dominio molto diversi in 234 aziende OSM (3,8%),
+  0 su 681 degli annunci (domini indovinati o cercati), 6 su 317 del motore. Tutte le 234 aperte dal vivo: 98 siti giusti
+  (marchio, sigla, gruppo), 28 pagine di portali, 6 siti di un'altra azienda (3 domini scaduti e riusati), 102 non
+  determinabili. Un dominio diverso dal nome è sbagliato solo in un caso su cinque: non basta da solo per scartare.
+- **Cosa c'era già:** le pagine interne di un altro sito (`is_hosted_page`, 033) erano già escluse dalle ricerche.
+- **Cosa:** la 062 aggiunge a `is_platform_domain` i portali trovati indicati con la sola homepage e i siti business.site di
+  Google (servizio chiuso, 59 aziende; la vecchia espressione non riconosceva i sottodomini). Escono da riserve, avvisi e
+  prossimi import. Test `36_platform_domains_test.sql`; prima di eseguirla, `supabase/queries/verifica_062.sql` conta le
+  aziende colpite per portale.
+- **Rimandato:** sospendere email e segnali quando il nome non compare nella homepage (prende i 6 siti di altre aziende, ma
+  sbaglia su 1 sito giusto su 5).
+- **Indietro:** rieseguire `is_platform_domain` dalla 033.
+
 ## 21/10/2026 — ritorno alla coda della 054 (migrazione 061) · in produzione (eseguita il 21/10 sera)
 - **Problema:** dopo la 060 «Aziende | Controllo siti» è fallita alle 17:25 (esecuzione 3953, «lettura non riuscita», 500
   dall'app dopo 3 tentativi): sui dati veri `pending_site_checks` supera gli 8 secondi di Supabase. Sul banco di prova (12.000

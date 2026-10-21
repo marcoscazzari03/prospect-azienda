@@ -84,7 +84,9 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     domande ai consulenti e README aggiornati~~ (21/10).
 
 ## 🔵 Tecnico aperto
-54e. **Io, dopo il 30/10** – Segnalare le aziende con nome e dominio molto diversi (Data Quality).
+54e. ~~**Io** – Segnalare le aziende con nome e dominio molto diversi (Data Quality)~~ (21/10: 28 portali e 6 siti di altre
+    aziende su 234; portali e business.site esclusi con la 062). **Tu:** `verifica_062.sql`, poi la migrazione 062. **Dopo:**
+    sospendere email e segnali quando il nome non compare nella homepage.
 59. **Insieme** – Giri a vuoto e province: ~~Siti aziende 2 giri al mattino~~ (21/10); controllo siti ogni 2 ore dopo il 2/11
     (finito il ricontrollo della 054); irraggiungibili ricontrollati dopo 60–90 giorni; OSM più lento dopo il primo giro;
     lotto del Settore aziende; recuperare Como, Sondrio, Belluno, Padova, Rovigo, Treviso (in corso, notti 22–24/10).
