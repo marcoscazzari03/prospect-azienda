@@ -39,6 +39,21 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — popolamento OSM fallito: salvataggio a pezzi · in produzione dopo il push (nessuna migrazione)
+- **Cosa:** `src/app/api/engine/companies-import/route.ts` chiama `store_imported_companies` a pezzi di 250 invece che con
+  l'intero blocco da 2.000 di n8n; somma i conteggi; `maxDuration = 120`; in caso di errore risponde 500 con `saved_before` e
+  scrive nel log di Vercel pezzo, dimensione ed errore. Documentato in `docs/03-contratto-motore.md`.
+- **Perché:** esecuzione 3927 del 21/10 (Brescia, Como, Milano, Monza, Pavia, Sondrio, Varese, Belluno, Padova, Rovigo,
+  Treviso): 7.303 aziende pronte, salvataggio in errore 500 per tre tentativi da circa 10 s. Causa più probabile: tempo massimo
+  delle query di Supabase superato dal blocco da 2.000 (la notte prima lo stesso blocco era al limite e n8n l'aveva ripetuto).
+  Il log aggiunto lo confermerà (codice `57014` = tempo massimo).
+- **Revisione:** Code Reviewer, PRONTO CON RISERVE (solo il registro mancante): ripetibile senza danni anche a metà, conteggi
+  coerenti con la 048, circa 1,3 s per pezzo.
+- **Da ricordare:** la rotazione delle province va per data: Como, Sondrio, Belluno, Padova, Rovigo e Treviso (salvate da
+  Overpass ma non nel database) tornano al prossimo giro, tra circa due settimane, se non si recuperano prima; Brescia,
+  Milano, Monza, Pavia e Varese sono nella lista delle riprove (4 al giorno).
+- **Indietro:** `git revert` del commit (torna la singola chiamata).
+
 ## 21/10/2026 — primo resoconto del Business Analyst e controllo del Data Quality sui siti veri
 - **Resoconto (ultime 24 ore):** nessuna ricerca di clienti; 5 esecuzioni del motore, tutte dell'admin, costo AI 0,49 €
   (tariffe della migrazione 020). Problemi: **popolamento OSM fallito** (esecuzione 3927: 7.303 aziende pronte, salvataggio

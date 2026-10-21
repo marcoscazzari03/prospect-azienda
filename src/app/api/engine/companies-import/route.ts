@@ -11,6 +11,12 @@ import type { Json } from "@/lib/supabase/database.types";
 //   POST { source: "osm", companies } -> salvate da store_imported_companies
 // Solo dati d'azienda (dominio, nome, sito, città, settore): nessun dato personale.
 
+// Blocchi da 2.000 aziende in una sola chiamata superavano il tempo massimo di una query di
+// Supabase (21/10: popolamento fallito con 7.303 aziende pronte): si salvano a pezzi. Ogni pezzo
+// è una chiamata separata e ripetibile (stessa azienda = aggiornata, mai duplicata).
+const CHUNK = 250;
+export const maxDuration = 120;
+
 function authorized(request: Request) {
   const secret = env.engineCallbackSecret();
   return Boolean(secret) && safeEqual(request.headers.get("x-engine-secret") ?? "", secret!);
@@ -41,13 +47,19 @@ export async function POST(request: Request) {
     domain: c.domain.trim().toLowerCase(),
     website: urlOnDomain(c.website, c.domain.trim().toLowerCase()) ? c.website : `https://${c.domain.trim().toLowerCase()}`,
   }));
-  const { data, error } = await createAdminClient().rpc("store_imported_companies", {
-    p_source: parsed.data.source,
-    p_items: companies as Json,
-  });
-  if (error) {
-    console.error("store_imported_companies", error);
-    return NextResponse.json({ error: "salvataggio non riuscito" }, { status: 500 });
+  const db = createAdminClient();
+  const totals = { received: 0, new: 0, updated: 0, skipped: 0 };
+  for (let k = 0; k < companies.length; k += CHUNK) {
+    const { data, error } = await db.rpc("store_imported_companies", {
+      p_source: parsed.data.source,
+      p_items: companies.slice(k, k + CHUNK) as Json,
+    });
+    if (error) {
+      console.error("store_imported_companies", { from: k, size: companies.length, error });
+      return NextResponse.json({ error: "salvataggio non riuscito", saved_before: k, ...totals }, { status: 500 });
+    }
+    const part = data as Record<string, number>;
+    for (const key of Object.keys(totals) as (keyof typeof totals)[]) totals[key] += Number(part?.[key]) || 0;
   }
-  return NextResponse.json({ ok: true, ...(data as Record<string, number>) });
+  return NextResponse.json({ ok: true, ...totals });
 }

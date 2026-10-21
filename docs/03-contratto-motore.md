@@ -232,7 +232,9 @@ Scartati enti pubblici, associazioni, luoghi non commerciali, siti non aziendali
 traduzione restano senza settore e le classifica Claude Haiku («Annunci | Settore aziende»).
 
 - `POST { source: "osm", companies: [{ domain, name, website, city, province, region, industry, keywords }] }`
-  (max 5.000) → `{ ok, received, new, updated, skipped }` da `store_imported_companies`. Solo dati d'azienda;
+  (max 5.000) → `{ ok, received, new, updated, skipped }` da `store_imported_companies`, chiamata a pezzi di 250 (dal 21/10:
+  un blocco intero superava il tempo massimo delle query). Errore: 500 `{ error, saved_before, …conteggi }` (i pezzi prima di
+  `saved_before` sono salvati; ripetere la chiamata è sicuro). Solo dati d'azienda;
   le aziende già presenti non vengono sovrascritte (si aggiungono luoghi ed etichette).
 
 ## Riserva dal database (ricerche opportunità)
