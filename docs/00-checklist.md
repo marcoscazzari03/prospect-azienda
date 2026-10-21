@@ -14,7 +14,7 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     agenzie con l'email, poi quelle con il solo modulo. Lista aggiornata in chat (`agenzie_beta.csv`, fuori dal repository).
 5b. **Insieme** – A ogni «sì», in giornata: account, +150 crediti e piano Growth dall'admin, email di benvenuto
     (`10-beta.md`, link /registrati?beta=1).
-5i. **Tu, 24–25/10** – Un solo promemoria a Gopher, Mutart e Studio360 (testo in `10-beta.md`, scritto il 21/10).
+5i. **Sospeso il 21/10 sera** (decisione dell'utente, come gli inviti). Prima: **Tu, 24–25/10** – Un solo promemoria a Gopher, Mutart e Studio360 (testo in `10-beta.md`, scritto il 21/10).
 56b. **Tu, ogni giorno** – Guardare le nuove registrazioni per aggiungere i crediti beta; controllare in Stripe (test) che
     nessun cliente non admin abbia comprato.
 57b. **Io, 22/10 mattina** – Nel resoconto: notte del recupero OSM (Sondrio, Belluno) e salvataggio a pezzi; prove false tolte
@@ -30,8 +30,7 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
 72. **Io** – Nome in un solo punto del codice (`config.ts`): «Webora Leads» e gli indirizzi diventano impostazioni, così il
     passaggio ad Avvisto è un cambio di configurazione più logo e testi.
 73. **Tu** – Controlli a mano: avvisi di spesa (punto 18), Deployment Protection su Vercel, conservazione breve delle
-    esecuzioni su n8n, rotazione del segreto del motore (punto 17, insieme), Supabase Pro e backup (punto 15, da decidere per il
-    costo).
+    esecuzioni su n8n, rotazione del segreto del motore (punto 17, insieme). Supabase Pro rinviato alla messa in produzione (punto 15).
 
 ## 🟠 Decisione della beta
 9. **Insieme, il 30/10** – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive, esporta almeno la metà
@@ -46,7 +45,8 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     riga «rispondete no» e firma delle email. Niente promesse di «contatto senza consenso» finché non risponde per iscritto.
 13. **Tu** – Conferma scritta di Adzuna sull'uso commerciale degli annunci (mail del 18/10, in attesa).
 14. **Insieme** – Stripe con pagamenti reali e un acquisto vero di prova; poi togliere il blocco «acquisti solo admin».
-15. **Tu, poi Insieme** – Supabase Pro (backup giornalieri) e prova di ripristino.
+15. **Tu, poi Insieme, alla messa in produzione definitiva** – Supabase Pro (backup giornalieri) e prova di ripristino
+    (rinviato il 21/10 sera, decisione dell'utente).
 16. **Tu** – Repository GitHub privato.
 17. **Insieme** – Rotazione del segreto del motore.
 18. **Tu** – Avvisi di spesa su Anthropic, Vercel, Supabase.
