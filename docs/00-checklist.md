@@ -34,7 +34,7 @@ Ultimo aggiornamento: 21/10/2026 sera (inviti in pausa, 3–4 giorni su tecnico 
     esecuzioni su n8n, rotazione del segreto del motore (punto 17, insieme). Supabase Pro rinviato alla messa in produzione (punto 15).
 74. **Io, poi Tu** – ~~Motore e workflow n8n: nomi DNS «jolly» bloccati, porte e indirizzi IP scartati anche nel Settore e nella
     pagina del referente, domini validati anche nelle route dell'app, callback solo verso leads.weborastudio.it~~ (21/10).
-    **Tu:** pubblicare i 3 workflow (motore, Siti aziende, Settore). Redirect, IP e certificati: con il worker (punto 49).
+    ~~**Tu:** pubblicare i 3 workflow (motore, Siti aziende, Settore)~~ (21/10). Redirect, IP e certificati: con il worker (punto 49).
 75. ~~**Io** – Testi del sito anche per i professionisti con partita IVA (decisione del 21/10): «anche da solo» sopra il titolo,
     «Per chi è», domanda nelle FAQ, riga nei prezzi, «Azienda o attività» nella registrazione~~ (21/10)
 76. ~~**Tu** – Eseguire la migrazione 058 (limiti sui tentativi sotto lock, permessi delle tabelle dell'avviso)~~ (21/10)
