@@ -45,7 +45,14 @@ Come tornare indietro, in generale:
 
 ---
 
-## 21/10/2026 — coda del controllo siti con priorità (punto 39, migrazione 060) · in produzione (migrazione eseguita il 21/10)
+## 21/10/2026 — ritorno alla coda della 054 (migrazione 061) · in attesa di migrazione
+- **Problema:** dopo la 060 «Aziende | Controllo siti» è fallita alle 17:25 (esecuzione 3953, «lettura non riuscita», 500
+  dall'app dopo 3 tentativi): sui dati veri `pending_site_checks` supera gli 8 secondi di Supabase. Sul banco di prova (12.000
+  aziende) impiegava 0,5 s: la differenza con i dati veri va capita prima di riproporla.
+- **Cosa:** la 061 rimette la funzione della 054 identica (con revoke e grant). Il test 35 ora verifica l'ordine di arrivo.
+- **Indietro:** rieseguire la 060 (sconsigliato finché non si capisce il tempo sui dati veri).
+
+## 21/10/2026 — coda del controllo siti con priorità (punto 39, migrazione 060) · tolta il 21/10 sera con la 061: troppo lenta sui dati veri
 - **Cosa:** `pending_site_checks` ordina le aziende da controllare così: prima quelle nella zona e nel settore (o in una delle
   parole chiave) di una ricerca degli ultimi 30 giorni o di un avviso settimanale attivo, o nella zona di una ricerca
   senza settore (opportunità «tutti i settori»); poi quelle nella zona di una ricerca di un altro settore; poi le altre, come

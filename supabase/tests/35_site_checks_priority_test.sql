@@ -1,4 +1,4 @@
--- Coda del controllo siti con priorità (migrazione 060): prima zona e settore cercati dai clienti, poi la sola zona.
+-- Coda del controllo siti (061: torna la coda della 054, in ordine di arrivo; la priorità della 060 era troppo lenta).
 \set ON_ERROR_STOP on
 
 create or replace function pg_temp.check(p_cond boolean, p_msg text) returns void language plpgsql as $$
@@ -22,8 +22,8 @@ insert into companies (domain, name, website, city, places, tags, first_seen_at)
 
 create temp table q35 as
   select p.domain, p.n from pending_site_checks(300) with ordinality as p(company_id, domain, name, website, n) where p.domain like '%35.it';
-select pg_temp.check((select array_agg(domain order by n) = '{a35.it,b35.it,d35.it,c35.it}' from q35),
-                     'prima zona e settore, poi la sola zona, poi le altre in ordine di arrivo');
+select pg_temp.check((select array_agg(domain order by n) = '{d35.it,c35.it,b35.it,a35.it}' from q35),
+                     'coda della 054 (061): in ordine di arrivo');
 
 -- Ricerca vecchia (oltre 30 giorni) senza avviso: non dà più priorità.
 update searches set created_at = now() - interval '40 days' where name = 'Hotel Trentino 35';
