@@ -109,6 +109,9 @@ Ultimo aggiornamento: 21/10/2026.
     Treviso; ridurre i giri a vuoto (Siti aziende 1 volta al giorno, Controllo siti ogni 2 ore dopo il 2/11, irraggiungibili dopo
     60–90 giorni, OSM più lento dopo il primo giro); alzare il lotto del Settore aziende; capire perché manca Adzuna del 20/10.
     **Tu:** query `supabase/queries/popolamento_settimanale.sql`.
+60. **Io, da decidere** – Dai numeri del database (21/10): ricontrollare subito le aziende controllate prima del 20/10 senza
+    email (circa 9.000, nei giri oggi a vuoto: migrazione sulla coda `pending_site_checks`); capire perché ci sono solo 14
+    segnali «annuncio di lavoro» con 1.244 aziende collegate ad annunci (Data Quality).
 
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo

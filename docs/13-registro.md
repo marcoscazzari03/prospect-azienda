@@ -39,6 +39,19 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — numeri del database (query Q1–Q8 eseguite dall'utente)
+- **Aziende:** 11.956 (OSM 10.485, Adzuna 1.217, target 180), con settore 11.337; tutte controllate, coda vuota; 2.154
+  irraggiungibili (18%); **solo 710 con email dal sito**, perché l'estrazione dell'email nel controllo siti esiste dal 20/10
+  12:25 e le aziende controllate prima la prendono solo al ricontrollo (25 giorni).
+- **Prove fresche:** no_booking_engine 8.120, single_language 4.749, stale_copyright 1.275, outdated_cms 1.072, no_mobile 646,
+  no_https 231, no_privacy 125, under_construction 99, **job_ad 14** (contro 6.551 annunci, 1.244 aziende collegate: da capire).
+- **Per regione:** Lombardia 3.207 (rifacimento 627), Puglia 2.867 (696), Campania 2.137 (477), Sicilia 1.296 (280),
+  **Emilia-Romagna 743 (154)**, Veneto 61. L'Emilia-Romagna, regione della beta, entra nella rotazione OSM il 22–23/10.
+- **Ricerche della settimana:** tutte dell'admin (34; 3 opportunità fallite, «Sicurezza del sito» hotel in Toscana con 39
+  aziende in regione). Nessuna ricerca di clienti.
+- **Proposte (punto 60):** usare i giri a vuoto del controllo siti per ricontrollare subito le aziende controllate prima del
+  20/10 senza email (circa 9.000: email e no_privacy in 2–3 giorni); capire i soli 14 segnali job_ad.
+
 ## 21/10/2026 — recupero delle province perse il 21/10 · nodo caricato su n8n, da pubblicare
 - **Cosa:** `n8n/annunci/nodes/10-prepara-osm.js` («Prepara richieste OSM» di «Aziende | Popolamento OSM»): lista `RECUPERO`
   per tre notti, dopo le riprove e prima della rotazione: 22/10 Sondrio, Belluno; 23/10 Rovigo, Como, Treviso, Varese; 24/10
