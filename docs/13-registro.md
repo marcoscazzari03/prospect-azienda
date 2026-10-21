@@ -45,6 +45,20 @@ Come tornare indietro, in generale:
 
 ---
 
+## 21/10/2026 — ricerche in target più veloci (punto 63, migrazione 059) · in attesa di migrazione
+- **Cosa:** `target_pool` riscritta come la 057: radici di settore, parole chiave, zone ed esclusioni calcolate una volta sola
+  invece che per ogni azienda, e query pianificata a ogni chiamata con i valori veri (plpgsql con `execute … using`). Una ricerca
+  non «semplice» esce subito senza leggere le aziende.
+- **Perché:** su Supabase ogni chiamata dell'app ha al massimo 8 secondi; riserva e conteggio delle ricerche in target
+  (`target_reserve`, `target_availability`) usano questa funzione.
+- **Prove (12.000 aziende di prova):** stessi risultati in 10 ricerche diverse (0 differenze, anche con esclusioni, più
+  contatti per azienda, settore senza termini utili e paese estero); tempi da 1,1–3,6 s a 0,6–1,0 s (da 1,5 a 5 volte più
+  veloce). Test SQL: 390 «ok».
+- **Prima di eseguirla:** `supabase/queries/verifica_059.sql` confronta sui dati veri la funzione nuova con l'attuale sulle
+  ultime 4 ricerche in target e annulla tutto; atteso «differenze» = 0.
+- **Dove:** `supabase/migrations/20261204000059_target_pool_speed.sql`. Nessuna modifica all'app (niente Vercel).
+- **Indietro:** rieseguire `target_pool` dalla 052.
+
 ## 21/10/2026 — falsi «Senza HTTPS» (punto 19e) · in produzione (Controllo siti pubblicato il 21/10)
 - **Misura (Data Quality):** dalle esecuzioni di «Controllo siti» dopo la seconda correzione (dalla 3893, 2.681 siti), 139 segnali
   «Senza HTTPS» ricontrollati tutti dal vivo: 118 veri (85%), 17 falsi (12%), 4 non determinabili. Falsi: 9 siti che con http

@@ -37,8 +37,8 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
 | Captcha | Cloudflare Turnstile | registrazione, accesso, recupero password |
 | Fonti di dati | OpenStreetMap (ODbL), Adzuna (annunci), siti ufficiali delle aziende | |
 
-Il codice è un unico repository. Contiene l'app in `src/`, il database in `supabase/migrations/` (58 migrazioni,
-fino alla 058, con i loro test; a ogni push GitHub Actions esegue lint, tipi, test dell'app, del motore e SQL,
+Il codice è un unico repository. Contiene l'app in `src/`, il database in `supabase/migrations/` (59 migrazioni,
+fino alla 059, con i loro test; a ogni push GitHub Actions esegue lint, tipi, test dell'app, del motore e SQL,
 `.github/workflows/ci.yml`) e i workflow in `n8n/`, generati da script (`build.py` e `build.mjs`) con i loro test.
 
 ## 3. Piani, crediti e prezzi
