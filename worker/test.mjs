@@ -169,11 +169,12 @@ const confini = [
   JSON.stringify({ type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: [[quadrato(10.8, 44.4, 11.2, 44.8), quadrato(11.0, 44.7, 11.1, 44.75)]] }, properties: { 'ISO3166-2': 'IT-MO', name: 'Modena' } }),
   '\x1e' + JSON.stringify({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [quadrato(11.2, 44.4, 11.6, 44.8)] }, properties: { 'ISO3166-2': 'IT-BO' } }),
   JSON.stringify({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [quadrato(0, 0, 1, 1)] }, properties: { 'ISO3166-2': 'IT-45' } }),
+  JSON.stringify({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [quadrato(7, 45.5, 7.5, 46)] }, properties: { 'ISO3166-2': 'IT-23' } }),
   JSON.stringify({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [quadrato(0, 0, 1, 1)] }, properties: { 'ISO3166-2': 'FR-NI' } }),
   'non json',
 ];
 const province = await caricaProvince(confini);
-assert.deepEqual(province.map(p => p.sigla), ['MO', 'BO'], 'solo le province italiane note');
+assert.deepEqual(province.map(p => p.sigla), ['MO', 'BO', 'AO'], 'solo le province italiane note, Aosta dalla regione');
 assert.ok(dentro(province[0], [10.9, 44.6]) && !dentro(province[0], [11.05, 44.72]) && !dentro(province[0], [11.3, 44.6]), 'dentro, nel buco, fuori');
 assert.deepEqual(puntoDi({ type: 'MultiPolygon', coordinates: [[quadrato(11, 44.5, 11.02, 44.52)]] }).map(v => +v.toFixed(6)), [11.01, 44.51]);
 assert.equal(semplifica([[0, 0], [1, 0.00001], [2, 0], [3, 0.00001], [4, 0], [4, 4], [0, 0]]).length, 4, 'confini semplificati');

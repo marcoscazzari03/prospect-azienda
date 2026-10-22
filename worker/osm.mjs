@@ -59,7 +59,9 @@ export async function caricaProvince(righe) {
     if (!riga.trim()) continue;
     let f;
     try { f = JSON.parse(riga.replace(/^\x1e/, '')); } catch { continue; }
-    const sigla = (String(f?.properties?.['ISO3166-2'] || '').match(/^IT-([A-Z]{2})$/) || [])[1];
+    // La Valle d'Aosta in OSM è solo regione (IT-23, nessuna provincia «IT-AO»): il suo confine vale per Aosta (22/10).
+    const iso = String(f?.properties?.['ISO3166-2'] || '');
+    const sigla = iso === 'IT-23' ? 'AO' : (iso.match(/^IT-([A-Z]{2})$/) || [])[1];
     if (!sigla || !note.has(sigla) || !f.geometry) continue;
     const poligoni = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.type === 'MultiPolygon' ? f.geometry.coordinates : [];
     const anelli = poligoni.flat().map(a => semplifica(a)).filter(a => a.length >= 4);
