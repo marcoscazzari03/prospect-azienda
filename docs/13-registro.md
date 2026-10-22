@@ -187,7 +187,7 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
-## 22/10/2026 — tutta Italia da OpenStreetMap sul VPS (punto 87) · rivisto (Code Reviewer, QA), su main; prova sul VPS fatta; da fare: primo giro vero, spegnere il popolamento n8n
+## 22/10/2026 — tutta Italia da OpenStreetMap sul VPS (punto 87) · in produzione dal 22/10 (primo giro: 52.284 aziende nuove, 15.132 aggiornate; giro ogni lunedì alle 2:20 UTC); da spegnere «Aziende | Popolamento OSM» su n8n
 - **Perché:** il popolamento n8n chiede a Overpass 8 province a notte (due settimane per un giro, province perse per i
   timeout: Milano, Brescia, Bologna...) e solo i tipi con sito; manifattura e uffici sono i settori più deboli del database.
 - **Cosa:** `scripts/vps/osm.sh` (ogni lunedì alle 2:20 UTC, servizio `webora-osm`, dati in `/var/lib/webora-osm`): scarica
@@ -218,6 +218,9 @@ Come tornare indietro, in generale:
   107 (Aosta senza confine: in OSM è solo regione, ora presa da `IT-23`), 592.429 attività, 94.982 con sito → **69.557
   aziende** (oggi nel database circa 17.500), 397.605 senza sito ma con nome (per il punto 88); scartate 14.815 come catene,
   3.331 con sito non aziendale, 1.249 fuori.
+- **Primo giro vero (22/10, 15:43–15:54 UTC, 276 s per l'elaborazione):** 107 province su 107, 70.012 aziende inviate:
+  **52.284 nuove**, 15.132 aggiornate, 2.596 saltate (fuori target o in opposizione). Le nuove entrano nelle code del
+  controllo siti e dei contatti (circa 4 giorni) e, se senza settore, di Haiku.
 - **Indietro:** `sudo systemctl disable --now webora-osm.timer`; riaccendere «Aziende | Popolamento OSM» su n8n.
 
 ## 22/10/2026 — contatti per tutto il database (punto 86) · in produzione dal 22/10 (migrazione 066 eseguita, main pubblicato, primo giro: 150 aziende in 42 s, 116 siti letti, 18 email e 35 moduli salvati; giro alle :15 e :45 UTC)

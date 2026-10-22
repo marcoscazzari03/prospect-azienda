@@ -167,7 +167,7 @@ Si va in produzione solo con il database coperto anche per manifattura, uffici e
 `supabase/queries/copertura_settori.sql`. Il lavoro gira sul VPS (gratis), senza Google Maps, PagineGialle o Registro Imprese.
 86. **Io** – ~~Contatti per tutto il database~~ (fatto il 22/10: primo giro 150 aziende in 42 s, 18 email e 35 moduli nuovi, cioè il 35% di aziende senza contatto ora raggiungibili; giro ogni 30 minuti sul VPS): il worker apre «Contatti», «Note legali» e «Chi siamo» di ogni azienda senza
     email né modulo (oggi lo fa solo il motore durante una ricerca). Stima: dal 22% al 45–55% di aziende consegnabili.
-87. **Io** – (22/10: codice pronto, in revisione) Tutta Italia da OpenStreetMap in un colpo: file Geofabrik letto sul VPS, niente timeout di Overpass, più tipi
+87. **Io** – ~~Tutta Italia da OpenStreetMap in un colpo~~ (fatto il 22/10: 52.284 aziende nuove e 15.132 aggiornate al primo giro, poi ogni lunedì sul VPS; restano 397.605 attività senza sito per il punto 88): file Geofabrik letto sul VPS, niente timeout di Overpass, più tipi
     di attività (manifattura `man_made=works` e `industrial=*`, tutti gli `office=*`, `craft=*`), anche senza sito.
 88. **Io** – Sito delle aziende che non ce l'hanno: domini probabili verificati sulla homepage (gratis), ricerca web con
     Haiku solo per i casi difficili, con un tetto di spesa giornaliero.
