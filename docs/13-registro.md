@@ -187,6 +187,26 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 22/10/2026 — tutta Italia da OpenStreetMap sul VPS (punto 87) · codice pronto; da fare: revisione, main, prima prova sul VPS
+- **Perché:** il popolamento n8n chiede a Overpass 8 province a notte (due settimane per un giro, province perse per i
+  timeout: Milano, Brescia, Bologna...) e solo i tipi con sito; manifattura e uffici sono i settori più deboli del database.
+- **Cosa:** `scripts/vps/osm.sh` (ogni lunedì alle 2:20 UTC, servizio `webora-osm`, dati in `/var/lib/webora-osm`): scarica
+  `italy-latest.osm.pbf` da Geofabrik solo se cambiato (md5), tiene con osmium le attività dei tipi utili e i confini con
+  il codice ISO; `worker/osm.mjs` assegna la provincia (indirizzo, altrimenti confini semplificati a circa 50 m) e passa le
+  attività con sito al nodo n8n «Normalizza OSM» eseguito così com'è, poi le salva a blocchi di 2.000 su
+  `/api/engine/companies-import` (ora apribile anche con `SITE_CHECKS_SECRET`, come le altre route del worker).
+  Regole spostate in `n8n/annunci/nodes/lib-osm.js` (usate da n8n e dal worker), con due novità: stabilimenti
+  `man_made=works` («Produzione industriale») e aree industriali di ogni tipo tranne porti, ferrovie, depositi, impianti
+  di acqua, gas, elettricità e discariche (le categorie senza traduzione prendono il settore da Haiku). Le catene ora si
+  contano su tutta Italia (stesso dominio su 3 o più punti), non sulle 8 province della notte.
+- **Non ancora:** le attività senza sito restano nel file `attivita.geojsonseq` sul VPS (contate nel riepilogo come
+  `senza_sito_con_nome`): servono al punto 88 (cercare il sito). Il nodo n8n caricato in «Aziende | Popolamento OSM» resta
+  quello di prima: il workflow si spegne dopo il primo giro del worker.
+- **Prove:** `worker/test.mjs` (filtri di osmium, confini con buchi, province dall'indirizzo o dai confini, fuori Italia,
+  regole del nodo n8n, catene); `n8n/annunci/test/run.mjs` (fabbriche e aree industriali, non porti né torri); catena osmium
+  provata su un file finto (attività, edificio, confine `IT-MO`); 300.000 attività su 107 province finte in 49 s, 320 MB.
+- **Indietro:** `sudo systemctl disable --now webora-osm.timer`; riaccendere «Aziende | Popolamento OSM» su n8n.
+
 ## 22/10/2026 — contatti per tutto il database (punto 86) · in produzione dal 22/10 (migrazione 066 eseguita, main pubblicato, primo giro: 150 aziende in 42 s, 116 siti letti, 18 email e 35 moduli salvati; giro alle :15 e :45 UTC)
 - **Perché:** solo il 22% delle aziende vive ha un'email o un modulo (2.530 su 11.623): il controllo siti legge solo la
   homepage, le pagine «Contatti» e «Note legali» le apriva solo il motore durante una ricerca.

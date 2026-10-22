@@ -19,11 +19,13 @@ export const famiglie = JOB_FAMILIES.map(f => ({ code: f.code, titles: [...new S
 const controlliSito = readFileSync(join(root, 'n8n', 'engine', 'nodes', 'lib-controlli-sito.js'), 'utf8');
 // Email aziendale dalla homepage: stesse regole del motore, ridotte a «Solo azienda».
 const emailAzienda = readFileSync(join(root, 'n8n', 'engine', 'nodes', 'lib-email-azienda.js'), 'utf8');
+// Regole di OpenStreetMap: le stesse per n8n e per il worker sul VPS (worker/osm.mjs).
+const libOsm = readFileSync(join(dir, 'nodes', 'lib-osm.js'), 'utf8');
 const rilasciCms = JSON.stringify(JSON.parse(readFileSync(join(root, 'src', 'lib', 'domain', 'cms-releases.json'), 'utf8')));
 // Province (sigla, nome, regione), per il popolamento da OpenStreetMap.
 const province = JSON.stringify(JSON.parse(readFileSync(join(dir, 'province.json'), 'utf8')));
 export const codice = (f, subs = {}) => Object.entries({ __FAMIGLIE__: JSON.stringify(famiglie), __CMS_RELEASES__: rilasciCms, __PROVINCE__: province, ...subs })
-  .reduce((s, [k, v]) => s.split(k).join(v), readFileSync(join(dir, 'nodes', f), 'utf8').split('__CONTROLLI_SITO__').join(controlliSito).split('__EMAIL_AZIENDA__').join(emailAzienda));
+  .reduce((s, [k, v]) => s.split(k).join(v), readFileSync(join(dir, 'nodes', f), 'utf8').split('__CONTROLLI_SITO__').join(controlliSito).split('__EMAIL_AZIENDA__').join(emailAzienda).split('__LIB_OSM__').join(libOsm));
 // Verifica dei siti: livello 2 (domini indovinati) e livello 3 (ricerca web).
 export const scegliSito = (livello) => codice('04-scegli-sito.js', livello === 2
   ? { __METODO__: 'guess', __CANDIDATI__: 'Domini candidati', __ELENCO__: "($('Aziende senza sito').first().json.companies || [])" }

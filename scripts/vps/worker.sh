@@ -6,7 +6,10 @@
 #   bash worker.sh prova-contatti   contatti: giro di prova su 20 aziende, SENZA salvare
 #   bash worker.sh giro             controllo siti: un giro vero adesso (300 aziende)
 #   bash worker.sh giro-contatti    contatti: un giro vero adesso (150 aziende)
-#   bash worker.sh avvia            giri automatici: controllo siti alle :05 e :35, contatti alle :15 e :45
+#   bash worker.sh prova-osm        popolamento OSM: scarica l'Italia e conta, SENZA salvare (10-20 minuti)
+#   bash worker.sh osm              popolamento OSM: un giro vero, in sottofondo (si segue con «stato-osm»)
+#   bash worker.sh stato-osm        ultime righe del popolamento OSM
+#   bash worker.sh avvia            giri automatici: controllo siti alle :05 e :35, contatti alle :15 e :45, OSM il lunedì
 #   bash worker.sh ferma            ferma i giri automatici
 #   bash worker.sh stato            ultimi giri e prossimi
 #   bash worker.sh aggiorna         scarica l'ultima versione del codice da main
@@ -16,8 +19,10 @@ ENVF=/etc/webora/site-checks.env
 REPO=https://github.com/marcoscazzari03/prospect-azienda.git
 NOME=webora-site-checks
 CONT=webora-contacts
+OSM=webora-osm
 
-# Servizio e timer systemd per un giro del worker: nome, descrizione, script, minuti.
+# Servizio e timer systemd per un giro del worker: nome, descrizione, comando, quando (OnCalendar), durata massima,
+# memoria massima, righe in più per il servizio.
 unita() {
   sudo tee /etc/systemd/system/$1.service >/dev/null <<UNIT
 [Unit]
@@ -30,9 +35,10 @@ Type=oneshot
 User=$USER
 WorkingDirectory=$APP
 EnvironmentFile=$ENVF
-ExecStart=/usr/bin/node $3
-TimeoutStartSec=20min
-MemoryMax=1G
+ExecStart=$3
+TimeoutStartSec=$5
+MemoryMax=$6
+$7
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=true
@@ -44,11 +50,12 @@ RestrictSUIDSGID=true
 UNIT
   sudo tee /etc/systemd/system/$1.timer >/dev/null <<UNIT
 [Unit]
-Description=Webora Leads - $2 ogni 30 minuti
+Description=Webora Leads - $2 (programmato)
 
 [Timer]
-OnCalendar=*-*-* *:$4:00
+OnCalendar=$4
 RandomizedDelaySec=60
+Persistent=true
 
 [Install]
 WantedBy=timers.target
@@ -57,7 +64,7 @@ UNIT
 
 prova() {
   sudo systemd-run --quiet --wait --pipe --collect --uid="$USER" --property=EnvironmentFile="$ENVF" \
-    --working-directory="$APP" --setenv=DRY_RUN=1 --setenv=LIMIT=20 /usr/bin/node "$1"
+    --working-directory="$APP" --setenv=DRY_RUN=1 --setenv=LIMIT=20 "$@"
 }
 
 case "${1:-}" in
@@ -74,18 +81,26 @@ case "${1:-}" in
       sudo chown root:"$USER" "$ENVF"; sudo chmod 640 "$ENVF"
       unset SEGRETO
     fi
-    unita "$NOME" "controllo siti" "worker/site-checks.mjs" "05,35"
-    unita "$CONT" "contatti" "worker/contacts.mjs" "15,45"
+    # osmium legge il file di OpenStreetMap (popolamento OSM, punto 87).
+    command -v osmium >/dev/null || sudo apt-get install -y -qq osmium-tool
+    unita "$NOME" "controllo siti" "/usr/bin/node worker/site-checks.mjs" "*-*-* *:05,35:00" 20min 1G ""
+    unita "$CONT" "contatti" "/usr/bin/node worker/contacts.mjs" "*-*-* *:15,45:00" 20min 1G ""
+    # Il file dell'Italia (circa 2 GB) e i suoi derivati restano in /var/lib/webora-osm, l'unica cartella scrivibile.
+    unita "$OSM" "popolamento OSM" "/bin/bash $APP/scripts/vps/osm.sh" "Mon *-*-* 02:20:00" 3h 2500M "StateDirectory=webora-osm
+Nice=10"
     sudo systemctl daemon-reload
     echo "Installato. Prossimo passo: bash $0 prova"
     ;;
-  prova) prova worker/site-checks.mjs ;;
-  prova-contatti) prova worker/contacts.mjs ;;
+  prova) prova /usr/bin/node worker/site-checks.mjs ;;
+  prova-contatti) prova /usr/bin/node worker/contacts.mjs ;;
+  prova-osm) prova --property=StateDirectory=webora-osm --property=MemoryMax=2500M /bin/bash "$APP/scripts/vps/osm.sh" ;;
+  osm) sudo systemctl start --no-block $OSM.service && echo "Partito in sottofondo. Per seguirlo: bash $0 stato-osm" ;;
+  stato-osm) systemctl is-active $OSM.service || true; sudo journalctl -u $OSM.service -n 15 --no-pager ;;
   giro) sudo systemctl start $NOME.service || echo "Giro non riuscito: ecco le ultime righe."; sudo journalctl -u $NOME.service -n 5 --no-pager ;;
   giro-contatti) sudo systemctl start $CONT.service || echo "Giro non riuscito: ecco le ultime righe."; sudo journalctl -u $CONT.service -n 5 --no-pager ;;
-  avvia) sudo systemctl enable --now $NOME.timer $CONT.timer && systemctl list-timers $NOME.timer $CONT.timer --no-pager ;;
-  ferma) sudo systemctl disable --now $NOME.timer $CONT.timer ;;
-  stato) systemctl list-timers $NOME.timer $CONT.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
+  avvia) sudo systemctl enable --now $NOME.timer $CONT.timer $OSM.timer && systemctl list-timers $NOME.timer $CONT.timer $OSM.timer --no-pager ;;
+  ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer ;;
+  stato) systemctl list-timers $NOME.timer $CONT.timer $OSM.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
   aggiorna) git -C "$APP" pull --ff-only && git -C "$APP" log --oneline -1 ;;
-  *) sed -n '2,13p' "$0"; exit 1 ;;
+  *) sed -n '2,16p' "$0"; exit 1 ;;
 esac

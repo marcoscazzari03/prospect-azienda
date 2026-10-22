@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publicDomain, urlOnDomain } from "@/lib/domain/engine";
-import { safeEqual } from "@/lib/server/crypto";
+import { workerAuthorized } from "@/lib/server/worker-auth";
 import type { Json } from "@/lib/supabase/database.types";
 
-// Popolamento del database aziende da fonti aperte, per il workflow n8n
-// «Aziende | Popolamento OSM» (stesso segreto condiviso del callback del motore).
+// Popolamento del database aziende da fonti aperte, per il workflow n8n «Aziende | Popolamento OSM» (segreto del
+// callback del motore) e per il worker sul VPS (worker/osm.mjs, file Geofabrik, punto 87: SITE_CHECKS_SECRET).
 //   POST { source: "osm", companies } -> salvate da store_imported_companies
 // Solo dati d'azienda (dominio, nome, sito, città, settore): nessun dato personale.
 
@@ -17,10 +16,7 @@ import type { Json } from "@/lib/supabase/database.types";
 const CHUNK = 250;
 export const maxDuration = 120;
 
-function authorized(request: Request) {
-  const secret = env.engineCallbackSecret();
-  return Boolean(secret) && safeEqual(request.headers.get("x-engine-secret") ?? "", secret!);
-}
+const authorized = workerAuthorized;
 
 const schema = z.object({
   source: z.literal("osm"),

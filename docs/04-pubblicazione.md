@@ -129,10 +129,15 @@ Il worker (`worker/site-checks.mjs`) fa il lavoro di «Aziende | Controllo siti�
 2. **Server:** scaricare lo script e installare (chiede il segreto, che non resta nella cronologia):
    `curl -fsSL https://raw.githubusercontent.com/marcoscazzari03/prospect-azienda/main/scripts/vps/worker.sh -o worker.sh && bash worker.sh installa`
 3. `bash worker.sh prova`: giro di 20 aziende senza salvare; deve stampare i numeri, non «HTTP 401».
-4. `bash worker.sh avvia`: controllo siti alle :05 e alle :35, contatti (punto 86, `worker/contacts.mjs`: pagine «Contatti»,
+4. `bash worker.sh avvia`: popolamento OSM il lunedì (punto 5), controllo siti alle :05 e alle :35, contatti (punto 86, `worker/contacts.mjs`: pagine «Contatti»,
    «Note legali», «Chi siamo» delle aziende senza email né modulo) alle :15 e alle :45. Poi si spegne «Aziende | Controllo siti» su n8n.
-5. Altri comandi: `prova-contatti`, `giro`, `giro-contatti`, `stato`, `ferma`; dopo un aggiornamento del codice
-   `bash worker.sh installa` (scarica da main e riscrive i servizi; il segreto resta).
+5. Popolamento OSM (punto 87, `worker/osm.mjs` e `scripts/vps/osm.sh`): ogni lunedì alle 2:20 UTC scarica l'Italia da
+   Geofabrik (circa 2 GB, solo se cambiata, con il controllo md5, in `/var/lib/webora-osm`), tiene con osmium le attività e i
+   confini delle province e salva le aziende con un sito su `/api/engine/companies-import`, con le regole del nodo n8n
+   «Normalizza OSM». Prima volta: `bash worker.sh prova-osm` (conta senza salvare, 10–20 minuti, finestra aperta), poi
+   `bash worker.sh osm` (in sottofondo) e `bash worker.sh stato-osm`. Poi si spegne «Aziende | Popolamento OSM» su n8n.
+6. Altri comandi: `prova-contatti`, `giro`, `giro-contatti`, `stato`, `ferma`; dopo un aggiornamento del codice
+   `bash worker.sh installa` (scarica da main, installa osmium se manca e riscrive i servizi; il segreto resta).
 
 ## Sviluppo locale
 

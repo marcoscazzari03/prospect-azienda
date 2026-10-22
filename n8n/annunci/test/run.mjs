@@ -444,6 +444,18 @@ const [osmDoppio] = run(codice('11-normalizza-osm.js'), {
   input: [{ elements: [doppio] }, { elements: [doppio] }, { elements: [doppio] }]
 });
 assert.deepEqual([osmDoppio.companies.length, osmDoppio.stats.chains, osmDoppio.stats.elements], [1, 0, 1], 'attività ripetuta in più richieste: una sola azienda');
+// Manifattura (punto 87): stabilimenti «man_made=works» e aree industriali di ogni tipo, non impianti e porti.
+const [osmFabbriche] = run(codice('11-normalizza-osm.js'), {
+  nodes: { 'Prepara richieste OSM': [{ sigla: 'BS', provincia: 'Brescia', regione: 'Lombardia' }] },
+  input: [{ elements: [
+    el({ man_made: 'works', name: 'Fonderia Bresciana', website: 'https://fonderiabresciana.it' }),
+    el({ industrial: 'foundry', name: 'Fusioni Rossi', website: 'https://fusionirossi.it' }),
+    el({ industrial: 'port', name: 'Porto industriale', website: 'https://portoindustriale.it' }),
+    el({ man_made: 'tower', name: 'Torre', website: 'https://torre.it' })
+  ] }]
+});
+assert.deepEqual(osmFabbriche.companies.map(c => [c.domain, c.industry]), [['fonderiabresciana.it', 'Produzione industriale'], ['fusionirossi.it', '']],
+  'fabbriche e aree industriali (settore da Haiku), non porti né torri');
 // Province fallite: riprovate il giorno dopo, al massimo 3 volte.
 const primo = run(codice('10-prepara-osm.js'), { eseguiti: ['Ogni giorno'], statico: {} });
 assert.deepEqual(primo.slice(0, 10).map(r => r.sigla + ' ' + r.parte), ['NA 1/7', 'NA 2/7', 'NA 3/7', 'NA 4/7', 'NA 5/7', 'NA 6/7', 'NA 7/7', 'BA 1/3', 'BA 2/3', 'BA 3/3'],

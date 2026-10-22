@@ -225,7 +225,9 @@ del motore (`n8n/engine/nodes/lib-controlli-sito.js`).
 ## Popolamento del database aziende (`/api/engine/companies-import`)
 
 Workflow n8n «Aziende | Popolamento OSM» (generato da `n8n/annunci/build.mjs` in `popolamento.sdk.ts`), stesso
-segreto. Ogni notte una regione a rotazione (a mano l'Emilia-Romagna): Overpass API di OpenStreetMap, una
+segreto; dal punto 87 il worker sul VPS (`worker/osm.mjs`, file Geofabrik di tutta Italia ogni lunedì, `SITE_CHECKS_SECRET`)
+con le stesse regole (`n8n/annunci/nodes/lib-osm.js` e il nodo «Normalizza OSM» eseguito così com'è), più gli stabilimenti
+(`man_made=works`) e le aree industriali di ogni tipo tranne impianti, porti e infrastrutture. Ogni notte una regione a rotazione (a mano l'Emilia-Romagna): Overpass API di OpenStreetMap, una
 query per tipo di attività (office, craft, shop, amenity, tourism, healthcare, industrial) con sito web.
 Scartati enti pubblici, associazioni, luoghi non commerciali, siti non aziendali (social, portali) e catene
 (stesso dominio su 3+ punti). Categoria OSM tradotta in settore italiano + parole chiave; le categorie senza

@@ -9,6 +9,7 @@ import { codice } from '../n8n/annunci/build.mjs';
 import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo } from './site-checks.mjs';
 import { richiesta, privato } from './http.mjs';
 import { pagineDaAprire, haModulo, trovaContatti } from './contacts.mjs';
+import { caricaOsm, filtri, caricaProvince, dentro, puntoDi, leggiAttivita, normalizza, semplifica } from './osm.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fx = join(root, 'n8n', 'engine', 'test', 'fixtures', 'signals');
@@ -158,5 +159,49 @@ const corta = await trovaContatti(regole, { domain: 'ditta.it', website: 'https:
   async (url) => ({ status: 200, url, body: url === 'https://ditta.it/' ? '<div id="app"></div>' : url === 'https://ditta.it/contatti' ? sito['https://www.ditta.it/privacy-policy'] : '' }));
 assert.equal(corta.email, 'info@ditta.it', 'homepage corta: percorsi tipici provati');
 console.log('ok  contatti: pagine, modulo, email del dominio, sito spento, 404, pagine ostili, redirect, homepage corta');
+
+// 7. Popolamento OSM (punto 87): righe come le scrive «osmium export -f geojsonseq -a type,id».
+const osm = caricaOsm();
+const f = filtri(osm);
+assert.ok(f.includes('nwr/office') && f.includes('nwr/man_made=works') && f.some(x => x.startsWith('nwr/amenity=') && x.includes('restaurant') && !x.includes('bench')), 'filtri di osmium');
+const quadrato = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]];
+const confini = [
+  JSON.stringify({ type: 'Feature', geometry: { type: 'MultiPolygon', coordinates: [[quadrato(10.8, 44.4, 11.2, 44.8), quadrato(11.0, 44.7, 11.1, 44.75)]] }, properties: { 'ISO3166-2': 'IT-MO', name: 'Modena' } }),
+  '\x1e' + JSON.stringify({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [quadrato(11.2, 44.4, 11.6, 44.8)] }, properties: { 'ISO3166-2': 'IT-BO' } }),
+  JSON.stringify({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [quadrato(0, 0, 1, 1)] }, properties: { 'ISO3166-2': 'IT-45' } }),
+  JSON.stringify({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [quadrato(0, 0, 1, 1)] }, properties: { 'ISO3166-2': 'FR-NI' } }),
+  'non json',
+];
+const province = caricaProvince(confini);
+assert.deepEqual(province.map(p => p.sigla), ['MO', 'BO'], 'solo le province italiane note');
+assert.ok(dentro(province[0], [10.9, 44.6]) && !dentro(province[0], [11.05, 44.72]) && !dentro(province[0], [11.3, 44.6]), 'dentro, nel buco, fuori');
+assert.deepEqual(puntoDi({ type: 'MultiPolygon', coordinates: [[quadrato(11, 44.5, 11.02, 44.52)]] }).map(v => +v.toFixed(6)), [11.01, 44.51]);
+assert.equal(semplifica([[0, 0], [1, 0.00001], [2, 0], [3, 0.00001], [4, 0], [4, 4], [0, 0]]).length, 4, 'confini semplificati');
+const attivita = (id, geometry, props) => JSON.stringify({ type: 'Feature', geometry, properties: { '@type': 'node', '@id': id, ...props } });
+const punto = (x, y) => ({ type: 'Point', coordinates: [x, y] });
+const righe = [
+  attivita(1, punto(10.9, 44.6), { office: 'lawyer', name: 'Studio Bianchi', website: 'https://studiobianchi.it' }),
+  attivita(2, punto(11.3, 44.5), { shop: 'clothes', name: 'Moda Bologna', 'contact:website': 'modabologna.it' }),
+  attivita(3, punto(10.0, 46.0), { shop: 'clothes', name: 'Fuori dai confini', website: 'https://fuori.it' }),
+  attivita(4, punto(10.0, 46.0), { craft: 'carpenter', name: 'Falegname', website: 'https://falegname.it', 'addr:province': 'PR' }),
+  attivita(5, punto(10.9, 44.6), { craft: 'carpenter', name: 'Falegname senza sito' }),
+  attivita(6, punto(10.9, 44.6), { entrance: 'main', website: 'https://ingresso.it' }),
+  attivita(7, { type: 'MultiPolygon', coordinates: [[quadrato(11, 44.5, 11.02, 44.52)]] }, { '@type': 'way', man_made: 'works', name: 'Fonderia', website: 'fonderia.it' }),
+  ...[8, 9, 10].map(i => attivita(i, punto(11.3, 44.5), { shop: 'clothes', name: `Catena ${i}`, website: 'https://catena.it' })),
+  attivita(11, punto(11.05, 44.72), { office: 'it', name: 'Nel buco', website: 'https://buco.it' }),
+  '{rotta',
+];
+async function* comeFile(r) { for (const x of r) yield x; }
+const letto = await leggiAttivita(comeFile(righe), osm, province);
+assert.deepEqual([...letto.gruppi.keys()].sort(), ['BO', 'MO', 'PR'], 'provincia dai confini o dall\'indirizzo');
+assert.deepEqual([letto.stats.fuori, letto.stats.senza_sito_con_nome, letto.stats.illeggibili], [2, 1, 1], 'fuori (anche nel buco), senza sito, riga rotta');
+const [blocco] = normalizza(osm, letto.gruppi);
+assert.deepEqual(blocco.companies.map(c => [c.domain, c.province, c.region, c.industry]).sort(), [
+  ['falegname.it', 'Parma', 'Emilia-Romagna', 'Falegnameria'],
+  ['fonderia.it', 'Modena', 'Emilia-Romagna', 'Produzione industriale'],
+  ['modabologna.it', 'Bologna', 'Emilia-Romagna', 'Abbigliamento'],
+  ['studiobianchi.it', 'Modena', 'Emilia-Romagna', 'Studio legale'],
+], 'regole del nodo n8n: catene escluse, settori, province');
+console.log('ok  popolamento OSM: filtri, confini, province, regole del nodo n8n');
 
 console.log('\nTest del worker superati.');
