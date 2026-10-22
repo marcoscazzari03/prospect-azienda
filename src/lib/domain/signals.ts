@@ -380,8 +380,8 @@ export const OFFERS: OfferDef[] = [
   },
   {
     code: "recruiting_industry", area: "hr", label: "Selezione di operai e tecnici",
-    description: "Per agenzie per il lavoro e selezionatori che lavorano con l'industria.",
-    lookFor: "annunci di lavoro recenti per operai specializzati, manutentori o magazzinieri",
+    description: "Per agenzie per il lavoro e selezionatori di personale operativo nell'industria.",
+    lookFor: "annunci di lavoro recenti per operai, manutentori o magazzinieri",
     signals: ["job_ad"], jobFamilies: ["production", "maintenance", "logistics"], match: "any",
   },
   {
