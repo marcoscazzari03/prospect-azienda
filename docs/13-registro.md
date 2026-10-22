@@ -64,6 +64,13 @@ Come tornare indietro, in generale:
   combinazioni zona/settore, 150 su 150 aziende scelte nelle zone e nei settori cercati. Migrazione
   `20261208000064_site_checks_priority_v2.sql`, test `35_site_checks_priority_test.sql` aggiornato (zona e settore,
   settore su tutto il paese, scadute prima delle 054, ricerca vecchia con e senza avviso, permessi).
+- **Differenze dalla 060 (Code Reviewer, 22/10):** due livelli invece di tre: tolto «zona di una ricerca con un altro
+  settore» (più semplice; in produzione 150 su 150 aziende scelte sono già nella zona e nel settore cercati); un settore
+  fatto solo di parole vuote (es. «di») non dà priorità invece di valere come «tutti i settori». Per rimettere il livello
+  intermedio: aggiungere all'ordine un secondo `exists` sulla sola zona. Zone e parole chiave accettate solo come elenchi,
+  altrimenti la ricerca vale come «tutto il paese» / «nessuna parola»; qualsiasi errore nel leggere le ricerche lascia la
+  coda senza priorità (ordine della 061) invece di fermare il controllo siti; oltre 100 combinazioni restano quelle delle
+  ricerche più recenti. Test 35: 406 «ok» in tutto. Dopo la migrazione: controllare la durata del primo giro orario.
 - **Indietro:** rieseguire la 061 (coda della 054).
 
 ## 22/10/2026 — stima realistica nel wizard (punto 40) · migrazione 063 eseguita il 22/10; app pubblicata su main il 22/10

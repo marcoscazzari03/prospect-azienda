@@ -60,5 +60,14 @@ create temp table t35 as
 select pg_temp.check((select array_agg(domain order by n) = '{a35.it,d35.it,c35.it,b35.it}' from t35),
                      'ricerca vecchia con avviso attivo: di nuovo prima l''albergo vicino');
 
+-- Una ricerca con le zone in un formato strano (riga scritta a mano) non ferma la coda e non toglie la priorità alle altre.
+insert into searches (org_id, created_by, name, target, email_mode, quantity, status)
+select org, 'a0a0a0a0-0000-4000-8000-000000000035', 'Strana 35',
+       '{"industry":"Officina","regions":"Valsugana35","industry_keywords":null}', 'company_only', 5, 'completed' from o35;
+create temp table u35 as
+  select p.domain, p.n from pending_site_checks(300) with ordinality as p(company_id, domain, name, website, n) where p.domain like '%35.it';
+select pg_temp.check((select array_agg(domain order by n) = '{d35.it,b35.it,a35.it,c35.it}' from u35),
+                     'zone non in elenco: la ricerca vale come «tutto il paese» (officine e albergo vicino davanti), la coda non si ferma');
+
 select pg_temp.check(not has_function_privilege('authenticated', 'public.pending_site_checks(integer)', 'execute'),
                      'coda non chiamabile dai clienti');

@@ -17,9 +17,13 @@ declare
 begin
   -- Zone e settori cercati: una riga per zona e per settore (o parola chiave del settore, che è un'alternativa).
   -- Zona vuota = tutto il paese, settore vuoto = tutti i settori; una ricerca senza zona e senza settore non conta.
-  -- Al massimo le 200 ricerche più recenti e 100 combinazioni.
+  -- Al massimo le 200 ricerche più recenti e le 100 combinazioni delle ricerche più recenti. Solo elenchi: una ricerca
+  -- con zone o parole chiave in un altro formato non deve fermare la coda (Code Reviewer, 22/10).
+  begin
   with recenti as (
-    select se.target
+    select se.target, se.created_at,
+           case when jsonb_typeof(se.target -> 'regions') = 'array' then se.target -> 'regions' else '[]'::jsonb end as zone,
+           case when jsonb_typeof(se.target -> 'industry_keywords') = 'array' then se.target -> 'industry_keywords' else '[]'::jsonb end as parole
       from searches se
      where se.deleted_at is null
        and (se.created_at > now() - interval '30 days' or exists (select 1 from search_alerts a where a.search_id = se.id))
@@ -27,28 +31,33 @@ begin
      limit 200
   ),
   coppie as (
-    select distinct z.stems as zona, s.stems as settore
+    select z.stems as zona, s.stems as settore
       from recenti r
       cross join lateral (
-        select term_stems(g) as stems from jsonb_array_elements_text(coalesce(r.target -> 'regions', '[]')) g
+        select term_stems(g) as stems from jsonb_array_elements_text(r.zone) g
          where cardinality(term_stems(g)) > 0
         union all
         select '{}'::text[] where not exists (
-          select 1 from jsonb_array_elements_text(coalesce(r.target -> 'regions', '[]')) g where cardinality(term_stems(g)) > 0)
+          select 1 from jsonb_array_elements_text(r.zone) g where cardinality(term_stems(g)) > 0)
       ) z
       cross join lateral (
         select term_stems(r.target ->> 'industry') as stems where cardinality(term_stems(r.target ->> 'industry')) > 0
         union all
-        select term_stems(k) from jsonb_array_elements_text(coalesce(r.target -> 'industry_keywords', '[]')) k
+        select term_stems(k) from jsonb_array_elements_text(r.parole) k
          where cardinality(term_stems(k)) > 0
         union all
-        select '{}'::text[] where coalesce(btrim(r.target ->> 'industry'), '') = ''
-                             and jsonb_array_length(coalesce(r.target -> 'industry_keywords', '[]')) = 0
+        select '{}'::text[] where coalesce(btrim(r.target ->> 'industry'), '') = '' and jsonb_array_length(r.parole) = 0
       ) s
      where cardinality(z.stems) > 0 or cardinality(s.stems) > 0
+     group by 1, 2
+     order by max(r.created_at) desc
      limit 100
   )
   select coalesce(jsonb_agg(jsonb_build_object('z', to_jsonb(zona), 's', to_jsonb(settore))), '[]') into v_domanda from coppie;
+  exception when others then
+    -- Qualsiasi errore nel leggere le ricerche: coda senza priorità (ordine della 061) invece di fermarsi.
+    v_domanda := '[]';
+  end;
 
   return query execute $q$
   with domanda as materialized (
