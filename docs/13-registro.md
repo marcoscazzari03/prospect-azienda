@@ -45,6 +45,14 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — coda del controllo siti con priorità, misure (punto 39) · in corso, nessuna modifica in produzione
+- **Misura in produzione** (`supabase/queries/misura_039.sql`): 17.482 aziende, 4.588 da controllare (25 giorni), 44
+  ricerche in 30 giorni con 23 zone/settori diversi, nessun avviso; la coda attuale (054) impiega già 2,1 s.
+- **Banco di prova rifatto con le stesse dimensioni** (17.500 aziende, 44 ricerche; prima c'era una sola ricerca): coda
+  attuale 1,07 s, 060 0,94 s. Gran parte del tempo è la compilazione JIT di Postgres (0,7 s): senza JIT 0,59 s e 0,33 s.
+  Il fallimento della 060 in produzione (oltre 8 s) non si riproduce: serve il piano reale
+  (`supabase/queries/misura_039_piano.sql`, esegue la 060 come semplice lettura).
+
 ## 22/10/2026 — stima realistica nel wizard (punto 40) · migrazione 063 eseguita il 22/10; app pubblicata su main il 22/10
 - **Problema:** il wizard mostra le aziende «disponibili» (`target_pool` / `opportunity_pool`), ma il pool non richiede
   un'email: una parte delle aziende non diventa un lead (nessuna email né modulo). «120 disponibili» può voler dire molti
