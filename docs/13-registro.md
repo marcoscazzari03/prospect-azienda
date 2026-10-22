@@ -187,7 +187,7 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
-## 22/10/2026 — annunci di lavoro anche per la manifattura (punto 89) · codice pronto; da fare: revisione, main, nodi n8n
+## 22/10/2026 — annunci di lavoro anche per la manifattura (punto 89) · rivisto (Code Reviewer, Sales Copywriter), su main; nodi caricati in «Annunci | Raccolta Adzuna» e «Lead Engine» il 22/10, da pubblicare
 - **Perché:** manifattura e industria sono i settori più deboli; gli annunci per operai, manutentori e magazzinieri sono
   il segnale più forte che un'azienda industriale assume, e chi seleziona personale per l'industria è un cliente possibile.
 - **Cosa:** tre figure nuove in `JOB_FAMILIES` (`src/lib/domain/signals.ts`): `production` (operai specializzati,
