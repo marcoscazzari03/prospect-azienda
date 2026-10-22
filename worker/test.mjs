@@ -9,7 +9,7 @@ import { codice } from '../n8n/annunci/build.mjs';
 import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo } from './site-checks.mjs';
 import { richiesta, privato } from './http.mjs';
 import { pagineDaAprire, haModulo, trovaContatti } from './contacts.mjs';
-import { caricaRegoleSiti, luogoSullaPagina, cercaSito, daProvare } from './siti-osm.mjs';
+import { caricaRegoleSiti, luogoSullaPagina, cercaSito, daProvare, dominioDaScartare } from './siti-osm.mjs';
 import { caricaOsm, filtri, caricaProvince, dentro, puntoDi, leggiAttivita, normalizza, semplifica } from './osm.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -229,12 +229,25 @@ const web = {
   'https://barcentrale.it': pagina('Bar Centrale', 'Il bar in piazza a Torino'),
   'https://sonnosereno.it': pagina('Domain for sale', 'buy this domain'),
 };
-const reqWeb = async (url) => { if (!(url in web)) throw Object.assign(new Error('ENOTFOUND'), { code: 'ENOTFOUND' }); return { status: 200, body: web[url] }; };
+web['https://hotel.com'] = pagina('Hotel Bellavista Milano - prenota', 'Hotel Bellavista, Milano: le migliori offerte');
+web['https://scheda.it'] = pagina('Officine Gialli', 'Officine Gialli, Modena');
+const rimandi = { 'https://officinegialli.it': 'https://www.paginegialle.it/officine-gialli' };
+const reqWeb = async (url) => {
+  if (rimandi[url]) return { status: 200, url: rimandi[url], body: web['https://scheda.it'] };
+  if (!(url in web)) throw Object.assign(new Error('ENOTFOUND'), { code: 'ENOTFOUND' });
+  return { status: 200, url, body: web[url] };
+};
 assert.equal(await cercaSito(regoleSiti, { chiave: 'node/1', nome: 'Falegnameria Rossi', citta: 'Carpi' }, 'Modena', reqWeb), 'falegnameriarossi.it', 'nome e città sulla pagina');
 assert.equal(await cercaSito(regoleSiti, { chiave: 'node/2', nome: 'Falegnameria Rossi', citta: '' }, 'Modena', reqWeb), '', 'senza città: serve la provincia sulla pagina (qui solo «MO»)');
 assert.equal(await cercaSito(regoleSiti, { chiave: 'node/3', nome: 'Bar Centrale', citta: 'Bologna' }, 'Bologna', reqWeb), '', 'omonimo in un\'altra città');
 assert.equal(await cercaSito(regoleSiti, { chiave: 'node/4', nome: 'Sonno Sereno', citta: 'Modena' }, 'Modena', reqWeb), '', 'dominio in vendita');
 assert.ok(luogoSullaPagina('<p>Sede a Forlì</p>', '', 'Forlì-Cesena') && luogoSullaPagina('<p>Monza</p>', '', 'Monza e Brianza') && !luogoSullaPagina('<p>MO</p>', '', 'Modena'));
+// Revisione: niente domini-categoria, niente rimandi a portali, niente vie con il nome della città, province-parole.
+assert.equal(await cercaSito(regoleSiti, { chiave: 'node/5', nome: 'Hotel Bellavista', citta: 'Milano' }, 'Milano', reqWeb), '', 'hotel.com non è il sito di Hotel Bellavista');
+assert.ok(dominioDaScartare('farmacia.it', 'Farmacia Rossi') && !dominioDaScartare('farmaciarossi.it', 'Farmacia Rossi') && !dominioDaScartare('bellavista.it', 'Bellavista'));
+assert.equal(await cercaSito(regoleSiti, { chiave: 'node/6', nome: 'Officine Gialli', citta: 'Modena' }, 'Modena', reqWeb), '', 'rimando a un portale');
+assert.ok(!luogoSullaPagina('<p>Via Roma 12, Lodi</p>', 'Casalpusterlengo', 'Roma'), 'via Roma non è Roma, e con la città la provincia non conta');
+assert.ok(!luogoSullaPagina('<p>Un prato fiorito</p>', '', 'Prato') && luogoSullaPagina('<p>Sede: Roma, via Milano 3</p>', 'Roma', 'Roma'));
 const elencoSiti = [
   ...['Bar Sport', 'Bar Sport', 'Bar Sport', 'Bar Sport'].map((nome, i) => ({ chiave: `n/${i}`, nome, tipo: 'amenity' })),
   { chiave: 'n/10', nome: 'Hotel Uno', tipo: 'tourism' }, { chiave: 'n/11', nome: 'Officine Bianchi', tipo: 'industrial' },

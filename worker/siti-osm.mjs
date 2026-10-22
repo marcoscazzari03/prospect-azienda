@@ -6,7 +6,7 @@
 // Lavora a lotti (LIMIT attività per giro, predefinito 3000) e si ricorda le attività provate in siti-provati.tsv
 // (si riprovano dopo 180 giorni). Legge i file di scripts/vps/osm.sh dalla stessa cartella ($STATE_DIRECTORY).
 // Configurazione come worker/site-checks.mjs: SITE_CHECKS_SECRET, APP_URL, LIMIT, CONCURRENCY, DRY_RUN.
-import { appendFileSync, createReadStream, existsSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { appendFileSync, createReadStream, existsSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,20 +37,44 @@ const norm = (v) => ` ${String(v ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, ''
   .replace(/&[a-z]+;/g, ' ').replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()} `;
 const testo = (h) => String(h ?? '').replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ');
 
-// Il luogo sulla pagina: la città dell'indirizzo OSM o la provincia (anche una sola parte: «Forlì», «Monza»).
+// Il luogo sulla pagina: la città dell'indirizzo OSM; solo senza città, la provincia (anche una sola parte: «Forlì»,
+// «Monza»), tranne quelle che sono anche parole comuni. Mai dentro un indirizzo («via Roma», «corso Torino»): sono vie
+// di qualsiasi città (Code Reviewer).
+const PROVINCE_COMUNI = new Set(['prato', 'massa', 'fermo', 'latina', 'lodi', 'enna', 'terni', 'nuoro', 'imperia', 'carrara', 'trani', 'andria']);
+const VIA = new Set(['via', 'viale', 'corso', 'piazza', 'piazzale', 'largo', 'strada', 'vicolo', 'borgo', 'lungomare', 'contrada']);
 export function luogoSullaPagina(html, citta, provincia) {
   const pagina = norm(testo(html).slice(0, 300_000));
-  const luoghi = [citta, provincia, ...String(provincia || '').split(/-| e /)].map(l => norm(l).trim()).filter(l => l.length >= 4);
-  return luoghi.some(l => pagina.includes(` ${l} `));
+  const luoghi = norm(citta).trim()
+    ? [citta]
+    : [provincia, ...String(provincia || '').split(/-| e /)].filter(l => !PROVINCE_COMUNI.has(norm(l).trim()));
+  return luoghi.map(l => norm(l).trim()).filter(l => l.length >= 4).some(l => {
+    for (let i = pagina.indexOf(` ${l} `); i >= 0; i = pagina.indexOf(` ${l} `, i + 1)) {
+      const prima = pagina.slice(Math.max(0, i - 12), i).trim().split(' ').pop();
+      if (!VIA.has(prima)) return true;
+    }
+    return false;
+  });
 }
 
-// Un'attività: i domini nell'ordine del nodo 03, il primo che passa il nodo 04 e mostra il luogo.
+// Dominio di una sola parola di un nome che ne ha di più: quasi sempre la categoria («Farmacia Rossi» -> farmacia.it,
+// «Hotel Bellavista» -> hotel.com), cioè il sito di un portale o di un'altra azienda (Code Reviewer).
+export function dominioDaScartare(dominio, nome) {
+  const parole = norm(nome).trim().split(' ').filter(w => w.length >= 2);
+  const base = dominio.split('.')[0].replace(/-/g, '');
+  return parole.length >= 2 && parole.includes(base);
+}
+
+const host = (u) => { try { return new URL(u).hostname.toLowerCase().replace(/^www\./, ''); } catch { return ''; } };
+
+// Un'attività: i domini nell'ordine del nodo 03, il primo che passa il nodo 04 e mostra il luogo. La pagina deve restare
+// sullo stesso dominio: un rimando a PagineGialle, Facebook o un portale non è il sito dell'azienda (Code Reviewer).
 export async function cercaSito(regole, a, provincia, req = richiesta) {
   for (const c of regole.domini({ company_key: a.chiave, company_name: a.nome, city: a.citta || provincia })) {
+    if (dominioDaScartare(c.domain, a.nome)) continue;
     let html = '';
     try {
       const r = await req(c.url, { insicuro: true, redirect: 5, timeout: 8_000, maxBytes: 1_500_000 });
-      if (r.status >= 200 && r.status < 300) html = r.body;
+      if (r.status >= 200 && r.status < 300 && host(r.url || c.url) === c.domain) html = r.body;
     } catch { /* dominio inesistente o spento: si passa al prossimo */ }
     if (html.length >= 500 && regole.valido(c, html) && luogoSullaPagina(html, a.citta, provincia)) return c.domain;
   }
@@ -66,8 +90,10 @@ async function attivitaSenzaSito(cartella) {
   const osm = caricaOsm();
   const province = await caricaProvince(righe('confini.geojsonseq'));
   const elenco = [];
-  await leggiAttivita(righe('attivita.geojsonseq'), osm, province, { senzaSito: elenco });
-  writeFileSync(cache, JSON.stringify(elenco));
+  await leggiAttivita(righe('attivita.geojsonseq'), osm, province, { senzaSito: elenco, soloSenzaSito: true });
+  // Prima un file temporaneo: una cache troncata bloccherebbe tutti i giri fino al lunedì dopo (Code Reviewer).
+  writeFileSync(`${cache}.tmp`, JSON.stringify(elenco));
+  renameSync(`${cache}.tmp`, cache);
   return elenco;
 }
 
@@ -123,6 +149,10 @@ async function main() {
     return { a, dominio };
   });
   const fatti = esiti.filter(Boolean);
+  // Lo stesso dominio per due attività diverse non è il sito di nessuna delle due (Code Reviewer).
+  const volte = new Map();
+  for (const e of fatti) if (e.dominio) volte.set(e.dominio, (volte.get(e.dominio) || 0) + 1);
+  for (const e of fatti) if (volte.get(e.dominio) > 1) e.dominio = '';
   const trovate = fatti.filter(e => e.dominio).map(({ a, dominio }) => {
     const { provincia, regione } = nomi.get(a.sigla) || {};
     const [industry, keywords] = osm.SETTORI[a.tipo]?.[a.valore] || ['', []];

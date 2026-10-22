@@ -200,6 +200,12 @@ Come tornare indietro, in generale:
   route). `osm.sh` ora scrive i file con un altro nome e poi li rinomina, perché il worker li legge ogni ora.
 - **Prove:** `worker/test.mjs` (attività senza sito con provincia, sito trovato con nome e città, senza città serve la
   provincia, omonimo in un'altra città scartato, dominio in vendita scartato, priorità e riprova dopo 180 giorni).
+- **Revisione (Code Reviewer, «NON PRONTO», corretto):** niente domini di una sola parola per i nomi che ne hanno di più
+  (era la categoria: «Hotel Bellavista» → hotel.com, il portale con nome e città passava); la pagina deve restare sullo
+  stesso dominio dopo i rimandi (non PagineGialle o Facebook); la provincia conta solo senza città, mai dopo «via»,
+  «corso», «piazza» e mai per le province che sono parole comuni (Prato, Massa, Fermo, Latina...); lo stesso dominio per
+  due attività nello stesso giro si scarta; cache scritta con un file temporaneo; in memoria solo le attività senza sito;
+  `UV_THREADPOOL_SIZE=16` per le risoluzioni DNS.
 - **Indietro:** `sudo systemctl disable --now webora-siti.timer`; le aziende aggiunte hanno `origin = 'osm_sito'`.
 
 ## 22/10/2026 — tutta Italia da OpenStreetMap sul VPS (punto 87) · in produzione dal 22/10 (primo giro: 52.284 aziende nuove, 15.132 aggiornate; giro ogni lunedì alle 2:20 UTC); da spegnere «Aziende | Popolamento OSM» su n8n

@@ -94,6 +94,7 @@ case "${1:-}" in
 Nice=10" "Persistent=true"
     # Siti delle attività OSM senza sito (punto 88): stessa cartella dei dati del popolamento.
     unita "$SITI" "siti delle attività OSM" "/usr/bin/node worker/siti-osm.mjs" "*-*-* *:50:00" 50min 1500M "StateDirectory=webora-osm
+Environment=UV_THREADPOOL_SIZE=16
 Nice=5" ""
     sudo systemctl daemon-reload
     echo "Installato. Prossimo passo: bash $0 prova"
@@ -103,7 +104,7 @@ Nice=5" ""
   prova-osm) prova --property=StateDirectory=webora-osm --property=MemoryMax=2500M /bin/bash "$APP/scripts/vps/osm.sh" ;;
   osm) sudo systemctl start --no-block $OSM.service && echo "Partito in sottofondo. Per seguirlo: bash $0 stato-osm" ;;
   stato-osm) systemctl is-active $OSM.service || true; sudo journalctl -u $OSM.service -n 15 --no-pager ;;
-  prova-siti) prova --property=StateDirectory=webora-osm --setenv=LIMIT=300 /usr/bin/node worker/siti-osm.mjs ;;
+  prova-siti) prova --property=StateDirectory=webora-osm --setenv=LIMIT=300 --setenv=UV_THREADPOOL_SIZE=16 /usr/bin/node worker/siti-osm.mjs ;;
   giro-siti) sudo systemctl start --no-block $SITI.service && echo "Partito in sottofondo. Per seguirlo: bash $0 stato-siti" ;;
   stato-siti) systemctl is-active $SITI.service || true; sudo journalctl -u $SITI.service -n 10 --no-pager ;;
   giro) sudo systemctl start $NOME.service || echo "Giro non riuscito: ecco le ultime righe."; sudo journalctl -u $NOME.service -n 5 --no-pager ;;

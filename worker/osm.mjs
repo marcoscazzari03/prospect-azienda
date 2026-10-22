@@ -102,7 +102,7 @@ export function puntoDi(g) {
 
 // Dalle righe del GeoJSON alle attività per provincia. La provincia scritta nell'indirizzo vale più dei confini (come in
 // n8n); senza nessuna delle due l'attività è fuori Italia (San Marino, Svizzera di confine) o in mare, e si scarta.
-export async function leggiAttivita(righe, osm, province, { senzaSito = null } = {}) {
+export async function leggiAttivita(righe, osm, province, { senzaSito = null, soloSenzaSito = false } = {}) {
   const perSigla = new Map(province.map(p => [p.sigla, p]));
   const sigle = new Set(PROVINCE.map(([s]) => s));
   const gruppi = new Map();
@@ -137,6 +137,7 @@ export async function leggiAttivita(righe, osm, province, { senzaSito = null } =
       continue;
     }
     stats.con_sito++;
+    if (soloSenzaSito) continue; // la ricerca dei siti non tiene in memoria le attività che ce l'hanno
     const p = provinciaDi(t, f);
     if (!p) { stats.fuori++; continue; }
     // Stessa azienda segnata più volte nello stesso posto (area industriale, edificio e ufficio, ognuno con il sito): un
