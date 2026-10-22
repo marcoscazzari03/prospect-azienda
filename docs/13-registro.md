@@ -45,6 +45,14 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — stima realistica nel wizard (punto 40) · in corso: misura della resa
+- **Problema:** il wizard mostra le aziende «disponibili» (`target_pool` / `opportunity_pool`), ma il pool non richiede
+  un'email: una parte delle aziende non diventa un lead (nessuna email né modulo). «120 disponibili» può voler dire molti
+  meno lead consegnati.
+- **Primo passo:** `supabase/queries/resa_wizard.sql` (sola lettura): composizione delle aziende vive (con email, solo
+  modulo, provate senza contatto, mai provate), lead validi e motivi di scarto dei giri degli ultimi 30 giorni, consegne.
+  Con questi numeri si decide la resa da usare nella stima.
+
 ## 22/10/2026 — controllo siti bloccato di notte da pagine enormi (proposta 1 del resoconto) · controllo siti in produzione (pubblicato il 22/10); motore in produzione (pubblicato il 22/10)
 - **Problema:** 4 giri falliti di fila la notte del 22/10 (00:25–03:25 UTC, «Task runner unresponsive» in «Valuta siti»). La coda
   è sempre la stessa e un giro fallito non salva niente, quindi lo stesso lotto (ricontrollo della 054, Puglia) tornava ogni
