@@ -187,6 +187,20 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 22/10/2026 — backup notturno cifrato del database sul VPS (punto 90) · codice pronto; da fare: revisione, main, installazione
+- **Perché:** Supabase gratuito non ha backup scaricabili; il database ora ha circa 70.000 aziende e cresce ogni ora.
+- **Cosa:** `scripts/vps/backup.sh` (servizio `webora-backup`, ogni notte alle 1:40 UTC): `pg_dump` di PostgreSQL 17 (repository
+  ufficiale PGDG) dello schema `public` e dei dati di `auth.users` e `auth.identities`, controllo con `pg_restore --list` (si
+  ferma se meno di 10 tabelle con dati), cifratura con age per la sola chiave pubblica; la chiave privata non sta sul
+  server (la mostra una volta `installa-backup`, la tiene l'utente). Connessione in `/etc/webora/backup.env` come variabili
+  di libpq (la password non passa mai sulla riga di comando). Tenuti 7 giorni più le domeniche fino a 35 giorni.
+  `worker.sh`: `installa-backup`, `backup`, `stato-backup`; `avvia` e `ferma` comprendono il timer del backup se c'è.
+- **Prove:** in locale su `bench39` (40 tabelle, 2,8 MB cifrati), ripristino in un database vuoto con le 17.500 aziende,
+  pulizia degli archivi vecchi con date finte (tenuti gli ultimi 7 giorni e le domeniche entro 35 giorni).
+- **Limiti:** i backup stanno sullo stesso VPS (proteggono da un guasto di Supabase o da un errore, non dalla perdita del
+  VPS); un backup fallito non manda ancora avvisi (lo si vede con `stato-backup`). Copia fuori dal VPS e avvisi: dopo.
+- **Indietro:** `sudo systemctl disable --now webora-backup.timer`; `sudo rm /etc/webora/backup.env` per togliere la password.
+
 ## 22/10/2026 — annunci di lavoro anche per la manifattura (punto 89) · rivisto (Code Reviewer, Sales Copywriter), su main; in produzione dal 22/10 (nodi di «Annunci | Raccolta Adzuna» e «Lead Engine» pubblicati)
 - **Perché:** manifattura e industria sono i settori più deboli; gli annunci per operai, manutentori e magazzinieri sono
   il segnale più forte che un'azienda industriale assume, e chi seleziona personale per l'industria è un cliente possibile.

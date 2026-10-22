@@ -139,7 +139,18 @@ Il worker (`worker/site-checks.mjs`) fa il lavoro di «Aziende | Controllo siti�
 6. Siti delle attività OSM senza sito (punto 88, `worker/siti-osm.mjs`): ogni ora alle :50, 3.000 attività, domini
    indovinati dal nome e verificati sulla homepage (nome e luogo). Prima volta: `bash worker.sh prova-siti` (300 attività,
    senza salvare, con esempi da controllare), poi `bash worker.sh giro-siti` e `bash worker.sh stato-siti`.
-7. Altri comandi: `prova-contatti`, `giro`, `giro-contatti`, `stato`, `ferma`; dopo un aggiornamento del codice
+7. Backup notturno del database (punto 90, `scripts/vps/backup.sh`), finché non c'è Supabase Pro: ogni notte alle 1:40 UTC
+   `pg_dump` dello schema `public` e dei dati di `auth.users`/`auth.identities`, controllati con `pg_restore --list` e cifrati
+   con age in `/var/lib/webora-backup` (ultimi 7 giorni più le domeniche fino a 35 giorni). Sul server c'è solo la chiave
+   pubblica: la privata (`AGE-SECRET-KEY-…`) la mostra una volta `bash worker.sh installa-backup` e va tenuta in un gestore di
+   password. Connessione: stringa «Session pooler» di Supabase (Connect), con la password del database, in
+   `/etc/webora/backup.env` (root:worker 640). Comandi: `installa-backup`, `backup`, `stato-backup`; `avvia` accende anche il
+   timer del backup. **Ripristino** sul proprio computer: scaricare l'archivio
+   (`scp worker@2.31.7.149:/var/lib/webora-backup/db-AAAA-MM-GG.public.dump.age .`, serve `sudo` sul server per leggerlo
+   oppure copiarlo prima in /tmp), poi `age -d -i chiave.txt -o public.dump db-AAAA-MM-GG.public.dump.age` e
+   `pg_restore --no-owner --no-privileges -d "<stringa del nuovo progetto Supabase>" public.dump` (idem per `auth`, con
+   `--data-only`). Provato il 22/10 su un database locale: 17.500 aziende ripristinate.
+8. Altri comandi: `prova-contatti`, `giro`, `giro-contatti`, `stato`, `ferma`; dopo un aggiornamento del codice
    `bash worker.sh installa` (scarica da main, installa osmium se manca e riscrive i servizi; il segreto resta).
 
 ## Sviluppo locale
