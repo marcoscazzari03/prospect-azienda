@@ -48,7 +48,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — rotazione dei segreti del motore (punto 17) · A verificato; B in attesa della ricerca di prova; `vercel.json` da pubblicare su main
+## 22/10/2026 — rotazione dei segreti del motore (punto 17) · completata il 22/10 (A e B verificati, `vercel.json` online con `5e44953`)
 - **Cosa:** l'utente ha cambiato `ENGINE_CALLBACK_SECRET` (n8n → app, credenziale n8n «Lead Engine - Callback verso
   backend», usata da tutti i workflow) e `N8N_ENGINE_HEADER_VALUE` (app → n8n, credenziale «Lead Engine - Webhook in
   ingresso») su Vercel e in n8n. Valori generati nel browser (`crypto.randomUUID()`), mai in chat né nel repository.
@@ -64,6 +64,10 @@ Come tornare indietro, in generale:
   logica (provato: stesso commit → pubblica, solo documenti → salta, codice → pubblica, vuoto o inesistente → pubblica).
 - **Da ricordare:** dopo aver cambiato una variabile su Vercel serve una pubblicazione nuova; finché questa correzione non è
   online, il Redeploy dal pannello va fatto con «Redeploy» senza cache o con un push su main.
+- **Segreto B:** il primo valore non coincideva (ricerca di prova mai arrivata a n8n: l'app risponde «Il motore di ricerca non
+  ha risposto» e restituisce i crediti); su Vercel le variabili «Sensitive» non si possono rileggere, quindi l'utente ha messo
+  un valore nuovo su entrambi i lati e il deploy `5e44953` l'ha letto. Verifica: ricerca di prova in target arrivata al
+  motore (esecuzioni 3995 e 3996 riuscite). Una prima ricerca da 1 lead era stata servita dal magazzino senza il motore.
 - **Indietro:** rimettere i valori precedenti su entrambi i lati (o due valori nuovi uguali sui due lati); per `vercel.json`
   togliere la condizione `[ "$P" != "$(git rev-parse HEAD)" ]`.
 

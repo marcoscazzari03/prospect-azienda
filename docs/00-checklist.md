@@ -79,7 +79,7 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 15. **Tu, poi Insieme, alla messa in produzione definitiva** – Supabase Pro (backup giornalieri) e prova di ripristino
     (rinviato il 21/10 sera, decisione dell'utente).
 16. **Tu** – Repository GitHub privato.
-17. **Insieme** – Rotazione del segreto del motore.
+17. ~~**Insieme** – Rotazione del segreto del motore~~ (22/10: i due segreti, n8n → app e app → n8n, cambiati e verificati).
 18. **Tu** – Avvisi di spesa su Anthropic, Vercel, Supabase.
 19. ~~**Insieme** – Pulizia dei dati di collaudo, compreso l'account di prova delle email~~ (22/10: cancellati gli account di
     prova «Scazza» e «Prova»; «Webora» tenuta con lo storico dei collaudi).
