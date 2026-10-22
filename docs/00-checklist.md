@@ -59,8 +59,7 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
     attivazione~~ (21/10)
 78. ~~**Io** – Menu del sito che non sborda sui telefoni stretti (320px)~~ (21/10)
 81. ~~**Io** – Ricerca delle email più veloce (blocchi notturni di «Valuta siti») e province OSM divise in 7 richieste~~ (22/10:
-    controllo siti e OSM pubblicati; motore caricato in n8n).
-    **Tu:** pubblicare il motore «Lead Engine | Search (v1)» (nodi «Estrai email homepage» e «pagina 2/3/4»).
+    controllo siti, OSM e motore pubblicati).
 
 ## 🟠 Decisione della beta
 9. **Insieme, il 30/10** – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive, esporta almeno la metà
