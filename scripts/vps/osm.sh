@@ -18,7 +18,15 @@ else
   if [ "$LIBERI" -lt 6000000 ]; then echo "Spazio insufficiente: $((LIBERI / 1024)) MB liberi"; exit 1; fi
   trap 'rm -f $PBF.nuovo' EXIT
   curl -fsS --retry 3 -o $PBF.nuovo "$URL"
-  sed "s/$PBF/$PBF.nuovo/" $PBF.md5 | md5sum -c --status || { echo "md5 diverso: file scaricato male"; rm -f $PBF.nuovo; exit 1; }
+  # Impronta attesa riletta dopo lo scaricamento: se Geofabrik ha pubblicato il file del giorno nel frattempo, vale la
+  # nuova (22/10: primo tentativo fermato qui).
+  ATTESO=$(curl -fsS "$URL.md5" | cut -d' ' -f1)
+  VERO=$(md5sum $PBF.nuovo | cut -d' ' -f1)
+  if [ "$ATTESO" != "$VERO" ]; then
+    echo "md5 diverso: file scaricato male ($(du -h $PBF.nuovo | cut -f1), atteso $ATTESO, trovato $VERO)"
+    exit 1
+  fi
+  echo "$ATTESO  $PBF" > $PBF.md5
   mv $PBF.nuovo $PBF
 fi
 echo "Italia: $(du -h $PBF | cut -f1)"
