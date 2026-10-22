@@ -312,6 +312,11 @@ assert.equal(vuota._scarto_segnale, 'annuncio_pagina_non_leggibile');
 const [jobAny] = run(src('01-valida-richiesta.js'), { input: [{ body: bodyAnnunci('it_systems', { codes: ['job_ad', 'no_mobile'], match: 'any' }) }] }).map(i => i.json);
 const nonObblig = run(verifica, { nodes: { 'Valida richiesta': [jobAny], 'Serve verifica annuncio?': [prospetto({})] }, json: { html: '' } }).json;
 assert.equal(nonObblig._scarto_segnale, undefined, 'con "basta uno" decide anche il sito');
+// «Programmatore CNC» non vale per chi cerca sviluppatori (punto 89, Code Reviewer).
+const [jobSw] = run(src('01-valida-richiesta.js'), { input: [{ body: bodyAnnunci('software_dev') }] }).map(i => i.json);
+const cncHtml = readFileSync(join(fx, 'job-ad-jsonld.html'), 'utf8').split('Sistemista IT junior').join('Programmatore CNC');
+const cnc = run(verifica, { nodes: { 'Valida richiesta': [jobSw], 'Serve verifica annuncio?': [prospetto({})] }, json: { html: cncHtml } }).json;
+assert.notEqual(cnc.signals.at(-1).status, 'pass', 'programmatore CNC non è uno sviluppatore');
 console.log('ok  verifica annunci: JSON-LD, agenzie, scaduti, senza data, fuori famiglia, Lavora con noi');
 
 const conSegnale = run(verifica, { nodes: { 'Valida richiesta': [jobA], 'Serve verifica annuncio?': [prospetto({})] }, json: { html: readFileSync(join(fx, 'job-ad-jsonld.html'), 'utf8') } }).json;

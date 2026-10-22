@@ -22,7 +22,14 @@ const giorno = (d) => { const m = String(d ?? '').match(/(\d{4})-(\d{2})-(\d{2})
 const giorniFa = (d) => Math.floor((Date.parse(job.today) - Date.parse(d)) / 86400000);
 
 const titoli = sg.job_families.flatMap(f => f.titles.map(t => ({ fam: f.code, t: norm(t) })));
-const famigliaDi = (titolo) => { const n = norm(titolo); return titoli.find(x => n.includes(x.t))?.fam || ''; };
+// Mestieri di officina (CNC, CAD, PLC, saldatore): valgono solo per le figure della manifattura, mai per programmatori,
+// grafici o sistemisti («Programmatore CNC» non è uno sviluppatore; 22/10, punto 89). Stessa regola della raccolta Adzuna.
+const OFFICINA = /\b(cnc|cad|cam|plc|fresatore|tornitore|saldatore|macchine utensili|centri di lavoro)\b/;
+const MANIFATTURA = new Set(['production', 'maintenance', 'logistics']);
+const famigliaDi = (titolo) => {
+  const n = norm(titolo);
+  return titoli.find(x => n.includes(x.t) && (!OFFICINA.test(n) || MANIFATTURA.has(x.fam)))?.fam || '';
+};
 
 // Agenzie per il lavoro: se l'annuncio non è sul sito dell'azienda, non sappiamo chi assume davvero.
 const AGENZIE = /\b(randstad|adecco|manpower|gi group|synergie|openjobmetis|etjca|umana|lavoropiu|orienta|kelly services|hays|michael page|page personnel|robert half|spring professional|start people|quanta|eurointerim|ali spa|osm partners|indeed|jobrapido|infojobs|monster|stepstone)\b/;

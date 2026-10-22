@@ -203,8 +203,9 @@ Come tornare indietro, in generale:
   manifattura (prima «Tecnico commerciale CNC» o «Help desk CAD» finivano in «produzione»: lead pagati con la figura
   sbagliata); niente «operaio» da solo (edili e agricoli, e 5 pagine di Adzuna piene): cercati «operaio produzione»,
   «operaio metalmeccanico», «operaio specializzato»; operai edili, agricoli, comunali, delle pulizie esclusi dalla
-  manifattura; «programmatore cad/cam» tra i titoli della produzione. 88 ricerche ogni 2 giorni. Resta (c'era già): il
-  motore, se il cliente sceglie «Sviluppo software», accetta un annuncio «Programmatore CNC» (`09-verifica-annuncio.js`).
+  manifattura; «programmatore cad/cam» tra i titoli della produzione. 88 ricerche ogni 2 giorni. Corretto anche il difetto
+  che c'era già nel motore (`09-verifica-annuncio.js`): un annuncio «Programmatore CNC» valeva per «Sviluppo software»; ora i
+  mestieri di officina valgono solo per le figure della manifattura (nodo da caricare in «Lead Engine»).
 - **Da guardare:** chiamate Adzuna nel riquadro dell'Admin dopo 2–3 giri (limite 2.500 al mese, 250 al giorno; caso
   peggiore circa 165 chiamate a giro). **Non avviare a mano** «Annunci | Raccolta Adzuna»: l'avvio a mano va indietro di
   30 giorni e con 88 ricerche supererebbe le 250 chiamate del giorno.
