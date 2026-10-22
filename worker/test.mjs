@@ -193,6 +193,9 @@ const righe = [
   attivita(12, punto(10.95, 44.55), { industrial: 'factory', name: 'Ceramiche Sole', website: 'https://ceramichesole.it' }),
   attivita(13, punto(10.951, 44.551), { man_made: 'works', name: 'Ceramiche Sole', website: 'http://www.ceramichesole.it/' }),
   attivita(14, punto(10.952, 44.5505), { office: 'company', name: 'Ceramiche Sole spa', website: 'ceramichesole.it' }),
+  // Ufficio senza nome e poi l'area con il nome, stesso sito: l'azienda resta (QA).
+  attivita(16, punto(10.85, 44.45), { office: 'company', website: 'https://acme.it' }),
+  attivita(17, punto(10.851, 44.451), { industrial: 'factory', name: 'Acme Srl', website: 'https://acme.it' }),
   // Ristorante in una torre: resta un ristorante.
   attivita(15, punto(10.9, 44.6), { man_made: 'tower', amenity: 'restaurant', name: 'Ristorante La Torre', website: 'https://latorre.it' }),
   '{rotta',
@@ -203,6 +206,7 @@ assert.deepEqual([...letto.gruppi.keys()].sort(), ['BO', 'MO', 'PR'], 'provincia
 assert.deepEqual([letto.stats.fuori, letto.stats.senza_sito_con_nome, letto.stats.illeggibili, letto.stats.stesso_posto], [2, 1, 1, 2], 'fuori (anche nel buco), senza sito, riga rotta, stesso posto');
 const [blocco] = normalizza(osm, letto.gruppi);
 assert.deepEqual(blocco.companies.map(c => [c.domain, c.province, c.region, c.industry]).sort(), [
+  ['acme.it', 'Modena', 'Emilia-Romagna', 'Produzione industriale'],
   ['ceramichesole.it', 'Modena', 'Emilia-Romagna', 'Produzione industriale'],
   ['falegname.it', 'Parma', 'Emilia-Romagna', 'Falegnameria'],
   ['fonderia.it', 'Modena', 'Emilia-Romagna', 'Produzione industriale'],

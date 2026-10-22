@@ -131,7 +131,9 @@ export async function leggiAttivita(righe, osm, province) {
     // Stessa azienda segnata più volte nello stesso posto (area industriale, edificio e ufficio, ognuno con il sito): un
     // solo punto, altrimenti tre oggetti sembrerebbero una catena (Code Reviewer). Entro circa 500 m.
     const dom = String(t.website || t['contact:website']).trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\d?\./, '').split(/[/?#:\s;]/)[0];
-    const qui = puntoDi(f.geometry);
+    // Contano solo gli oggetti che il nodo può tenere (con nome, senza scheda Wikidata): un ufficio senza nome non deve
+    // far scartare l'area con il nome vero (QA).
+    const qui = (t.name || t['name:it'] || t.operator) && !t['brand:wikidata'] && !t['operator:wikidata'] ? puntoDi(f.geometry) : null;
     if (qui) {
       const visti = posti.get(dom) || [];
       if (visti.some(([x, y]) => Math.abs(x - qui[0]) < 0.006 && Math.abs(y - qui[1]) < 0.0045)) { stats.stesso_posto++; continue; }
