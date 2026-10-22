@@ -48,7 +48,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — pulizia dei dati di collaudo (punto 19) · script pronto e rivisto, da eseguire
+## 22/10/2026 — pulizia dei dati di collaudo (punto 19) · eseguita il 22/10 (resta solo «Webora», 1 utente)
 - **Inventario** (`supabase/queries/inventario_collaudo.sql`, sola lettura): 3 organizzazioni, tutte dell'utente. «Webora»
   (admin, 44 ricerche e 195 lead di collaudo), «Scazza» e «Prova» (nessuna ricerca, solo i crediti di benvenuto).
 - **Decisione dell'utente:** cancellare «Scazza» e «Prova» con i loro utenti; tenere «Webora» (storico dei collaudi: costi,
