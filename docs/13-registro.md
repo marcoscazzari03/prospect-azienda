@@ -52,6 +52,9 @@ Come tornare indietro, in generale:
   attuale 1,07 s, 060 0,94 s. Gran parte del tempo è la compilazione JIT di Postgres (0,7 s): senza JIT 0,59 s e 0,33 s.
   Il fallimento della 060 in produzione (oltre 8 s) non si riproduce: serve il piano reale
   (`supabase/queries/misura_039_piano.sql`, esegue la 060 come semplice lettura).
+- **Il piano reale non si ottiene:** in produzione la 060 supera il minuto dell'editor SQL (timeout), quindi i dati veri
+  hanno una forma diversa dal banco. Prossima misura: `supabase/queries/misura_039_forma.sql` (zone e parole chiave delle
+  ricerche, etichette e luoghi delle aziende, aziende da ricontrollare della 054, JIT), senza eseguire la 060.
 
 ## 22/10/2026 — stima realistica nel wizard (punto 40) · migrazione 063 eseguita il 22/10; app pubblicata su main il 22/10
 - **Problema:** il wizard mostra le aziende «disponibili» (`target_pool` / `opportunity_pool`), ma il pool non richiede
