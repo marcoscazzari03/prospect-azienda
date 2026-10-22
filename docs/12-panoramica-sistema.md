@@ -31,7 +31,7 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
 | Sito e app | Next.js 16 su Vercel | server a Francoforte (fra1) |
 | Database e accesso | Supabase (Postgres) | Francoforte; regole di accesso per riga (RLS); verifica in due passaggi per gli utenti |
 | Motore e lavori automatici | n8n Cloud | 7 workflow di Webora (sezione 7) |
-| Intelligenza artificiale | Anthropic Claude | Sonnet per la ricerca, Haiku per settore e siti; spazio di lavoro dedicato con limite di spesa |
+| Intelligenza artificiale | Anthropic Claude | Sonnet per la ricerca, Haiku per settore e siti (Haiku 5.5: 0,10 $ / 0,50 $ per milione di token, prezzi nel registro del 22/10); spazio di lavoro dedicato con limite di spesa |
 | Pagamenti | Stripe | in modalità di prova: finché la chiave non è live, acquisti e portale solo per gli admin; i crediti della beta li aggiunge l'admin |
 | Email del servizio | Resend | modelli con la grafica Webora |
 | Captcha | Cloudflare Turnstile | registrazione, accesso, recupero password |
