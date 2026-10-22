@@ -55,6 +55,11 @@ Come tornare indietro, in generale:
 - **Il piano reale non si ottiene:** in produzione la 060 supera il minuto dell'editor SQL (timeout), quindi i dati veri
   hanno una forma diversa dal banco. Prossima misura: `supabase/queries/misura_039_forma.sql` (zone e parole chiave delle
   ricerche, etichette e luoghi delle aziende, aziende da ricontrollare della 054, JIT), senza eseguire la 060.
+- **Forma dei dati (22/10):** uguale al banco (zone 0,9 per ricerca, parole chiave 0,1, etichette 4,5, luoghi 2,8; 7.948
+  aziende da ricontrollare della 054; JIT spento). Causa probabile: nella 060 l'elenco di zone e settori era una sottoquery
+  che il piano può ricalcolare per ogni azienda in coda (sul banco la memorizzava). Nuova versione (064, non ancora
+  migrazione): zone e settori calcolati una volta sola e passati come parametro. Banco, JIT spento: coda attuale 0,55 s,
+  064 0,63 s. Prova in produzione come semplice lettura: `supabase/queries/misura_039_v2.sql`.
 
 ## 22/10/2026 — stima realistica nel wizard (punto 40) · migrazione 063 eseguita il 22/10; app pubblicata su main il 22/10
 - **Problema:** il wizard mostra le aziende «disponibili» (`target_pool` / `opportunity_pool`), ma il pool non richiede
