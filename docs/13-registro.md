@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — province che vanno in timeout su Overpass (proposta 2 del resoconto) · in attesa di caricamento su n8n
+## 22/10/2026 — province che vanno in timeout su Overpass (proposta 2 del resoconto) · caricato su n8n il 22/10 (verificato identico), da pubblicare
 - **Problema:** notte del 22/10, timeout di Overpass su Brescia, Milano, Venezia, Verona, Vicenza e Bologna (zona della beta),
   anche se le grandi erano già divise in 3 richieste.
 - **Cosa:** `n8n/annunci/nodes/10-prepara-osm.js`: le province `ENORMI` (MI, RM, NA, TO, BS, BO, VE, VR, VI) con una richiesta
