@@ -45,6 +45,16 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — province che vanno in timeout su Overpass (proposta 2 del resoconto) · in attesa di caricamento su n8n
+- **Problema:** notte del 22/10, timeout di Overpass su Brescia, Milano, Venezia, Verona, Vicenza e Bologna (zona della beta),
+  anche se le grandi erano già divise in 3 richieste.
+- **Cosa:** `n8n/annunci/nodes/10-prepara-osm.js`: le province `ENORMI` (MI, RM, NA, TO, BS, BO, VE, VR, VI) con una richiesta
+  per tipo di attività (7, più leggere); Vicenza tra le grandi. `11-normalizza-osm.js`: le attività ripetute in più
+  richieste (es. forno-bar: shop e amenity) contate una volta sola, altrimenti sembravano catene (Code Reviewer).
+  Test in `n8n/annunci/test/run.mjs`; reso indipendente dalla data un test che dal 22/10 falliva per le notti di recupero.
+- **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
+- **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
+
 ## 21/10/2026 — VPS Hetzner: prima configurazione (punto 49, preparazione) · script pronto, da eseguire sul server
 - **Cosa:** `scripts/vps/setup.sh`: aggiornamenti (anche automatici), firewall con la sola porta SSH, fail2ban, utente
   `worker` con la chiave SSH di root, SSH solo con chiave e senza root, Node.js 22 e git. Nessun segreto nello script.

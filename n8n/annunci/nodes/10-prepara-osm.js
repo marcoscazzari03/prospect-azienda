@@ -45,11 +45,15 @@ const scelte = programmato
 const TIPI = ['office', 'craft', 'shop', 'amenity', 'tourism', 'healthcare', 'industrial'];
 // Province grandi o già fallite: la query intera va in timeout (Napoli e Bari, 16/10), quindi
 // si divide in 3 parti più leggere per tipo di attività.
-const GRANDI = ['RM', 'MI', 'NA', 'TO', 'BA', 'PA', 'CT', 'FI', 'BO', 'GE', 'VE', 'VR', 'PD', 'BS', 'BG', 'SA', 'MB', 'VA'];
+const GRANDI = ['RM', 'MI', 'NA', 'TO', 'BA', 'PA', 'CT', 'FI', 'BO', 'GE', 'VE', 'VR', 'VI', 'PD', 'BS', 'BG', 'SA', 'MB', 'VA'];
 const PARTI = [['office', 'craft', 'industrial', 'healthcare'], ['shop'], ['amenity', 'tourism']];
+// Province che vanno in timeout anche divise in 3 (notte del 22/10: Brescia, Milano, Bologna, Venezia, Verona, Vicenza):
+// una richiesta per ogni tipo di attività, sette in tutto, più leggere.
+const ENORMI = ['MI', 'RM', 'NA', 'TO', 'BS', 'BO', 'VE', 'VR', 'VI'];
+const PARTI_PICCOLE = TIPI.map(t => [t]);
 const query = (sigla, tipi) => `[out:json][timeout:250];area["ISO3166-2"="IT-${sigla}"]->.a;(${tipi.map(t => `nwr(area.a)["website"]["${t}"];nwr(area.a)["contact:website"]["${t}"];`).join('')});out tags;`;
 return scelte.flatMap(([sigla, provincia, regione]) => {
   const base = { sigla, provincia, regione, url: SERVER, riprova: riprova.includes(sigla) };
-  const dividi = base.riprova || GRANDI.includes(sigla);
-  return (dividi ? PARTI : [TIPI]).map((tipi, k) => ({ json: { ...base, parte: dividi ? `${k + 1}/${PARTI.length}` : '', data: query(sigla, tipi) } }));
+  const parti = ENORMI.includes(sigla) ? PARTI_PICCOLE : base.riprova || GRANDI.includes(sigla) ? PARTI : [TIPI];
+  return parti.map((tipi, k) => ({ json: { ...base, parte: parti.length > 1 ? `${k + 1}/${parti.length}` : '', data: query(sigla, tipi) } }));
 });

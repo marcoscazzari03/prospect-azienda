@@ -92,6 +92,7 @@ const pulisci = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0,
 const trovate = [];
 const stats = { provinces: [...new Set(richieste.map(r => r.provincia))], elements: 0, no_name: 0, excluded_category: 0, not_company_site: 0, foreign: 0, chains: 0, duplicates: 0, saved: 0, unmapped: 0, errors: 0, failed_provinces: [], retried: [...new Set(richieste.filter(r => r.riprova).map(r => r.provincia))] };
 const fallite = [];
+const elementiVisti = new Set();
 const TIPI = ['office', 'craft', 'industrial', 'healthcare', 'tourism', 'shop', 'amenity'];
 // Sigla della provincia scritta nell'indirizzo (addr:province = «BO»): se c'è, vale quella.
 const PROVINCE = Object.fromEntries((__PROVINCE__).map(([sigla, nome, regione]) => [sigla, [nome, regione]]));
@@ -102,6 +103,11 @@ $input.all().forEach((item, i) => {
   // Risposta interrotta dal server (timeout a metà): si salva quello che c'è e si riprova.
   if (/runtime error|timed? ?out|too busy/i.test(String(item.json?.remark ?? ''))) { stats.errors++; stats.failed_provinces.push(provincia); fallite.push(sigla); }
   for (const el of elementi) {
+    // Con più richieste per provincia (una per tipo, 22/10) un'attività con più tipi (forno-bar: shop e amenity) torna più
+    // volte: contata una sola, altrimenti sembrerebbe una catena (Code Reviewer).
+    const chiaveEl = `${el.type}/${el.id}`;
+    if (el.id !== undefined && elementiVisti.has(chiaveEl)) continue;
+    elementiVisti.add(chiaveEl);
     stats.elements++;
     const t = el.tags || {};
     // Tipo di attività: il primo tra quelli noti (un ufficio dentro un negozio è un ufficio).
