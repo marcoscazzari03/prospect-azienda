@@ -206,6 +206,9 @@ Come tornare indietro, in generale:
   «corso», «piazza» e mai per le province che sono parole comuni (Prato, Massa, Fermo, Latina...); lo stesso dominio per
   due attività nello stesso giro si scarta; cache scritta con un file temporaneo; in memoria solo le attività senza sito;
   `UV_THREADPOOL_SIZE=16` per le risoluzioni DNS.
+- **Prova sul VPS (22/10, senza salvare):** 355.179 attività senza sito in elenco; 300 provate in 92 s, **32 siti trovati
+  (11%)**: studi, agenzie immobiliari, assicurazioni, informatica. Controllati a mano 8 esempi: 6 giusti (titolo con il
+  nome), 2 non apribili da qui (protezione anti-bot), nessuno sbagliato.
 - **Indietro:** `sudo systemctl disable --now webora-siti.timer`; le aziende aggiunte hanno `origin = 'osm_sito'`.
 
 ## 22/10/2026 — tutta Italia da OpenStreetMap sul VPS (punto 87) · in produzione dal 22/10 (primo giro: 52.284 aziende nuove, 15.132 aggiornate; giro ogni lunedì alle 2:20 UTC); da spegnere «Aziende | Popolamento OSM» su n8n
