@@ -211,7 +211,7 @@ Come tornare indietro, in generale:
   30 giorni e con 88 ricerche supererebbe le 250 chiamate del giorno.
 - **Indietro:** togliere le tre figure e il servizio, ricaricare i nodi 01 e 02 di «Annunci | Raccolta Adzuna».
 
-## 22/10/2026 — sito delle attività OSM che non ce l'hanno (punto 88) · codice pronto; da fare: revisione, main, prova sul VPS
+## 22/10/2026 — sito delle attività OSM che non ce l'hanno (punto 88) · in produzione dal 22/10 (VPS, ogni ora alle :50)
 - **Perché:** il popolamento OSM ha trovato 397.605 attività con un nome ma senza sito: senza dominio non entrano nel
   database. Solo la parte gratuita (domini indovinati); la ricerca web con Haiku per i casi difficili, con un tetto di spesa,
   è una decisione a parte.
@@ -233,6 +233,8 @@ Come tornare indietro, in generale:
 - **Prova sul VPS (22/10, senza salvare):** 355.179 attività senza sito in elenco; 300 provate in 92 s, **32 siti trovati
   (11%)**: studi, agenzie immobiliari, assicurazioni, informatica. Controllati a mano 8 esempi: 6 giusti (titolo con il
   nome), 2 non apribili da qui (protezione anti-bot), nessuno sbagliato.
+- **Primo giro vero (22/10, 16:12–16:18 UTC):** 3.000 attività in 366 s, **257 siti trovati (8,6%)**: 241 aziende nuove, 16
+  già presenti. Giro ogni ora alle :50: circa 5 giorni per tutte le 355.000, stima 25–30.000 aziende nuove.
 - **Indietro:** `sudo systemctl disable --now webora-siti.timer`; le aziende aggiunte hanno `origin = 'osm_sito'`.
 
 ## 22/10/2026 — tutta Italia da OpenStreetMap sul VPS (punto 87) · in produzione dal 22/10 (primo giro: 52.284 aziende nuove, 15.132 aggiornate; giro ogni lunedì alle 2:20 UTC); da spegnere «Aziende | Popolamento OSM» su n8n
