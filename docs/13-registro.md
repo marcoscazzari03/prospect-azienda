@@ -48,7 +48,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — pulizia dei dati di collaudo (punto 19) · script pronto, da eseguire
+## 22/10/2026 — pulizia dei dati di collaudo (punto 19) · script pronto e rivisto, da eseguire
 - **Inventario** (`supabase/queries/inventario_collaudo.sql`, sola lettura): 3 organizzazioni, tutte dell'utente. «Webora»
   (admin, 44 ricerche e 195 lead di collaudo), «Scazza» e «Prova» (nessuna ricerca, solo i crediti di benvenuto).
 - **Decisione dell'utente:** cancellare «Scazza» e «Prova» con i loro utenti; tenere «Webora» (storico dei collaudi: costi,
@@ -58,6 +58,9 @@ Come tornare indietro, in generale:
   ricerche, lead, segnalazioni, acquisti o avvisi, o se nome e piano non corrispondono; cancella un utente solo se non è
   admin e non è in altre organizzazioni. Aziende, controlli, prove dei segnali e annunci restano. Provato su un database di
   prova (blocco con una ricerca, pulizia, seconda esecuzione bloccata, admin membro di «Prova» non cancellato).
+- **Revisione:** Code Reviewer PRONTO, QA FUNZIONA. Aggiunti i controlli su pagamenti, abbonamenti, cliente Stripe, ticket,
+  esportazioni e liste, e il blocco delle due righe tra controllo e cancellazione. QA: acquisto, segnalazione, avviso, nome
+  diverso, piano diverso, già cancellata → si ferma; utente anche in Webora → resta; crediti di Webora e aziende invariati.
 - **Indietro:** non si torna indietro se non dal backup; gli account si possono ricreare con una nuova registrazione.
 
 ## 22/10/2026 — disponibilità come la riserva, prova del certificato, filtro porte nel motore · in produzione (migrazione 065 eseguita e workflow pubblicati il 22/10)
