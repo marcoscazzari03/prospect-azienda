@@ -82,6 +82,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 17. **Insieme** – Rotazione del segreto del motore.
 18. **Tu** – Avvisi di spesa su Anthropic, Vercel, Supabase.
 19. **Insieme** – Pulizia dei dati di collaudo, compreso l'account di prova delle email.
+    Primo passo (22/10): **Tu** esegui `supabase/queries/inventario_collaudo.sql` (sola lettura) e indichi le organizzazioni
+    di collaudo; **Io** preparo lo script di pulizia solo per quelle (aziende, controlli e prove dei segnali restano).
 29. **Tu, con il legale** – Contratto sul trattamento dei dati (DPA) pronto da firmare per i clienti.
 5f. **Insieme, dopo la beta** – Nuovo listino (proposta nel registro, 20/10 sera): pacchetti 59/249/790 €, Scale tolto,
     20 crediti di benvenuto, lead con solo modulo a 1 credito, niente supplemento AI; abbonamenti a pagamento con l'avviso
