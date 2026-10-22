@@ -301,7 +301,9 @@ export function SearchWizard({
   const howMany = (n: number) => (n > 500 ? "oltre 500" : String(n));
   // Lead attesi dalle aziende del database (punto 40): non tutte hanno un'email o un modulo di contatto pubblico.
   // Durante il ricalcolo (circa un secondo) resta la stima di prima: i crediti non saltano al valore pieno e ritorno.
-  const recent = available ?? (checking ? availability?.value ?? null : null);
+  // Solo per la stessa ricerca (stesso tipo e servizio): passando ad altro si aspetta il conteggio nuovo.
+  const sameSearch = availability?.key.startsWith(`${kind}|${chosenCode}|`);
+  const recent = available ?? (checking && sameSearch ? availability?.value ?? null : null);
   const expected = recent?.contacts && recent.count > 0 ? expectedLeads(recent.contacts, withForm, leads) : null;
   const expectedLabel = expected ? (expected.min === expected.max ? String(expected.max) : `${expected.min}–${expected.max}`) : "";
   const fewer = Boolean(expected && expected.max < leads);
@@ -813,7 +815,7 @@ export function SearchWizard({
                         : noContact
                           ? `Per ora ${available.count === 1 ? "l'unica azienda con un annuncio recente non ha" : `nessuna delle ${howMany(available.count)} aziende con un annuncio recente ha`} un contatto aziendale pubblico (${withForm ? "email o modulo" : "email"}): prova ad allargare la zona o a scegliere tutti i settori.`
                         : expected
-                          ? <>Lead attesi: circa <strong className="font-mono">{expectedLabel}</strong>. {available.count === 1 ? "L'unica azienda con un annuncio recente potrebbe non avere" : `Delle ${howMany(available.count)} aziende con un annuncio recente, non tutte avranno`} un contatto aziendale pubblico ({withForm ? "email o modulo" : "email"}).{fewer && ` Ne chiedi ${leads}: la ricerca si fermerà prima e i crediti non usati tornano disponibili.`}</>
+                          ? <>Lead attesi: circa <strong className="font-mono">{expectedLabel}</strong>.{available.contacts?.toTry !== 0 && ` ${available.count === 1 ? "L'unica azienda con un annuncio recente potrebbe non avere" : `Delle ${howMany(available.count)} aziende con un annuncio recente, non tutte avranno`} un contatto aziendale pubblico (${withForm ? "email o modulo" : "email"}).`}{fewer && ` Ne chiedi ${leads}: la ricerca si fermerà prima e i crediti non usati tornano disponibili.`}</>
                           : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < leads && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
                       : available.count > 0
                         ? expected?.max === 0
