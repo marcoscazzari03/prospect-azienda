@@ -145,6 +145,10 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 ## 🟢 Per tutti i mestieri che vendono alle aziende (idea del 22/10, da valutare)
 Solo B2B; ricerca generalista, opportunità solo con prova. Prima di promettere «qualsiasi settore»: misurare settori e zone
 ben coperti dal database.
+Pareri del 22/10: copywriter (sì, ma dopo il 25/10 insieme ad Avvisto, senza promettere segnali a chi non li ha), designer
+(domanda in dashboard alla prima visita, saltabile; 3 schede che aprono il wizard compilato), analista (dopo il 30/10 per non
+confondere i numeri della beta; costo Haiku circa 0,03 centesimi per utente). **Tu:** eseguire
+`supabase/queries/copertura_settori.sql` (sola lettura) per sapere quali settori e regioni il database copre bene.
 83. **Insieme** – Posizionamento «Trova i tuoi prossimi clienti», con esempi di mestieri diversi (falegname, impresa di
     pulizie, fotografo, commercialista, consulente IT). Da fare insieme al passaggio ad Avvisto (punti 66–67).
 84. **Io** – «Di cosa si occupa la tua attività?» al primo accesso (non nella registrazione), modificabile nel profilo.
