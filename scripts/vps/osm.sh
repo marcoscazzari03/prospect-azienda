@@ -9,7 +9,7 @@ APP=${APP_DIR:-/opt/webora/app}
 URL=https://download.geofabrik.de/europe/italy-latest.osm.pbf
 PBF=italy-latest.osm.pbf
 
-curl -fsS -o $PBF.md5 "$URL.md5"
+curl -fsSL -o $PBF.md5 "$URL.md5"
 if [ -s $PBF ] && md5sum -c --status $PBF.md5; then
   echo "File Geofabrik già aggiornato."
 else
@@ -17,10 +17,11 @@ else
   LIBERI=$(df --output=avail -k . | tail -1)
   if [ "$LIBERI" -lt 6000000 ]; then echo "Spazio insufficiente: $((LIBERI / 1024)) MB liberi"; exit 1; fi
   trap 'rm -f $PBF.nuovo' EXIT
-  curl -fsS --retry 3 -o $PBF.nuovo "$URL"
+  # -L: Geofabrik rimanda il file «latest» a quello del giorno (22/10: senza, si salvava la pagina del rimando, 4 KB).
+  curl -fsSL --retry 3 -o $PBF.nuovo "$URL"
   # Impronta attesa riletta dopo lo scaricamento: se Geofabrik ha pubblicato il file del giorno nel frattempo, vale la
   # nuova (22/10: primo tentativo fermato qui).
-  ATTESO=$(curl -fsS "$URL.md5" | cut -d' ' -f1)
+  ATTESO=$(curl -fsSL "$URL.md5" | cut -d' ' -f1)
   VERO=$(md5sum $PBF.nuovo | cut -d' ' -f1)
   if [ "$ATTESO" != "$VERO" ]; then
     echo "md5 diverso: file scaricato male ($(du -h $PBF.nuovo | cut -f1), atteso $ATTESO, trovato $VERO)"
