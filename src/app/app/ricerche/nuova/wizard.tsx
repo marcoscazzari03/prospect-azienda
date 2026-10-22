@@ -292,11 +292,14 @@ export function SearchWizard({
   }, [wantsAvailability, availabilityKey]);
   const available = wantsAvailability && availability?.key === availabilityKey ? availability.value : null;
   const checking = Boolean(wantsAvailability && availability?.key !== availabilityKey);
-  const noneAvailable = Boolean(opportunity && available?.kind === "opportunity" && available.databaseOnly && available.count === 0);
+  // Solo annunci dal database: nessuna azienda, oppure nessuna con un contatto possibile (tutte provate da poco senza trovarlo).
+  const withForm = mode === "company_only" && contact === "email_or_form";
+  const c = available?.contacts;
+  const noContact = Boolean(c && available && available.count > 0 && c.withEmail + (withForm ? c.formOnly : 0) + c.toTry === 0);
+  const noneAvailable = Boolean(opportunity && available?.kind === "opportunity" && available.databaseOnly && (available.count === 0 || noContact));
   const targetReady = !opportunity && available?.kind === "target" && available.count > 0 ? available.count : 0;
   const howMany = (n: number) => (n > 500 ? "oltre 500" : String(n));
   // Lead attesi dalle aziende del database (punto 40): non tutte hanno un'email o un modulo di contatto pubblico.
-  const withForm = mode === "company_only" && contact === "email_or_form";
   const expected = available?.contacts && available.count > 0 ? expectedLeads(available.contacts, withForm, leads) : null;
   const expectedLabel = expected ? (expected.min === expected.max ? String(expected.max) : `${expected.min}–${expected.max}`) : "";
   const fewer = Boolean(expected && expected.max < leads);
@@ -803,6 +806,8 @@ export function SearchWizard({
                     : available.databaseOnly
                       ? available.count === 0
                         ? "Per ora nessuna azienda con un annuncio recente per questa ricerca: prova ad allargare la zona o a scegliere tutti i settori."
+                        : noContact
+                          ? `Per ora nessuna delle ${howMany(available.count)} aziende con un annuncio recente ha un contatto aziendale pubblico (${withForm ? "email o modulo" : "email"}): prova ad allargare la zona o a scegliere tutti i settori.`
                         : expected
                           ? <>Lead attesi: circa <strong className="font-mono">{expectedLabel}</strong>. Delle {howMany(available.count)} {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente, non tutte avranno un contatto aziendale pubblico ({withForm ? "email o modulo" : "email"}).{fewer && ` Ne chiedi ${leads}: la ricerca si fermerà prima e i crediti non usati tornano disponibili.`}</>
                           : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < leads && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>

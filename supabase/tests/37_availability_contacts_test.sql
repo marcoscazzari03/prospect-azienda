@@ -39,11 +39,13 @@ select pg_temp.check((select (a ->> 'missed')::int = 1 and (a ->> 'to_try')::int
 select pg_temp.check((select (a ->> 'total')::int = 0 and (a ->> 'to_try')::int = 0
                         from (select availability_contacts((select org from o37), '{"industry":"Commercialisti","countries":["IT"]}', 1, false) as a) x),
                      'nessuna azienda: tutti zero');
-select pg_temp.check((select (a ->> 'total')::int = 0
-                        from (select availability_contacts((select org from o37),
-                          '{"industry":"Falegnameria","countries":["IT"],"signals":{"codes":["no_mobile"],"match":"any"}}', 1, true) as a) x)
-                     = (opportunity_availability((select org from o37),
-                          '{"industry":"Falegnameria","countries":["IT"],"signals":{"codes":["no_mobile"],"match":"any"}}', 1) = 0),
-                     'opportunità: stesso totale di opportunity_availability');
+-- Opportunità: una falegnameria con la prova «non ottimizzato per smartphone».
+select store_company_checks('[{"company":{"domain":"legnoemail37.it"},"checks":[{"code":"no_mobile","status":"pass","evidence":{"detail":"nessun viewport"}}]}]', '{}', 'seed');
+create temp table b37 as select availability_contacts((select org from o37),
+  '{"industry":"Falegnameria","countries":["IT"],"signals":{"codes":["no_mobile"],"match":"any"}}', 1, true) as a;
+select pg_temp.check((select (a ->> 'total')::int from b37) = opportunity_availability((select org from o37),
+  '{"industry":"Falegnameria","countries":["IT"],"signals":{"codes":["no_mobile"],"match":"any"}}', 1)
+                     and (select (a ->> 'total')::int >= 1 and (a ->> 'with_email')::int >= 1 from b37),
+                     'opportunità: stesso totale di opportunity_availability, l''azienda con la prova ha l''email');
 select pg_temp.check(not has_function_privilege('authenticated', 'public.availability_contacts(uuid, jsonb, integer, boolean)', 'execute'),
                      'non chiamabile dai clienti');

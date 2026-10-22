@@ -63,6 +63,10 @@ Come tornare indietro, in generale:
   la ricerca per scoprire altri risultati» (UI/UX: ambiguo); con le ricerche solo da annunci la spesa in crediti ed euro
   segue i lead attesi, la riserva resta sui lead richiesti. Test SQL 37, test in `tests/domain.test.ts`.
 - **Prima la migrazione, poi main:** l'app nuova chiama `availability_contacts`; le funzioni di prima restano.
+- **Revisione (Code Reviewer: pronto con riserve, corrette):** il massimo non supera le aziende esistenti (11 aziende non
+  fanno «10–15»), senza aziende da provare niente forbice; solo annunci con aziende ma nessun contatto possibile: ricerca
+  bloccata come con zero aziende; test 37 confronta i totali veri. Testi rivisti dal Sales Copywriter («non tutte
+  avranno», «con la prova del segnale», «per arrivare a Z cerchiamo anche sul web»).
 - **Indietro:** `git revert`; `drop function public.availability_contacts(uuid, jsonb, integer, boolean)` dopo il revert.
 
 ## 22/10/2026 — controllo siti bloccato di notte da pagine enormi (proposta 1 del resoconto) · controllo siti in produzione (pubblicato il 22/10); motore in produzione (pubblicato il 22/10)

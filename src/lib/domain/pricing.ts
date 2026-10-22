@@ -21,8 +21,10 @@ export type AvailabilityContacts = { total: number; withEmail: number; formOnly:
 export function expectedLeads(c: AvailabilityContacts, withForm: boolean, requested: number) {
   const known = c.withEmail + (withForm ? c.formOnly : 0);
   const round = (n: number, up: boolean) => (n < 10 ? Math.round(n) : (up ? Math.ceil(n / 5) : Math.floor(n / 5)) * 5);
-  const max = Math.min(requested, round(known + c.toTry * CONTACT_YIELD.high, true));
-  const min = Math.min(max, round(known + c.toTry * CONTACT_YIELD.low, false));
+  // Mai oltre le aziende che esistono (l'arrotondamento a 5 non deve aggiungerne: 11 aziende non fanno «10–15»).
+  const max = Math.min(requested, known + c.toTry, round(known + c.toTry * CONTACT_YIELD.high, true));
+  // Nessuna azienda da provare: il numero è certo, niente forbice.
+  const min = c.toTry === 0 ? max : Math.min(max, round(known + c.toTry * CONTACT_YIELD.low, false));
   return { min, max };
 }
 

@@ -296,6 +296,9 @@ describe("lead attesi nel wizard (punto 40)", () => {
   it("mai oltre i lead richiesti", () => {
     expect(expectedLeads({ total: 100, withEmail: 20, formOnly: 4, toTry: 76 }, false, 30)).toEqual({ min: 30, max: 30 });
   });
+  it("mai oltre le aziende che esistono", () => {
+    expect(expectedLeads({ total: 11, withEmail: 11, formOnly: 0, toTry: 0 }, false, 50)).toEqual({ min: 11, max: 11 });
+  });
   it("numeri piccoli esatti", () => {
     expect(expectedLeads({ total: 5, withEmail: 1, formOnly: 0, toTry: 4 }, false, 10)).toEqual({ min: 2, max: 3 });
     expect(expectedLeads({ total: 0, withEmail: 0, formOnly: 0, toTry: 0 }, true, 10)).toEqual({ min: 0, max: 0 });
