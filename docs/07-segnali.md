@@ -64,7 +64,9 @@ Il controllo siti apre l'indirizzo con il protocollo e il www del sito salvato (
 ### Annuncio di lavoro (`job_ad`) · verificato
 - **Cosa dice al cliente:** «Sta assumendo una figura»: annuncio negli ultimi 60 giorni per la
   figura scelta (famiglie in `JOB_FAMILIES`: sistemista/IT, sviluppatore, sicurezza, marketing
-  digitale, commerciale, HR, amministrazione, grafica).
+  digitale, commerciale, HR, amministrazione, grafica; dal 22/10, punto 89, anche operai e produzione, manutentori e
+  tecnici di impianto e qualità, magazzino e logistica, per il servizio «Selezione di operai e tecnici»). I mestieri di
+  officina (CNC, PLC, CAD, saldatore, tornitore) vanno sempre alla manifattura, mai a programmatori o grafici.
 - **Fonti:**
   1. pagina «Lavora con noi / Careers» del sito ufficiale;
   2. pagine di annunci pubbliche trovate dalla ricerca web (portali, siti di settore), che il

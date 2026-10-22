@@ -22,7 +22,7 @@ const giorno = run(codice('01-prepara-richieste.js'), { eseguiti: ['Ogni mattina
 const termini = giorno.map(r => r.term);
 assert.ok(termini.includes('sistemista') && termini.includes('developer') && termini.includes('graphic designer'));
 assert.ok(!termini.includes('web developer') && !termini.includes('software developer'), 'titoli già coperti saltati');
-assert.ok(giorno.length < 75, `al massimo ~70 ricerche al giorno (${giorno.length})`);
+assert.ok(giorno.length < 100, `al massimo ~95 ricerche ogni 2 giorni (${giorno.length})`);
 assert.ok(giorno.every(r => r.max_days_old === 3 && r.region === ''), 'tutta Italia');
 const mano = run(codice('01-prepara-richieste.js'), {});
 assert.ok(mano.every(r => r.max_days_old === 30));
@@ -59,7 +59,11 @@ assert.ok(agenzia('Oasi Lavoro S.p.A.', 'Grafico'), 'nome con «lavoro»');
 assert.ok(agenzia('Risorse SpA', 'Graphic designer') && agenzia('ADHR GROUP', '') && agenzia('KNET Human Resources S.r.l.', ''));
 const [cnc] = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
   input: [{ results: [ad('10', 'Programmatore CNC', 'Archimede S.p.A.'), ad('11', 'Programmatore CAD CAM', 'Beta Srl'), ad('12', 'Programmatore PLC', 'Gamma Srl')] }] });
-assert.equal(cnc.stats.off_topic, 3, 'mestieri di officina fuori tema');
+assert.deepEqual([cnc.stats.off_topic, ...cnc.ads.map(a => a.family)], [0, 'production', 'production', 'maintenance'],
+  'mestieri di officina alla manifattura, mai a programmatori o grafici (punto 89)');
+const [fabbrica] = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
+  input: [{ results: [ad('20', 'Magazziniere con patentino muletto', 'Logistica Rossi Srl'), ad('21', 'Manutentore meccanico', 'Meccanica Bianchi Srl'), ad('22', 'Operaio addetto alla produzione', 'Ceramiche Verdi Spa'), ad('23', 'Operaio', 'Adecco Italia Spa')] }] });
+assert.deepEqual(fabbrica.ads.map(a => a.family), ['logistics', 'maintenance', 'production'], 'magazzino, manutenzione, produzione; agenzie escluse');
 // Emoji spezzata dal taglio della descrizione (600 caratteri): niente mezzo carattere nel JSON verso il database.
 for (const k of [599, 598]) {
   const [e] = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
@@ -79,7 +83,7 @@ assert.ok(!agenzia('Keyweb srl', 'azienda attenta al cliente, cerchiamo per la n
 assert.ok(!agenzia('Pinalli', 'garantire un servizio di qualità per il cliente'), '«per il cliente» resta');
 assert.ok(!agenzia('Centro Premi', 'Contratto di lavoro: Tempo pieno'), '«contratto di lavoro» nel testo resta');
 assert.equal(altriBlocchi.length, 0, 'pochi annunci: un solo blocco');
-assert.deepEqual(out.ads.map(a => a.external_id), ['1', '5']);
+assert.deepEqual(out.ads.map(a => a.external_id), ['1', '4', '5'], 'dal punto 89 il magazziniere è una figura del catalogo');
 const tanti = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
   input: [{ results: Array.from({ length: 2500 }, (_, i) => ad(`t${i}`, 'Sistemista', `Officina Rossi ${i}`)) }] });
 assert.deepEqual(tanti.map(b => b.ads.length), [1000, 1000, 500], 'blocchi da 1.000 per il backend');
@@ -88,8 +92,9 @@ assert.equal(out.ads[0].title, 'Sistemista Windows Server', 'titolo senza HTML')
 assert.equal(out.ads[0].family, 'it_systems');
 assert.equal(out.ads[0].city, 'Carpi');
 assert.equal(out.ads[0].region, 'Emilia-Romagna');
-assert.equal(out.ads[1].family, 'sales', 'business developer è commerciale, non programmatore');
-assert.deepEqual(out.stats, { requests: 3, errors: 1, results: 7, off_topic: 1, agencies: 2, anonymous: 1, duplicates: 1, kept: 2 });
+assert.equal(out.ads[1].family, 'logistics');
+assert.equal(out.ads[2].family, 'sales', 'business developer è commerciale, non programmatore');
+assert.deepEqual(out.stats, { requests: 3, errors: 1, results: 7, off_topic: 0, agencies: 2, anonymous: 1, duplicates: 1, kept: 3 });
 
 console.log('Test raccolta annunci superati.');
 

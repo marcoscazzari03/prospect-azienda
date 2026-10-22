@@ -187,6 +187,21 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 22/10/2026 — annunci di lavoro anche per la manifattura (punto 89) · codice pronto; da fare: revisione, main, nodi n8n
+- **Perché:** manifattura e industria sono i settori più deboli; gli annunci per operai, manutentori e magazzinieri sono
+  il segnale più forte che un'azienda industriale assume, e chi seleziona personale per l'industria è un cliente possibile.
+- **Cosa:** tre figure nuove in `JOB_FAMILIES` (`src/lib/domain/signals.ts`): `production` (operai specializzati,
+  produzione), `maintenance` (manutentori, tecnici di impianto e qualità), `logistics` (magazzino); servizio nuovo
+  `recruiting_industry` «Selezione di operai e tecnici» (area HR). Campo `adzuna` delle figure: i titoli chiesti ad Adzuna
+  (19 in più, quasi solo italiani: 86 ricerche ogni 2 giorni invece di 67; stima circa 1.800 chiamate al mese su 2.500),
+  mentre tutti i titoli valgono per riconoscere gli annunci. `02-normalizza-annunci.js`: i mestieri di officina (CNC, PLC,
+  CAD, saldatore, tornitore) prima erano fuori tema, ora vanno alla manifattura (mai a programmatori o grafici).
+  Nessuna migrazione: le figure sono testo libero in `job_ads.family` e nel target.
+- **Prove:** `n8n/annunci/test/run.mjs` (officina e manifattura, magazziniere, agenzie escluse, numero di ricerche);
+  `tests/signals-catalog.test.ts` (titoli di Adzuna tra quelli della figura).
+- **Da guardare:** chiamate Adzuna nel riquadro dell'Admin dopo 2–3 giri (limite 2.500 al mese, 250 al giorno).
+- **Indietro:** togliere le tre figure e il servizio, ricaricare i nodi 01 e 02 di «Annunci | Raccolta Adzuna».
+
 ## 22/10/2026 — sito delle attività OSM che non ce l'hanno (punto 88) · codice pronto; da fare: revisione, main, prova sul VPS
 - **Perché:** il popolamento OSM ha trovato 397.605 attività con un nome ma senza sito: senza dominio non entrano nel
   database. Solo la parte gratuita (domini indovinati); la ricerca web con Haiku per i casi difficili, con un tetto di spesa,

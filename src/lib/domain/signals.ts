@@ -136,6 +136,9 @@ export type JobFamily = {
   label: string;
   // Titoli che fanno valere l'annuncio (minuscolo, senza accenti; confronto per parole).
   titles: Record<JobLang, string[]>;
+  // Titoli cercati su Adzuna, se diversi da italiano + inglese: per le figure con molti annunci (manifattura) si cercano
+  // solo i titoli principali, per stare nel limite di 2.500 chiamate al mese; gli altri titoli valgono per riconoscerli.
+  adzuna?: string[];
 };
 
 export const JOB_FAMILIES: JobFamily[] = [
@@ -233,6 +236,47 @@ export const JOB_FAMILIES: JobFamily[] = [
       fr: ["graphiste", "webdesigner", "designer ui", "designer ux"],
       de: ["grafikdesigner", "webdesigner", "ui designer", "ux designer", "mediengestalter"],
       pt: ["designer grafico", "web designer", "ui designer", "ux designer"],
+    },
+  },
+  // Manifattura (punto 89, 22/10): operai, tecnici di impianto e magazzino, per chi seleziona personale per l'industria.
+  // Per la raccolta Adzuna pochi titoli, quasi solo italiani: sono annunci numerosi e il limite è 2.500 chiamate al mese.
+  {
+    code: "production",
+    label: "Operai specializzati / produzione",
+    adzuna: ["operaio", "addetto produzione", "tornitore", "fresatore", "saldatore", "operatore cnc", "montatore meccanico", "welder"],
+    titles: {
+      it: ["operaio", "addetto produzione", "addetto alla produzione", "tornitore", "fresatore", "saldatore", "operatore cnc", "programmatore cnc", "attrezzista", "montatore meccanico", "verniciatore", "disegnatore meccanico", "responsabile di produzione"],
+      en: ["welder", "cnc operator", "machine operator", "production operator"],
+      es: ["operario de produccion", "soldador", "tornero", "operador cnc"],
+      fr: ["operateur de production", "soudeur", "tourneur", "fraiseur", "operateur cnc"],
+      de: ["produktionsmitarbeiter", "schweisser", "zerspanungsmechaniker", "cnc-fraser", "maschinenfuhrer"],
+      pt: ["operador de producao", "soldador", "torneiro", "operador cnc"],
+    },
+  },
+  {
+    code: "maintenance",
+    label: "Manutentori / tecnici di impianto e qualità",
+    adzuna: ["manutentore", "elettricista industriale", "elettromeccanico", "tecnico plc", "addetto qualita", "maintenance technician"],
+    titles: {
+      it: ["manutentore", "elettricista industriale", "elettromeccanico", "programmatore plc", "tecnico plc", "addetto qualita", "responsabile qualita"],
+      en: ["maintenance technician", "industrial electrician", "plc programmer", "quality technician"],
+      es: ["tecnico de mantenimiento", "electricista industrial", "tecnico de calidad"],
+      fr: ["technicien de maintenance", "electricien industriel", "technicien qualite"],
+      de: ["instandhalter", "industrieelektriker", "elektroniker fur betriebstechnik", "qualitatsprufer"],
+      pt: ["tecnico de manutencao", "eletricista industrial", "tecnico de qualidade"],
+    },
+  },
+  {
+    code: "logistics",
+    label: "Magazzino / logistica",
+    adzuna: ["magazziniere", "carrellista", "mulettista", "addetto magazzino", "warehouse operator"],
+    titles: {
+      it: ["magazziniere", "carrellista", "mulettista", "addetto magazzino", "responsabile magazzino", "responsabile logistica"],
+      en: ["warehouse operator", "forklift driver", "warehouse manager"],
+      es: ["mozo de almacen", "carretillero", "jefe de almacen"],
+      fr: ["magasinier", "cariste", "responsable logistique"],
+      de: ["lagerist", "staplerfahrer", "lagerleiter"],
+      pt: ["operador de armazem", "operador de empilhador", "responsavel de armazem"],
     },
   },
 ];
@@ -333,6 +377,12 @@ export const OFFERS: OfferDef[] = [
     description: "Per agenzie e consulenti di selezione.",
     lookFor: "annunci di lavoro recenti per figure commerciali, amministrative o tecniche",
     signals: ["job_ad"], jobFamilies: ["sales", "accounting", "it_systems"], match: "any",
+  },
+  {
+    code: "recruiting_industry", area: "hr", label: "Selezione di operai e tecnici",
+    description: "Per agenzie per il lavoro e selezionatori che lavorano con l'industria.",
+    lookFor: "annunci di lavoro recenti per operai specializzati, manutentori o magazzinieri",
+    signals: ["job_ad"], jobFamilies: ["production", "maintenance", "logistics"], match: "any",
   },
   {
     code: "hr_consulting", area: "hr", label: "Consulenza HR",

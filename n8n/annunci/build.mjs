@@ -14,7 +14,8 @@ const { createJiti } = createRequire(import.meta.url)('jiti');
 const { JOB_FAMILIES } = await createJiti(join(root, 'build.js')).import('./src/lib/domain/signals.ts');
 
 // Annunci in Italia: titoli in italiano e inglese.
-export const famiglie = JOB_FAMILIES.map(f => ({ code: f.code, titles: [...new Set([...f.titles.it, ...f.titles.en])] }));
+// `cerca`: i titoli chiesti ad Adzuna (meno, per le figure con molti annunci); `titles`: quelli che fanno valere l'annuncio.
+export const famiglie = JOB_FAMILIES.map(f => ({ code: f.code, titles: [...new Set([...f.titles.it, ...f.titles.en])], cerca: f.adzuna || [...new Set([...f.titles.it, ...f.titles.en])] }));
 // Controlli sul sito: gli stessi del motore (n8n/engine/nodes/lib-controlli-sito.js).
 const controlliSito = readFileSync(join(root, 'n8n', 'engine', 'nodes', 'lib-controlli-sito.js'), 'utf8');
 // Email aziendale dalla homepage: stesse regole del motore, ridotte a «Solo azienda».

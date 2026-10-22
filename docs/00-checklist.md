@@ -171,7 +171,7 @@ Si va in produzione solo con il database coperto anche per manifattura, uffici e
     di attività (manifattura `man_made=works` e `industrial=*`, tutti gli `office=*`, `craft=*`), anche senza sito.
 88. **Io** – (22/10: parte gratuita pronta, in revisione) Sito delle aziende che non ce l'hanno: domini probabili verificati sulla homepage (gratis), ricerca web con
     Haiku solo per i casi difficili, con un tetto di spesa giornaliero.
-89. **Io** – Annunci di lavoro anche per la manifattura: operai specializzati, tecnici, magazzinieri, amministrativi.
+89. **Io** – (22/10: codice pronto, in revisione) Annunci di lavoro anche per la manifattura: operai specializzati, tecnici, magazzinieri, amministrativi.
 90. **Insieme** – Backup notturno cifrato del database sul VPS, finché non c'è Supabase Pro.
 91. **Io** – Segnali nuovi dal VPS: certificato in scadenza entro 30 giorni, velocità del sito.
 92. **Più avanti** – Siti italiani da Common Crawl (archivio pubblico) per le aziende che non sono in nessun elenco.

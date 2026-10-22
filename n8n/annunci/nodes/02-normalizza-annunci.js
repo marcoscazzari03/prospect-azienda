@@ -17,11 +17,16 @@ const testo = (h) => String(h ?? '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi
 // (es. «business developer» è commerciale, non programmatore).
 const titoli = FAMIGLIE.flatMap(f => f.titles.map(t => ({ fam: f.code, t: norm(t) })))
   .sort((a, b) => b.t.length - a.t.length);
-// Mestieri di officina con titoli simili (programmatore CNC, grafico CAD): non sono le figure cercate.
+// Mestieri di officina con titoli simili ad altre figure (programmatore CNC, grafico CAD): dal 22/10 (punto 89) vanno
+// alle figure della manifattura, mai a programmatori o grafici; senza quelle figure nel catalogo restano fuori tema.
 const OFFICINA = /\b(cnc|cad|cam|plc|fresatore|tornitore|saldatore|macchine utensili|centri di lavoro)\b/;
+const MANIFATTURA = new Set(['production', 'maintenance', 'logistics']);
 const famigliaDi = (titolo) => {
   const n = norm(titolo);
-  if (OFFICINA.test(n)) return '';
+  if (OFFICINA.test(n)) {
+    const fam = titoli.find(x => MANIFATTURA.has(x.fam) && n.includes(x.t))?.fam;
+    return fam || (FAMIGLIE.some(f => f.code === 'production') ? 'production' : '');
+  }
   return titoli.find(x => n.includes(x.t))?.fam || '';
 };
 

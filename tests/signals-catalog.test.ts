@@ -34,6 +34,12 @@ describe("catalogo dei segnali (fase 0)", () => {
     }
   });
 
+  it("titoli cercati su Adzuna: tra quelli che fanno valere l'annuncio", () => {
+    for (const f of JOB_FAMILIES.filter((x) => x.adzuna)) {
+      for (const t of f.adzuna!) expect([...f.titles.it, ...f.titles.en], `${f.code}: ${t}`).toContain(t);
+    }
+  });
+
   it("date di rilascio dei CMS in ordine", () => {
     for (const list of Object.values(CMS_RELEASES)) {
       expect(list.length).toBeGreaterThan(4);

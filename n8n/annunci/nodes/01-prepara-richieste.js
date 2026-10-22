@@ -7,11 +7,12 @@
 // riempimento, avviato a mano, va indietro di 30. Pagine da 50, al massimo 5 per ricerca.
 // Limiti di base dell'API Adzuna: 25 chiamate al minuto, 250 al giorno, 2.500 al mese.
 // Ogni giro fa circa 70 chiamate (67 titoli + qualche pagina in più): ogni giorno erano
-// ~2.100 al mese, troppo vicino al tetto; ogni 2 giorni ~1.100.
+// ~2.100 al mese, troppo vicino al tetto; ogni 2 giorni ~1.100. Dal 22/10 (punto 89, manifattura) circa 25 titoli in
+// più, con annunci numerosi (più pagine): stima ~1.800 al mese, da controllare nel riquadro delle chiamate Adzuna.
 const FAMIGLIE = __FAMIGLIE__;
 
 const parole = (t) => t.split(/\s+/).filter(w => w && !['di', 'de', 'del'].includes(w));
-const titoli = [...new Set(FAMIGLIE.flatMap(f => f.titles))];
+const titoli = [...new Set(FAMIGLIE.flatMap(f => f.cerca || f.titles))];
 const ricerche = titoli.filter(t => !titoli.some(a => a !== t && parole(a).every(w => parole(t).includes(w))));
 
 // Avvio a mano = primo riempimento. ($execution.mode non basta: vale «test» anche per
