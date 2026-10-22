@@ -1,0 +1,109 @@
+// Test del worker del controllo siti, senza rete esterna. Uso: node worker/test.mjs
+import assert from 'node:assert/strict';
+import http from 'node:http';
+import zlib from 'node:zlib';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { codice } from '../n8n/annunci/build.mjs';
+import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo } from './site-checks.mjs';
+import { richiesta, privato } from './http.mjs';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const fx = join(root, 'n8n', 'engine', 'test', 'fixtures', 'signals');
+
+// 1. Stessi esiti del nodo n8n «Valuta siti» (09-valuta-siti.js) sulle stesse pagine e sugli stessi esiti HTTPS.
+const n8n = (aziende, https, pagine) => {
+  const $ = (name) => ({ all: () => (name === 'Siti da controllare' ? aziende : https).map(j => ({ json: j })) });
+  const $input = { all: () => pagine.map(j => ({ json: j })) };
+  return new Function('$', '$input', codice('09-valuta-siti.js'))($, $input)[0].json.items;
+};
+const regole = caricaRegole();
+const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+const ssl = (m) => ({ error: { message: "SSL Issue: consider using the 'Ignore SSL issues' option", cause: { message: m } }, details: { description: m } });
+const casiHttps = [{}, ssl('certificate has expired'), ssl("Hostname/IP does not match certificate's altnames: Host: www.prova.it. is not in the cert's altnames: DNS:webx.aruba.it"),
+  { error: { message: 'connect ECONNREFUSED 1.2.3.4:443', code: 'ECONNREFUSED' } }];
+let confronti = 0;
+for (const f of readdirSync(fx).filter(n => n.endsWith('.html'))) {
+  const html = readFileSync(join(fx, f), 'utf8');
+  for (const website of ['https://www.prova.it/', 'http://prova.it']) {
+    for (const h of casiHttps) {
+      const a = { company_id: 'x', domain: 'prova.it', name: 'Prova', website };
+      const atteso = n8n([a], [h], [{ html }]);
+      const mio = valuta(regole, a, html, { eseguito: true, ...h }, oggi);
+      delete mio.letto;
+      assert.deepEqual(JSON.parse(JSON.stringify(mio)), JSON.parse(JSON.stringify(atteso[0])), `${f} ${website} ${JSON.stringify(h).slice(0, 60)}`);
+      confronti++;
+    }
+  }
+}
+console.log(`ok  stessi esiti di «Valuta siti» su ${confronti} casi`);
+
+// 2. Indirizzi interni rifiutati.
+for (const ip of ['127.0.0.1', '10.1.2.3', '172.20.0.1', '192.168.1.1', '169.254.169.254', '100.64.0.1', '0.0.0.0', '::1', 'fd00::1', 'fe80::1', '::ffff:127.0.0.1'])
+  assert.ok(privato(ip), `privato: ${ip}`);
+for (const ip of ['8.8.8.8', '2.31.7.149', '172.32.0.1', '2a01:4f8::1']) assert.ok(!privato(ip), `pubblico: ${ip}`);
+await assert.rejects(richiesta('http://127.0.0.1/'), { code: 'EPRIVATE' });
+await assert.rejects(richiesta('http://localhost/'), { code: 'EPRIVATE' });
+await assert.rejects(richiesta('http://example.com:8080/'), { code: 'EPORT' });
+await assert.rejects(richiesta('file:///etc/passwd'), { code: 'EPROTOCOL' });
+console.log('ok  indirizzi interni, porte e protocolli strani rifiutati');
+
+// 3. Client HTTP su un server locale (ammesso solo con privatiAmmessi, che usano i test).
+const server = http.createServer((req, res) => {
+  if (req.url === '/r1') { res.writeHead(301, { Location: '/r2' }); return res.end(); }
+  if (req.url === '/r2') { res.writeHead(302, { Location: '/pagina' }); return res.end(); }
+  if (req.url === '/loop') { res.writeHead(302, { Location: '/loop' }); return res.end(); }
+  if (req.url === '/interno') { res.writeHead(302, { Location: 'http://127.0.0.1/' }); return res.end(); }
+  if (req.url === '/gz') { res.writeHead(200, { 'Content-Encoding': 'gzip' }); return res.end(zlib.gzipSync('<html>compressa</html>')); }
+  if (req.url === '/grande') { res.writeHead(200); return res.end('x'.repeat(5_000_000)); }
+  if (req.url === '/404') { res.writeHead(404); return res.end('<html>non trovata</html>'); }
+  res.writeHead(200); res.end(req.method === 'HEAD' ? undefined : '<html>ok</html>');
+});
+await new Promise(r => server.listen(0, '127.0.0.1', r));
+const base = `http://127.0.0.1:${server.address().port}`;
+const op = { privatiAmmessi: true };
+// La porta del server di prova non è 80/443: rifiutata anche con privatiAmmessi.
+try {
+  await assert.rejects(richiesta(base + '/', op), { code: 'EPORT' });
+} finally { server.close(); }
+console.log('ok  porta non standard rifiutata anche in locale');
+
+// Il resto del client si prova su un server sulla porta 80 solo se disponibile (root); altrimenti si salta.
+const s80 = http.createServer(server.listeners('request')[0]);
+const libera = await new Promise(r => { s80.once('error', () => r(false)); s80.listen(80, '127.0.0.1', () => r(true)); });
+if (libera) {
+  const b = 'http://127.0.0.1';
+  assert.equal((await richiesta(b + '/r1', op)).body, '<html>ok</html>', 'redirect seguiti');
+  await assert.rejects(richiesta(b + '/loop', op), { code: 'EREDIRECT' }, 'redirect infiniti fermati');
+  await assert.rejects(richiesta(b + '/interno', { privatiAmmessi: false }), { code: 'EPRIVATE' });
+  assert.equal((await richiesta(b + '/gz', op)).body, '<html>compressa</html>', 'gzip');
+  assert.equal((await richiesta(b + '/grande', op)).body.length, 3_000_000, 'al massimo 3 MB');
+  const nf = await richiesta(b + '/404', op);
+  assert.equal(nf.status, 404); assert.equal(nf.body, '<html>non trovata</html>', 'pagina letta anche con 404');
+  assert.equal((await richiesta(b + '/', { ...op, method: 'HEAD' })).status, 200, 'HEAD');
+  s80.close();
+  console.log('ok  redirect, gzip, limite di 3 MB, 404 e HEAD');
+} else console.log('--  porta 80 occupata o senza permessi: test del client saltati');
+
+// 4. Controllo HTTPS e apertura del sito: indirizzi e opzioni come i nodi n8n.
+const chiamate = [];
+const finta = (esito) => async (url, o) => { chiamate.push([url, o]); if (esito instanceof Error) throw esito; return { status: 200, body: esito }; };
+const scaduto = Object.assign(new Error('certificate has expired'), { code: 'CERT_HAS_EXPIRED' });
+assert.deepEqual(await controlloHttps({ domain: 'a.it', website: 'https://www.a.it/' }, finta('')), { eseguito: true });
+const h = await controlloHttps({ domain: 'a.it', website: 'http://a.it' }, finta(scaduto));
+assert.equal(h.error.cause.message, 'certificate has expired');
+assert.equal(await apriSito({ domain: 'a.it', website: 'http://www.a.it' }, finta('<html/>')), '<html/>');
+assert.equal(await apriSito({ domain: 'a.it', website: 'https://a.it' }, finta(scaduto)), '');
+assert.deepEqual(chiamate.map(([u, o]) => [u, o.method || 'GET', Boolean(o.insicuro), o.redirect]), [
+  ['https://www.a.it/', 'HEAD', false, 3], ['https://a.it/', 'HEAD', false, 3], ['http://www.a.it/', 'GET', true, 5], ['https://a.it/', 'GET', true, 5]]);
+const r = regole.controlliSito({ html: '', website: 'http://a.it', oggi, richiesti: ['no_https'], https: h });
+assert.equal(r.esiti.no_https.status, 'pass'); assert.equal(r.esiti.no_https.evidence.detail, 'Certificato HTTPS scaduto');
+console.log('ok  controllo HTTPS e apertura del sito come in n8n');
+
+// 5. Parallelo: tutti gli elementi, nell'ordine, al massimo n insieme.
+let insieme = 0, massimo = 0;
+const esiti = await inParallelo([1, 2, 3, 4, 5, 6, 7], 3, async (x) => { insieme++; massimo = Math.max(massimo, insieme); await new Promise(r => setTimeout(r, 5)); insieme--; return x * 2; });
+assert.deepEqual(esiti, [2, 4, 6, 8, 10, 12, 14]); assert.ok(massimo <= 3);
+console.log('ok  parallelo');
+console.log('\nTest del worker superati.');

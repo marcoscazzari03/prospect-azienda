@@ -6,15 +6,15 @@ import { safeEqual } from "@/lib/server/crypto";
 import { publicDomain } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 
-// Controllo dei siti del database, per il workflow n8n «Aziende | Controllo siti»
-// (stesso segreto condiviso del callback del motore).
+// Controllo dei siti del database, per il workflow n8n «Aziende | Controllo siti» (segreto del callback del motore) e
+// per il worker sul VPS (`worker/site-checks.mjs`, segreto proprio SITE_CHECKS_SECRET che apre solo questa route).
 //   GET  ?limit=80  -> aziende da controllare (mai controllate o da più di 25 giorni; poi, dalla 054, quelle
 //                      controllate prima dell'email dal sito, il 20/10, senza email)
 //   POST { items }  -> esiti dei controlli, salvati da store_company_checks (origine «seed»)
 
 function authorized(request: Request) {
-  const secret = env.engineCallbackSecret();
-  return Boolean(secret) && safeEqual(request.headers.get("x-engine-secret") ?? "", secret!);
+  const given = request.headers.get("x-engine-secret") ?? "";
+  return [env.engineCallbackSecret(), env.siteChecksSecret()].some((secret) => secret.length >= 32 && safeEqual(given, secret));
 }
 
 export async function GET(request: Request) {

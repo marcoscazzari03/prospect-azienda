@@ -164,7 +164,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
     Preparazione: server già ridimensionato a CX23 (6,70 €/mese, 21/10). ~~**Insieme, 22/10:** rebuild pulito con Ubuntu 24.04
     e `scripts/vps/setup.sh`~~ (22/10: server pronto; Hetzner ha inserito la chiave SSH del progetto, quindi accesso solo con
     `ssh worker@2.31.7.149` dal computer dell'utente, root e password via SSH spenti; Node 22, firewall, fail2ban,
-    aggiornamenti automatici; riavviato). **Io:** il worker del controllo siti.
+    aggiornamenti automatici; riavviato). ~~**Io:** il worker del controllo siti~~ (22/10: `worker/`, revisione).
+    **Tu:** `SITE_CHECKS_SECRET` su Vercel; **Insieme:** installazione sul server (`docs/04-pubblicazione.md`, sezione 8).
 50. **Insieme** – Seconda fonte per gli annunci (termini di Jooble e Careerjet) e pagine «Lavora con noi».
 51. **Insieme** – Ricerche AI notturne mirate su province e settori dei clienti (circa 15–20 € ogni 1.000 aziende).
 

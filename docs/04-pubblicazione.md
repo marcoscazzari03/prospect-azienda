@@ -43,7 +43,8 @@ sottodominio `leads.weborastudio.it`.
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase, punto 1.5 |
 | `N8N_ENGINE_WEBHOOK_URL` | `https://lefonti.app.n8n.cloud/webhook/lead-engine/v1/search` |
 | `N8N_ENGINE_HEADER_NAME`, `N8N_ENGINE_HEADER_VALUE` | Li scegli tu (punto 3) |
-| `ENGINE_CALLBACK_SECRET` | Lo scegli tu (punto 3) |
+| `ENGINE_CALLBACK_SECRET` | Lo scegli tu (punto 3), almeno 32 caratteri |
+| `SITE_CHECKS_SECRET` | Solo per il worker del controllo siti sul VPS (sezione 8), almeno 32 caratteri; apre solo `/api/engine/site-checks` |
 | `N8N_BASE_URL` | `https://lefonti.app.n8n.cloud` |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Stripe, punto 4 |
 | `CRON_SECRET` | Una stringa casuale lunga |
@@ -115,6 +116,21 @@ Nel codice il nome e gli indirizzi stanno in pochi punti:
   dominio nuovo, tenendo il vecchio finché il rinvio è attivo); poi build e caricamento dei nodi;
 - fuori dal codice: `APP_URL` ed `EMAIL_FROM` su Vercel, dominio su Vercel e su Resend (SPF/DKIM), Site URL e Redirect URLs su
   Supabase, Turnstile (domini ammessi), webhook di Stripe, rinvio permanente dal vecchio dominio.
+
+## 8. Worker del controllo siti sul VPS (dal 22/10)
+
+Server Hetzner CX23 `2.31.7.149` (Ubuntu 24.04, preparato con `scripts/vps/setup.sh`): si entra con
+`ssh worker@2.31.7.149` dal computer che ha la chiave; senza chiave, console web di Hetzner con la password di root.
+Il worker (`worker/site-checks.mjs`) fa il lavoro di «Aziende | Controllo siti» con le stesse regole, 300 aziende ogni
+30 minuti invece di 150 ogni ora.
+
+1. **Vercel:** variabile `SITE_CHECKS_SECRET` (Production, almeno 32 caratteri, generata nel browser con
+   `crypto.randomUUID() + crypto.randomUUID()`, senza apici), poi una pubblicazione nuova di main.
+2. **Server:** scaricare lo script e installare (chiede il segreto, che non resta nella cronologia):
+   `curl -fsSL https://raw.githubusercontent.com/marcoscazzari03/prospect-azienda/main/scripts/vps/worker.sh -o worker.sh && bash worker.sh installa`
+3. `bash worker.sh prova`: giro di 20 aziende senza salvare; deve stampare i numeri, non «HTTP 401».
+4. `bash worker.sh avvia`: giro automatico alle :05 e alle :35. Poi si spegne «Aziende | Controllo siti» su n8n.
+5. Altri comandi: `stato` (ultimi giri), `giro` (un giro adesso), `ferma`, `aggiorna` (ultima versione da main).
 
 ## Sviluppo locale
 

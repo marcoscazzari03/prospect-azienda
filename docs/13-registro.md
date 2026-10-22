@@ -186,6 +186,21 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 22/10/2026 — worker del controllo siti sul VPS (punto 49) · codice pronto; da fare: variabile su Vercel, main, installazione sul server
+- **Cosa:** `worker/site-checks.mjs` fa il lavoro di «Aziende | Controllo siti» con le stesse regole (carica
+  `lib-controlli-sito.js` e `lib-email-azienda.js` senza copiarli; valutazione come `09-valuta-siti.js`): 300 aziende per
+  giro, 8 siti in parallelo, un giro ogni 30 minuti (systemd, `scripts/vps/worker.sh`). `worker/http.mjs`: richieste come i
+  nodi n8n (HEAD con certificato verificato e 3 redirect per l'HTTPS; GET senza verifica, 5 redirect, 10 s per la pagina),
+  più: niente indirizzi interni nemmeno dopo un redirect, solo porte 80/443, al massimo 3 MB per pagina.
+- **App:** `SITE_CHECKS_SECRET` apre solo `/api/engine/site-checks` (il server non ha il segreto del callback del motore);
+  entrambi i segreti devono avere almeno 32 caratteri.
+- **Prove:** `node worker/test.mjs`: esiti identici a «Valuta siti» su 120 casi (16 pagine × 2 indirizzi × 4 esiti HTTPS),
+  indirizzi interni, porte e protocolli rifiutati, redirect, gzip, limite di 3 MB, 404, HEAD.
+- **Servizio:** systemd con `ProtectSystem=strict`, `ProtectHome`, `NoNewPrivileges`, `MemoryMax=1G`; segreto in
+  `/etc/webora/site-checks.env` (root:worker, 640), mai nel repository.
+- **Dopo:** una settimana di giri del worker, poi «Aziende | Controllo siti» su n8n si spegne (circa 720 esecuzioni al mese).
+- **Indietro:** `bash worker.sh ferma` e riaccendere il workflow n8n; togliere `SITE_CHECKS_SECRET` da Vercel.
+
 ## 22/10/2026 — VPS Hetzner configurato (punto 49, preparazione) · server pronto, worker da scrivere
 - **Cosa:** rebuild con Ubuntu 24.04 e `scripts/vps/setup.sh`, passo per passo con l'utente. Hetzner ha inserito da solo la
   chiave SSH salvata nel progetto, quindi lo script ha preso la strada «con chiave»: utente `worker` con sudo, accesso solo

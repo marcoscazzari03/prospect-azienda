@@ -19,6 +19,8 @@ export const env = {
   engineHeaderName: () => process.env.N8N_ENGINE_HEADER_NAME ?? "X-Engine-Key",
   engineHeaderValue: () => process.env.N8N_ENGINE_HEADER_VALUE ?? "",
   engineCallbackSecret: () => process.env.ENGINE_CALLBACK_SECRET ?? "",
+  // Solo per il controllo siti del worker sul VPS (22/10): non apre callback, annunci né import.
+  siteChecksSecret: () => process.env.SITE_CHECKS_SECRET ?? "",
   n8nBaseUrl: () => process.env.N8N_BASE_URL ?? "",
   stripeSecretKey: () => process.env.STRIPE_SECRET_KEY ?? "",
   stripeWebhookSecret: () => process.env.STRIPE_WEBHOOK_SECRET ?? "",
