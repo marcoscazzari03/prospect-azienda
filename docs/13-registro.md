@@ -187,7 +187,7 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
-## 22/10/2026 — contatti per tutto il database (punto 86) · codice rivisto (Code Reviewer PRONTO, QA corretto); da fare: migrazione 066, main, installazione
+## 22/10/2026 — contatti per tutto il database (punto 86) · in produzione dal 22/10 (migrazione 066 eseguita, main pubblicato, primo giro: 150 aziende in 42 s, 116 siti letti, 18 email e 35 moduli salvati; giro alle :15 e :45 UTC)
 - **Perché:** solo il 22% delle aziende vive ha un'email o un modulo (2.530 su 11.623): il controllo siti legge solo la
   homepage, le pagine «Contatti» e «Note legali» le apriva solo il motore durante una ricerca.
 - **Cosa:** migrazione `20261210000066_contact_checks.sql`: colonna `contacts_checked_at`; `pending_contact_checks(n)` (sito
