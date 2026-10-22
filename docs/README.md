@@ -15,6 +15,7 @@ documento vivo che la descrive, nello stesso commit.
 | [10-beta.md](10-beta.md) | Piano della beta, criteri della decisione del 30/10, testi degli inviti, promemoria e benvenuto |
 | [04-pubblicazione.md](04-pubblicazione.md) | Guida per rimettere in piedi tutto da zero: Supabase, Vercel, n8n, Stripe, dominio |
 | [09-domande-consulenti.md](09-domande-consulenti.md) | Domande aperte per il legale e il commercialista |
+| [15-ricerche-consigliate.md](15-ricerche-consigliate.md) | «Di cosa si occupa la tua attività?» e ricerche consigliate: decisioni, progetto del designer, cosa manca |
 
 Fuori dal repository (pubblico): `06-audit-sicurezza.md`, con il dettaglio delle vulnerabilità.
 
