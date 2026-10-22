@@ -17,17 +17,19 @@ const testo = (h) => String(h ?? '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi
 // (es. «business developer» è commerciale, non programmatore).
 const titoli = FAMIGLIE.flatMap(f => f.titles.map(t => ({ fam: f.code, t: norm(t) })))
   .sort((a, b) => b.t.length - a.t.length);
-// Mestieri di officina con titoli simili ad altre figure (programmatore CNC, grafico CAD): dal 22/10 (punto 89) vanno
-// alle figure della manifattura, mai a programmatori o grafici; senza quelle figure nel catalogo restano fuori tema.
+// Mestieri di officina con titoli simili ad altre figure (programmatore CNC, grafico CAD): mai a programmatori o grafici.
+// Dal 22/10 (punto 89) valgono solo se il titolo è di una figura della manifattura; gli altri («Tecnico commerciale CNC»,
+// «Help desk CAD») restano fuori tema (Code Reviewer).
 const OFFICINA = /\b(cnc|cad|cam|plc|fresatore|tornitore|saldatore|macchine utensili|centri di lavoro)\b/;
 const MANIFATTURA = new Set(['production', 'maintenance', 'logistics']);
+// Operai fuori dalla fabbrica (edilizia, campi, servizi comunali, pulizie): non sono industria.
+const NON_FABBRICA = /\b(edil\w*|agricol\w*|florovivai\w*|vivai\w*|forestal\w*|giardinier\w*|ecologic\w*|comunal\w*|cimiteri\w*|pulizi\w*|stradal\w*)\b/;
 const famigliaDi = (titolo) => {
   const n = norm(titolo);
-  if (OFFICINA.test(n)) {
-    const fam = titoli.find(x => MANIFATTURA.has(x.fam) && n.includes(x.t))?.fam;
-    return fam || (FAMIGLIE.some(f => f.code === 'production') ? 'production' : '');
-  }
-  return titoli.find(x => n.includes(x.t))?.fam || '';
+  const fam = OFFICINA.test(n)
+    ? titoli.find(x => MANIFATTURA.has(x.fam) && n.includes(x.t))?.fam || ''
+    : titoli.find(x => n.includes(x.t))?.fam || '';
+  return MANIFATTURA.has(fam) && NON_FABBRICA.test(n) ? '' : fam;
 };
 
 // Agenzie per il lavoro, società di selezione e consulenza «presso cliente»: dal nome

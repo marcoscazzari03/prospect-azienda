@@ -199,7 +199,15 @@ Come tornare indietro, in generale:
   Nessuna migrazione: le figure sono testo libero in `job_ads.family` e nel target.
 - **Prove:** `n8n/annunci/test/run.mjs` (officina e manifattura, magazziniere, agenzie escluse, numero di ricerche);
   `tests/signals-catalog.test.ts` (titoli di Adzuna tra quelli della figura).
-- **Da guardare:** chiamate Adzuna nel riquadro dell'Admin dopo 2–3 giri (limite 2.500 al mese, 250 al giorno).
+- **Revisione (Code Reviewer, «NON PRONTO», corretto):** un titolo di officina vale solo con un titolo della
+  manifattura (prima «Tecnico commerciale CNC» o «Help desk CAD» finivano in «produzione»: lead pagati con la figura
+  sbagliata); niente «operaio» da solo (edili e agricoli, e 5 pagine di Adzuna piene): cercati «operaio produzione»,
+  «operaio metalmeccanico», «operaio specializzato»; operai edili, agricoli, comunali, delle pulizie esclusi dalla
+  manifattura; «programmatore cad/cam» tra i titoli della produzione. 88 ricerche ogni 2 giorni. Resta (c'era già): il
+  motore, se il cliente sceglie «Sviluppo software», accetta un annuncio «Programmatore CNC» (`09-verifica-annuncio.js`).
+- **Da guardare:** chiamate Adzuna nel riquadro dell'Admin dopo 2–3 giri (limite 2.500 al mese, 250 al giorno; caso
+  peggiore circa 165 chiamate a giro). **Non avviare a mano** «Annunci | Raccolta Adzuna»: l'avvio a mano va indietro di
+  30 giorni e con 88 ricerche supererebbe le 250 chiamate del giorno.
 - **Indietro:** togliere le tre figure e il servizio, ricaricare i nodi 01 e 02 di «Annunci | Raccolta Adzuna».
 
 ## 22/10/2026 — sito delle attività OSM che non ce l'hanno (punto 88) · codice pronto; da fare: revisione, main, prova sul VPS

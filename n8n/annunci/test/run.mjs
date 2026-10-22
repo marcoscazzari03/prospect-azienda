@@ -64,6 +64,11 @@ assert.deepEqual([cnc.stats.off_topic, ...cnc.ads.map(a => a.family)], [0, 'prod
 const [fabbrica] = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
   input: [{ results: [ad('20', 'Magazziniere con patentino muletto', 'Logistica Rossi Srl'), ad('21', 'Manutentore meccanico', 'Meccanica Bianchi Srl'), ad('22', 'Operaio addetto alla produzione', 'Ceramiche Verdi Spa'), ad('23', 'Operaio', 'Adecco Italia Spa')] }] });
 assert.deepEqual(fabbrica.ads.map(a => a.family), ['logistics', 'maintenance', 'production'], 'magazzino, manutenzione, produzione; agenzie escluse');
+const [fuori] = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },
+  input: [{ results: ['Tecnico commerciale CNC', 'Help desk CAD', 'Agente di commercio macchine utensili', 'Operaio specializzato edile', 'Operaio agricolo', 'Operaio metalmeccanico']
+    .map((t, i) => ad(`f${i}`, t, `Officine Rossi ${i} Srl`)) }] });
+assert.deepEqual(fuori.ads.map(a => [a.title, a.family]), [['Operaio metalmeccanico', 'production']],
+  'officina senza figura della manifattura e operai edili o agricoli: fuori tema (Code Reviewer)');
 // Emoji spezzata dal taglio della descrizione (600 caratteri): niente mezzo carattere nel JSON verso il database.
 for (const k of [599, 598]) {
   const [e] = run(codice('02-normalizza-annunci.js'), { nodes: { 'Prepara richieste': richieste },

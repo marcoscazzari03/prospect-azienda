@@ -243,9 +243,10 @@ export const JOB_FAMILIES: JobFamily[] = [
   {
     code: "production",
     label: "Operai specializzati / produzione",
-    adzuna: ["operaio", "addetto produzione", "tornitore", "fresatore", "saldatore", "operatore cnc", "montatore meccanico", "welder"],
+    // Niente «operaio» da solo: porterebbe operai edili e agricoli e riempirebbe le 5 pagine di Adzuna (Code Reviewer).
+    adzuna: ["operaio produzione", "operaio metalmeccanico", "operaio specializzato", "addetto produzione", "tornitore", "fresatore", "saldatore", "operatore cnc", "montatore meccanico", "welder"],
     titles: {
-      it: ["operaio", "addetto produzione", "addetto alla produzione", "tornitore", "fresatore", "saldatore", "operatore cnc", "programmatore cnc", "attrezzista", "montatore meccanico", "verniciatore", "disegnatore meccanico", "responsabile di produzione"],
+      it: ["operaio produzione", "operaio metalmeccanico", "operaio specializzato", "addetto produzione", "addetto alla produzione", "tornitore", "fresatore", "saldatore", "operatore cnc", "programmatore cnc", "programmatore cad", "programmatore cam", "attrezzista", "montatore meccanico", "verniciatore", "disegnatore meccanico", "responsabile di produzione"],
       en: ["welder", "cnc operator", "machine operator", "production operator"],
       es: ["operario de produccion", "soldador", "tornero", "operador cnc"],
       fr: ["operateur de production", "soudeur", "tourneur", "fraiseur", "operateur cnc"],
