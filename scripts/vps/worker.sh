@@ -125,34 +125,42 @@ Nice=5" ""
     if sudo test -s /etc/webora/backup.env && [ "${2:-}" != "nuova-connessione" ]; then
       echo "Connessione già presente (per cambiarla: bash $0 installa-backup nuova-connessione)."
     else
-      read -rsp "Incolla la stringa «Session pooler» di Supabase, con la password al posto di [YOUR-PASSWORD], e premi Invio (non si vede niente): " URI; echo
-      # Dalla stringa alle variabili di libpq; la password non passa mai sulla riga di comando.
-      RIGHE=$(URI="$URI" python3 -c '
+      read -rp "Incolla la stringa «Session pooler» di Supabase così com'è, con [YOUR-PASSWORD], e premi Invio: " URI
+      read -rsp "Ora la password del database e Invio (non si vede niente, è normale): " PW; echo
+      # Dalla stringa alle variabili di libpq; la password, chiesta a parte, non passa mai sulla riga di comando.
+      RIGHE=$(URI="$URI" PW="$PW" python3 -c '
 import os, urllib.parse as u
-p = u.urlparse(os.environ["URI"].strip())
-assert p.scheme in ("postgres", "postgresql") and p.hostname and p.username and p.password, "stringa non valida"
-assert "[YOUR-PASSWORD]" not in os.environ["URI"], "manca la password"
+uri = os.environ["URI"].strip().replace("[YOUR-PASSWORD]", "x")
+p = u.urlparse(uri)
+assert p.scheme in ("postgres", "postgresql") and p.hostname and p.username, "stringa non valida"
+pw = os.environ["PW"]
+assert pw, "password vuota"
 q = lambda v: "\"" + v.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
-for k, v in [("PGHOST", p.hostname), ("PGPORT", str(p.port or 5432)), ("PGUSER", u.unquote(p.username)), ("PGPASSWORD", u.unquote(p.password)), ("PGDATABASE", (p.path or "/postgres")[1:] or "postgres"), ("PGSSLMODE", "require")]:
+for k, v in [("PGHOST", p.hostname), ("PGPORT", str(p.port or 5432)), ("PGUSER", u.unquote(p.username)), ("PGPASSWORD", pw), ("PGDATABASE", (p.path or "/postgres")[1:] or "postgres"), ("PGSSLMODE", "require")]:
     print(f"{k}={q(v)}")
 ') || { echo "Stringa non valida: copia quella «Session pooler» da Supabase → Connect."; exit 1; }
+      unset PW
       unset URI
       printf '%s\n' "$RIGHE" | sudo tee /etc/webora/backup.env >/dev/null
       unset RIGHE
-      sudo chown root:"$USER" /etc/webora/backup.env; sudo chmod 640 /etc/webora/backup.env
+      # Solo root: la legge systemd prima di avviare il backup, non i worker (Code Reviewer).
+      sudo chown root:root /etc/webora/backup.env; sudo chmod 600 /etc/webora/backup.env
     fi
-    if [ ! -s /etc/webora/backup-pubblica.txt ]; then
+    sudo install -d -m 755 -o root -g root /usr/local/lib/webora
+    if [ ! -s /usr/local/lib/webora/backup-pubblica.txt ]; then
       CHIAVE=$(age-keygen 2>/dev/null)
-      printf '%s\n' "$CHIAVE" | age-keygen -y | sudo tee /etc/webora/backup-pubblica.txt >/dev/null
+      printf '%s\n' "$CHIAVE" | age-keygen -y | sudo tee /usr/local/lib/webora/backup-pubblica.txt >/dev/null
       echo
       echo "=== CHIAVE PER APRIRE I BACKUP: copiala ADESSO in un posto sicuro (gestore di password), NON in chat ==="
       printf '%s\n' "$CHIAVE" | grep '^AGE-SECRET-KEY'
       echo "=== Sul server resta solo la chiave pubblica: senza questa riga i backup non si possono aprire ==="
       unset CHIAVE
       read -rp "Scrivi «copiata» quando l'hai salvata: " OK
-      [ "$OK" = "copiata" ] || echo "Attenzione: senza la chiave salvata i backup non servono. Si rigenera con: sudo rm /etc/webora/backup-pubblica.txt && bash $0 installa-backup"
-      clear
+      [ "$OK" = "copiata" ] || echo "Attenzione: senza la chiave salvata i backup non servono. Si rigenera con: sudo rm /usr/local/lib/webora/backup-pubblica.txt && bash $0 installa-backup"
+      clear; printf '\033[3J'
     fi
+    # Copia dello script di proprietà di root: «worker» non può cambiare quello che gira con la password del database.
+    sudo install -D -m 755 -o root -g root "$APP/scripts/vps/backup.sh" /usr/local/lib/webora/backup.sh
     sudo tee /etc/systemd/system/$BACKUP.service >/dev/null <<UNIT
 [Unit]
 Description=Webora Leads - backup del database
@@ -161,10 +169,9 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=$USER
-WorkingDirectory=$APP
+DynamicUser=yes
 EnvironmentFile=/etc/webora/backup.env
-ExecStart=/bin/bash $APP/scripts/vps/backup.sh
+ExecStart=/bin/bash /usr/local/lib/webora/backup.sh
 TimeoutStartSec=1h
 MemoryMax=1G
 StateDirectory=webora-backup
@@ -193,14 +200,15 @@ UNIT
     sudo systemctl daemon-reload
     echo "Backup installato. Prossimo passo: bash $0 backup"
     ;;
-  backup) sudo systemctl start $BACKUP.service || echo "Backup non riuscito: ecco le ultime righe."; sudo journalctl -u $BACKUP.service -n 6 --no-pager ;;
+  backup) sudo install -m 755 -o root -g root "$APP/scripts/vps/backup.sh" /usr/local/lib/webora/backup.sh; sudo systemctl start $BACKUP.service || echo "Backup non riuscito: ecco le ultime righe."; sudo journalctl -u $BACKUP.service -n 6 --no-pager ;;
   stato-backup) sudo ls -lh /var/lib/webora-backup/ 2>/dev/null || true; systemctl list-timers $BACKUP.timer --no-pager || true; sudo journalctl -u $BACKUP.service -n 6 --no-pager ;;
   avvia)
     TIMER="$NOME.timer $CONT.timer $OSM.timer $SITI.timer"
     [ -f /etc/systemd/system/$BACKUP.service ] && TIMER="$TIMER $BACKUP.timer"
     # shellcheck disable=SC2086
     sudo systemctl enable --now $TIMER && systemctl list-timers $TIMER --no-pager ;;
-  ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer $SITI.timer; sudo systemctl disable --now $BACKUP.timer 2>/dev/null || true ;;
+  # Il backup resta acceso anche con «ferma» (per spegnerlo: sudo systemctl disable --now webora-backup.timer).
+  ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer $SITI.timer ;;
   stato) systemctl list-timers $NOME.timer $CONT.timer $OSM.timer $SITI.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
   aggiorna) git -C "$APP" pull --ff-only && git -C "$APP" log --oneline -1 ;;
   *) sed -n '2,21p' "$0"; exit 1 ;;

@@ -143,8 +143,9 @@ Il worker (`worker/site-checks.mjs`) fa il lavoro di «Aziende | Controllo siti�
    `pg_dump` dello schema `public` e dei dati di `auth.users`/`auth.identities`, controllati con `pg_restore --list` e cifrati
    con age in `/var/lib/webora-backup` (ultimi 7 giorni più le domeniche fino a 35 giorni). Sul server c'è solo la chiave
    pubblica: la privata (`AGE-SECRET-KEY-…`) la mostra una volta `bash worker.sh installa-backup` e va tenuta in un gestore di
-   password. Connessione: stringa «Session pooler» di Supabase (Connect), con la password del database, in
-   `/etc/webora/backup.env` (root:worker 640). Comandi: `installa-backup`, `backup`, `stato-backup`; `avvia` accende anche il
+   password. Connessione: stringa «Session pooler» di Supabase (Connect) e, a parte, la password del database, in
+   `/etc/webora/backup.env` (solo root: la legge systemd); il backup gira con un utente temporaneo (`DynamicUser`), non con
+   «worker», e lo script eseguito è la copia di root in `/usr/local/lib/webora/`. `ferma` non spegne il backup. Comandi: `installa-backup`, `backup`, `stato-backup`; `avvia` accende anche il
    timer del backup. **Ripristino** sul proprio computer: scaricare l'archivio
    (`scp worker@2.31.7.149:/var/lib/webora-backup/db-AAAA-MM-GG.public.dump.age .`, serve `sudo` sul server per leggerlo
    oppure copiarlo prima in /tmp), poi `age -d -i chiave.txt -o public.dump db-AAAA-MM-GG.public.dump.age` e

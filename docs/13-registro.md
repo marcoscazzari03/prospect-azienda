@@ -197,6 +197,10 @@ Come tornare indietro, in generale:
   `worker.sh`: `installa-backup`, `backup`, `stato-backup`; `avvia` e `ferma` comprendono il timer del backup se c'è.
 - **Prove:** in locale su `bench39` (40 tabelle, 2,8 MB cifrati), ripristino in un database vuoto con le 17.500 aziende,
   pulizia degli archivi vecchi con date finte (tenuti gli ultimi 7 giorni e le domeniche entro 35 giorni).
+- **Revisione (Code Reviewer, pronto con riserve, corretto):** il backup gira con un utente temporaneo di systemd
+  (`DynamicUser`), non con «worker» che apre siti esterni; `backup.env` solo root (la legge systemd), script e chiave pubblica
+  copiati da root in `/usr/local/lib/webora/`; password chiesta a parte (niente codifica `%xx` da fare a mano); motivo
+  scritto anche con 0 tabelle; schermo e storico del terminale puliti dopo la chiave; `ferma` non spegne il backup.
 - **Limiti:** i backup stanno sullo stesso VPS (proteggono da un guasto di Supabase o da un errore, non dalla perdita del
   VPS); un backup fallito non manda ancora avvisi (lo si vede con `stato-backup`). Copia fuori dal VPS e avvisi: dopo.
 - **Indietro:** `sudo systemctl disable --now webora-backup.timer`; `sudo rm /etc/webora/backup.env` per togliere la password.
