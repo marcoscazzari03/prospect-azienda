@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — coda del controllo siti con priorità, misure (punto 39) · in corso, nessuna modifica in produzione
+## 22/10/2026 — coda del controllo siti con priorità, seconda versione (punto 39) · in attesa della migrazione 064
 - **Misura in produzione** (`supabase/queries/misura_039.sql`): 17.482 aziende, 4.588 da controllare (25 giorni), 44
   ricerche in 30 giorni con 23 zone/settori diversi, nessun avviso; la coda attuale (054) impiega già 2,1 s.
 - **Banco di prova rifatto con le stesse dimensioni** (17.500 aziende, 44 ricerche; prima c'era una sola ricerca): coda
@@ -60,6 +60,11 @@ Come tornare indietro, in generale:
   che il piano può ricalcolare per ogni azienda in coda (sul banco la memorizzava). Nuova versione (064, non ancora
   migrazione): zone e settori calcolati una volta sola e passati come parametro. Banco, JIT spento: coda attuale 0,55 s,
   064 0,63 s. Prova in produzione come semplice lettura: `supabase/queries/misura_039_v2.sql`.
+- **Prova in produzione (22/10):** 1,7 s (coda attuale 2,1 s, 060 oltre un minuto); 10.519 aziende in coda, 27
+  combinazioni zona/settore, 150 su 150 aziende scelte nelle zone e nei settori cercati. Migrazione
+  `20261208000064_site_checks_priority_v2.sql`, test `35_site_checks_priority_test.sql` aggiornato (zona e settore,
+  settore su tutto il paese, scadute prima delle 054, ricerca vecchia con e senza avviso, permessi).
+- **Indietro:** rieseguire la 061 (coda della 054).
 
 ## 22/10/2026 — stima realistica nel wizard (punto 40) · migrazione 063 eseguita il 22/10; app pubblicata su main il 22/10
 - **Problema:** il wizard mostra le aziende «disponibili» (`target_pool` / `opportunity_pool`), ma il pool non richiede

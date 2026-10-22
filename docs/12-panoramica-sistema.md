@@ -180,7 +180,7 @@ database non copre.
 | Workflow | Quando | Cosa fa |
 |---|---|---|
 | Aziende \| Popolamento OSM | ogni notte (4:20) | 8 province al giorno, prima il Nord: attività con sito da OpenStreetMap, con il settore ricavato dalla categoria |
-| Aziende \| Controllo siti | ogni ora | 150 siti (prima quelli nelle zone e nei settori delle ricerche degli ultimi 30 giorni e degli avvisi, migrazione 060): HTTPS, software, cellulari, lingue, copyright, «in costruzione», prenotazioni; salva prove, tecnologie e l'email aziendale della homepage (gratis, senza AI); fino a esaurimento ricontrolla anche le circa 9.000 aziende controllate prima del 20/10 senza email (migrazione 054) |
+| Aziende \| Controllo siti | ogni ora | 150 siti (prima quelli nelle zone e nei settori delle ricerche degli ultimi 30 giorni e degli avvisi, migrazione 064; la 060 tolta perché troppo lenta): HTTPS, software, cellulari, lingue, copyright, «in costruzione», prenotazioni; salva prove, tecnologie e l'email aziendale della homepage (gratis, senza AI); fino a esaurimento ricontrolla anche le circa 9.000 aziende controllate prima del 20/10 senza email (migrazione 054) |
 | Annunci \| Raccolta Adzuna | ogni 2 giorni alle 6:10 | 67 ricerche per titolo in tutta Italia (ultimi 3 giorni); scarta le agenzie per il lavoro |
 | Annunci \| Siti aziende | alle 7:40 e alle 11:40 | trova il sito di 120 aziende degli annunci: prima prova i domini probabili (gratis), poi al massimo 3 ricerche web con Claude Haiku |
 | Annunci \| Settore aziende | ogni 4 ore | classifica il settore dalla homepage con Claude Haiku; esclude chi vende *al* settore («per hotel» non vuol dire hotel) |
