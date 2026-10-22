@@ -535,6 +535,12 @@ assert.equal(esitoHttps(sslErr("Hostname/IP does not match certificate's altname
 assert.equal(esitoHttps({ error: { message: 'unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca', code: 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' } }).status, 'undetermined', 'catena incompleta: i browser la accettano');
 assert.equal(esitoHttps({ error: { message: 'write EPROTO 5073C1A18A7F0000:error:0A000410:SSL routines:ssl3_read_bytes:ssl/tls alert handshake failure', code: 'EPROTO' } }).status, 'undetermined', 'handshake rifiutato');
 assert.equal(esitoHttps(sslErr('self-signed certificate')).status, 'pass');
+// Errore sul nome insieme alla scadenza (Data Quality, 22/10): la prova parla del nome, non della scadenza.
+const nomeEScaduto = esitoSu('https://www.prova.it/', sslErr("certificate has expired; Hostname/IP does not match certificate's altnames: Host: www.prova.it. is not in the cert's altnames: DNS:dadapro.com"));
+assert.equal(nomeEScaduto.status, 'pass');
+assert.equal(nomeEScaduto.evidence.detail, 'Certificato HTTPS non valido per questo sito', 'nome sbagliato prima della scadenza');
+assert.equal(esitoSu('https://prova.it/', sslErr("certificate has expired; Hostname/IP does not match certificate's altnames: Host: prova.it. is not in the cert's altnames: DNS:www.prova.it")).status,
+  'undetermined', 'nome sbagliato ma il certificato copre il www: niente «scaduto» al suo posto');
 const senzaSegnali = run(valuta, { nodes: { 'Valida richiesta': [job], 'Serve controllo sito?': [prospettoSito], 'HTTP - Sito (segnali)': [{ html: '' }] }, json: prospettoSito }).json;
 assert.deepEqual(senzaSegnali, prospettoSito, 'ricerche senza segnali: nessun cambiamento');
 

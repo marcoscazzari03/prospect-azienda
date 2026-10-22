@@ -48,6 +48,20 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — disponibilità come la riserva, prova del certificato, filtro porte nel motore · in attesa della migrazione 065 e della pubblicazione dei workflow
+- **Disponibilità (migrazione `20261209000065_availability_like_reserve.sql`):** `availability_contacts` toglie come la riserva
+  portali e piattaforme, pagine ospitate e aziende fuori target dal nome; prima le aziende con email potevano risultare di
+  più (QA del punto 40). Banco: 0,15–0,48 s come prima. Test 37. Indietro: `availability_contacts` dalla 063.
+- **Prova del certificato (`lib-controlli-sito.js`):** con un errore sul nome del certificato la prova non dice più
+  «scaduto» o «autofirmato»: decide solo la regola del nome (Data Quality, 22/10: jmpshop «scaduto» con un certificato di un
+  altro dominio valido fino al 2027). Test in `n8n/engine/test/run.mjs`.
+- **Motore allineato al controllo siti:** i nodi «Valuta segnali sito» e «Controlli tecnici sito» non avevano ancora il
+  filtro sulle porte (ripasso del 22/10) né le regole del 21/10 su «Senza HTTPS» (domini in vendita, traslochi, indirizzo
+  vero dichiarato su un altro dominio), caricate finora solo nel controllo siti. Si caricano con la regola del certificato;
+  nel controllo siti cambia solo «Valuta siti».
+- **Dove:** `KlpbVKZWttHa0L14` («Valuta segnali sito», «Controlli tecnici sito»), `bMlXndGWBTMp66Fa` («Valuta siti»).
+- **Indietro:** versioni precedenti dei workflow nella cronologia di n8n; `git revert`.
+
 ## 22/10/2026 — coda del controllo siti con priorità, seconda versione (punto 39) · migrazione 064 eseguita il 22/10; primo giro da controllare (11:25 UTC)
 - **Misura in produzione** (`supabase/queries/misura_039.sql`): 17.482 aziende, 4.588 da controllare (25 giorni), 44
   ricerche in 30 giorni con 23 zone/settori diversi, nessun avviso; la coda attuale (054) impiega già 2,1 s.

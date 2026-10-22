@@ -47,5 +47,15 @@ select pg_temp.check((select (a ->> 'total')::int from b37) = opportunity_availa
   '{"industry":"Falegnameria","countries":["IT"],"signals":{"codes":["no_mobile"],"match":"any"}}', 1)
                      and (select (a ->> 'total')::int >= 1 and (a ->> 'with_email')::int >= 1 from b37),
                      'opportunità: stesso totale di opportunity_availability, l''azienda con la prova ha l''email');
+-- Come la riserva (065): un'azienda fuori target dal nome (consorzio di bonifica) non conta, anche con l'email.
+select store_imported_companies('osm', '[
+  {"domain":"bonifica37.it","name":"Consorzio di Bonifica Falegnameria","city":"Lecce","province":"Lecce","region":"Puglia","industry":"Falegnameria","keywords":["falegnameria"]}
+]');
+select store_company_checks('[{"company":{"domain":"bonifica37.it"},"checks":[{"code":"no_mobile","status":"fail","evidence":{}}]}]', '{}', 'seed');
+update companies set site_email = 'info@bonifica37.it' where domain = 'bonifica37.it';
+select pg_temp.check((select (a ->> 'total')::int = 4 and (a ->> 'with_email')::int = 1
+                        from (select availability_contacts((select org from o37),
+                          '{"industry":"Falegnameria","countries":["IT"],"regions":["Puglia"]}', 1, false) as a) x),
+                     'azienda fuori target esclusa come nella riserva');
 select pg_temp.check(not has_function_privilege('authenticated', 'public.availability_contacts(uuid, jsonb, integer, boolean)', 'execute'),
                      'non chiamabile dai clienti');

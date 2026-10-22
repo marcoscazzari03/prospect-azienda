@@ -187,8 +187,10 @@ function controlliSito({ html, website, oggi, richiesti, https }) {
     const altroSito = dichiarato && dichiarato !== radice(website) && !dichiarato.endsWith('.' + radice(website));
     if (!eseguito || inVendita || trasloco || altroSito) metti('no_https', 'undetermined');
     else if (!h.error) metti('no_https', 'fail');
-    else if (/expired|CERT_HAS_EXPIRED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS scaduto');
-    else if (/self.signed|SELF_SIGNED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS autofirmato');
+    // Con un errore sul nome conta prima quello: il certificato è di un altro sito, la sua scadenza non è la prova
+    // (Data Quality, 22/10: «scaduto» per un certificato di un altro dominio valido fino al 2027).
+    else if (!nome && /expired|CERT_HAS_EXPIRED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS scaduto');
+    else if (!nome && /self.signed|SELF_SIGNED/i.test(msg)) metti('no_https', 'pass', 'Certificato HTTPS autofirmato');
     // Nome sbagliato: conta solo se il certificato non copre il www, non è del marchio e l'host è quello vero.
     else if (nome && !copreWww && !marchio && hostVero) metti('no_https', 'pass', 'Certificato HTTPS non valido per questo sito');
     else if (/ECONNREFUSED/i.test(msg) && /^http:\/\//i.test(website) && leggibile) metti('no_https', 'pass', 'Il sito non risponde in HTTPS');
