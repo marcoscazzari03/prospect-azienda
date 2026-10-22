@@ -1,4 +1,4 @@
--- Coda del controllo siti (061: torna la coda della 054, in ordine di arrivo; la priorità della 060 era troppo lenta).
+-- Coda del controllo siti con priorità (064; la 060 era troppo lenta in produzione, tolta con la 061).
 \set ON_ERROR_STOP on
 
 create or replace function pg_temp.check(p_cond boolean, p_msg text) returns void language plpgsql as $$
@@ -22,12 +22,43 @@ insert into companies (domain, name, website, city, places, tags, first_seen_at)
 
 create temp table q35 as
   select p.domain, p.n from pending_site_checks(300) with ordinality as p(company_id, domain, name, website, n) where p.domain like '%35.it';
-select pg_temp.check((select array_agg(domain order by n) = '{d35.it,c35.it,b35.it,a35.it}' from q35),
-                     'coda della 054 (061): in ordine di arrivo');
+select pg_temp.check((select array_agg(domain order by n) = '{a35.it,d35.it,c35.it,b35.it}' from q35),
+                     'prima l''albergo nella zona cercata (luogo dalla città), poi le altre in ordine di arrivo');
+
+-- Ricerca dello stesso settore su tutto il paese: anche l'albergo lontano passa davanti.
+insert into searches (org_id, created_by, name, target, email_mode, quantity, status)
+select org, 'a0a0a0a0-0000-4000-8000-000000000035', 'Hotel Italia 35',
+       '{"industry":"Albergo35","countries":["IT"],"regions":[]}', 'company_only', 5, 'completed' from o35;
+create temp table n35 as
+  select p.domain, p.n from pending_site_checks(300) with ordinality as p(company_id, domain, name, website, n) where p.domain like '%35.it';
+select pg_temp.check((select array_agg(domain order by n) = '{c35.it,a35.it,d35.it,b35.it}' from n35),
+                     'settore su tutto il paese: i due alberghi davanti, in ordine di arrivo');
+delete from searches where name = 'Hotel Italia 35';
+
+-- Le aziende scadute (25 giorni) restano prima di quelle da ricontrollare (054), anche se cercate.
+update companies set site_checked_at = timestamptz '2026-10-15 10:00:00+00' where domain = 'a35.it';
+insert into company_checks (company_id, code, status) select id, 'no_mobile', 'fail' from companies where domain = 'a35.it';
+create temp table s35 as
+  select p.domain, p.n from pending_site_checks(300) with ordinality as p(company_id, domain, name, website, n) where p.domain like '%35.it';
+select pg_temp.check((select array_agg(domain order by n) = '{d35.it,c35.it,b35.it,a35.it}' from s35)
+                     or now() - timestamptz '2026-10-15 10:00:00+00' > interval '25 days',
+                     'da ricontrollare (054) dopo le scadute, anche se nella zona cercata');
+update companies set site_checked_at = null where domain = 'a35.it';
 
 -- Ricerca vecchia (oltre 30 giorni) senza avviso: non dà più priorità.
 update searches set created_at = now() - interval '40 days' where name = 'Hotel Trentino 35';
 create temp table r35 as
   select p.domain, p.n from pending_site_checks(300) with ordinality as p(company_id, domain, name, website, n) where p.domain like '%35.it';
 select pg_temp.check((select array_agg(domain order by n) = '{d35.it,c35.it,b35.it,a35.it}' from r35),
-                     'ricerca di oltre 30 giorni: di nuovo in ordine di arrivo');
+                     'ricerca di oltre 30 giorni senza avviso: di nuovo in ordine di arrivo');
+
+-- Con un avviso settimanale attivo la ricerca vecchia conta ancora.
+insert into search_alerts (search_id, org_id, user_id, next_run_at)
+  select id, org_id, 'a0a0a0a0-0000-4000-8000-000000000035', now() + interval '7 days' from searches where name = 'Hotel Trentino 35';
+create temp table t35 as
+  select p.domain, p.n from pending_site_checks(300) with ordinality as p(company_id, domain, name, website, n) where p.domain like '%35.it';
+select pg_temp.check((select array_agg(domain order by n) = '{a35.it,d35.it,c35.it,b35.it}' from t35),
+                     'ricerca vecchia con avviso attivo: di nuovo prima l''albergo vicino');
+
+select pg_temp.check(not has_function_privilege('authenticated', 'public.pending_site_checks(integer)', 'execute'),
+                     'coda non chiamabile dai clienti');
