@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — stima realistica nel wizard (punto 40) · migrazione 063 eseguita il 22/10; app da pubblicare su main
+## 22/10/2026 — stima realistica nel wizard (punto 40) · migrazione 063 eseguita il 22/10; app pubblicata su main il 22/10
 - **Problema:** il wizard mostra le aziende «disponibili» (`target_pool` / `opportunity_pool`), ma il pool non richiede
   un'email: una parte delle aziende non diventa un lead (nessuna email né modulo). «120 disponibili» può voler dire molti
   meno lead consegnati.
