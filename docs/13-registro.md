@@ -54,7 +54,11 @@ Come tornare indietro, in generale:
   più (QA del punto 40). Banco: 0,15–0,48 s come prima. Test 37. Indietro: `availability_contacts` dalla 063.
 - **Prova del certificato (`lib-controlli-sito.js`):** con un errore sul nome del certificato la prova non dice più
   «scaduto» o «autofirmato»: decide solo la regola del nome (Data Quality, 22/10: jmpshop «scaduto» con un certificato di un
-  altro dominio valido fino al 2027). Test in `n8n/engine/test/run.mjs`.
+  altro dominio valido fino al 2027). Test in `n8n/engine/test/run.mjs`. **jmpshop non è risolto da questa regola:**
+  l'errore salvato da n8n (esecuzione 3979) è solo «certificate has expired» (Node segnala la catena scaduta prima del
+  nome), quindi da lì non si capisce che il certificato è di un altro sito. Il segnale resta giusto (l'HTTPS non funziona),
+  cambia solo il dettaglio. La regola serve quando il messaggio contiene entrambi. Le funzioni `opportunity_availability` e
+  `target_availability` restano senza i tre filtri: l'app non le usa più (Code Reviewer).
 - **Motore allineato al controllo siti:** i nodi «Valuta segnali sito» e «Controlli tecnici sito» non avevano ancora il
   filtro sulle porte (ripasso del 22/10) né le regole del 21/10 su «Senza HTTPS» (domini in vendita, traslochi, indirizzo
   vero dichiarato su un altro dominio), caricate finora solo nel controllo siti. Si caricano con la regola del certificato;

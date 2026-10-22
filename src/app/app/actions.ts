@@ -133,7 +133,8 @@ export async function searchAvailability(form: FormData): Promise<Availability> 
   const opportunity = parsed.input.signals.codes.length > 0;
   const aiExtra = aiSearchExtra(target);
   if (!opportunity && !targetIsSimple(target)) return { count: 0, databaseOnly: false, kind: "target", aiExtra, contacts: null };
-  // Stesse aziende di opportunity_availability / target_availability, divise per contatto: il wizard stima i lead attesi.
+  // Stesse aziende della riserva del motore (065: senza portali, pagine ospitate e fuori target), divise per contatto:
+  // il wizard stima i lead attesi.
   const { data, error } = await createAdminClient().rpc("availability_contacts", {
     p_org: viewer.org.id,
     p_target: target as Json,

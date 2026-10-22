@@ -121,7 +121,7 @@ fino alla 060, con i loro test; a ogni push GitHub Actions esegue lint, tipi, te
 | Segnale | Come si verifica | Peso dell'affidabilità |
 |---|---|---|
 | Sta assumendo una figura (annuncio) | annunci Adzuna e pagine «Lavora con noi», verificati ed entro 60 giorni | 90 |
-| Sito senza connessione sicura | richiesta HTTPS sull'indirizzo vero del sito; conta solo un certificato scaduto, autofirmato o di un altro sito | 90 |
+| Sito senza connessione sicura | richiesta HTTPS sull'indirizzo vero del sito; conta solo un certificato scaduto, autofirmato o di un altro sito (con un errore sul nome decide il nome) | 90 |
 | Software non aggiornato | versione di WordPress, Joomla o WooCommerce uscita da più di 2 anni | 85 |
 | Sito in costruzione | homepage provvisoria | 70 |
 | Non adatto ai cellulari | homepage senza impostazione per cellulari (viewport) | 65 |

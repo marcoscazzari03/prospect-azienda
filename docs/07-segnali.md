@@ -96,7 +96,8 @@ Il controllo siti apre l'indirizzo con il protocollo e il www del sito salvato (
 
 ### Sito senza connessione sicura (`no_https`) · verificato
 - **Vale se:** il sito risponde solo in HTTP (nessun redirect a HTTPS), oppure il certificato
-  HTTPS è scaduto, autofirmato o per un altro dominio.
+  HTTPS è scaduto, autofirmato o per un altro dominio. Se l'errore parla del nome (certificato di un altro sito), conta
+  solo la regola del nome, non «scaduto» o «autofirmato» (22/10).
 - **Dove:** sull'host del sito salvato (con il www se il sito lo usa), sempre sul dominio
   dell'azienda: il dominio nudo spesso ha un certificato diverso da quello del sito vero (19/10).
 - **Non determinabile:** sito irraggiungibile in entrambi i modi; errori di rete temporanei
