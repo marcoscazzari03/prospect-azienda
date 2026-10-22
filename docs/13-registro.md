@@ -81,7 +81,7 @@ Come tornare indietro, in generale:
 - **Dove:** `KlpbVKZWttHa0L14` («Valuta segnali sito», «Controlli tecnici sito»), `bMlXndGWBTMp66Fa` («Valuta siti»).
 - **Indietro:** versioni precedenti dei workflow nella cronologia di n8n; `git revert`.
 
-## 22/10/2026 — coda del controllo siti con priorità, seconda versione (punto 39) · migrazione 064 eseguita il 22/10; primo giro da controllare (11:25 UTC)
+## 22/10/2026 — coda del controllo siti con priorità, seconda versione (punto 39) · in produzione (migrazione 064 eseguita il 22/10; primo giro delle 11:25 UTC riuscito: 150 aziende salvate in 92 s, prima circa 90 s)
 - **Misura in produzione** (`supabase/queries/misura_039.sql`): 17.482 aziende, 4.588 da controllare (25 giorni), 44
   ricerche in 30 giorni con 23 zone/settori diversi, nessun avviso; la coda attuale (054) impiega già 2,1 s.
 - **Banco di prova rifatto con le stesse dimensioni** (17.500 aziende, 44 ricerche; prima c'era una sola ricerca): coda
