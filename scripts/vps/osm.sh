@@ -13,6 +13,10 @@ curl -fsS -o $PBF.md5 "$URL.md5"
 if [ -s $PBF ] && md5sum -c --status $PBF.md5; then
   echo "File Geofabrik già aggiornato."
 else
+  # Servono circa 6 GB: il file nuovo accanto al vecchio, più i file filtrati.
+  LIBERI=$(df --output=avail -k . | tail -1)
+  if [ "$LIBERI" -lt 6000000 ]; then echo "Spazio insufficiente: $((LIBERI / 1024)) MB liberi"; exit 1; fi
+  trap 'rm -f $PBF.nuovo' EXIT
   curl -fsS --retry 3 -o $PBF.nuovo "$URL"
   sed "s/$PBF/$PBF.nuovo/" $PBF.md5 | md5sum -c --status || { echo "md5 diverso: file scaricato male"; rm -f $PBF.nuovo; exit 1; }
   mv $PBF.nuovo $PBF

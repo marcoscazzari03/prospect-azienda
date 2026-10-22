@@ -22,7 +22,7 @@ CONT=webora-contacts
 OSM=webora-osm
 
 # Servizio e timer systemd per un giro del worker: nome, descrizione, comando, quando (OnCalendar), durata massima,
-# memoria massima, righe in più per il servizio.
+# memoria massima, righe in più per il servizio, righe in più per il timer.
 unita() {
   sudo tee /etc/systemd/system/$1.service >/dev/null <<UNIT
 [Unit]
@@ -50,12 +50,12 @@ RestrictSUIDSGID=true
 UNIT
   sudo tee /etc/systemd/system/$1.timer >/dev/null <<UNIT
 [Unit]
-Description=Webora Leads - $2 (programmato)
+Description=Webora Leads - $2, giro programmato
 
 [Timer]
 OnCalendar=$4
 RandomizedDelaySec=60
-Persistent=true
+$8
 
 [Install]
 WantedBy=timers.target
@@ -82,12 +82,12 @@ case "${1:-}" in
       unset SEGRETO
     fi
     # osmium legge il file di OpenStreetMap (popolamento OSM, punto 87).
-    command -v osmium >/dev/null || sudo apt-get install -y -qq osmium-tool
-    unita "$NOME" "controllo siti" "/usr/bin/node worker/site-checks.mjs" "*-*-* *:05,35:00" 20min 1G ""
-    unita "$CONT" "contatti" "/usr/bin/node worker/contacts.mjs" "*-*-* *:15,45:00" 20min 1G ""
+    command -v osmium >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool; }
+    unita "$NOME" "controllo siti" "/usr/bin/node worker/site-checks.mjs" "*-*-* *:05,35:00" 20min 1G "" ""
+    unita "$CONT" "contatti" "/usr/bin/node worker/contacts.mjs" "*-*-* *:15,45:00" 20min 1G "" ""
     # Il file dell'Italia (circa 2 GB) e i suoi derivati restano in /var/lib/webora-osm, l'unica cartella scrivibile.
     unita "$OSM" "popolamento OSM" "/bin/bash $APP/scripts/vps/osm.sh" "Mon *-*-* 02:20:00" 3h 2500M "StateDirectory=webora-osm
-Nice=10"
+Nice=10" "Persistent=true"
     sudo systemctl daemon-reload
     echo "Installato. Prossimo passo: bash $0 prova"
     ;;

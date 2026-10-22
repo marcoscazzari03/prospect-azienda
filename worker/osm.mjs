@@ -52,10 +52,10 @@ export function semplifica(anello, tolleranza = 0.0005) {
 }
 
 // Confini delle province dal GeoJSON di osmium: solo «IT-XX» delle province note, anelli semplificati e riquadro.
-export function caricaProvince(righe) {
+export async function caricaProvince(righe) {
   const note = new Map(PROVINCE.map(([sigla, provincia, regione]) => [sigla, { sigla, provincia, regione }]));
   const trovate = new Map();
-  for (const riga of righe) {
+  for await (const riga of righe) {
     if (!riga.trim()) continue;
     let f;
     try { f = JSON.parse(riga.replace(/^\x1e/, '')); } catch { continue; }
@@ -104,7 +104,8 @@ export async function leggiAttivita(righe, osm, province) {
   const perSigla = new Map(province.map(p => [p.sigla, p]));
   const sigle = new Set(PROVINCE.map(([s]) => s));
   const gruppi = new Map();
-  const stats = { righe: 0, attivita: 0, con_sito: 0, senza_sito_con_nome: 0, fuori: 0, illeggibili: 0 };
+  const stats = { righe: 0, attivita: 0, con_sito: 0, senza_sito_con_nome: 0, fuori: 0, stesso_posto: 0, illeggibili: 0 };
+  const posti = new Map(); // dominio -> punti già visti
   let ultima = null; // la provincia dell'attività precedente: quelle vicine nel file stanno spesso nella stessa
   for await (const riga of righe) {
     if (!riga.trim()) continue;
@@ -127,6 +128,16 @@ export async function leggiAttivita(righe, osm, province) {
       if (p) ultima = p;
     }
     if (!p) { stats.fuori++; continue; }
+    // Stessa azienda segnata più volte nello stesso posto (area industriale, edificio e ufficio, ognuno con il sito): un
+    // solo punto, altrimenti tre oggetti sembrerebbero una catena (Code Reviewer). Entro circa 500 m.
+    const dom = String(t.website || t['contact:website']).trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\d?\./, '').split(/[/?#:\s;]/)[0];
+    const qui = puntoDi(f.geometry);
+    if (qui) {
+      const visti = posti.get(dom) || [];
+      if (visti.some(([x, y]) => Math.abs(x - qui[0]) < 0.006 && Math.abs(y - qui[1]) < 0.0045)) { stats.stesso_posto++; continue; }
+      visti.push(qui);
+      posti.set(dom, visti);
+    }
     const tags = Object.fromEntries(Object.entries(t).filter(([k]) => !k.startsWith('@')));
     if (!gruppi.has(p.sigla)) gruppi.set(p.sigla, []);
     gruppi.get(p.sigla).push({ type: t['@type'], id: t['@id'], tags });
@@ -161,9 +172,7 @@ async function main() {
   const app = (process.env.APP_URL || 'https://leads.weborastudio.it').replace(/\/+$/, '');
   const inizio = Date.now();
 
-  const confini = [];
-  for await (const r of righeDi(fileConfini)) confini.push(r);
-  const province = caricaProvince(confini);
+  const province = await caricaProvince(righeDi(fileConfini));
   // Senza i confini di quasi tutte le province il file è rotto: meglio fermarsi che salvare mezza Italia (o niente).
   if (province.length < 100) throw new Error(`confini di sole ${province.length} province su ${PROVINCE.length}: file incompleto`);
   const { gruppi, stats } = await leggiAttivita(righeDi(fileAttivita), osm, province);
@@ -173,6 +182,8 @@ async function main() {
     secondi: Math.round((Date.now() - inizio) / 1000), province: province.length, ...stats,
     aziende: blocchi.reduce((s, b) => s + b.companies.length, 0),
     scartate: { categoria: n8n.excluded_category, senza_nome: n8n.no_name, sito_non_aziendale: n8n.not_company_site, estere: n8n.foreign, catene: n8n.chains, doppioni: n8n.duplicates },
+    // Province senza confine in OSM (sigla cambiata, confine rotto): le loro attività senza indirizzo finiscono tra le «fuori».
+    senza_confine: PROVINCE.map(([s]) => s).filter(s => !province.some(p => p.sigla === s)),
     per_provincia_poche: [...gruppi].filter(([, v]) => v.length < 30).map(([s, v]) => `${s}:${v.length}`),
   };
   if (prova) { console.log(JSON.stringify({ prova: true, ...riepilogo }, null, 2)); return; }

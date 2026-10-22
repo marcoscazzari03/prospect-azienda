@@ -205,6 +205,11 @@ Come tornare indietro, in generale:
 - **Prove:** `worker/test.mjs` (filtri di osmium, confini con buchi, province dall'indirizzo o dai confini, fuori Italia,
   regole del nodo n8n, catene); `n8n/annunci/test/run.mjs` (fabbriche e aree industriali, non porti né torri); catena osmium
   provata su un file finto (attività, edificio, confine `IT-MO`); 300.000 attività su 107 province finte in 49 s, 320 MB.
+- **Revisione (Code Reviewer, pronto con riserve, corretto):** `man_made` conta solo se vale `works` (un ristorante in
+  una torre restava scartato); la stessa azienda segnata più volte entro circa 500 m (area industriale, edificio, ufficio)
+  vale un punto solo, altrimenti sembrava una catena; nel riepilogo le province senza confine (`senza_confine`); confini
+  letti in streaming; spazio libero controllato (6 GB) e file a metà cancellato; `apt-get update` prima di osmium;
+  `Persistent=true` solo sul timer OSM.
 - **Indietro:** `sudo systemctl disable --now webora-osm.timer`; riaccendere «Aziende | Popolamento OSM» su n8n.
 
 ## 22/10/2026 — contatti per tutto il database (punto 86) · in produzione dal 22/10 (migrazione 066 eseguita, main pubblicato, primo giro: 150 aziende in 42 s, 116 siti letti, 18 email e 35 moduli salvati; giro alle :15 e :45 UTC)

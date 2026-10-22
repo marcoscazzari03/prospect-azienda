@@ -90,7 +90,8 @@ const NON_AZIENDALI = /(^|\.)(facebook|instagram|twitter|x|youtube|tiktok|linked
 // Tipo di attività: il primo tra quelli noti (un ufficio dentro un negozio è un ufficio).
 const TIPI_OSM = ['office', 'craft', 'industrial', 'man_made', 'healthcare', 'tourism', 'shop', 'amenity'];
 function categoriaOsm(t) {
-  const tipo = TIPI_OSM.find(k => t[k]) || '';
+  // «man_made» conta solo per gli stabilimenti: un ristorante in una torre resta un ristorante (Code Reviewer).
+  const tipo = TIPI_OSM.find(k => t[k] && (k !== 'man_made' || t[k] === 'works')) || '';
   const valore = String(t[tipo] || '').toLowerCase();
   const esclusa = !tipo || SCARTA.test(valore) || (SOLO_ELENCO.has(tipo) && !SETTORI[tipo]?.[valore])
     || (tipo === 'industrial' && INDUSTRIALI_NO.test(valore));
