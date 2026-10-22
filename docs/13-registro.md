@@ -48,6 +48,18 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — pulizia dei dati di collaudo (punto 19) · script pronto, da eseguire
+- **Inventario** (`supabase/queries/inventario_collaudo.sql`, sola lettura): 3 organizzazioni, tutte dell'utente. «Webora»
+  (admin, 44 ricerche e 195 lead di collaudo), «Scazza» e «Prova» (nessuna ricerca, solo i crediti di benvenuto).
+- **Decisione dell'utente:** cancellare «Scazza» e «Prova» con i loro utenti; tenere «Webora» (storico dei collaudi: costi,
+  resa del motore, misure usate dalla pagina Admin e dal resoconto; i suoi 195 lead escludono quelle aziende solo dalle
+  ricerche di prova dell'admin).
+- **Script:** `supabase/queries/pulizia_collaudo_22_10.sql`, un solo blocco: si ferma se le due organizzazioni hanno
+  ricerche, lead, segnalazioni, acquisti o avvisi, o se nome e piano non corrispondono; cancella un utente solo se non è
+  admin e non è in altre organizzazioni. Aziende, controlli, prove dei segnali e annunci restano. Provato su un database di
+  prova (blocco con una ricerca, pulizia, seconda esecuzione bloccata, admin membro di «Prova» non cancellato).
+- **Indietro:** non si torna indietro se non dal backup; gli account si possono ricreare con una nuova registrazione.
+
 ## 22/10/2026 — disponibilità come la riserva, prova del certificato, filtro porte nel motore · in produzione (migrazione 065 eseguita e workflow pubblicati il 22/10)
 - **Disponibilità (migrazione `20261209000065_availability_like_reserve.sql`):** `availability_contacts` toglie come la riserva
   portali e piattaforme, pagine ospitate e aziende fuori target dal nome; prima le aziende con email potevano risultare di
