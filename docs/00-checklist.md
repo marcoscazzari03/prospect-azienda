@@ -155,7 +155,11 @@ studi professionali; Centro quasi vuoto (Lazio 113, Piemonte 64, Toscana 43); Su
 a hotel, ristoranti e negozi»; l'apertura a tutti quando il database copre anche Centro e manifattura.
 83. **Insieme** – Posizionamento «Trova i tuoi prossimi clienti», con esempi di mestieri diversi (falegname, impresa di
     pulizie, fotografo, commercialista, consulente IT). Da fare insieme al passaggio ad Avvisto (punti 66–67).
-84. **Io** – «Di cosa si occupa la tua attività?» al primo accesso (non nella registrazione), modificabile nel profilo.
+84. **Io** – (deciso il 22/10, in lavorazione dal 23/10) «Di cosa si occupa la tua attività?» alla prima apertura dell'app
+    (riquadro in dashboard, saltabile; non nella registrazione), modificabile nel profilo. Chi vende anche alle aziende:
+    solo ricerche verso aziende; chi vende solo a privati: messaggio onesto e «Prova comunque una ricerca»; descrizione
+    vaga: domanda di riserva «A chi vendi di solito?». Si costruisce subito con un interruttore nell'Admin (prima solo
+    per l'admin), si accende per tutti con Avvisto dopo il 25/10.
 85. **Io** – Ricerche consigliate: dalla descrizione, Haiku propone 3 ricerche già impostate (circa 0,1 centesimi); l'app
     le accetta solo se il database le può soddisfare (conteggio «circa X lead» del punto 40) e il wizard parte già compilato.
     Si avviano con i crediti, come ogni ricerca.
