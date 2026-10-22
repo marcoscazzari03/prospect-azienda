@@ -136,7 +136,10 @@ Il worker (`worker/site-checks.mjs`) fa il lavoro di «Aziende | Controllo siti�
    confini delle province e salva le aziende con un sito su `/api/engine/companies-import`, con le regole del nodo n8n
    «Normalizza OSM». Prima volta: `bash worker.sh prova-osm` (conta senza salvare, 10–20 minuti, finestra aperta), poi
    `bash worker.sh osm` (in sottofondo) e `bash worker.sh stato-osm`. Poi si spegne «Aziende | Popolamento OSM» su n8n.
-6. Altri comandi: `prova-contatti`, `giro`, `giro-contatti`, `stato`, `ferma`; dopo un aggiornamento del codice
+6. Siti delle attività OSM senza sito (punto 88, `worker/siti-osm.mjs`): ogni ora alle :50, 3.000 attività, domini
+   indovinati dal nome e verificati sulla homepage (nome e luogo). Prima volta: `bash worker.sh prova-siti` (300 attività,
+   senza salvare, con esempi da controllare), poi `bash worker.sh giro-siti` e `bash worker.sh stato-siti`.
+7. Altri comandi: `prova-contatti`, `giro`, `giro-contatti`, `stato`, `ferma`; dopo un aggiornamento del codice
    `bash worker.sh installa` (scarica da main, installa osmium se manca e riscrive i servizi; il segreto resta).
 
 ## Sviluppo locale

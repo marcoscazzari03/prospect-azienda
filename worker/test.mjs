@@ -9,6 +9,7 @@ import { codice } from '../n8n/annunci/build.mjs';
 import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo } from './site-checks.mjs';
 import { richiesta, privato } from './http.mjs';
 import { pagineDaAprire, haModulo, trovaContatti } from './contacts.mjs';
+import { caricaRegoleSiti, luogoSullaPagina, cercaSito, daProvare } from './siti-osm.mjs';
 import { caricaOsm, filtri, caricaProvince, dentro, puntoDi, leggiAttivita, normalizza, semplifica } from './osm.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -216,5 +217,32 @@ assert.deepEqual(blocco.companies.map(c => [c.domain, c.province, c.region, c.in
   ['studiobianchi.it', 'Modena', 'Emilia-Romagna', 'Studio legale'],
 ], 'regole del nodo n8n: catene escluse, settori, province');
 console.log('ok  popolamento OSM: filtri, confini, province, regole del nodo n8n');
+
+// 8. Siti delle attività OSM senza sito (punto 88).
+const senza = [];
+await leggiAttivita(comeFile(righe), osm, province, { senzaSito: senza });
+assert.deepEqual(senza.map(a => [a.chiave, a.nome, a.sigla, a.tipo]), [['node/5', 'Falegname senza sito', 'MO', 'craft']], 'attività senza sito con nome e provincia');
+const regoleSiti = caricaRegoleSiti();
+const pagina = (titolo, corpo) => `<html><head><title>${titolo}</title></head><body>${corpo}${' '.repeat(600)}</body></html>`;
+const web = {
+  'https://falegnameriarossi.it': pagina('Falegnameria Rossi', 'Mobili su misura. Via Emilia 3, Carpi (MO). P.IVA 01234567890'),
+  'https://barcentrale.it': pagina('Bar Centrale', 'Il bar in piazza a Torino'),
+  'https://sonnosereno.it': pagina('Domain for sale', 'buy this domain'),
+};
+const reqWeb = async (url) => { if (!(url in web)) throw Object.assign(new Error('ENOTFOUND'), { code: 'ENOTFOUND' }); return { status: 200, body: web[url] }; };
+assert.equal(await cercaSito(regoleSiti, { chiave: 'node/1', nome: 'Falegnameria Rossi', citta: 'Carpi' }, 'Modena', reqWeb), 'falegnameriarossi.it', 'nome e città sulla pagina');
+assert.equal(await cercaSito(regoleSiti, { chiave: 'node/2', nome: 'Falegnameria Rossi', citta: '' }, 'Modena', reqWeb), '', 'senza città: serve la provincia sulla pagina (qui solo «MO»)');
+assert.equal(await cercaSito(regoleSiti, { chiave: 'node/3', nome: 'Bar Centrale', citta: 'Bologna' }, 'Bologna', reqWeb), '', 'omonimo in un\'altra città');
+assert.equal(await cercaSito(regoleSiti, { chiave: 'node/4', nome: 'Sonno Sereno', citta: 'Modena' }, 'Modena', reqWeb), '', 'dominio in vendita');
+assert.ok(luogoSullaPagina('<p>Sede a Forlì</p>', '', 'Forlì-Cesena') && luogoSullaPagina('<p>Monza</p>', '', 'Monza e Brianza') && !luogoSullaPagina('<p>MO</p>', '', 'Modena'));
+const elencoSiti = [
+  ...['Bar Sport', 'Bar Sport', 'Bar Sport', 'Bar Sport'].map((nome, i) => ({ chiave: `n/${i}`, nome, tipo: 'amenity' })),
+  { chiave: 'n/10', nome: 'Hotel Uno', tipo: 'tourism' }, { chiave: 'n/11', nome: 'Officine Bianchi', tipo: 'industrial' },
+  { chiave: 'n/12', nome: 'Studio Verdi', tipo: 'office' }, { chiave: 'n/13', nome: 'Studio Neri', tipo: 'office' },
+];
+const provateSiti = new Map([['n/13', Date.parse('2026-10-01')], ['n/10', Date.parse('2026-01-01')]]);
+assert.deepEqual(daProvare(elencoSiti, provateSiti, 10, Date.parse('2026-10-22')).map(a => a.chiave), ['n/12', 'n/11', 'n/10'],
+  'uffici e manifattura prima, nomi comuni esclusi, riprova dopo 180 giorni');
+console.log('ok  siti delle attività OSM: domini dal nome, verifica, luogo, priorità');
 
 console.log('\nTest del worker superati.');

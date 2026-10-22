@@ -35,9 +35,12 @@ echo "Italia: $(du -h $PBF | cut -f1)"
 # Attività dei tipi utili (con e senza sito: quelle senza servono al punto 88) e confini con il codice ISO.
 # shellcheck disable=SC2046
 osmium tags-filter --overwrite -o attivita.osm.pbf $PBF $(node "$APP/worker/osm.mjs" filtri)
-osmium export --overwrite -f geojsonseq --geometry-types=point,polygon -a type,id -o attivita.geojsonseq attivita.osm.pbf
+# Scritti con un altro nome e poi rinominati: la ricerca dei siti (worker/siti-osm.mjs) li legge ogni ora.
+osmium export --overwrite -f geojsonseq --geometry-types=point,polygon -a type,id -o attivita.nuovo.geojsonseq attivita.osm.pbf
 osmium tags-filter --overwrite -o confini.osm.pbf $PBF r/ISO3166-2
-osmium export --overwrite -f geojsonseq --geometry-types=polygon -o confini.geojsonseq confini.osm.pbf
+osmium export --overwrite -f geojsonseq --geometry-types=polygon -o confini.nuovo.geojsonseq confini.osm.pbf
+mv confini.nuovo.geojsonseq confini.geojsonseq
+mv attivita.nuovo.geojsonseq attivita.geojsonseq
 echo "Attività: $(wc -l < attivita.geojsonseq) righe"
 
 node "$APP/worker/osm.mjs" attivita.geojsonseq confini.geojsonseq

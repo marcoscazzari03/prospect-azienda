@@ -7,7 +7,7 @@ import type { Json } from "@/lib/supabase/database.types";
 
 // Popolamento del database aziende da fonti aperte, per il workflow n8n «Aziende | Popolamento OSM» (segreto del
 // callback del motore) e per il worker sul VPS (worker/osm.mjs, file Geofabrik, punto 87: SITE_CHECKS_SECRET).
-//   POST { source: "osm", companies } -> salvate da store_imported_companies
+//   POST { source: "osm" | "osm_sito", companies } -> salvate da store_imported_companies
 // Solo dati d'azienda (dominio, nome, sito, città, settore): nessun dato personale.
 
 // Blocchi da 2.000 aziende in una sola chiamata superavano il tempo massimo di una query di
@@ -19,7 +19,8 @@ export const maxDuration = 120;
 const authorized = workerAuthorized;
 
 const schema = z.object({
-  source: z.literal("osm"),
+  // «osm_sito»: attività OSM senza sito a cui il worker ha trovato il sito (punto 88), tenute distinte per misurarle.
+  source: z.enum(["osm", "osm_sito"]),
   companies: z.array(z.object({
     domain: z.string().min(3).max(200),
     name: z.string().max(300),

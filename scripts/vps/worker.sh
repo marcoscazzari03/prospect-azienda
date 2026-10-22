@@ -9,7 +9,10 @@
 #   bash worker.sh prova-osm        popolamento OSM: scarica l'Italia e conta, SENZA salvare (10-20 minuti)
 #   bash worker.sh osm              popolamento OSM: un giro vero, in sottofondo (si segue con «stato-osm»)
 #   bash worker.sh stato-osm        ultime righe del popolamento OSM
-#   bash worker.sh avvia            giri automatici: controllo siti alle :05 e :35, contatti alle :15 e :45, OSM il lunedì
+#   bash worker.sh prova-siti       siti delle attività OSM senza sito: 300 attività, SENZA salvare (mostra esempi)
+#   bash worker.sh giro-siti        siti: un giro vero adesso (3000 attività), in sottofondo
+#   bash worker.sh avvia            giri automatici: controllo siti alle :05 e :35, contatti alle :15 e :45, siti alle :50,
+#                                   OSM il lunedì
 #   bash worker.sh ferma            ferma i giri automatici
 #   bash worker.sh stato            ultimi giri e prossimi
 #   bash worker.sh aggiorna         scarica l'ultima versione del codice da main
@@ -20,6 +23,7 @@ REPO=https://github.com/marcoscazzari03/prospect-azienda.git
 NOME=webora-site-checks
 CONT=webora-contacts
 OSM=webora-osm
+SITI=webora-siti
 
 # Servizio e timer systemd per un giro del worker: nome, descrizione, comando, quando (OnCalendar), durata massima,
 # memoria massima, righe in più per il servizio, righe in più per il timer.
@@ -88,6 +92,9 @@ case "${1:-}" in
     # Il file dell'Italia (circa 2 GB) e i suoi derivati restano in /var/lib/webora-osm, l'unica cartella scrivibile.
     unita "$OSM" "popolamento OSM" "/bin/bash $APP/scripts/vps/osm.sh" "Mon *-*-* 02:20:00" 3h 2500M "StateDirectory=webora-osm
 Nice=10" "Persistent=true"
+    # Siti delle attività OSM senza sito (punto 88): stessa cartella dei dati del popolamento.
+    unita "$SITI" "siti delle attività OSM" "/usr/bin/node worker/siti-osm.mjs" "*-*-* *:50:00" 50min 1500M "StateDirectory=webora-osm
+Nice=5" ""
     sudo systemctl daemon-reload
     echo "Installato. Prossimo passo: bash $0 prova"
     ;;
@@ -96,11 +103,14 @@ Nice=10" "Persistent=true"
   prova-osm) prova --property=StateDirectory=webora-osm --property=MemoryMax=2500M /bin/bash "$APP/scripts/vps/osm.sh" ;;
   osm) sudo systemctl start --no-block $OSM.service && echo "Partito in sottofondo. Per seguirlo: bash $0 stato-osm" ;;
   stato-osm) systemctl is-active $OSM.service || true; sudo journalctl -u $OSM.service -n 15 --no-pager ;;
+  prova-siti) prova --property=StateDirectory=webora-osm --setenv=LIMIT=300 /usr/bin/node worker/siti-osm.mjs ;;
+  giro-siti) sudo systemctl start --no-block $SITI.service && echo "Partito in sottofondo. Per seguirlo: bash $0 stato-siti" ;;
+  stato-siti) systemctl is-active $SITI.service || true; sudo journalctl -u $SITI.service -n 10 --no-pager ;;
   giro) sudo systemctl start $NOME.service || echo "Giro non riuscito: ecco le ultime righe."; sudo journalctl -u $NOME.service -n 5 --no-pager ;;
   giro-contatti) sudo systemctl start $CONT.service || echo "Giro non riuscito: ecco le ultime righe."; sudo journalctl -u $CONT.service -n 5 --no-pager ;;
-  avvia) sudo systemctl enable --now $NOME.timer $CONT.timer $OSM.timer && systemctl list-timers $NOME.timer $CONT.timer $OSM.timer --no-pager ;;
-  ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer ;;
-  stato) systemctl list-timers $NOME.timer $CONT.timer $OSM.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
+  avvia) sudo systemctl enable --now $NOME.timer $CONT.timer $OSM.timer $SITI.timer && systemctl list-timers $NOME.timer $CONT.timer $OSM.timer $SITI.timer --no-pager ;;
+  ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer $SITI.timer ;;
+  stato) systemctl list-timers $NOME.timer $CONT.timer $OSM.timer $SITI.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
   aggiorna) git -C "$APP" pull --ff-only && git -C "$APP" log --oneline -1 ;;
-  *) sed -n '2,16p' "$0"; exit 1 ;;
+  *) sed -n '2,18p' "$0"; exit 1 ;;
 esac

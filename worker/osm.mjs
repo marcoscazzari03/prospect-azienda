@@ -102,33 +102,42 @@ export function puntoDi(g) {
 
 // Dalle righe del GeoJSON alle attività per provincia. La provincia scritta nell'indirizzo vale più dei confini (come in
 // n8n); senza nessuna delle due l'attività è fuori Italia (San Marino, Svizzera di confine) o in mare, e si scarta.
-export async function leggiAttivita(righe, osm, province) {
+export async function leggiAttivita(righe, osm, province, { senzaSito = null } = {}) {
   const perSigla = new Map(province.map(p => [p.sigla, p]));
   const sigle = new Set(PROVINCE.map(([s]) => s));
   const gruppi = new Map();
   const stats = { righe: 0, attivita: 0, con_sito: 0, senza_sito_con_nome: 0, fuori: 0, stesso_posto: 0, illeggibili: 0 };
   const posti = new Map(); // dominio -> punti già visti
   let ultima = null; // la provincia dell'attività precedente: quelle vicine nel file stanno spesso nella stessa
+  const provinciaDi = (t, f) => {
+    const scritta = String(t['addr:province'] || '').trim().toUpperCase();
+    if (sigle.has(scritta)) return perSigla.get(scritta) || { sigla: scritta };
+    const punto = puntoDi(f.geometry);
+    const p = punto && ((ultima && dentro(ultima, punto) && ultima) || province.find(q => q !== ultima && dentro(q, punto)));
+    if (p) ultima = p;
+    return p || null;
+  };
   for await (const riga of righe) {
     if (!riga.trim()) continue;
     stats.righe++;
     let f;
     try { f = JSON.parse(riga.replace(/^\x1e/, '')); } catch { stats.illeggibili++; continue; }
     const t = f?.properties || {};
-    if (osm.categoriaOsm(t).esclusa) continue;
+    const categoria = osm.categoriaOsm(t);
+    if (categoria.esclusa) continue;
     stats.attivita++;
     if (!(t.website || t['contact:website'])) {
-      if (t.name) stats.senza_sito_con_nome++;
+      if (!t.name) continue;
+      stats.senza_sito_con_nome++;
+      // Per la ricerca del sito (punto 88): solo i dati che servono, senza marchi nazionali né attività estere.
+      if (senzaSito && !t['brand:wikidata'] && !t['operator:wikidata'] && !t.brand && !(t['addr:country'] && t['addr:country'].toUpperCase() !== 'IT')) {
+        const p = provinciaDi(t, f);
+        if (p) senzaSito.push({ chiave: `${t['@type']}/${t['@id']}`, nome: String(t.name).slice(0, 200), citta: String(t['addr:city'] || '').slice(0, 80), sigla: p.sigla, tipo: categoria.tipo, valore: categoria.valore });
+      }
       continue;
     }
     stats.con_sito++;
-    const scritta = String(t['addr:province'] || '').trim().toUpperCase();
-    let p = sigle.has(scritta) ? (perSigla.get(scritta) || { sigla: scritta }) : null;
-    if (!p) {
-      const punto = puntoDi(f.geometry);
-      p = punto && ((ultima && dentro(ultima, punto) && ultima) || province.find(q => q !== ultima && dentro(q, punto)));
-      if (p) ultima = p;
-    }
+    const p = provinciaDi(t, f);
     if (!p) { stats.fuori++; continue; }
     // Stessa azienda segnata più volte nello stesso posto (area industriale, edificio e ufficio, ognuno con il sito): un
     // solo punto, altrimenti tre oggetti sembrerebbero una catena (Code Reviewer). Entro circa 500 m.

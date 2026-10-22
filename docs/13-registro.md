@@ -187,6 +187,21 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 22/10/2026 — sito delle attività OSM che non ce l'hanno (punto 88) · codice pronto; da fare: revisione, main, prova sul VPS
+- **Perché:** il popolamento OSM ha trovato 397.605 attività con un nome ma senza sito: senza dominio non entrano nel
+  database. Solo la parte gratuita (domini indovinati); la ricerca web con Haiku per i casi difficili, con un tetto di spesa,
+  è una decisione a parte.
+- **Cosa:** `worker/siti-osm.mjs` (servizio `webora-siti`, ogni ora alle :50, 3.000 attività per giro, 16 in parallelo,
+  massimo 40 minuti): legge le attività senza sito dal file del popolamento (`senza-sito.json`, rifatto quando il file
+  cambia), sceglie prima uffici, manifattura e artigiani, salta i nomi presenti in 4 o più posti («Bar Sport») e quelle
+  provate negli ultimi 180 giorni (`siti-provati.tsv`). Per ognuna: domini dal nome e verifica con i nodi n8n
+  `03-domini-candidati.js` e `04-scegli-sito.js` eseguiti così come sono, più la conferma del luogo (città o provincia
+  scritte sulla pagina). Le trovate vanno su `/api/engine/companies-import` con origine `osm_sito` (nuova nello schema della
+  route). `osm.sh` ora scrive i file con un altro nome e poi li rinomina, perché il worker li legge ogni ora.
+- **Prove:** `worker/test.mjs` (attività senza sito con provincia, sito trovato con nome e città, senza città serve la
+  provincia, omonimo in un'altra città scartato, dominio in vendita scartato, priorità e riprova dopo 180 giorni).
+- **Indietro:** `sudo systemctl disable --now webora-siti.timer`; le aziende aggiunte hanno `origin = 'osm_sito'`.
+
 ## 22/10/2026 — tutta Italia da OpenStreetMap sul VPS (punto 87) · in produzione dal 22/10 (primo giro: 52.284 aziende nuove, 15.132 aggiornate; giro ogni lunedì alle 2:20 UTC); da spegnere «Aziende | Popolamento OSM» su n8n
 - **Perché:** il popolamento n8n chiede a Overpass 8 province a notte (due settimane per un giro, province perse per i
   timeout: Milano, Brescia, Bologna...) e solo i tipi con sito; manifattura e uffici sono i settori più deboli del database.
