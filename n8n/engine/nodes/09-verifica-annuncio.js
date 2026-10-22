@@ -26,9 +26,11 @@ const titoli = sg.job_families.flatMap(f => f.titles.map(t => ({ fam: f.code, t:
 // grafici o sistemisti («Programmatore CNC» non è uno sviluppatore; 22/10, punto 89). Stessa regola della raccolta Adzuna.
 const OFFICINA = /\b(cnc|cad|cam|plc|fresatore|tornitore|saldatore|macchine utensili|centri di lavoro)\b/;
 const MANIFATTURA = new Set(['production', 'maintenance', 'logistics']);
+// Operai fuori dalla fabbrica (edilizia, campi, servizi comunali, pulizie): non valgono per la manifattura.
+const NON_FABBRICA = /\b(edil\w*|agricol\w*|florovivai\w*|vivai\w*|forestal\w*|giardinier\w*|ecologic\w*|comunal\w*|cimiteri\w*|pulizi\w*|stradal\w*)\b/;
 const famigliaDi = (titolo) => {
   const n = norm(titolo);
-  return titoli.find(x => n.includes(x.t) && (!OFFICINA.test(n) || MANIFATTURA.has(x.fam)))?.fam || '';
+  return titoli.find(x => n.includes(x.t) && (!OFFICINA.test(n) || MANIFATTURA.has(x.fam)) && !(MANIFATTURA.has(x.fam) && NON_FABBRICA.test(n)))?.fam || '';
 };
 
 // Agenzie per il lavoro: se l'annuncio non è sul sito dell'azienda, non sappiamo chi assume davvero.
