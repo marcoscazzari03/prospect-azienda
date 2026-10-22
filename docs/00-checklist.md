@@ -161,8 +161,10 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 46. **Insieme** – Referenti: restano spenti, solo dopo il parere legale.
 49. **Io** – Controllo siti su un worker fuori da n8n, sul VPS Hetzner dell'utente da reinstallare (deciso il 21/10): libera
     ~720 esecuzioni al mese e permette i segnali «certificato in scadenza entro 30 giorni» e PageSpeed. Dopo il 30/10.
-    Preparazione: server già ridimensionato a CX23 (6,70 €/mese, 21/10). **Insieme, 22/10:** rebuild pulito con Ubuntu 24.04
-    e `scripts/vps/setup.sh` (accesso con password, scelta dell'utente), passo per passo.
+    Preparazione: server già ridimensionato a CX23 (6,70 €/mese, 21/10). ~~**Insieme, 22/10:** rebuild pulito con Ubuntu 24.04
+    e `scripts/vps/setup.sh`~~ (22/10: server pronto; Hetzner ha inserito la chiave SSH del progetto, quindi accesso solo con
+    `ssh worker@2.31.7.149` dal computer dell'utente, root e password via SSH spenti; Node 22, firewall, fail2ban,
+    aggiornamenti automatici; riavviato). **Io:** il worker del controllo siti.
 50. **Insieme** – Seconda fonte per gli annunci (termini di Jooble e Careerjet) e pagine «Lavora con noi».
 51. **Insieme** – Ricerche AI notturne mirate su province e settori dei clienti (circa 15–20 € ogni 1.000 aziende).
 

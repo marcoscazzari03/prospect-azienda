@@ -186,6 +186,15 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 22/10/2026 — VPS Hetzner configurato (punto 49, preparazione) · server pronto, worker da scrivere
+- **Cosa:** rebuild con Ubuntu 24.04 e `scripts/vps/setup.sh`, passo per passo con l'utente. Hetzner ha inserito da solo la
+  chiave SSH salvata nel progetto, quindi lo script ha preso la strada «con chiave»: utente `worker` con sudo, accesso solo
+  con chiave, root e password via SSH spenti. Verificato: l'utente entra con `ssh worker@2.31.7.149`; dopo il riavvio Node
+  v22.23.4 e firewall attivo (solo OpenSSH).
+- **Da ricordare:** si entra solo dal computer dell'utente (la chiave sta lì). Senza la chiave: console web di Hetzner con
+  la password di root. Nessun segreto sul server per ora.
+- **Indietro:** rebuild dalla console Hetzner.
+
 ## 21/10/2026 — VPS Hetzner: prima configurazione (punto 49, preparazione) · script pronto, da eseguire sul server
 - **Cosa:** `scripts/vps/setup.sh`: aggiornamenti (anche automatici), firewall con la sola porta SSH, fail2ban, utente
   `worker` con la chiave SSH di root, SSH solo con chiave e senza root, Node.js 22 e git. Nessun segreto nello script.
