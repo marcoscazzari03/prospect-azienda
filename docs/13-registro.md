@@ -59,6 +59,9 @@ Come tornare indietro, in generale:
 - **Correzione di `vercel.json`:** `ignoreCommand` salta la build solo se il commit è diverso da quello già pubblicato; un
   Redeploy dello stesso commit ora costruisce davvero (provato in locale: stesso commit → pubblica, solo documenti → salta,
   codice cambiato → pubblica, senza commit precedente → pubblica). Vale dal prossimo push su main.
+- **Deploy fallito (975ac36):** Vercel accetta un `ignoreCommand` di al massimo 256 caratteri; con la condizione nuova erano
+  274 («Deployment failed», online resta `bb5707b`). Accorciato a 232 con la forma breve `':!…'` di `':(exclude)…'`, stessa
+  logica (provato: stesso commit → pubblica, solo documenti → salta, codice → pubblica, vuoto o inesistente → pubblica).
 - **Da ricordare:** dopo aver cambiato una variabile su Vercel serve una pubblicazione nuova; finché questa correzione non è
   online, il Redeploy dal pannello va fatto con «Redeploy» senza cache o con un push su main.
 - **Indietro:** rimettere i valori precedenti su entrambi i lati (o due valori nuovi uguali sui due lati); per `vercel.json`
