@@ -95,9 +95,11 @@ export function haModulo(html) {
 export const apri = async (url, req) => {
   try {
     const r = await req(url, { insicuro: true, redirect: 5, timeout: 10_000 });
-    if (!(r.status >= 200 && r.status < 300)) return '';
-    return r.body.length > 500_000 ? r.body.slice(0, 400_000) + r.body.slice(-100_000) : r.body;
-  } catch { return ''; }
+    if (!(r.status >= 200 && r.status < 300)) return { url, html: '' };
+    const html = r.body.length > 500_000 ? r.body.slice(0, 400_000) + r.body.slice(-100_000) : r.body;
+    // L'indirizzo finale, dopo i redirect: il modulo si salva dove sta davvero (QA, 22/10).
+    return { url: r.url || url, html };
+  } catch { return { url, html: '' }; }
 };
 
 // Una azienda: homepage, poi le pagine scelte; la prima email aziendale trovata (contatti prima della homepage) e la prima
@@ -106,16 +108,18 @@ export async function trovaContatti(regole, a, req = richiesta) {
   const www = String(a.website || '').toLowerCase().includes('://www.') ? 'www.' : '';
   const protocollo = String(a.website || '').toLowerCase().startsWith('http://') ? 'http://' : 'https://';
   const base = `${protocollo}${www}${a.domain}/`;
-  const home = await apri(base, req);
+  const casa = await apri(base, req);
+  const home = casa.html;
   const dominio = radice(a.domain);
-  const pagine = home.length >= 500 ? pagineDaAprire(home, base, dominio) : [];
+  // Anche una homepage corta (sito in JavaScript) fa provare i percorsi tipici (QA, 22/10).
+  const pagine = home ? pagineDaAprire(home, base, dominio) : [];
   const lette = [];
-  for (const url of pagine) lette.push({ url, html: await apri(url, req) });
-  lette.push({ url: base, html: home });
+  for (const url of pagine) lette.push(await apri(url, req));
+  lette.push(casa);
   const valide = lette.filter(p => p.html.length >= 500);
   let email = '';
   for (const p of valide) { email = regole.emailAziendale(p.html, a.website || base); if (email) break; }
-  const modulo = valide.find(p => p.url !== base && haModulo(p.html))?.url || (haModulo(home) ? base : '');
+  const modulo = valide.find(p => p !== casa && haModulo(p.html))?.url || (haModulo(home) ? casa.url : '');
   return { domain: a.domain, ...(email ? { email } : {}), ...(modulo ? { contact_form: modulo.slice(0, 300) } : {}), pages_read: valide.length };
 }
 

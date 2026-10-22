@@ -64,7 +64,8 @@ begin
     v_read := coalesce((v_item ->> 'pages_read')::int, 0) > 0;
 
     update companies c
-       set contacts_checked_at = now(),
+       -- Nessuna pagina letta (sito spento, rete del VPS, tempo scaduto): si riprova tra 7 giorni, non tra 90 (QA).
+       set contacts_checked_at = case when v_read then now() else now() - interval '83 days' end,
            site_email = case when v_email <> '' and coalesce(c.site_email, '') = '' then v_email else c.site_email end,
            site_email_at = case when v_email <> '' and coalesce(c.site_email, '') = '' then now() else c.site_email_at end,
            email_missed_at = case when v_email <> '' then null

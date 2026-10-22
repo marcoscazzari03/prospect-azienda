@@ -49,8 +49,9 @@ select pg_temp.check((select site_email = 'ufficio@vuota38.it' from companies wh
 -- Sito non letto (nessuna pagina): niente «email non trovata».
 update companies set site_email = '', contact_form_url = '', contacts_checked_at = null, email_missed_at = null where domain = 'vuota38.it';
 select store_contact_checks('[{"domain":"vuota38.it","pages_read":0}]');
-select pg_temp.check((select email_missed_at is null and contacts_checked_at is not null from companies where domain = 'vuota38.it'),
-                     'sito non letto: cercata, ma senza «email non trovata»');
+select pg_temp.check((select email_missed_at is null and contacts_checked_at between now() - interval '84 days' and now() - interval '82 days'
+                        from companies where domain = 'vuota38.it'),
+                     'sito non letto: senza «email non trovata», si riprova tra 7 giorni');
 
 -- Domini sconosciuti o malformati: ignorati.
 select pg_temp.check((select (store_contact_checks('[{"domain":"sconosciuto38.it","email":"info@sconosciuto38.it"},{"domain":"x"}]') ->> 'saved')::int = 0),

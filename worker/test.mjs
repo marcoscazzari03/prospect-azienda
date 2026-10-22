@@ -147,6 +147,16 @@ let t0 = Date.now();
 haModulo('<form <textarea '.repeat(200_000));
 pagineDaAprire('<meta http-equiv=refresh content="0; '.repeat(80_000), 'https://ditta.it/', 'ditta.it');
 assert.ok(Date.now() - t0 < 2000, `pagine ostili lette in ${Date.now() - t0} ms`);
-console.log('ok  contatti: pagine, modulo, email del dominio, sito spento, 404, pagine ostili');
+// Pagina contatti che rimanda a un altro sito: si salva l'indirizzo finale (poi scartato dal database), non /contatti (QA).
+const altrove = await trovaContatti(regole, { domain: 'ditta.it', website: 'https://www.ditta.it/' },
+  async (url) => url === 'https://www.ditta.it/contatti'
+    ? { status: 200, url: 'https://moduli.esempio.com/ditta', body: sito[url] }
+    : { status: 200, url, body: sito[url] || casa });
+assert.equal(altrove.contact_form, 'https://moduli.esempio.com/ditta', 'modulo su un altro sito: indirizzo finale');
+// Homepage corta (sito in JavaScript): si provano i percorsi tipici (QA).
+const corta = await trovaContatti(regole, { domain: 'ditta.it', website: 'https://ditta.it/' },
+  async (url) => ({ status: 200, url, body: url === 'https://ditta.it/' ? '<div id="app"></div>' : url === 'https://ditta.it/contatti' ? sito['https://www.ditta.it/privacy-policy'] : '' }));
+assert.equal(corta.email, 'info@ditta.it', 'homepage corta: percorsi tipici provati');
+console.log('ok  contatti: pagine, modulo, email del dominio, sito spento, 404, pagine ostili, redirect, homepage corta');
 
 console.log('\nTest del worker superati.');
