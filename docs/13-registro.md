@@ -45,7 +45,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — controllo siti bloccato di notte da pagine enormi (proposta 1 del resoconto) · in attesa di caricamento su n8n
+## 22/10/2026 — controllo siti bloccato di notte da pagine enormi (proposta 1 del resoconto) · «Valuta siti» caricato il 22/10 (verificato identico), da pubblicare; nodi del motore da caricare
 - **Problema:** 4 giri falliti di fila la notte del 22/10 (00:25–03:25 UTC, «Task runner unresponsive» in «Valuta siti»). La coda
   è sempre la stessa e un giro fallito non salva niente, quindi lo stesso lotto (ricontrollo della 054, Puglia) tornava ogni
   ora; è ripartito solo perché le aziende nuove di OSM sono passate davanti, e quel lotto è ancora in coda.
