@@ -1,8 +1,8 @@
 -- Punto 19 (22/10): pulizia dei dati di collaudo, decisa dall'utente dopo `inventario_collaudo.sql`.
 -- CANCELLA DATI: le organizzazioni di prova «Scazza» e «Prova» (nessuna ricerca, nessun lead, nessun acquisto, solo i 15
 -- crediti di benvenuto) e i loro utenti. «Webora» (admin, storico dei collaudi) resta com'è.
--- Sicurezze: si ferma senza toccare niente se una delle due ha ricerche, lead, segnalazioni, acquisti o avvisi, se il
--- nome non corrisponde o se non le trova entrambe. Cancella un utente solo se non è admin e non appartiene ad altre
+-- Sicurezze: si ferma senza toccare niente se una delle due ha ricerche, lead, segnalazioni, acquisti, pagamenti,
+-- abbonamenti, un cliente Stripe o avvisi, se il nome non corrisponde o se non le trova entrambe. Cancella un utente solo se non è admin e non appartiene ad altre
 -- organizzazioni. Restano aziende, controlli dei siti, prove dei segnali, annunci e tutto il resto.
 -- Tutto o niente: è un solo blocco, un errore annulla ogni cancellazione. Non si torna indietro (solo dal backup).
 
@@ -12,17 +12,21 @@ declare
   v_users uuid[];
   v_n integer;
 begin
+  -- Righe bloccate fino alla fine: niente ricerche o acquisti nuovi tra il controllo e la cancellazione (Code Reviewer).
+  perform 1 from organizations where id = any (v_orgs) for update;
   select count(*) into v_n from organizations
-   where id = any (v_orgs) and name in ('Scazza', 'Prova') and plan_id = 'free';
+   where id = any (v_orgs) and name in ('Scazza', 'Prova') and plan_id = 'free' and stripe_customer_id is null;
   if v_n <> 2 then
-    raise exception 'Fermato: trovate % organizzazioni su 2 con nome e piano attesi', v_n;
+    raise exception 'Fermato: trovate % organizzazioni su 2 con nome, piano e senza cliente Stripe come attesi', v_n;
   end if;
   if exists (select 1 from searches where org_id = any (v_orgs))
      or exists (select 1 from deliveries where org_id = any (v_orgs))
      or exists (select 1 from lead_reports r join deliveries d on d.id = r.delivery_id where d.org_id = any (v_orgs))
      or exists (select 1 from credit_ledger where org_id = any (v_orgs) and kind not in ('grant', 'expire'))
-     or exists (select 1 from search_alerts where org_id = any (v_orgs)) then
-    raise exception 'Fermato: una delle due organizzazioni ha ricerche, lead, segnalazioni, acquisti o avvisi';
+     or exists (select 1 from search_alerts where org_id = any (v_orgs))
+     or exists (select 1 from payments where org_id = any (v_orgs))
+     or exists (select 1 from subscriptions where org_id = any (v_orgs)) then
+    raise exception 'Fermato: una delle due organizzazioni ha ricerche, lead, segnalazioni, acquisti, pagamenti o avvisi';
   end if;
 
   -- Utenti da togliere: solo membri di queste due, non admin, senza altre organizzazioni.
