@@ -95,7 +95,8 @@ fino alla 060, con i loro test; a ogni push GitHub Actions esegue lint, tipi, te
   - **«Vendi altro?»** porta alla ricerca in target, per i settori senza segnali.
 - **Il resto del wizard:**
   - quantità di lead;
-  - anteprima con il riepilogo «Cercheremo…» e la disponibilità stimata dal database;
+  - anteprima con il riepilogo «Cercheremo…» e i lead attesi dal database (dal 22/10: le aziende con email o modulo
+    più il 30–50% di quelle ancora da provare, resa misurata), con la spesa in euro;
   - ripetizione automatica facoltativa.
 - **Risultati della ricerca:**
   - tabella dei lead con azienda, sito, settore, zona, email o modulo, segnali con prova e data, punteggio

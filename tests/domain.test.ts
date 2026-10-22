@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { estimateCredits } from "@/lib/domain/pricing";
+import { estimateCredits, expectedLeads } from "@/lib/domain/pricing";
 import { blockedSector } from "@/lib/domain/blocked-sectors";
 import { aiSearchExtra, buildEnginePayload, formOnlyLeads, reserveCompaniesForDatabase, enrichmentCap, enrichmentSearchBudget, jobAdFromDatabaseOnly, maxAttemptsFor, nextStep, targetIsSimple } from "@/lib/domain/engine";
 import { nextRepeatAt, searchInputSchema, toTarget } from "@/lib/domain/search-input";
@@ -285,5 +285,19 @@ describe("moduli di contatto", () => {
     expect(row.modulo_contatto).toBe("https://a.it/contatti");
     expect(row.tipo_email).toBe("Solo modulo di contatto");
     expect(row.stato_email).toBe("");
+  });
+});
+
+describe("lead attesi nel wizard (punto 40)", () => {
+  it("conta l'email nota e una quota delle aziende da provare", () => {
+    expect(expectedLeads({ total: 100, withEmail: 20, formOnly: 4, toTry: 76 }, false, 500)).toEqual({ min: 40, max: 60 });
+    expect(expectedLeads({ total: 100, withEmail: 20, formOnly: 4, toTry: 76 }, true, 500)).toEqual({ min: 45, max: 65 });
+  });
+  it("mai oltre i lead richiesti", () => {
+    expect(expectedLeads({ total: 100, withEmail: 20, formOnly: 4, toTry: 76 }, false, 30)).toEqual({ min: 30, max: 30 });
+  });
+  it("numeri piccoli esatti", () => {
+    expect(expectedLeads({ total: 5, withEmail: 1, formOnly: 0, toTry: 4 }, false, 10)).toEqual({ min: 2, max: 3 });
+    expect(expectedLeads({ total: 0, withEmail: 0, formOnly: 0, toTry: 0 }, true, 10)).toEqual({ min: 0, max: 0 });
   });
 });

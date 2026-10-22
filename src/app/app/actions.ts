@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { defaultSearchName, nextRepeatAt, searchInputSchema, splitZones, toTarget, type SearchInput } from "@/lib/domain/search-input";
 import { aiSearchExtra, jobAdFromDatabaseOnly, targetIsSimple } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
+import type { AvailabilityContacts } from "@/lib/domain/pricing";
 import { startSearch } from "@/lib/server/searches";
 import { checkoutAllowed, createCheckout, createPortal } from "@/lib/server/stripe";
 import { RATE_LIMITS, SEARCH_RULES } from "@/lib/config";
@@ -110,7 +111,13 @@ export async function createSearch(_: ActionState, form: FormData): Promise<Acti
 }
 
 // aiExtra: crediti in più a lead se la ricerca usa la ricerca AI sul web (aiSearchExtra).
-export type Availability = { count: number; databaseOnly: boolean; kind: "opportunity" | "target"; aiExtra: number } | null;
+export type Availability = {
+  count: number;
+  databaseOnly: boolean;
+  kind: "opportunity" | "target";
+  aiExtra: number;
+  contacts: AvailabilityContacts | null; // le stesse aziende divise per contatto (migrazione 063)
+} | null;
 
 // Wizard: quante aziende del database sono già pronte per questa ricerca (stesso calcolo
 // della riserva del motore). Opportunità: con la prova dei segnali (con le offerte basate
@@ -125,17 +132,21 @@ export async function searchAvailability(form: FormData): Promise<Availability> 
   const target = toTarget(parsed.input);
   const opportunity = parsed.input.signals.codes.length > 0;
   const aiExtra = aiSearchExtra(target);
-  if (!opportunity && !targetIsSimple(target)) return { count: 0, databaseOnly: false, kind: "target", aiExtra };
-  const { data, error } = await createAdminClient().rpc(opportunity ? "opportunity_availability" : "target_availability", {
+  if (!opportunity && !targetIsSimple(target)) return { count: 0, databaseOnly: false, kind: "target", aiExtra, contacts: null };
+  // Stesse aziende di opportunity_availability / target_availability, divise per contatto: il wizard stima i lead attesi.
+  const { data, error } = await createAdminClient().rpc("availability_contacts", {
     p_org: viewer.org.id,
     p_target: target as Json,
     p_contacts: parsed.input.contactsPerCompany,
+    p_opportunity: opportunity,
   });
   if (error) {
     console.error("availability", error);
     return null;
   }
-  return { count: data ?? 0, databaseOnly: jobAdFromDatabaseOnly(target), kind: opportunity ? "opportunity" : "target", aiExtra };
+  const n = (k: string) => Number((data as Record<string, unknown> | null)?.[k] ?? 0) || 0;
+  const contacts = { total: n("total"), withEmail: n("with_email"), formOnly: n("form_only"), toTry: n("to_try") };
+  return { count: contacts.total, databaseOnly: jobAdFromDatabaseOnly(target), kind: opportunity ? "opportunity" : "target", aiExtra, contacts };
 }
 
 export type IndustrySuggestion = { industry: string; companies: number };

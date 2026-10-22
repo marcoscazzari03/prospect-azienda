@@ -9,6 +9,23 @@ export function estimateCredits(mode: EmailMode, quantity: number, extra: number
   return { min: (info.minCredits + e.min) * quantity, max, reserve: max };
 }
 
+// Resa delle aziende «da provare» (sito vivo, nessuna email né modulo noti): quota che diventa un lead.
+// Misurata il 22/10 (supabase/queries/resa_wizard.sql): nei giri degli ultimi 30 giorni il motore trova un contatto in
+// circa il 60% delle aziende che prova, ma prova prima quelle con l'email già nota; per le altre si usa una forbice prudente.
+export const CONTACT_YIELD = { low: 0.3, high: 0.5 } as const;
+
+export type AvailabilityContacts = { total: number; withEmail: number; formOnly: number; toTry: number };
+
+// Lead attesi dalle aziende disponibili: quelle con l'email (e il modulo, se il cliente lo accetta) più una quota
+// delle «da provare». Mai oltre i lead richiesti. Sotto 10 il numero esatto, sopra a multipli di 5.
+export function expectedLeads(c: AvailabilityContacts, withForm: boolean, requested: number) {
+  const known = c.withEmail + (withForm ? c.formOnly : 0);
+  const round = (n: number, up: boolean) => (n < 10 ? Math.round(n) : (up ? Math.ceil(n / 5) : Math.floor(n / 5)) * 5);
+  const max = Math.min(requested, round(known + c.toTry * CONTACT_YIELD.high, true));
+  const min = Math.min(max, round(known + c.toTry * CONTACT_YIELD.low, false));
+  return { min, max };
+}
+
 export function formatEur(cents: number) {
   return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
 }

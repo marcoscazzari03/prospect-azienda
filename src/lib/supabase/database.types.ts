@@ -871,6 +871,9 @@ isOneToOne: false
 "stop_search_alert":
 { Args: { "p_org": string,"p_search": string }; Returns: undefined
                            },
+"availability_contacts":
+{ Args: { "p_contacts": number,"p_opportunity": boolean,"p_org": string,"p_target": Json }; Returns: Json
+                           },
 "opportunity_availability":
 { Args: { "p_contacts": number,"p_org": string,"p_target": Json }; Returns: number
                            },

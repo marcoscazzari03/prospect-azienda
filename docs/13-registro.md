@@ -45,13 +45,25 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — stima realistica nel wizard (punto 40) · in corso: misura della resa
+## 22/10/2026 — stima realistica nel wizard (punto 40) · in attesa della migrazione 063, poi pubblicazione su main
 - **Problema:** il wizard mostra le aziende «disponibili» (`target_pool` / `opportunity_pool`), ma il pool non richiede
   un'email: una parte delle aziende non diventa un lead (nessuna email né modulo). «120 disponibili» può voler dire molti
   meno lead consegnati.
 - **Primo passo:** `supabase/queries/resa_wizard.sql` (sola lettura): composizione delle aziende vive (con email, solo
   modulo, provate senza contatto, mai provate), lead validi e motivi di scarto dei giri degli ultimi 30 giorni, consegne.
   Con questi numeri si decide la resa da usare nella stima.
+- **Misura (22/10):** 10.583 aziende vive: 2.015 con email (19%), 96 solo modulo, 52 provate senza contatto, 8.420 mai
+  provate. Giri degli ultimi 30 giorni: 400 lead validi e 265 «nessuna_email» (circa 60% di resa, ma il motore prova prima
+  chi ha già l'email). Consegnati 195 lead, 7 con il solo modulo.
+- **Cosa:** migrazione `20261207000063_availability_contacts.sql`: `availability_contacts(org, target, contatti,
+  opportunità)` divide le stesse aziende di `target_availability` / `opportunity_availability` (al massimo 501) in con
+  email, solo modulo, provate senza contatto (90 giorni) e da provare. App: `searchAvailability` la usa al posto delle
+  due funzioni; `expectedLeads` in `src/lib/domain/pricing.ts` (resa delle «da provare» 30–50%, `CONTACT_YIELD`);
+  wizard: «Lead attesi: circa X–Y» / «Dal nostro database: circa X–Y lead» al posto del numero di aziende, tolto «Avvia
+  la ricerca per scoprire altri risultati» (UI/UX: ambiguo); con le ricerche solo da annunci la spesa in crediti ed euro
+  segue i lead attesi, la riserva resta sui lead richiesti. Test SQL 37, test in `tests/domain.test.ts`.
+- **Prima la migrazione, poi main:** l'app nuova chiama `availability_contacts`; le funzioni di prima restano.
+- **Indietro:** `git revert`; `drop function public.availability_contacts(uuid, jsonb, integer, boolean)` dopo il revert.
 
 ## 22/10/2026 — controllo siti bloccato di notte da pagine enormi (proposta 1 del resoconto) · controllo siti in produzione (pubblicato il 22/10); motore in produzione (pubblicato il 22/10)
 - **Problema:** 4 giri falliti di fila la notte del 22/10 (00:25–03:25 UTC, «Task runner unresponsive» in «Valuta siti»). La coda

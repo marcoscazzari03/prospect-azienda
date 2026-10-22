@@ -2,7 +2,7 @@
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Button, Card, Field, Input, Select, Textarea, cx } from "@/components/ui";
 import { COMPANY_SIZES, COUNTRIES, EMAIL_MODES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
-import { estimateCredits, formatEur } from "@/lib/domain/pricing";
+import { estimateCredits, expectedLeads, formatEur } from "@/lib/domain/pricing";
 import { BLOCKED_SECTORS_MESSAGE, blockedSector } from "@/lib/domain/blocked-sectors";
 import {
   JOB_AD_COUNTRIES,
@@ -223,8 +223,7 @@ export function SearchWizard({
   const affordable = perLead > 0 ? Math.floor(credits / perLead) : maxQuantity;
   const quantityMax = Math.max(1, Math.min(maxQuantity, affordable));
   const leads = Math.min(quantity, quantityMax);
-  const estimate = estimateCredits(mode, leads, extra);
-  const reserve = estimate.reserve;
+  const reserve = estimateCredits(mode, leads, extra).reserve;
   const enough = credits >= reserve;
   const euro = (n: number) => formatEur(Math.round((n * centsPerCredit) / 10) * 10);
   const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
@@ -296,6 +295,13 @@ export function SearchWizard({
   const noneAvailable = Boolean(opportunity && available?.kind === "opportunity" && available.databaseOnly && available.count === 0);
   const targetReady = !opportunity && available?.kind === "target" && available.count > 0 ? available.count : 0;
   const howMany = (n: number) => (n > 500 ? "oltre 500" : String(n));
+  // Lead attesi dalle aziende del database (punto 40): non tutte hanno un'email o un modulo di contatto pubblico.
+  const withForm = mode === "company_only" && contact === "email_or_form";
+  const expected = available?.contacts && available.count > 0 ? expectedLeads(available.contacts, withForm, leads) : null;
+  const expectedLabel = expected ? (expected.min === expected.max ? String(expected.max) : `${expected.min}–${expected.max}`) : "";
+  const fewer = Boolean(expected && expected.max < leads);
+  // Solo annunci dal database: la ricerca non va oltre, la spesa prevista segue i lead attesi (la riserva no).
+  const estimate = estimateCredits(mode, available?.databaseOnly && expected ? Math.max(1, expected.max) : leads, extra);
   const showIndustry = !(opportunity && allSectors);
   const blocked = showIndustry && blockedSector([industry]) ? BLOCKED_SECTORS_MESSAGE : "";
 
@@ -797,9 +803,13 @@ export function SearchWizard({
                     : available.databaseOnly
                       ? available.count === 0
                         ? "Per ora nessuna azienda con un annuncio recente per questa ricerca: prova ad allargare la zona o a scegliere tutti i settori."
-                        : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < leads && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
+                        : expected
+                          ? <>Lead attesi: circa <strong className="font-mono">{expectedLabel}</strong>. Delle {howMany(available.count)} {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente non tutte hanno un&apos;email o un modulo di contatto pubblico.{fewer && ` Ne chiedi ${leads}: la ricerca si fermerà prima e i crediti non usati tornano disponibili.`}</>
+                          : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < leads && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
                       : available.count > 0
-                        ? <>Stima preliminare: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda compatibile" : "aziende compatibili"} con la prova. Avvia la ricerca per scoprire altri risultati.</>
+                        ? expected
+                          ? <>Dal nostro database: circa <strong className="font-mono">{expectedLabel}</strong> lead con la prova già verificata (non tutte le aziende hanno un contatto pubblico).{fewer && " Gli altri li cerchiamo sul web: potrebbero essere meno del previsto."}</>
+                          : <>Stima preliminare: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda compatibile" : "aziende compatibili"} con la prova.</>
                         : "Cerchiamo le aziende sul web: può richiedere qualche minuto in più."}
                 </p>
               )}
@@ -815,16 +825,18 @@ export function SearchWizard({
           </dl>
           {targetReady > 0 && (
             <p className="rounded-lg border border-ledger/30 bg-ledger-soft/60 p-3 text-xs text-ink-2" aria-live="polite">
-              Stima preliminare: <strong className="font-mono">{howMany(targetReady)}</strong> {targetReady === 1 ? "azienda compatibile" : "aziende compatibili"}. Avvia la ricerca per scoprire altri risultati.
+              {expected
+                ? <>Dal nostro database: circa <strong className="font-mono">{expectedLabel}</strong> lead (non tutte le aziende hanno un contatto pubblico).{fewer && " Gli altri li cerchiamo sul web: potrebbero essere meno del previsto."}</>
+                : <>Stima preliminare: <strong className="font-mono">{howMany(targetReady)}</strong> {targetReady === 1 ? "azienda compatibile" : "aziende compatibili"}.</>}
             </p>
           )}
           <div className="rounded-xl bg-ledger-soft p-4">
             <p className="flex items-center gap-2 text-sm font-medium text-ledger">
               <Icon name="coins" className="h-4 w-4" /> Crediti stimati
             </p>
-            <p className="mt-1 font-mono text-3xl font-semibold">{estimate.min === reserve ? reserve : `${estimate.min}–${reserve}`}</p>
+            <p className="mt-1 font-mono text-3xl font-semibold">{estimate.min === estimate.max ? estimate.max : `${estimate.min}–${estimate.max}`}</p>
             {centsPerCredit > 0 && (
-              <p className="text-xs text-ink-2">circa {estimate.min === reserve ? euro(reserve) : `${euro(estimate.min)}–${euro(reserve)}`} al prezzo del tuo piano</p>
+              <p className="text-xs text-ink-2">circa {estimate.min === estimate.max ? euro(estimate.max) : `${euro(estimate.min)}–${euro(estimate.max)}`} al prezzo del tuo piano</p>
             )}
             <p className="mt-1 text-xs text-ink-2">
               {withSignal && <>Ogni lead con opportunità: {extraCreditsLabel(signalPrices)}. </>}

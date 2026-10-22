@@ -246,7 +246,9 @@ segnali dal sito controllati negli ultimi 30), paese, zona (anche città e regio
 settore della ricerca, escluse aziende già consegnate, già controllate nella ricerca e in opposizione.
 Il motore le tratta come la riserva: niente ricerca AI se bastano, referente dal sito, poi email.
 La selezione è `opportunity_pool(org, target, contatti, esclusi)`: il wizard la usa tramite
-`opportunity_availability` per mostrare quante aziende sono disponibili prima di avviare.
+`opportunity_availability` per mostrare quante aziende sono disponibili prima di avviare (dal 22/10
+`availability_contacts`, migrazione 063: stesse aziende divise in con email, solo modulo, provate senza
+contatto e da provare; il wizard ne ricava i lead attesi con `expectedLeads`).
 
 ## Riserva dal database (ricerche in target, versione prudente)
 
@@ -260,4 +262,4 @@ segnali solo se la ricerca non ha segnali; scarica la homepage («Serve controll
 per `_riserva`), cerca il referente prima sul sito e poi sul web (tetto `referenti_max`), poi le
 email. Niente ricerca AI se la riserva è almeno 1,4 volte i lead (2 con «solo nominative»),
 altrimenti i lotti AI coprono solo la parte mancante. Il wizard mostra il numero con
-`target_availability` (migrazione 029).
+`target_availability` (migrazione 029), dal 22/10 con `availability_contacts` (migrazione 063).
