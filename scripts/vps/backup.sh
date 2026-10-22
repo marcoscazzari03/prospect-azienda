@@ -17,6 +17,12 @@ PGBIN=$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | sort -V | tail -1)
 [ -s "$PUBBLICA" ] || { echo "Chiave pubblica mancante: bash worker.sh installa-backup"; exit 1; }
 : "${PGHOST:?connessione mancante: bash worker.sh installa-backup}"
 
+# Avanzi in chiaro di un giro interrotto a forza (memoria finita, riavvio): via subito (QA).
+rm -rf ./tmp.*
+# Un database svuotato per errore non deve sostituire i backup buoni: si controllano le righe, non solo le tabelle (QA).
+AZIENDE=$("$PGBIN/psql" -XtAc "select count(*) from public.companies")
+[ "$AZIENDE" -ge 1000 ] || { echo "Backup sospetto: solo $AZIENDE aziende nel database"; exit 1; }
+
 OGGI=$(date -u +%Y-%m-%d)
 TMP=$(mktemp -d -p .)
 trap 'rm -rf "$TMP"' EXIT
@@ -28,10 +34,9 @@ TABELLE=$("$PGBIN/pg_restore" --list "$TMP/public.dump" | grep -c 'TABLE DATA' |
 "$PGBIN/pg_restore" --list "$TMP/auth.dump" >/dev/null
 [ "$TABELLE" -ge 10 ] || { echo "Backup sospetto: solo $TABELLE tabelle con dati"; exit 1; }
 
-for parte in public auth; do
-  age -R "$PUBBLICA" -o "$TMP/$parte.age" "$TMP/$parte.dump"
-  mv "$TMP/$parte.age" "db-$OGGI.$parte.dump.age"
-done
+# Prima si cifrano tutti e due, poi si sostituiscono: mai un public nuovo con un auth vecchio (QA).
+for parte in public auth; do age -R "$PUBBLICA" -o "$TMP/$parte.age" "$TMP/$parte.dump"; done
+for parte in public auth; do mv "$TMP/$parte.age" "db-$OGGI.$parte.dump.age"; done
 
 # Pulizia: ultimi 7 giorni, più le domeniche fino a 35 giorni.
 ADESSO=$(date -u +%s)
@@ -42,4 +47,4 @@ for f in db-*.public.dump.age db-*.auth.dump.age; do
   if [ "$eta" -ge 7 ] && { [ "$(date -u -d "$giorno" +%u)" != 7 ] || [ "$eta" -gt 35 ]; }; then rm -f "$f"; fi
 done
 
-echo "Backup $OGGI: $TABELLE tabelle, public $(du -h "db-$OGGI.public.dump.age" | cut -f1), auth $(du -h "db-$OGGI.auth.dump.age" | cut -f1); archivi tenuti: $(ls db-*.public.dump.age | wc -l)"
+echo "Backup $OGGI: $AZIENDE aziende, $TABELLE tabelle, public $(du -h "db-$OGGI.public.dump.age" | cut -f1), auth $(du -h "db-$OGGI.auth.dump.age" | cut -f1); archivi tenuti: $(ls db-*.public.dump.age | wc -l)"

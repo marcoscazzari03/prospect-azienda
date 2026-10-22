@@ -126,7 +126,7 @@ Nice=5" ""
       echo "Connessione già presente (per cambiarla: bash $0 installa-backup nuova-connessione)."
     else
       read -rp "Incolla la stringa «Session pooler» di Supabase così com'è, con [YOUR-PASSWORD], e premi Invio: " URI
-      read -rsp "Ora la password del database e Invio (non si vede niente, è normale): " PW; echo
+      IFS= read -rsp "Ora la password del database e Invio (non si vede niente, è normale): " PW; echo
       # Dalla stringa alle variabili di libpq; la password, chiesta a parte, non passa mai sulla riga di comando.
       RIGHE=$(URI="$URI" PW="$PW" python3 -c '
 import os, urllib.parse as u
@@ -138,7 +138,9 @@ assert pw, "password vuota"
 q = lambda v: "\"" + v.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 for k, v in [("PGHOST", p.hostname), ("PGPORT", str(p.port or 5432)), ("PGUSER", u.unquote(p.username)), ("PGPASSWORD", pw), ("PGDATABASE", (p.path or "/postgres")[1:] or "postgres"), ("PGSSLMODE", "require")]:
     print(f"{k}={q(v)}")
-') || { echo "Stringa non valida: copia quella «Session pooler» da Supabase → Connect."; exit 1; }
+' 2>/dev/null) || { echo "Stringa non valida: copia quella «Session pooler» da Supabase → Connect."; exit 1; }
+      # 6543 è il «Transaction pooler»: pg_dump lì non funziona bene (QA).
+      case "$URI" in *:6543/*) echo "Questa è la stringa «Transaction pooler» (porta 6543): serve la «Session pooler» (porta 5432)."; exit 1 ;; esac
       unset PW
       unset URI
       printf '%s\n' "$RIGHE" | sudo tee /etc/webora/backup.env >/dev/null

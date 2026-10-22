@@ -187,7 +187,7 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
-## 22/10/2026 — backup notturno cifrato del database sul VPS (punto 90) · codice pronto; da fare: revisione, main, installazione
+## 22/10/2026 — backup notturno cifrato del database sul VPS (punto 90) · rivisto (Code Reviewer, QA), su main; da fare: installazione sul VPS
 - **Perché:** Supabase gratuito non ha backup scaricabili; il database ora ha circa 70.000 aziende e cresce ogni ora.
 - **Cosa:** `scripts/vps/backup.sh` (servizio `webora-backup`, ogni notte alle 1:40 UTC): `pg_dump` di PostgreSQL 17 (repository
   ufficiale PGDG) dello schema `public` e dei dati di `auth.users` e `auth.identities`, controllo con `pg_restore --list` (si
@@ -201,6 +201,11 @@ Come tornare indietro, in generale:
   (`DynamicUser`), non con «worker» che apre siti esterni; `backup.env` solo root (la legge systemd), script e chiave pubblica
   copiati da root in `/usr/local/lib/webora/`; password chiesta a parte (niente codifica `%xx` da fare a mano); motivo
   scritto anche con 0 tabelle; schermo e storico del terminale puliti dopo la chiave; `ferma` non spegne il backup.
+- **QA (funziona con problemi, corretto):** prima del backup si contano le aziende (almeno 1.000, altrimenti si ferma: un
+  database svuotato non sostituisce i backup buoni); avanzi in chiaro di un giro interrotto a forza cancellati all'inizio;
+  i due archivi si cifrano entrambi e poi si sostituiscono insieme; password con spazi conservata; la stringa
+  «Transaction pooler» (porta 6543) viene rifiutata. Provati: password sbagliata, disco pieno, chiave mancante, SIGTERM,
+  secondo giro nello stesso giorno, chiave sbagliata, caratteri speciali nella password.
 - **Limiti:** i backup stanno sullo stesso VPS (proteggono da un guasto di Supabase o da un errore, non dalla perdita del
   VPS); un backup fallito non manda ancora avvisi (lo si vede con `stato-backup`). Copia fuori dal VPS e avvisi: dopo.
 - **Indietro:** `sudo systemctl disable --now webora-backup.timer`; `sudo rm /etc/webora/backup.env` per togliere la password.
