@@ -118,7 +118,7 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 39. **Io** – Coda del controllo siti con priorità: la 060 era troppo lenta sui dati veri (controllo siti fermo alle 17:25),
     tolta con la 061. ~~**Tu:** eseguire la 061 subito~~ (21/10). **Io:** capire il tempo sui dati veri e riproporla.
 40. **Io** – ~~Wizard: stima realistica dei lead e costo in euro~~ (22/10: codice pronto sul branch).
-    **Tu:** eseguire la migrazione 063 (`availability_contacts`); poi pubblico su main.
+    ~~**Tu:** eseguire la migrazione 063 (`availability_contacts`)~~ (22/10). **Io:** pubblicare su main dopo il QA.
 
 ## 🟣 Nome nuovo «Avvisto» e costi di Hostinger (deciso il 21/10)
 65. **Insieme** – ~~Scegliere il nome di una parola, staccato da Webora (scelto in prova il 21/10: **Avvisto**, avvisto.it libero su
