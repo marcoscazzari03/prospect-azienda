@@ -11,17 +11,20 @@ import zlib from 'node:zlib';
 export const MAX_BYTES = 3_000_000;
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36';
 
-// Indirizzi che un sito pubblico non può avere: si rifiutano prima di connettersi.
+// Indirizzi che un sito pubblico non può avere: si rifiutano prima di connettersi. IPv6 che incapsulano un IPv4 (NAT64,
+// 6to4, Teredo) bloccati per intero (Code Reviewer, 22/10).
 export function privato(ip) {
   if (net.isIPv4(ip)) {
-    const [a, b] = ip.split('.').map(Number);
+    const [a, b, c] = ip.split('.').map(Number);
     return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) || (a === 169 && b === 254)
-      || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 192 && b === 0) || (a === 198 && (b === 18 || b === 19))
+      || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 192 && b === 0 && (c === 0 || c === 2))
+      || (a === 198 && (b === 18 || b === 19)) || (a === 198 && b === 51 && c === 100) || (a === 203 && b === 0 && c === 113)
       || a >= 224;
   }
   const x = ip.toLowerCase();
   if (x.startsWith('::ffff:')) return privato(x.slice(7));
-  return x === '::' || x === '::1' || /^f[cd]/.test(x) || /^fe[89ab]/.test(x) || x.startsWith('ff');
+  return x === '::' || x === '::1' || /^f[cd]/.test(x) || /^fe[89ab]/.test(x) || x.startsWith('ff')
+    || x.startsWith('64:ff9b:') || x.startsWith('2002:') || /^2001:0?:/.test(x) || x.startsWith('2001:db8:');
 }
 
 // dns.lookup con il controllo sugli indirizzi; regge sia la forma con un indirizzo sia quella con `all`.
@@ -50,60 +53,79 @@ function decomprimi(res) {
 
 // Una richiesta con i redirect. Esito: { status, body, url } oppure un'eccezione con .code e .message di Node
 // (gli stessi testi che vede n8n: «certificate has expired», «Hostname/IP does not match certificate's altnames: …»).
+// `timeout` vale per tutta la richiesta, redirect e lettura compresi: un sito che manda un byte al secondo non tiene
+// occupata una corsia (Code Reviewer, 22/10). Ogni errore, anche un redirect verso un indirizzo malformato, diventa un
+// rifiuto e mai un'eccezione che ferma il giro.
+const errore = (message, code) => Object.assign(new Error(message), { code });
+
 export function richiesta(url, { method = 'GET', insicuro = false, redirect = 5, timeout = 10_000, maxBytes = MAX_BYTES, privatiAmmessi = false } = {}) {
   return new Promise((resolve, reject) => {
-    const scadenza = Date.now() + timeout;
+    let chiuso = false;
+    let attuale = null; // richiesta in corso, da distruggere allo scadere
+    const fine = (fn, valore) => {
+      if (chiuso) return;
+      chiuso = true;
+      clearTimeout(orologio);
+      if (attuale) attuale.destroy();
+      fn(valore);
+    };
+    const orologio = setTimeout(() => fine(reject, errore('timeout', 'ETIMEDOUT')), timeout);
     const vai = (indirizzo, rimasti) => {
+      if (chiuso) return;
       let u;
-      try { u = new URL(indirizzo); } catch { return reject(Object.assign(new Error(`indirizzo non valido: ${indirizzo}`), { code: 'EBADURL' })); }
-      if (u.protocol !== 'http:' && u.protocol !== 'https:') return reject(Object.assign(new Error('protocollo non ammesso'), { code: 'EPROTOCOL' }));
-      if (u.port && !['80', '443'].includes(u.port)) return reject(Object.assign(new Error('porta non ammessa'), { code: 'EPORT' }));
-      if (!privatiAmmessi && net.isIP(u.hostname.replace(/^\[|\]$/g, ''))) return reject(Object.assign(new Error('indirizzo IP non ammesso'), { code: 'EPRIVATE' }));
-      const resto = scadenza - Date.now();
-      if (resto <= 0) return reject(Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' }));
+      try { u = new URL(indirizzo); } catch { return fine(reject, errore(`indirizzo non valido: ${indirizzo}`, 'EBADURL')); }
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return fine(reject, errore('protocollo non ammesso', 'EPROTOCOL'));
+      if (u.port && !['80', '443'].includes(u.port)) return fine(reject, errore('porta non ammessa', 'EPORT'));
+      if (!privatiAmmessi && net.isIP(u.hostname.replace(/^\[|\]$/g, ''))) return fine(reject, errore('indirizzo IP non ammesso', 'EPRIVATE'));
       const mod = u.protocol === 'https:' ? https : http;
-      const req = mod.request(u, {
-        method,
-        lookup: lookupPubblico(privatiAmmessi),
-        rejectUnauthorized: !insicuro,
-        servername: u.hostname,
-        timeout: resto,
-        headers: {
-          'User-Agent': UA,
-          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'it,en;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-        },
-      }, (res) => {
-        const dove = res.headers.location;
-        if (res.statusCode >= 300 && res.statusCode < 400 && dove) {
-          res.resume();
-          if (rimasti <= 0) return reject(Object.assign(new Error('troppi redirect'), { code: 'EREDIRECT' }));
-          return vai(new URL(dove, u).toString(), rimasti - 1);
-        }
-        if (method === 'HEAD') { res.resume(); return resolve({ status: res.statusCode, body: '', url: u.toString() }); }
-        const pezzi = [];
-        let letti = 0;
-        let finito = false;
-        const flusso = decomprimi(res);
-        const chiudi = () => {
-          if (finito) return;
-          finito = true;
-          resolve({ status: res.statusCode, body: Buffer.concat(pezzi).toString('utf8'), url: u.toString() });
-        };
-        flusso.on('data', (c) => {
-          if (finito) return;
-          const spazio = maxBytes - letti;
-          pezzi.push(c.length > spazio ? c.subarray(0, spazio) : c);
-          letti += Math.min(c.length, spazio);
-          if (letti >= maxBytes) { chiudi(); res.destroy(); }
+      let req;
+      try {
+        req = mod.request(u, {
+          method,
+          lookup: lookupPubblico(privatiAmmessi),
+          rejectUnauthorized: !insicuro,
+          servername: net.isIP(u.hostname) ? undefined : u.hostname,
+          headers: {
+            'User-Agent': UA,
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'it,en;q=0.8',
+            // Senza deflate: alcuni server lo mandano «grezzo» e la pagina risulterebbe vuota (Code Reviewer, 22/10).
+            'Accept-Encoding': 'gzip, br',
+          },
+        }, (res) => {
+          try {
+            const dove = res.headers.location;
+            if (res.statusCode >= 300 && res.statusCode < 400 && dove) {
+              res.resume();
+              if (rimasti <= 0) return fine(reject, errore('troppi redirect', 'EREDIRECT'));
+              let prossimo;
+              try { prossimo = new URL(dove, u).toString(); } catch { return fine(reject, errore('redirect non valido', 'EBADURL')); }
+              return vai(prossimo, rimasti - 1);
+            }
+            if (method === 'HEAD') { res.resume(); return fine(resolve, { status: res.statusCode, body: '', url: u.toString() }); }
+            const pezzi = [];
+            let letti = 0;
+            const flusso = decomprimi(res);
+            const leggi = () => fine(resolve, { status: res.statusCode, body: Buffer.concat(pezzi).toString('utf8'), url: u.toString() });
+            flusso.on('data', (c) => {
+              if (chiuso) return;
+              const spazio = maxBytes - letti;
+              pezzi.push(c.length > spazio ? c.subarray(0, spazio) : c);
+              letti += Math.min(c.length, spazio);
+              if (letti >= maxBytes) leggi();
+            });
+            flusso.on('end', leggi);
+            flusso.on('error', (e) => fine(reject, e));
+            res.on('error', (e) => fine(reject, e));
+          } catch (e) {
+            fine(reject, e);
+          }
         });
-        flusso.on('end', chiudi);
-        flusso.on('error', (e) => { if (!finito) { finito = true; reject(e); } });
-        res.on('error', (e) => { if (!finito) { finito = true; reject(e); } });
-      });
-      req.on('timeout', () => req.destroy(Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' })));
-      req.on('error', reject);
+      } catch (e) {
+        return fine(reject, e);
+      }
+      attuale = req;
+      req.on('error', (e) => fine(reject, e));
       req.end();
     };
     vai(url, redirect);

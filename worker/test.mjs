@@ -40,9 +40,9 @@ for (const f of readdirSync(fx).filter(n => n.endsWith('.html'))) {
 console.log(`ok  stessi esiti di «Valuta siti» su ${confronti} casi`);
 
 // 2. Indirizzi interni rifiutati.
-for (const ip of ['127.0.0.1', '10.1.2.3', '172.20.0.1', '192.168.1.1', '169.254.169.254', '100.64.0.1', '0.0.0.0', '::1', 'fd00::1', 'fe80::1', '::ffff:127.0.0.1'])
+for (const ip of ['127.0.0.1', '10.1.2.3', '172.20.0.1', '192.168.1.1', '169.254.169.254', '100.64.0.1', '0.0.0.0', '::1', 'fd00::1', 'fe80::1', '::ffff:127.0.0.1', '64:ff9b::a00:1', '2002:a00:1::', '2001:0:4136::1', '192.0.2.1'])
   assert.ok(privato(ip), `privato: ${ip}`);
-for (const ip of ['8.8.8.8', '2.31.7.149', '172.32.0.1', '2a01:4f8::1']) assert.ok(!privato(ip), `pubblico: ${ip}`);
+for (const ip of ['8.8.8.8', '2.31.7.149', '172.32.0.1', '2a01:4f8::1', '192.0.100.1', '2001:4860::8888']) assert.ok(!privato(ip), `pubblico: ${ip}`);
 await assert.rejects(richiesta('http://127.0.0.1/'), { code: 'EPRIVATE' });
 await assert.rejects(richiesta('http://localhost/'), { code: 'EPRIVATE' });
 await assert.rejects(richiesta('http://example.com:8080/'), { code: 'EPORT' });
@@ -58,6 +58,8 @@ const server = http.createServer((req, res) => {
   if (req.url === '/gz') { res.writeHead(200, { 'Content-Encoding': 'gzip' }); return res.end(zlib.gzipSync('<html>compressa</html>')); }
   if (req.url === '/grande') { res.writeHead(200); return res.end('x'.repeat(5_000_000)); }
   if (req.url === '/404') { res.writeHead(404); return res.end('<html>non trovata</html>'); }
+  if (req.url === '/lento') { res.writeHead(200); const t = setInterval(() => res.write('x'), 300); res.on('close', () => clearInterval(t)); return; }
+  if (req.url === '/storto') { res.writeHead(302, { Location: 'http://[zz/' }); return res.end(); }
   res.writeHead(200); res.end(req.method === 'HEAD' ? undefined : '<html>ok</html>');
 });
 await new Promise(r => server.listen(0, '127.0.0.1', r));
@@ -82,8 +84,12 @@ if (libera) {
   const nf = await richiesta(b + '/404', op);
   assert.equal(nf.status, 404); assert.equal(nf.body, '<html>non trovata</html>', 'pagina letta anche con 404');
   assert.equal((await richiesta(b + '/', { ...op, method: 'HEAD' })).status, 200, 'HEAD');
+  const t0 = Date.now();
+  await assert.rejects(richiesta(b + '/lento', { ...op, timeout: 1500 }), { code: 'ETIMEDOUT' }, 'sito lentissimo fermato');
+  assert.ok(Date.now() - t0 < 2500, 'entro il tempo massimo');
+  await assert.rejects(richiesta(b + '/storto', op), { code: 'EBADURL' }, 'redirect malformato: rifiuto, non eccezione');
   s80.close();
-  console.log('ok  redirect, gzip, limite di 3 MB, 404 e HEAD');
+  console.log('ok  redirect, gzip, limite di 3 MB, 404, HEAD, sito lentissimo, redirect malformato');
 } else console.log('--  porta 80 occupata o senza permessi: test del client saltati');
 
 // 4. Controllo HTTPS e apertura del sito: indirizzi e opzioni come i nodi n8n.

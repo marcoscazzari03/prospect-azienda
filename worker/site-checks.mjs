@@ -95,7 +95,11 @@ async function main() {
   const regole = caricaRegole();
   const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
   const items = await inParallelo(aziende, parallelo, async (a) => {
-    const [https, html] = await Promise.all([controlloHttps(a), apriSito(a)]);
+    // Al massimo 30 s per azienda (le richieste hanno già un tempo massimo; questo copre qualsiasi altro intoppo).
+    const [https, html] = await Promise.race([
+      Promise.all([controlloHttps(a), apriSito(a)]),
+      new Promise((r) => setTimeout(() => r([{}, '']), 30_000).unref()),
+    ]);
     try {
       return valuta(regole, a, html, https, oggi);
     } catch (e) {

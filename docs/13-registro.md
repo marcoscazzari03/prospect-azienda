@@ -198,6 +198,12 @@ Come tornare indietro, in generale:
   indirizzi interni, porte e protocolli rifiutati, redirect, gzip, limite di 3 MB, 404, HEAD.
 - **Servizio:** systemd con `ProtectSystem=strict`, `ProtectHome`, `NoNewPrivileges`, `MemoryMax=1G`; segreto in
   `/etc/webora/site-checks.env` (root:worker, 640), mai nel repository.
+- **Revisione (Code Reviewer: NON PRONTO, corretto):** tempo massimo su tutta la richiesta, redirect e lettura compresi
+  (prima un sito che manda un byte al secondo restava aperto: con 8 così si perdeva il giro) e 30 s al massimo per azienda;
+  un redirect verso un indirizzo malformato era un'eccezione non gestita che fermava il worker, ora è un rifiuto; bloccati
+  anche gli IPv6 che incapsulano un IPv4 (NAT64, 6to4, Teredo) e solo 192.0.0.0/24 e 192.0.2.0/24 invece di 192.0.x;
+  niente `deflate` tra le compressioni accettate (alcuni server lo mandano grezzo). Differenza nota da n8n: un redirect
+  dell'HTTPS verso un IP o una porta non standard dà «non determinabile» invece di «no».
 - **Dopo:** una settimana di giri del worker, poi «Aziende | Controllo siti» su n8n si spegne (circa 720 esecuzioni al mese).
 - **Indietro:** `bash worker.sh ferma` e riaccendere il workflow n8n; togliere `SITE_CHECKS_SECRET` da Vercel.
 
