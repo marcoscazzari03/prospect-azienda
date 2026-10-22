@@ -804,11 +804,11 @@ export function SearchWizard({
                       ? available.count === 0
                         ? "Per ora nessuna azienda con un annuncio recente per questa ricerca: prova ad allargare la zona o a scegliere tutti i settori."
                         : expected
-                          ? <>Lead attesi: circa <strong className="font-mono">{expectedLabel}</strong>. Delle {howMany(available.count)} {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente non tutte hanno un&apos;email o un modulo di contatto pubblico.{fewer && ` Ne chiedi ${leads}: la ricerca si fermerà prima e i crediti non usati tornano disponibili.`}</>
+                          ? <>Lead attesi: circa <strong className="font-mono">{expectedLabel}</strong>. Delle {howMany(available.count)} {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente, non tutte avranno un contatto aziendale pubblico ({withForm ? "email o modulo" : "email"}).{fewer && ` Ne chiedi ${leads}: la ricerca si fermerà prima e i crediti non usati tornano disponibili.`}</>
                           : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < leads && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
                       : available.count > 0
                         ? expected
-                          ? <>Dal nostro database: circa <strong className="font-mono">{expectedLabel}</strong> lead con la prova già verificata (non tutte le aziende hanno un contatto pubblico).{fewer && " Gli altri li cerchiamo sul web: potrebbero essere meno del previsto."}</>
+                          ? <>Dal nostro database: circa <strong className="font-mono">{expectedLabel}</strong> lead con la prova del segnale (non tutte le aziende hanno un contatto aziendale pubblico).{fewer && ` Per arrivare a ${leads} cerchiamo anche sul web: potremmo trovarne meno.`}</>
                           : <>Stima preliminare: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda compatibile" : "aziende compatibili"} con la prova.</>
                         : "Cerchiamo le aziende sul web: può richiedere qualche minuto in più."}
                 </p>
@@ -826,7 +826,7 @@ export function SearchWizard({
           {targetReady > 0 && (
             <p className="rounded-lg border border-ledger/30 bg-ledger-soft/60 p-3 text-xs text-ink-2" aria-live="polite">
               {expected
-                ? <>Dal nostro database: circa <strong className="font-mono">{expectedLabel}</strong> lead (non tutte le aziende hanno un contatto pubblico).{fewer && " Gli altri li cerchiamo sul web: potrebbero essere meno del previsto."}</>
+                ? <>Dal nostro database: circa <strong className="font-mono">{expectedLabel}</strong> lead (non tutte le aziende hanno un contatto aziendale pubblico).{fewer && ` Per arrivare a ${leads} cerchiamo anche sul web: potremmo trovarne meno.`}</>
                 : <>Stima preliminare: <strong className="font-mono">{howMany(targetReady)}</strong> {targetReady === 1 ? "azienda compatibile" : "aziende compatibili"}.</>}
             </p>
           )}
