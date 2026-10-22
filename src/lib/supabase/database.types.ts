@@ -35,14 +35,14 @@ export type Database = {
                   ]
                 },"companies": {
                   Row: {
-                    "city": string,"contact_form_url": string,"country": string,"country_code": string | null,"domain": string,"email_missed_at": string | null,"first_seen_at": string,"id": string,"industry": string,"industry_checked_at": string | null,"last_verified_at": string,"name": string,"origin": string,"places": (string)[],"referente_missed_at": string | null,"site_checked_at": string | null,"site_email": string,"site_email_at": string | null,"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
+                    "city": string,"contact_form_url": string,"contacts_checked_at": string | null,"country": string,"country_code": string | null,"domain": string,"email_missed_at": string | null,"first_seen_at": string,"id": string,"industry": string,"industry_checked_at": string | null,"last_verified_at": string,"name": string,"origin": string,"places": (string)[],"referente_missed_at": string | null,"site_checked_at": string | null,"site_email": string,"site_email_at": string | null,"size_hint": string,"tags": (string)[],"technologies": (string)[],"website": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "city"?: string,"contact_form_url"?: string,"country"?: string,"country_code"?: string | null,"domain": string,"email_missed_at"?: string | null,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name": string,"origin"?: string,"places"?: (string)[],"referente_missed_at"?: string | null,"site_checked_at"?: string | null,"site_email"?: string,"site_email_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
+                    "city"?: string,"contact_form_url"?: string,"contacts_checked_at"?: string | null,"country"?: string,"country_code"?: string | null,"domain": string,"email_missed_at"?: string | null,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name": string,"origin"?: string,"places"?: (string)[],"referente_missed_at"?: string | null,"site_checked_at"?: string | null,"site_email"?: string,"site_email_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website": string
                   }
                   Update: {
-                    "city"?: string,"contact_form_url"?: string,"country"?: string,"country_code"?: string | null,"domain"?: string,"email_missed_at"?: string | null,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name"?: string,"origin"?: string,"places"?: (string)[],"referente_missed_at"?: string | null,"site_checked_at"?: string | null,"site_email"?: string,"site_email_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
+                    "city"?: string,"contact_form_url"?: string,"contacts_checked_at"?: string | null,"country"?: string,"country_code"?: string | null,"domain"?: string,"email_missed_at"?: string | null,"first_seen_at"?: string,"id"?: string,"industry"?: string,"industry_checked_at"?: string | null,"last_verified_at"?: string,"name"?: string,"origin"?: string,"places"?: (string)[],"referente_missed_at"?: string | null,"site_checked_at"?: string | null,"site_email"?: string,"site_email_at"?: string | null,"size_hint"?: string,"tags"?: (string)[],"technologies"?: (string)[],"website"?: string
                   }
                   Relationships: [
                     
@@ -873,6 +873,14 @@ isOneToOne: false
                            },
 "availability_contacts":
 { Args: { "p_contacts": number,"p_opportunity": boolean,"p_org": string,"p_target": Json }; Returns: Json
+                           },
+"pending_contact_checks":
+{ Args: { "p_limit": number }; Returns: {
+              "company_id": string,"domain": string,"name": string,"website": string
+            }[]
+                           },
+"store_contact_checks":
+{ Args: { "p_items": Json }; Returns: Json
                            },
 "opportunity_availability":
 { Args: { "p_contacts": number,"p_org": string,"p_target": Json }; Returns: number

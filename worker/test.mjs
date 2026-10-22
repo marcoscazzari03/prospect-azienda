@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { codice } from '../n8n/annunci/build.mjs';
 import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo } from './site-checks.mjs';
 import { richiesta, privato } from './http.mjs';
+import { pagineDaAprire, haModulo, trovaContatti } from './contacts.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fx = join(root, 'n8n', 'engine', 'test', 'fixtures', 'signals');
@@ -112,4 +113,31 @@ let insieme = 0, massimo = 0;
 const esiti = await inParallelo([1, 2, 3, 4, 5, 6, 7], 3, async (x) => { insieme++; massimo = Math.max(massimo, insieme); await new Promise(r => setTimeout(r, 5)); insieme--; return x * 2; });
 assert.deepEqual(esiti, [2, 4, 6, 8, 10, 12, 14]); assert.ok(massimo <= 3);
 console.log('ok  parallelo');
+// 6. Contatti: pagine scelte come il motore, modulo, email del dominio, pagine lette.
+const casa = `<html><body>${'<p>Testo della homepage di prova con un po di contenuto. </p>'.repeat(20)}
+  <a href="/contatti">Contatti</a><a href="https://www.ditta.it/privacy-policy">Privacy</a><a href="/chi-siamo">Chi siamo</a>
+  <a href="/blog/contatti-vecchi">Blog</a><a href="https://altro.it/contatti">Altro</a><a href="/catalogo.pdf">Catalogo</a>
+  <a href="http://ditta.it:8080/contatti">Porta</a><a href="mailto:info@ditta.it">Scrivici</a></body></html>`;
+assert.deepEqual(pagineDaAprire(casa, 'https://www.ditta.it/', 'ditta.it'),
+  ['https://www.ditta.it/contatti', 'https://www.ditta.it/privacy-policy', 'https://www.ditta.it/chi-siamo'], 'contatti, legale, chi siamo; niente blog, altri siti, pdf, porte');
+assert.deepEqual(pagineDaAprire('<html><body><div id="app"></div></body></html>'.padEnd(600, ' '), 'https://ditta.it/', 'ditta.it'),
+  ['https://ditta.it/contatti', 'https://ditta.it/chi-siamo', 'https://ditta.it/privacy-policy'], 'senza link: percorsi tipici');
+assert.ok(haModulo('<form><input type="email" name="email"><textarea name="msg"></textarea></form>'), 'modulo');
+assert.ok(!haModulo('<form role="search"><input type="email"><textarea></textarea></form>'), 'ricerca: non è un modulo');
+assert.ok(!haModulo('<form><input type="text" name="q"></form>'), 'senza messaggio: non è un modulo');
+const lungo = (x) => `<html><body>${'<p>contenuto della pagina di prova abbastanza lungo. </p>'.repeat(12)}${x}</body></html>`;
+const sito = {
+  'https://www.ditta.it/': casa,
+  'https://www.ditta.it/contatti': lungo('<form><input type="email" name="email"><textarea name="m"></textarea></form><p>Scrivi a mario.rossi@gmail.com</p>'),
+  'https://www.ditta.it/privacy-policy': lungo('<p>Titolare: Ditta srl, info@ditta.it</p>'),
+  'https://www.ditta.it/chi-siamo': lungo('<p>Chi siamo</p>'),
+};
+const reqFinta = async (url) => { if (!(url in sito)) throw new Error('404'); return { status: 200, body: sito[url] }; };
+const trovati = await trovaContatti(regole, { domain: 'ditta.it', website: 'https://www.ditta.it/' }, reqFinta);
+assert.deepEqual(trovati, { domain: 'ditta.it', email: 'info@ditta.it', contact_form: 'https://www.ditta.it/contatti', pages_read: 4 },
+  'email del dominio dalla privacy (non la gmail), modulo dalla pagina contatti');
+const spento = await trovaContatti(regole, { domain: 'spento.it', website: 'https://spento.it' }, async () => { throw new Error('ECONNREFUSED'); });
+assert.deepEqual(spento, { domain: 'spento.it', pages_read: 0 }, 'sito spento: nessuna pagina letta');
+console.log('ok  contatti: pagine, modulo, email del dominio, sito spento');
+
 console.log('\nTest del worker superati.');

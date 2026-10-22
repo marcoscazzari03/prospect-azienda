@@ -187,6 +187,21 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 22/10/2026 — contatti per tutto il database (punto 86) · codice pronto; da fare: revisione, migrazione 066, main, installazione
+- **Perché:** solo il 22% delle aziende vive ha un'email o un modulo (2.530 su 11.623): il controllo siti legge solo la
+  homepage, le pagine «Contatti» e «Note legali» le apriva solo il motore durante una ricerca.
+- **Cosa:** migrazione `20261210000066_contact_checks.sql`: colonna `contacts_checked_at`; `pending_contact_checks(n)` (sito
+  vivo da 60 giorni, senza email né modulo, non cercata da 90 giorni, non provata dal motore da 90 giorni, non fuori
+  target né in opposizione); `store_contact_checks(items)` (email solo del dominio o di un fratello, modulo solo su una pagina
+  del dominio, la prima email non si sostituisce; pagine lette senza email: «email non trovata» come il motore; sito non
+  letto: solo la data). Route `/api/engine/contacts` (stesso segreto del worker, `src/lib/server/worker-auth.ts`).
+  `worker/contacts.mjs`: homepage più fino a 3 pagine scelte come il motore, email con `lib-email-azienda.js`, modulo come
+  «Estrai email»; 150 aziende ogni 30 minuti (alle :15 e :45), al massimo 60 s per azienda. Nessuna AI, nessun costo.
+- **Prove:** test SQL 38 (10 controlli, 417 in tutto); `worker/test.mjs` (pagine scelte, modulo, email del dominio e non la
+  gmail, sito spento); coda in 0,35 s sul banco da 17.500 aziende.
+- **Indietro:** `bash worker.sh ferma` (ferma entrambi i giri; per il solo controllo siti riaccendere il suo timer);
+  drop di `pending_contact_checks` e `store_contact_checks`.
+
 ## 22/10/2026 — worker del controllo siti sul VPS (punto 49) · in produzione dal 22/10 (giro vero: 300 aziende in 79 s; giro automatico alle :05 e alle :35 UTC acceso); «Aziende | Controllo siti» su n8n acceso fino al 23/10 per confronto
 - **Cosa:** `worker/site-checks.mjs` fa il lavoro di «Aziende | Controllo siti» con le stesse regole (carica
   `lib-controlli-sito.js` e `lib-email-azienda.js` senza copiarli; valutazione come `09-valuta-siti.js`): 300 aziende per

@@ -165,7 +165,7 @@ Si va in produzione solo con il database coperto anche per manifattura, uffici e
 **Soglia proposta:** almeno 500 aziende con contatto per ogni regione principale e per ciascuno dei 6 macro-settori
 (turismo, commercio, manifattura, servizi alle imprese, studi professionali, sanità); misura settimanale con
 `supabase/queries/copertura_settori.sql`. Il lavoro gira sul VPS (gratis), senza Google Maps, PagineGialle o Registro Imprese.
-86. **Io** – Contatti per tutto il database: il worker apre «Contatti», «Note legali» e «Chi siamo» di ogni azienda senza
+86. **Io** – (22/10: codice pronto, in revisione) Contatti per tutto il database: il worker apre «Contatti», «Note legali» e «Chi siamo» di ogni azienda senza
     email né modulo (oggi lo fa solo il motore durante una ricerca). Stima: dal 22% al 45–55% di aziende consegnabili.
 87. **Io** – Tutta Italia da OpenStreetMap in un colpo: file Geofabrik letto sul VPS, niente timeout di Overpass, più tipi
     di attività (manifattura `man_made=works` e `industrial=*`, tutti gli `office=*`, `craft=*`), anche senza sito.

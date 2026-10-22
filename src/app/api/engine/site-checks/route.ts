@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { env } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { safeEqual } from "@/lib/server/crypto";
+import { workerAuthorized } from "@/lib/server/worker-auth";
 import { publicDomain } from "@/lib/domain/engine";
 import type { Json } from "@/lib/supabase/database.types";
 
@@ -12,10 +11,7 @@ import type { Json } from "@/lib/supabase/database.types";
 //                      controllate prima dell'email dal sito, il 20/10, senza email)
 //   POST { items }  -> esiti dei controlli, salvati da store_company_checks (origine «seed»)
 
-function authorized(request: Request) {
-  const given = request.headers.get("x-engine-secret") ?? "";
-  return [env.engineCallbackSecret(), env.siteChecksSecret()].some((secret) => secret.length >= 32 && safeEqual(given, secret));
-}
+const authorized = workerAuthorized;
 
 export async function GET(request: Request) {
   if (!authorized(request)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });

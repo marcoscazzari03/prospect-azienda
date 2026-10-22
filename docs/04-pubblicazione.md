@@ -129,8 +129,10 @@ Il worker (`worker/site-checks.mjs`) fa il lavoro di «Aziende | Controllo siti�
 2. **Server:** scaricare lo script e installare (chiede il segreto, che non resta nella cronologia):
    `curl -fsSL https://raw.githubusercontent.com/marcoscazzari03/prospect-azienda/main/scripts/vps/worker.sh -o worker.sh && bash worker.sh installa`
 3. `bash worker.sh prova`: giro di 20 aziende senza salvare; deve stampare i numeri, non «HTTP 401».
-4. `bash worker.sh avvia`: giro automatico alle :05 e alle :35. Poi si spegne «Aziende | Controllo siti» su n8n.
-5. Altri comandi: `stato` (ultimi giri), `giro` (un giro adesso), `ferma`, `aggiorna` (ultima versione da main).
+4. `bash worker.sh avvia`: controllo siti alle :05 e alle :35, contatti (punto 86, `worker/contacts.mjs`: pagine «Contatti»,
+   «Note legali», «Chi siamo» delle aziende senza email né modulo) alle :15 e alle :45. Poi si spegne «Aziende | Controllo siti» su n8n.
+5. Altri comandi: `prova-contatti`, `giro`, `giro-contatti`, `stato`, `ferma`; dopo un aggiornamento del codice
+   `bash worker.sh installa` (scarica da main e riscrive i servizi; il segreto resta).
 
 ## Sviluppo locale
 
