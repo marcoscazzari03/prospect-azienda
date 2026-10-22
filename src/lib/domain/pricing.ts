@@ -9,7 +9,8 @@ export function estimateCredits(mode: EmailMode, quantity: number, extra: number
   return { min: (info.minCredits + e.min) * quantity, max, reserve: max };
 }
 
-// Resa delle aziende «da provare» (sito vivo, nessuna email né modulo noti): quota che diventa un lead.
+// Resa delle aziende «da provare» (nessuna email né modulo noti; nelle ricerche da annunci anche siti non ancora
+// controllati): quota che diventa un lead.
 // Misurata il 22/10 (supabase/queries/resa_wizard.sql): nei giri degli ultimi 30 giorni il motore trova un contatto in
 // circa il 60% delle aziende che prova, ma prova prima quelle con l'email già nota; per le altre si usa una forbice prudente.
 export const CONTACT_YIELD = { low: 0.3, high: 0.5 } as const;
@@ -25,6 +26,8 @@ export function expectedLeads(c: AvailabilityContacts, withForm: boolean, reques
   const max = Math.min(requested, known + c.toTry, round(known + c.toTry * CONTACT_YIELD.high, true));
   // Nessuna azienda da provare: il numero è certo, niente forbice.
   const min = c.toTry === 0 ? max : Math.min(max, round(known + c.toTry * CONTACT_YIELD.low, false));
+  // Oltre 500 aziende la funzione SQL ne conta solo 501: il totale vero è più alto, il massimo non ha tetto.
+  if (c.total > 500) return { min, max: requested };
   return { min, max };
 }
 

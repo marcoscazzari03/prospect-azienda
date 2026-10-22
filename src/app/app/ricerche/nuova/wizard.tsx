@@ -300,11 +300,15 @@ export function SearchWizard({
   const targetReady = !opportunity && available?.kind === "target" && available.count > 0 ? available.count : 0;
   const howMany = (n: number) => (n > 500 ? "oltre 500" : String(n));
   // Lead attesi dalle aziende del database (punto 40): non tutte hanno un'email o un modulo di contatto pubblico.
-  const expected = available?.contacts && available.count > 0 ? expectedLeads(available.contacts, withForm, leads) : null;
+  // Durante il ricalcolo (circa un secondo) resta la stima di prima: i crediti non saltano al valore pieno e ritorno.
+  const recent = available ?? (checking ? availability?.value ?? null : null);
+  const expected = recent?.contacts && recent.count > 0 ? expectedLeads(recent.contacts, withForm, leads) : null;
   const expectedLabel = expected ? (expected.min === expected.max ? String(expected.max) : `${expected.min}–${expected.max}`) : "";
   const fewer = Boolean(expected && expected.max < leads);
-  // Solo annunci dal database: la ricerca non va oltre, la spesa prevista segue i lead attesi (la riserva no).
-  const estimate = estimateCredits(mode, available?.databaseOnly && expected ? Math.max(1, expected.max) : leads, extra);
+  // Solo annunci dal database: la ricerca non va oltre, la spesa prevista segue la forbice dei lead attesi (la riserva no).
+  const estimate = recent?.databaseOnly && expected
+    ? { min: estimateCredits(mode, expected.min, extra).min, max: estimateCredits(mode, expected.max, extra).max }
+    : estimateCredits(mode, leads, extra);
   const showIndustry = !(opportunity && allSectors);
   const blocked = showIndustry && blockedSector([industry]) ? BLOCKED_SECTORS_MESSAGE : "";
 
@@ -807,12 +811,14 @@ export function SearchWizard({
                       ? available.count === 0
                         ? "Per ora nessuna azienda con un annuncio recente per questa ricerca: prova ad allargare la zona o a scegliere tutti i settori."
                         : noContact
-                          ? `Per ora nessuna delle ${howMany(available.count)} aziende con un annuncio recente ha un contatto aziendale pubblico (${withForm ? "email o modulo" : "email"}): prova ad allargare la zona o a scegliere tutti i settori.`
+                          ? `Per ora ${available.count === 1 ? "l'unica azienda con un annuncio recente non ha" : `nessuna delle ${howMany(available.count)} aziende con un annuncio recente ha`} un contatto aziendale pubblico (${withForm ? "email o modulo" : "email"}): prova ad allargare la zona o a scegliere tutti i settori.`
                         : expected
-                          ? <>Lead attesi: circa <strong className="font-mono">{expectedLabel}</strong>. Delle {howMany(available.count)} {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente, non tutte avranno un contatto aziendale pubblico ({withForm ? "email o modulo" : "email"}).{fewer && ` Ne chiedi ${leads}: la ricerca si fermerà prima e i crediti non usati tornano disponibili.`}</>
+                          ? <>Lead attesi: circa <strong className="font-mono">{expectedLabel}</strong>. {available.count === 1 ? "L'unica azienda con un annuncio recente potrebbe non avere" : `Delle ${howMany(available.count)} aziende con un annuncio recente, non tutte avranno`} un contatto aziendale pubblico ({withForm ? "email o modulo" : "email"}).{fewer && ` Ne chiedi ${leads}: la ricerca si fermerà prima e i crediti non usati tornano disponibili.`}</>
                           : <>Disponibili ora: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda" : "aziende"} con un annuncio recente.{available.count < leads && " Ne chiedi di più: la ricerca si fermerà prima e i crediti non usati tornano disponibili."}</>
                       : available.count > 0
-                        ? expected
+                        ? expected?.max === 0
+                          ? "Nel nostro database queste aziende non hanno un contatto aziendale pubblico: le cerchiamo sul web."
+                          : expected
                           ? <>Dal nostro database: circa <strong className="font-mono">{expectedLabel}</strong> lead con la prova del segnale (non tutte le aziende hanno un contatto aziendale pubblico).{fewer && ` Per arrivare a ${leads} cerchiamo anche sul web: potremmo trovarne meno.`}</>
                           : <>Stima preliminare: <strong className="font-mono">{howMany(available.count)}</strong> {available.count === 1 ? "azienda compatibile" : "aziende compatibili"} con la prova.</>
                         : "Cerchiamo le aziende sul web: può richiedere qualche minuto in più."}
@@ -830,7 +836,9 @@ export function SearchWizard({
           </dl>
           {targetReady > 0 && (
             <p className="rounded-lg border border-ledger/30 bg-ledger-soft/60 p-3 text-xs text-ink-2" aria-live="polite">
-              {expected
+              {expected?.max === 0
+                ? "Nel nostro database queste aziende non hanno un contatto aziendale pubblico: le cerchiamo sul web."
+                : expected
                 ? <>Dal nostro database: circa <strong className="font-mono">{expectedLabel}</strong> lead (non tutte le aziende hanno un contatto aziendale pubblico).{fewer && ` Per arrivare a ${leads} cerchiamo anche sul web: potremmo trovarne meno.`}</>
                 : <>Stima preliminare: <strong className="font-mono">{howMany(targetReady)}</strong> {targetReady === 1 ? "azienda compatibile" : "aziende compatibili"}.</>}
             </p>

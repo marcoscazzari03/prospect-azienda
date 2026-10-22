@@ -67,6 +67,13 @@ Come tornare indietro, in generale:
   fanno «10–15»), senza aziende da provare niente forbice; solo annunci con aziende ma nessun contatto possibile: ricerca
   bloccata come con zero aziende; test 37 confronta i totali veri. Testi rivisti dal Sales Copywriter («non tutte
   avranno», «con la prova del segnale», «per arrivare a Z cerchiamo anche sul web»).
+- **QA (funziona con problemi, corretti):** oltre 500 aziende (la funzione ne conta 501) il massimo resta quello
+  richiesto, prima diceva «la ricerca si fermerà prima» a torto; niente «circa 0 lead» nelle ricerche che cercano anche
+  sul web; crediti ed euro stimati seguono la forbice dei lead; frasi al singolare con una sola azienda; durante il
+  ricalcolo resta la stima di prima (i crediti non saltano). **Aperti, c'erano già prima:** la disponibilità non toglie
+  portali, pagine ospitate e aziende fuori target come fa la riserva (le aziende con email possono risultare un po' di
+  più); arrotondamento degli euro a 10 centesimi sulle cifre piccole. Da ricontrollare la resa del 30–50% con
+  `resa_wizard.sql` dopo qualche giorno.
 - **Indietro:** `git revert`; `drop function public.availability_contacts(uuid, jsonb, integer, boolean)` dopo il revert.
 
 ## 22/10/2026 — controllo siti bloccato di notte da pagine enormi (proposta 1 del resoconto) · controllo siti in produzione (pubblicato il 22/10); motore in produzione (pubblicato il 22/10)
