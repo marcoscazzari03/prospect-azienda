@@ -19,6 +19,7 @@ Come tornare indietro, in generale:
 
 | Data | Decisione | Motivo |
 |---|---|---|
+| 22/10 | Agenti per livello di rischio (CLAUDE.md): revisione prima della produzione (main, migrazione, nodi n8n) e non prima di ogni push sul branch; livelli 0–3; designer solo per pagine nuove o cambi di flusso; seconda revisione solo se la correzione va oltre il proposto o tocca il livello 3; brief e risposte corti | meno tempo e token, stessa sicurezza (decisione dell'utente) |
 | 20/10 | «Prospect \| Search» e «Prospect Avvocati \| Search» su n8n sono di un altro progetto **attivo**: non toccarli e non proporre di disattivarli. Usano ChatGPT, non la chiave Anthropic di Webora | indicazione dell'utente |
 | 20/10 | Nessuna promessa di «contatto senza consenso» nel marketing finché il legale non risponde per iscritto (art. 130 vale anche per le aziende secondo il Garante) | rischio legale |
 | 20/10 | Il listino non promette funzioni che l'app non ha (tolto «Fino a 3 utenti») | fiducia dei clienti |
@@ -45,7 +46,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — coda del controllo siti con priorità, seconda versione (punto 39) · in attesa della migrazione 064
+## 22/10/2026 — coda del controllo siti con priorità, seconda versione (punto 39) · migrazione 064 eseguita il 22/10; primo giro da controllare (11:25 UTC)
 - **Misura in produzione** (`supabase/queries/misura_039.sql`): 17.482 aziende, 4.588 da controllare (25 giorni), 44
   ricerche in 30 giorni con 23 zone/settori diversi, nessun avviso; la coda attuale (054) impiega già 2,1 s.
 - **Banco di prova rifatto con le stesse dimensioni** (17.500 aziende, 44 ricerche; prima c'era una sola ricerca): coda

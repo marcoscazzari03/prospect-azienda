@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Revisore indipendente del codice di Webora Leads. Usalo dopo ogni modifica significativa e sempre prima del push su main quando cambiano API, SQL (crediti, consegne, rimborsi, pagamenti, RLS), autenticazione, callback n8n o il motore. Legge e verifica, non modifica.
+description: Revisore indipendente del codice di Webora Leads. Usalo prima della produzione (push su main, migrazione all'utente, nodi n8n) per le modifiche di livello 2 e 3 del CLAUDE.md (logica, motore, SQL; sempre per crediti, pagamenti, RLS, autenticazione, callback), una volta per lavoro e solo sul diff. Legge e verifica, non modifica.
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---
