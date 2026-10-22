@@ -148,7 +148,11 @@ ben coperti dal database.
 Pareri del 22/10: copywriter (sì, ma dopo il 25/10 insieme ad Avvisto, senza promettere segnali a chi non li ha), designer
 (domanda in dashboard alla prima visita, saltabile; 3 schede che aprono il wizard compilato), analista (dopo il 30/10 per non
 confondere i numeri della beta; costo Haiku circa 0,03 centesimi per utente). **Tu:** eseguire
-`supabase/queries/copertura_settori.sql` (sola lettura) per sapere quali settori e regioni il database copre bene.
+~~`supabase/queries/copertura_settori.sql`~~ (22/10). Risultato: 11.623 aziende vive, 2.530 con contatto (22%); forti
+ristorazione (2.068), hotel (1.180), B&B (698), campeggi, negozi, auto, immobiliari, informatica; deboli manifattura, uffici,
+studi professionali; Centro quasi vuoto (Lazio 113, Piemonte 64, Toscana 43); Sud senza contatti (Sicilia 12 su 980, Puglia
+219 su 2.310) perché controllato prima dell'email dal sito: il worker li ricontrolla ora. **Primo messaggio:** «per chi vende
+a hotel, ristoranti e negozi»; l'apertura a tutti quando il database copre anche Centro e manifattura.
 83. **Insieme** – Posizionamento «Trova i tuoi prossimi clienti», con esempi di mestieri diversi (falegname, impresa di
     pulizie, fotografo, commercialista, consulente IT). Da fare insieme al passaggio ad Avvisto (punti 66–67).
 84. **Io** – «Di cosa si occupa la tua attività?» al primo accesso (non nella registrazione), modificabile nel profilo.
