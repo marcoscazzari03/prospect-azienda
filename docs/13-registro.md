@@ -199,6 +199,10 @@ Come tornare indietro, in generale:
   «Estrai email»; 150 aziende ogni 30 minuti (alle :15 e :45), al massimo 60 s per azienda. Nessuna AI, nessun costo.
 - **Prove:** test SQL 38 (10 controlli, 417 in tutto); `worker/test.mjs` (pagine scelte, modulo, email del dominio e non la
   gmail, sito spento); coda in 0,35 s sul banco da 17.500 aziende.
+- **Revisione (Code Reviewer, «NON PRONTO», corretto):** ricerca del modulo lineare e regex del `meta refresh` limitata
+  (prima minuti di calcolo su una pagina ostile da 3 MB, che bloccava il giro); pagine oltre 500 KB ridotte a inizio e
+  fine; contano solo le risposte 2xx (una 404 o una sfida anti-bot non scrive «email non trovata» né un modulo
+  inesistente); dopo 15 minuti il giro non parte con altre aziende e salva quanto trovato (systemd lo ferma a 20).
 - **Indietro:** `bash worker.sh ferma` (ferma entrambi i giri; per il solo controllo siti riaccendere il suo timer);
   drop di `pending_contact_checks` e `store_contact_checks`.
 

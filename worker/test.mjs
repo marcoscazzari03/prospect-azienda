@@ -138,6 +138,15 @@ assert.deepEqual(trovati, { domain: 'ditta.it', email: 'info@ditta.it', contact_
   'email del dominio dalla privacy (non la gmail), modulo dalla pagina contatti');
 const spento = await trovaContatti(regole, { domain: 'spento.it', website: 'https://spento.it' }, async () => { throw new Error('ECONNREFUSED'); });
 assert.deepEqual(spento, { domain: 'spento.it', pages_read: 0 }, 'sito spento: nessuna pagina letta');
-console.log('ok  contatti: pagine, modulo, email del dominio, sito spento');
+// Pagine 404 o anti-bot: non contano come lette e il modulo del piè di pagina non diventa un indirizzo (Code Reviewer).
+const conErrore = await trovaContatti(regole, { domain: 'ditta.it', website: 'https://www.ditta.it/' },
+  async (url) => ({ status: url === 'https://www.ditta.it/' ? 200 : 404, body: url === 'https://www.ditta.it/' ? casa : sito['https://www.ditta.it/contatti'] }));
+assert.deepEqual(conErrore, { domain: 'ditta.it', email: 'info@ditta.it', pages_read: 1 }, '404: solo la homepage letta, niente modulo');
+// Pagine ostili: niente regex quadratiche (prima minuti con 3 MB).
+let t0 = Date.now();
+haModulo('<form <textarea '.repeat(200_000));
+pagineDaAprire('<meta http-equiv=refresh content="0; '.repeat(80_000), 'https://ditta.it/', 'ditta.it');
+assert.ok(Date.now() - t0 < 2000, `pagine ostili lette in ${Date.now() - t0} ms`);
+console.log('ok  contatti: pagine, modulo, email del dominio, sito spento, 404, pagine ostili');
 
 console.log('\nTest del worker superati.');
