@@ -142,6 +142,16 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
       incluse nell'hosting; nel secondo caso togliere il rinnovo automatico (sostituisce il punto 33).
 69. **Tu** – VPS Hetzner (circa 14 €/mese): spegnerlo finché non serve al worker del punto 49 (circa 170 €/anno risparmiati).
 
+## 🟢 Per tutti i mestieri che vendono alle aziende (idea del 22/10, da valutare)
+Solo B2B; ricerca generalista, opportunità solo con prova. Prima di promettere «qualsiasi settore»: misurare settori e zone
+ben coperti dal database.
+83. **Insieme** – Posizionamento «Trova i tuoi prossimi clienti», con esempi di mestieri diversi (falegname, impresa di
+    pulizie, fotografo, commercialista, consulente IT). Da fare insieme al passaggio ad Avvisto (punti 66–67).
+84. **Io** – «Di cosa si occupa la tua attività?» al primo accesso (non nella registrazione), modificabile nel profilo.
+85. **Io** – Ricerche consigliate: dalla descrizione, Haiku propone 3 ricerche già impostate (circa 0,1 centesimi); l'app
+    le accetta solo se il database le può soddisfare (conteggio «circa X lead» del punto 40) e il wizard parte già compilato.
+    Si avviano con i crediti, come ogni ricerca.
+
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo (file pronto).
 33. ~~**Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027~~ (21/10: assorbito dal punto 68).

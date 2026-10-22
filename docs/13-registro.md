@@ -186,7 +186,7 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
-## 22/10/2026 — worker del controllo siti sul VPS (punto 49) · codice pronto; da fare: variabile su Vercel, main, installazione sul server
+## 22/10/2026 — worker del controllo siti sul VPS (punto 49) · installato e provato sul server il 22/10 (giro vero: 300 aziende salvate in 79 s); giro automatico da accendere
 - **Cosa:** `worker/site-checks.mjs` fa il lavoro di «Aziende | Controllo siti» con le stesse regole (carica
   `lib-controlli-sito.js` e `lib-email-azienda.js` senza copiarli; valutazione come `09-valuta-siti.js`): 300 aziende per
   giro, 8 siti in parallelo, un giro ogni 30 minuti (systemd, `scripts/vps/worker.sh`). `worker/http.mjs`: richieste come i
