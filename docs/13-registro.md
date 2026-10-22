@@ -187,7 +187,7 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
-## 22/10/2026 — backup notturno cifrato del database sul VPS (punto 90) · rivisto (Code Reviewer, QA), su main; da fare: installazione sul VPS
+## 22/10/2026 — backup notturno cifrato del database sul VPS (punto 90) · rivisto, su main, **non installato** (22/10: l'utente rimanda, i backup arriveranno con Supabase Pro; il codice resta pronto)
 - **Perché:** Supabase gratuito non ha backup scaricabili; il database ora ha circa 70.000 aziende e cresce ogni ora.
 - **Cosa:** `scripts/vps/backup.sh` (servizio `webora-backup`, ogni notte alle 1:40 UTC): `pg_dump` di PostgreSQL 17 (repository
   ufficiale PGDG) dello schema `public` e dei dati di `auth.users` e `auth.identities`, controllo con `pg_restore --list` (si
