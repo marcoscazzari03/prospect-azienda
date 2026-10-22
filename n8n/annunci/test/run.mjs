@@ -345,6 +345,16 @@ const segno = run(codice('09-valuta-siti.js'), {
   input: [{ html: '<html><head><title>Just a moment...</title></head><body>Checking your browser before accessing ditta.it.</body></html>' }]
 })[0].items[0].checks.find(c => c.code === 'no_mobile').evidence;
 assert.equal(segno.invalid_page, true, 'pagina di blocco: segno per togliere le vecchie prove');
+// Pagine patologiche (22/10): lunghe sequenze di spazi e di base64 non devono bloccare il nodo; l'email si trova lo stesso.
+const pesante = `<html lang="it"><body><div data-state="${'A'.repeat(200000)}"></div>${' '.repeat(200000)}<p>${corpo}</p>` +
+  `<a href="mailto:info@lento.it">info@lento.it</a> scrivi a commerciale [at] lento.it</body></html>`;
+const inizio = Date.now();
+const [lento] = run(codice('09-valuta-siti.js'), {
+  nodes: { 'Siti da controllare': [{ company_id: 'l1', domain: 'lento.it', name: 'Lento', website: 'https://lento.it' }], 'Controllo HTTPS': [{}] },
+  input: [{ html: pesante }]
+});
+assert.ok(Date.now() - inizio < 2000, `pagina patologica troppo lenta: ${Date.now() - inizio} ms`);
+assert.equal(lento.items[0].company.email, 'info@lento.it', 'email trovata anche nella pagina pesante');
 console.log('Test controllo siti superati.');
 
 // 9. Popolamento OpenStreetMap, per riquadro di provincia.

@@ -45,6 +45,19 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — controllo siti bloccato di notte da pagine enormi (proposta 1 del resoconto) · in attesa di caricamento su n8n
+- **Problema:** 4 giri falliti di fila la notte del 22/10 (00:25–03:25 UTC, «Task runner unresponsive» in «Valuta siti»). La coda
+  è sempre la stessa e un giro fallito non salva niente, quindi lo stesso lotto (ricontrollo della 054, Puglia) tornava ogni
+  ora; è ripartito solo perché le aziende nuove di OSM sono passate davanti, e quel lotto è ancora in coda.
+- **Causa (misurata):** non le regole del 21/10 ma la ricerca delle email: `[A-Z0-9._%+-]+@…` senza ancoraggio e le
+  sostituzioni «[at]» con `\s*` iniziale crescono col quadrato su lunghe sequenze di base64 o di spazi (una homepage di 1,46 MB:
+  4,2 s; 200 kB di spazi: 124 s).
+- **Cosa:** espressioni lineari con `(?<!…)` in `lib-email-azienda.js` (controllo siti) e `05-estrai-email.template.js`
+  (motore): sulle 255 pagine vere misurate, stesse email e tempo da 7,4 s a 1,3 s. In «Valuta siti» le pagine oltre 2 MB tengono
+  il primo e l'ultimo MB. Test in `n8n/annunci/test/run.mjs` (pagina con 200.000 spazi e base64: sotto i 2 s, email trovata).
+- **Dove:** «Aziende | Controllo siti» («Valuta siti»), motore («Estrai email homepage», «pagina 2/3/4»).
+- **Indietro:** versioni precedenti dei workflow nella cronologia di n8n; `git revert`.
+
 ## 22/10/2026 — province che vanno in timeout su Overpass (proposta 2 del resoconto) · in produzione (workflow pubblicato il 22/10)
 - **Problema:** notte del 22/10, timeout di Overpass su Brescia, Milano, Venezia, Verona, Vicenza e Bologna (zona della beta),
   anche se le grandi erano già divise in 3 richieste.

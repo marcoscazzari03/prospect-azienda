@@ -15,7 +15,10 @@ const CODICI = ['no_https', 'no_mobile', 'outdated_cms', 'single_language', 'sta
 const items = [];
 const stats = { companies: 0, unreachable: 0, signals: {}, emails: 0 };
 aziende.forEach((a, i) => {
-  const html = String(pagine[i]?.html ?? '');
+  // Pagine enormi: si tengono il primo e l'ultimo MB (il copyright sta nel piè di pagina). Nessuna homepage vista supera
+  // 1,95 MB (22/10).
+  const grezzo = String(pagine[i]?.html ?? '');
+  const html = grezzo.length > 2e6 ? grezzo.slice(0, 1e6) + grezzo.slice(-1e6) : grezzo;
   const { esiti, tecnologie } = controlliSito({ html, website: a.website, oggi, richiesti: CODICI, https: https[i] || {} });
   const checks = Object.values(esiti);
   if (html.length < 500) stats.unreachable++;

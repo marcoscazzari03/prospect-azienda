@@ -24,16 +24,18 @@ function emailAziendale(htmlGrezzo, website) {
     .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
     .replace(/&commat;/gi, '@').replace(/&period;/gi, '.')
     .replace(/%40/gi, '@')
-    .replace(/\s*\[\s*(?:at|chiocciola|arroba)\s*\]\s*/gi, '@')
-    .replace(/\s*\(\s*(?:at|chiocciola|arroba)\s*\)\s*/gi, '@')
-    .replace(/\s*\[\s*(?:dot|punto)\s*\]\s*/gi, '.');
+    // Espressioni lineari (22/10): con lunghe sequenze di spazi o di caratteri base64 le versioni senza (?<!…) impiegavano
+    // minuti e bloccavano «Valuta siti» (Task runner unresponsive, 4 giri falliti la notte del 22/10).
+    .replace(/(?<!\s)\s*\[\s*(?:at|chiocciola|arroba)\s*\]\s*/gi, '@')
+    .replace(/(?<!\s)\s*\(\s*(?:at|chiocciola|arroba)\s*\)\s*/gi, '@')
+    .replace(/(?<!\s)\s*\[\s*(?:dot|punto)\s*\]\s*/gi, '.');
   const tutte = [];
   let m;
   const cf = /data-cfemail=["']([0-9a-f]+)["']/gi;
   while ((m = cf.exec(html)) !== null) tutte.push(decodeCfEmail(m[1]));
   const mailto = /mailto:([^"'?#\s<>]+)/gi;
   while ((m = mailto.exec(html)) !== null) { let v = m[1]; try { v = decodeURIComponent(v); } catch {} tutte.push(v); }
-  tutte.push(...(html.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || []));
+  tutte.push(...(html.match(/(?<![A-Z0-9._%+-])[A-Z0-9._%+-]{1,64}@[A-Z0-9.-]{1,253}\.[A-Z]{2,}/gi) || []));
 
   const SCARTA_LOCALI = /^(no-?reply|do-?not-?reply|donotreply|noreply|mailer-daemon|postmaster|abuse|example|test|user|email|e-mail|name|nome|your|youremail|yourname|you|tuonome|sentry|wordpress|webmaster|hostmaster|jobs?|careers?|lavora(con)?noi|recruit(ment|ing)?|cv|hr|unsubscribe|bounce)$/;
   const PEC = /(^|\.)(pec\.[a-z.]+|legalmail\.it|arubapec\.it|postacert\.[a-z.]+|pecimprese\.it|cert\.[a-z.]+)$/;

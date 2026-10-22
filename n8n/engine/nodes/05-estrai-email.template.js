@@ -41,10 +41,12 @@ html = html
   .replace(/\\u0040/gi, '@').replace(/\\u002e/gi, '.')
   .replace(/\\x40/gi, '@').replace(/\\x2e/gi, '.')
   .replace(/%40/gi, '@').replace(/%2e/gi, '.')
-  .replace(/\s*\[\s*(?:at|chiocciola|arroba|ät)\s*\]\s*/gi, '@')
-  .replace(/\s*\(\s*(?:at|chiocciola|arroba|ät)\s*\)\s*/gi, '@')
-  .replace(/\s*\[\s*(?:dot|punto|punkt|point)\s*\]\s*/gi, '.')
-  .replace(/\s*\(\s*(?:dot|punto|punkt|point)\s*\)\s*/gi, '.');
+  // Espressioni lineari (22/10): con lunghe sequenze di spazi o di caratteri base64 le versioni senza (?<!…) impiegavano
+  // minuti e bloccavano «Valuta siti» (Task runner unresponsive, 4 giri falliti la notte del 22/10).
+  .replace(/(?<!\s)\s*\[\s*(?:at|chiocciola|arroba|ät)\s*\]\s*/gi, '@')
+  .replace(/(?<!\s)\s*\(\s*(?:at|chiocciola|arroba|ät)\s*\)\s*/gi, '@')
+  .replace(/(?<!\s)\s*\[\s*(?:dot|punto|punkt|point)\s*\]\s*/gi, '.')
+  .replace(/(?<!\s)\s*\(\s*(?:dot|punto|punkt|point)\s*\)\s*/gi, '.');
 
 // Email nella pagina ("sicure" = in un mailto o protette da Cloudflare).
 const sicure = new Set();
@@ -62,7 +64,7 @@ while ((m = mailtoRegex.exec(html)) !== null) {
   sicure.add(v.toLowerCase().trim());
   tutte.push(v);
 }
-tutte.push(...(html.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || []));
+tutte.push(...(html.match(/(?<![A-Z0-9._%+-])[A-Z0-9._%+-]{1,64}@[A-Z0-9.-]{1,253}\.[A-Z]{2,}/gi) || []));
 
 const ESTENSIONI = /\.(png|jpe?g|gif|svg|webp|css|js|ico|woff2?|ttf|pdf)$/i;
 const SCARTA_LOCALI = /^(no-?reply|do-?not-?reply|donotreply|noreply|mailer-daemon|postmaster|abuse|example|test|user|email|e-mail|name|nome|your|youremail|yourname|you|tuonome|sentry|wordpress|webmaster|hostmaster|jobs?|careers?|lavora(con)?noi|recruit(ment|ing)?|cv|hr|bewerbung|praktikum|stage|empleo|trabaja|vacatures|rekrutacja|kariera|unsubscribe|bounce)$/;
