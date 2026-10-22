@@ -48,6 +48,22 @@ Come tornare indietro, in generale:
 
 ---
 
+## 22/10/2026 — rotazione dei segreti del motore (punto 17) · A verificato; B in attesa della ricerca di prova; `vercel.json` da pubblicare su main
+- **Cosa:** l'utente ha cambiato `ENGINE_CALLBACK_SECRET` (n8n → app, credenziale n8n «Lead Engine - Callback verso
+  backend», usata da tutti i workflow) e `N8N_ENGINE_HEADER_VALUE` (app → n8n, credenziale «Lead Engine - Webhook in
+  ingresso») su Vercel e in n8n. Valori generati nel browser (`crypto.randomUUID()`), mai in chat né nel repository.
+- **Intoppo:** il Redeploy dal pannello di Vercel è stato annullato in 1 s dal nostro `ignoreCommand` (stesso commit = nessuna
+  differenza = build saltata), quindi l'app ha continuato a usare il segreto vecchio: due controlli siti a mano in 401
+  (esecuzioni 3991, 3992). Risolto pubblicando su main (`bb5707b`, con un commento cambiato in `src`); controllo a mano
+  3993 riuscito (150 aziende salvate). Il giro automatico delle 12:25 UTC era partito prima del cambio.
+- **Correzione di `vercel.json`:** `ignoreCommand` salta la build solo se il commit è diverso da quello già pubblicato; un
+  Redeploy dello stesso commit ora costruisce davvero (provato in locale: stesso commit → pubblica, solo documenti → salta,
+  codice cambiato → pubblica, senza commit precedente → pubblica). Vale dal prossimo push su main.
+- **Da ricordare:** dopo aver cambiato una variabile su Vercel serve una pubblicazione nuova; finché questa correzione non è
+  online, il Redeploy dal pannello va fatto con «Redeploy» senza cache o con un push su main.
+- **Indietro:** rimettere i valori precedenti su entrambi i lati (o due valori nuovi uguali sui due lati); per `vercel.json`
+  togliere la condizione `[ "$P" != "$(git rev-parse HEAD)" ]`.
+
 ## 22/10/2026 — pulizia dei dati di collaudo (punto 19) · eseguita il 22/10 (resta solo «Webora», 1 utente)
 - **Inventario** (`supabase/queries/inventario_collaudo.sql`, sola lettura): 3 organizzazioni, tutte dell'utente. «Webora»
   (admin, 44 ricerche e 195 lead di collaudo), «Scazza» e «Prova» (nessuna ricerca, solo i crediti di benvenuto).

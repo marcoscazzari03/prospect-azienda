@@ -6,5 +6,5 @@
       "claude/*": false
     }
   },
-  "ignoreCommand": "P=$VERCEL_GIT_PREVIOUS_SHA; if [ -n \"$P\" ] && git cat-file -e \"$P^{commit}\" 2>/dev/null && git diff --quiet \"$P\" HEAD -- . ':(exclude)docs' ':(exclude)*.md' ':(exclude)supabase/queries' ':(exclude).claude'; then exit 0; else exit 1; fi"
+  "ignoreCommand": "P=$VERCEL_GIT_PREVIOUS_SHA; if [ -n \"$P\" ] && [ \"$P\" != \"$(git rev-parse HEAD)\" ] && git cat-file -e \"$P^{commit}\" 2>/dev/null && git diff --quiet \"$P\" HEAD -- . ':(exclude)docs' ':(exclude)*.md' ':(exclude)supabase/queries' ':(exclude).claude'; then exit 0; else exit 1; fi"
 }
