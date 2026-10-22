@@ -60,6 +60,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 78. ~~**Io** – Menu del sito che non sborda sui telefoni stretti (320px)~~ (21/10)
 81. ~~**Io** – Ricerca delle email più veloce (blocchi notturni di «Valuta siti») e province OSM divise in 7 richieste~~ (22/10:
     controllo siti, OSM e motore pubblicati).
+82. ~~**Io** – Disponibilità nel wizard come la riserva (065), prova del certificato con errore sul nome, motore allineato al
+    controllo siti (porte e regole HTTPS del 21/10), prezzi di Haiku nel registro~~ (22/10: migrazione eseguita e workflow pubblicati).
 
 ## 🟠 Decisione della beta
 9. **Insieme, il 30/10** – Decidere con le soglie della pagina Admin → Beta: almeno 3 agenzie attive, esporta almeno la metà

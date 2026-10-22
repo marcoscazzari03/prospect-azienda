@@ -48,7 +48,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 22/10/2026 — disponibilità come la riserva, prova del certificato, filtro porte nel motore · nodi caricati in n8n il 22/10 (verificati identici ai file); in attesa della migrazione 065 e della pubblicazione di «Lead Engine | Search (v1)» e «Aziende | Controllo siti»
+## 22/10/2026 — disponibilità come la riserva, prova del certificato, filtro porte nel motore · in produzione (migrazione 065 eseguita e workflow pubblicati il 22/10)
 - **Disponibilità (migrazione `20261209000065_availability_like_reserve.sql`):** `availability_contacts` toglie come la riserva
   portali e piattaforme, pagine ospitate e aziende fuori target dal nome; prima le aziende con email potevano risultare di
   più (QA del punto 40). Banco: 0,15–0,48 s come prima. Test 37. Indietro: `availability_contacts` dalla 063.
