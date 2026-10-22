@@ -160,6 +160,23 @@ a hotel, ristoranti e negozi»; l'apertura a tutti quando il database copre anch
     le accetta solo se il database le può soddisfare (conteggio «circa X lead» del punto 40) e il wizard parte già compilato.
     Si avviano con i crediti, come ogni ricerca.
 
+## 🟠 Copertura del database prima della produzione (decisa il 22/10)
+Si va in produzione solo con il database coperto anche per manifattura, uffici e studi professionali, in tutte le regioni.
+**Soglia proposta:** almeno 500 aziende con contatto per ogni regione principale e per ciascuno dei 6 macro-settori
+(turismo, commercio, manifattura, servizi alle imprese, studi professionali, sanità); misura settimanale con
+`supabase/queries/copertura_settori.sql`. Il lavoro gira sul VPS (gratis), senza Google Maps, PagineGialle o Registro Imprese.
+86. **Io** – Contatti per tutto il database: il worker apre «Contatti», «Note legali» e «Chi siamo» di ogni azienda senza
+    email né modulo (oggi lo fa solo il motore durante una ricerca). Stima: dal 22% al 45–55% di aziende consegnabili.
+87. **Io** – Tutta Italia da OpenStreetMap in un colpo: file Geofabrik letto sul VPS, niente timeout di Overpass, più tipi
+    di attività (manifattura `man_made=works` e `industrial=*`, tutti gli `office=*`, `craft=*`), anche senza sito.
+88. **Io** – Sito delle aziende che non ce l'hanno: domini probabili verificati sulla homepage (gratis), ricerca web con
+    Haiku solo per i casi difficili, con un tetto di spesa giornaliero.
+89. **Io** – Annunci di lavoro anche per la manifattura: operai specializzati, tecnici, magazzinieri, amministrativi.
+90. **Insieme** – Backup notturno cifrato del database sul VPS, finché non c'è Supabase Pro.
+91. **Io** – Segnali nuovi dal VPS: certificato in scadenza entro 30 giorni, velocità del sito.
+92. **Più avanti** – Siti italiani da Common Crawl (archivio pubblico) per le aziende che non sono in nessun elenco.
+93. **Tu, con il legale** – Albi professionali (commercialisti, avvocati): si possono usare? Contengono dati di persone.
+
 ## ⚪ Email e immagine
 30. **Tu, nei prossimi giorni** – Logo accanto al mittente: account Google con leads@ e logo come foto profilo (file pronto).
 33. ~~**Tu** – Prezzo del rinnovo della casella Hostinger prima del 19/02/2027~~ (21/10: assorbito dal punto 68).
