@@ -65,7 +65,7 @@ UNIT
     sudo systemd-run --quiet --wait --pipe --collect --uid="$USER" --property=EnvironmentFile="$ENVF" \
       --working-directory="$APP" --setenv=DRY_RUN=1 --setenv=LIMIT=20 /usr/bin/node worker/site-checks.mjs
     ;;
-  giro) sudo systemctl start $NOME.service && journalctl -u $NOME.service -n 5 --no-pager ;;
+  giro) sudo systemctl start $NOME.service || echo "Giro non riuscito: ecco le ultime righe."; journalctl -u $NOME.service -n 5 --no-pager ;;
   avvia) sudo systemctl enable --now $NOME.timer && systemctl list-timers $NOME.timer --no-pager ;;
   ferma) sudo systemctl disable --now $NOME.timer ;;
   stato) systemctl list-timers $NOME.timer --no-pager || true; journalctl -u $NOME.service -n 20 --no-pager ;;

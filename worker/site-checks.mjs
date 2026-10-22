@@ -83,7 +83,7 @@ async function main() {
   const app = (process.env.APP_URL || 'https://leads.weborastudio.it').replace(/\/+$/, '');
   const limite = Math.min(Math.max(Number(process.env.LIMIT) || 300, 1), 300);
   const parallelo = Math.min(Math.max(Number(process.env.CONCURRENCY) || 8, 1), 32);
-  const prova = process.env.DRY_RUN === '1';
+  const prova = ['1', 'true', 'si', 'sì', 'yes'].includes(String(process.env.DRY_RUN || '').toLowerCase());
   const intestazioni = { 'x-engine-secret': segreto, 'Content-Type': 'application/json' };
   const inizio = Date.now();
 
@@ -111,7 +111,9 @@ async function main() {
 
   const stats = { aziende: items.length, illeggibili: items.filter(i => !i.letto).length, email: items.filter(i => i.company.email).length, segnali: {} };
   for (const i of items) for (const c of i.checks) if (c.status === 'pass') stats.segnali[c.code] = (stats.segnali[c.code] || 0) + 1;
-  const corpo = items.map((i) => ({ company: i.company, checks: i.checks }));
+  // Nome e sito entro i 300 caratteri dello schema della route: un valore troppo lungo farebbe rifiutare tutto il lotto (QA).
+  const corto = (v) => String(v ?? '').slice(0, 300);
+  const corpo = items.map((i) => ({ company: { ...i.company, name: corto(i.company.name), website: corto(i.company.website) }, checks: i.checks }));
 
   if (prova) {
     console.log(JSON.stringify({ prova: true, secondi: Math.round((Date.now() - inizio) / 1000), stats }, null, 2));
