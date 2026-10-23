@@ -47,6 +47,10 @@ Haiku sceglie solo tra i settori del database (`src/lib/domain/db-sectors.ts`, g
 le parole chiave di quel settore: con settori inventati («PMI», «artigiani») un commercialista in tutta Italia riceveva 0
 proposte. Fino a 6 proposte da Haiku, se ne mostrano 3.
 
+## Conteggio nei settori grandi (23/10 sera)
+Il conteggio leggeva 501 aziende a caso del settore: con «Ristorante» in tutta Italia erano quasi tutte senza email (3 lead).
+Dalla migrazione 070 entrano prima quelle con un contatto; vale anche per la stima del wizard.
+
 ## Come è fatto (23/10)
 - **Dati:** migrazione `20261211000067_business_profile.sql`, colonne sull'organizzazione: `business_description` (≤500),
   `business_area` (≤120), `business_suggestions` (proposte già filtrate e contate), `business_suggested_at`,

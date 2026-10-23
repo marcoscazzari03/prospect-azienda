@@ -50,6 +50,13 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — disponibilità: prima le aziende con un contatto (migrazione 070) · in revisione; poi migrazione da eseguire
+- **Cosa:** `availability_contacts` (065) leggeva al massimo 501 aziende del gruppo, prese come capitava; ora ordina prima
+  quelle con email o modulo (`supabase/migrations/20261214000070_availability_ready_first.sql`, test SQL 41).
+- **Perché:** nei settori grandi le 501 erano quasi tutte «email non trovata»: Ristorante in tutta Italia contava 3 lead
+  (ricerche consigliate dell'admin, 23/10), e lo stesso errore c'era nella stima del wizard.
+- **Indietro:** ripristinare la funzione dalla 065.
+
 ## 23/10/2026 — ricerche consigliate: 100 proposte al giorno per l'admin · su main
 - **Cosa:** `saveBusinessProfile` in `src/app/app/actions.ts`: tetto giornaliero 100 per l'admin, 10 per gli altri.
 - **Perché:** l'admin le prova e arrivava al limite (23/10). Costo massimo circa 3 centesimi al giorno.
