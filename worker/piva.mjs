@@ -55,11 +55,14 @@ const CREDITI = /realizzat[oa] da|sviluppat[oa] da|powered by|designed by|web ?d
 
 // La prima partita IVA valida con un'etichetta vicina («P.IVA», «Partita IVA», «VAT», «C.F. e P.IVA»), non nei crediti.
 export function trovaPiva(testo) {
+  let dopo = 0; // fine del numero precedente: i crediti prima di lui non valgono per questo (QA)
   for (const m of testo.matchAll(/(?:^|[^\d])(?:IT ?)?(\d{11})(?!\d)/g)) {
     const prima = testo.slice(Math.max(0, m.index - 60), m.index + 1);
+    const inizio = Math.max(dopo, m.index - 150);
+    dopo = m.index + m[0].length;
     // «vat» come parola: dentro «privato» o «innovativa» non è un'etichetta (Code Reviewer).
     if (!/p\.? ?i\.? ?v\.? ?a|partita ?iva|\bvat\b|c\.? ?f\.?|codice fiscale/i.test(prima)) continue;
-    if (CREDITI.test(testo.slice(Math.max(0, m.index - 150), m.index))) continue;
+    if (CREDITI.test(testo.slice(inizio, m.index))) continue;
     if (pivaValida(m[1])) return { piva: m[1], dove: m.index };
   }
   return null;

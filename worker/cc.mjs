@@ -191,16 +191,14 @@ export async function apriHomepage(dominio, req = richiesta) {
 
 function leggiProvati(file) {
   const provati = new Map();
-  const pive = new Map(); // partita IVA -> primo dominio che l'ha mostrata
-  if (!existsSync(file)) return { provati, pive };
+  if (!existsSync(file)) return provati;
   for (const riga of readFileSync(file, 'utf8').split('\n')) {
     const [dominio, data, piva] = riga.split('\t');
     if (!dominio || !data) continue;
     // Sito non aperto («x»: spento, rete, tempo scaduto): si riprova dopo 30 giorni invece che dopo un anno (QA).
     provati.set(dominio, Date.parse(data) - (piva === 'x' ? (RIPROVA_GIORNI - 30) * 86_400_000 : 0));
-    if (piva && piva.length === 11 && !pive.has(piva)) pive.set(piva, dominio);
   }
-  return { provati, pive };
+  return provati;
 }
 
 // I domini del giro: nell'ordine dell'elenco, non provati nell'ultimo anno.
@@ -212,17 +210,6 @@ export async function daProvare(righe, provati, limite, oggi = Date.now()) {
     if (scelti.length >= limite) break;
   }
   return scelti;
-}
-
-// Stessa partita IVA su più domini: si tiene il primo (stessa azienda con più siti, o il fornitore); gli altri no.
-export function senzaDoppioni(trovate, pive) {
-  const visti = new Map(pive);
-  return trovate.filter(t => {
-    const primo = visti.get(t.piva);
-    if (primo && primo !== t.dominio) return false;
-    visti.set(t.piva, t.dominio);
-    return true;
-  });
 }
 
 // Settore e parole chiave dall'app (Haiku, /api/engine/companies-classify) a lotti di 20; un lotto fallito resta senza
@@ -267,7 +254,7 @@ async function main() {
 
   const fileElenco = await scaricaElenco(cartella, release);
   const fileProvati = join(cartella, 'cc-provati.tsv');
-  const { provati, pive } = leggiProvati(fileProvati);
+  const provati = leggiProvati(fileProvati);
   const scelti = await daProvare(createInterface({ input: createReadStream(fileElenco), crlfDelay: Infinity }), provati, limite);
 
   const esiti = await inParallelo(scelti, parallelo, async (dominio) => {
@@ -281,8 +268,9 @@ async function main() {
     return { dominio, aperto: Boolean(pagina), url: pagina?.url, ...(dati || {}) };
   });
   const fatti = esiti.filter(Boolean);
-  const conPiva = fatti.filter(e => e.piva);
-  const trovate = senzaDoppioni(conPiva, pive);
+  // Tutte al database: è lui a decidere i doppioni con vat_seen (stessa partita IVA su 2 domini = stessa azienda, su 3 o
+  // più = di un fornitore). Scartarli qui gli nascondeva la terza volta (QA, 23/10).
+  const trovate = fatti.filter(e => e.piva);
   // In prova solo il primo lotto, per vedere i settori negli esempi (con il segreto, cioè sul VPS).
   const classificate = segreto.length >= 32 ? await classifica(prova ? trovate.slice(0, 20) : trovate, app, segreto, fetch, scadenzaSettore) : 0;
   const aziende = trovate.map(t => ({
@@ -292,7 +280,7 @@ async function main() {
   }));
   const riepilogo = {
     secondi: Math.round((Date.now() - inizio) / 1000), release, gia_provati: provati.size, provati: fatti.length,
-    aperti: fatti.filter(e => e.aperto).length, con_piva: conPiva.length, doppioni: conPiva.length - trovate.length,
+    aperti: fatti.filter(e => e.aperto).length, con_piva: trovate.length,
     con_citta: trovate.filter(t => t.citta).length, con_settore: classificate, trovate: aziende.length,
     esempi: trovate.slice(0, 20).map(t => `${t.nome} (${t.citta || '?'} ${t.sigla || ''}) -> ${t.dominio}${t.settore ? ` · ${t.settore}` : ''}`),
   };

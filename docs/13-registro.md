@@ -66,6 +66,9 @@ Come tornare indietro, in generale:
   restava per sempre e faceva scartare gli altri: ora `vat_sightings` e `vat_seen()` contano su quanti domini compare (1 =
   dell'azienda, 2 = stessa azienda con due siti, 3 o più = fornitore, tolta da tutte); un dominio già presente si aggiorna
   sempre invece di essere scartato; `vat_number <> ''` nelle ricerche per usare l'indice; `lock_timeout` di 5 s.
+- **Seconda QA («pronto con riserve»):** una partita IVA scritta male non fa più rifiutare tutto il lotto (`.catch` nelle
+  route `site-checks` e `companies-import`); i doppioni li decide solo il database (tolto `senzaDoppioni` dal worker, che gli
+  nascondeva la terza volta); i crediti valgono solo per la partita IVA che segue («Sito by Pixel P.IVA … | Rossi Srl P.IVA …»).
 - **Correzioni della QA («NON PRONTO»):** dominio con «--» che faceva fallire il giro (nome di riserva) e analisi di ogni
   pagina protetta da un try/catch; crediti «sito by», «web agency», «a cura di»; città con trattino o «nell'»
   («Bolzano-Bozen», «Reggio nell'Emilia»); og:site_name generico («Il mio blog WordPress») ignorato; siti non aperti

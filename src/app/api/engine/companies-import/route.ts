@@ -31,8 +31,8 @@ const schema = z.object({
     region: z.string().max(120).optional(),
     industry: z.string().max(200).optional(),
     keywords: z.array(z.string().max(80)).max(10).optional(),
-    // Partita IVA (migrazione 069): ricontrollata da vat_valid; già di un altro dominio = azienda non importata.
-    vat: z.string().regex(/^\d{11}$/).optional(),
+    // Partita IVA (migrazione 069): ricontrollata da vat_valid; una scritta male si ignora senza rifiutare il lotto (QA).
+    vat: z.string().regex(/^\d{11}$/).optional().catch(undefined),
   })).max(5000),
 });
 

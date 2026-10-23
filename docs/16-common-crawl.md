@@ -30,7 +30,7 @@ controlli.
    (CT)», «00187 Roma» se è un capoluogo); la sigla dà provincia e regione.
 6. **Partita IVA e doppioni** (migrazione 069, decisione dell'utente del 23/10): la partita IVA si salva in
    `companies.vat_number` (ricontrollata dal database con `vat_valid`). La stessa partita IVA su più domini (stessa azienda
-   con più siti) vale una volta sola: nel giro, tra giri diversi (`cc-provati.tsv`) e nel database. Il database tiene ogni
+   con più siti) vale una volta sola. Lo decide solo il database (il worker gli manda tutte le aziende trovate), che tiene ogni
    coppia partita IVA–dominio vista (`vat_sightings`): su un dominio solo la partita IVA è dell'azienda; su due è
    probabilmente la stessa azienda con due siti (la seconda, se nuova, non si importa); su tre o più è di un fornitore
    (web agency o hosting nel piè di pagina): si toglie da tutte e non blocca più nessuna. Anche il controllo siti legge la

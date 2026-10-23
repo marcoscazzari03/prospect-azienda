@@ -11,7 +11,7 @@ import { richiesta, privato } from './http.mjs';
 import { pagineDaAprire, haModulo, trovaContatti } from './contacts.mjs';
 import { caricaRegoleSiti, luogoSullaPagina, cercaSito, daProvare, dominioDaScartare } from './siti-osm.mjs';
 import { pivaDaPagina, testoDi } from './piva.mjs';
-import { dominioDaRiga, pivaValida, trovaPiva, trovaLuogo, trovaNome, analizzaPagina, schedaDi, senzaDoppioni, daProvare as daProvareCc, classifica, apriHomepage } from './cc.mjs';
+import { dominioDaRiga, pivaValida, trovaPiva, trovaLuogo, trovaNome, analizzaPagina, schedaDi, daProvare as daProvareCc, classifica, apriHomepage } from './cc.mjs';
 import { caricaOsm, filtri, caricaProvince, dentro, puntoDi, leggiAttivita, normalizza, semplifica } from './osm.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -331,8 +331,7 @@ assert.equal(analizzaPagina(paginaCc('P.IVA 02023170042', '<title>Questo dominio
 assert.equal(analizzaPagina(paginaCc('Nessun dato fiscale'), 'x.it'), null, 'senza partita IVA');
 assert.equal(analizzaPagina('<p>P.IVA 02023170042</p>', 'x.it'), null, 'pagina troppo corta');
 assert.ok(!/[\uD800-\uDFFF]/.test(schedaDi(`<title>Ciao ${'x'.repeat(149)}😀</title>`).replace(/😀/g, '')), 'nessun mezzo emoji nella scheda');
-assert.deepEqual(senzaDoppioni([{ dominio: 'b.it', piva: '1' }, { dominio: 'c.it', piva: '1' }, { dominio: 'd.it', piva: '2' }, { dominio: 'e.it', piva: '3' }], new Map([['3', 'z.it']])).map(t => t.dominio),
-  ['b.it', 'd.it'], 'stessa partita IVA: il primo dominio, anche dai giri precedenti');
+assert.equal(trovaPiva('Sito by Pixel P.IVA 04304320619 | Rossi Srl P.IVA 02023170042')?.piva, '02023170042', 'i crediti valgono solo per la partita IVA che segue (QA)');
 async function* gen(v) { yield* v; }
 assert.deepEqual(await daProvareCc(gen(['a.it', 'b.it', '', 'c.it', 'd.it']), new Map([['a.it', Date.parse('2026-10-01')], ['c.it', Date.parse('2025-01-01')]]), 2, Date.parse('2026-10-23')),
   ['b.it', 'c.it'], 'salta i provati nell\'ultimo anno');

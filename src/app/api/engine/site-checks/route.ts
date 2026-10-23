@@ -33,7 +33,7 @@ const schema = z.object({
       website: z.string().max(300).optional(),
       technologies: z.array(z.string().max(40)).max(10).optional(),
       email: z.string().max(200).optional(), // email aziendale dalla homepage (migrazione 050)
-      vat: z.string().regex(/^\d{11}$/).optional(), // partita IVA dalla homepage (migrazione 069), ricontrollata da vat_valid
+      vat: z.string().regex(/^\d{11}$/).optional().catch(undefined), // partita IVA dalla homepage (migrazione 069), ricontrollata da vat_valid; scritta male = ignorata
     }),
     checks: z.array(z.object({
       code: z.string().max(40),
