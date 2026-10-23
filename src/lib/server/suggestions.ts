@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { offerChoice } from "@/lib/domain/signals";
 import { getEnabledOffers } from "@/lib/server/offer-rules";
-import { haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, type StoredSuggestions, type Suggestion } from "@/lib/domain/suggestions";
+import { BUSINESS_LIMITS, haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, type StoredSuggestions, type Suggestion } from "@/lib/domain/suggestions";
 import type { Json } from "@/lib/supabase/database.types";
 import type { Viewer } from "@/lib/server/dal";
 import { expectedLeads } from "@/lib/domain/pricing";
@@ -115,8 +115,17 @@ export async function generateSuggestions(orgId: string, description: string, ar
   // tempo massimo del database (23/10).
   const items: Suggestion[] = [];
   for (let i = 0; i < toCount.length; i += 2) {
-    items.push(...await Promise.all(toCount.slice(i, i + 2).map(async (s) => ({ ...s, leads: await countLeads(orgId, s, area, offers) }))));
+    items.push(...await Promise.all(toCount.slice(i, i + 2).map(async (s) => {
+      const leads = await countLeads(orgId, s, area, offers);
+      // Con un servizio la ricerca chiede anche il segnale (per un commercialista: un annuncio per contabile), e le aziende
+      // sono poche: sotto la soglia si propone la ricerca semplice dello stesso settore (23/10: 0 proposte su 6).
+      if (s.offer && leads < BUSINESS_LIMITS.minLeads) {
+        const plain = { ...s, offer: null };
+        return { ...plain, leads: await countLeads(orgId, plain, area, offers) };
+      }
+      return { ...s, leads };
+    })));
   }
   // Anche le proposte scartate (meno di 10 lead), per capire le risposte di Haiku nelle prove: non si mostrano.
-  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ title: s.title, industry: s.industry, keywords: s.keywords, leads: s.leads, db: debug.get(`${s.industry}|${s.offer ?? ""}`), at: new Date().toISOString() })) };
+  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ title: s.title, industry: s.industry, keywords: s.keywords, offer: s.offer, leads: s.leads, db: debug.get(`${s.industry}|${s.offer ?? ""}`), at: new Date().toISOString() })) };
 }

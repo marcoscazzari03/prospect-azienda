@@ -50,6 +50,14 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — ricerche consigliate: con un servizio e pochi lead, la ricerca semplice dello stesso settore · su main
+- **Cosa:** in `generateSuggestions` una proposta con servizio (ricerca di opportunità) sotto i 10 lead si ricalcola senza
+  servizio e si propone come ricerca semplice; i tentativi salvano anche `offer`.
+- **Perché (trovato con la diagnosi):** per «Studio commercialista» Haiku legava tutte le proposte al servizio «Amministrazione /
+  contabilità», cioè «aziende con un annuncio recente per contabile»: in tutta Italia 12 ristoranti, 18 imprese edili, quindi
+  0 proposte. La 070 era giusta; il conteggio a mano dava 501 perché era una ricerca semplice.
+- **Indietro:** revert del commit.
+
 ## 23/10/2026 — ricerche consigliate: risposta grezza del database nei tentativi (diagnosi) · su main
 - **Cosa:** `business_suggestions.tried[].db` (conteggi di `availability_contacts`, tipo di ricerca e target) e `at`.
 - **Perché:** «Studio commercialista» in tutta Italia contava ancora Ristorante 3 dopo la 070, mentre la stessa chiamata a
