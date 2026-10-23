@@ -14,7 +14,7 @@ export const haikuAnswerSchema = z.object({
     industry: z.string(),
     keywords: z.array(z.string()),
     offer: z.string().nullable(),
-  })).max(4),
+  })),
 });
 export type HaikuAnswer = z.infer<typeof haikuAnswerSchema>;
 
@@ -36,7 +36,8 @@ export function sanitizeAnswer(a: HaikuAnswer, offerCodes: readonly string[]): H
         keywords: [...new Set(s.keywords.map((k) => clean(k, 40).toLowerCase()).filter((k) => k.length >= 3))].slice(0, 6),
         offer: s.offer && offerCodes.includes(s.offer) ? s.offer : null,
       }))
-      .filter((s) => s.title && s.industry),
+      .filter((s) => s.title && s.industry)
+      .slice(0, 4), // Haiku ne propone fino a 4: oltre si ignorano invece di rifiutare la risposta
   };
 }
 

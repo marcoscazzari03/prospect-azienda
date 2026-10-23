@@ -193,6 +193,11 @@ Come tornare indietro, in generale:
   aziende, contate sul database come il wizard, schede che aprono il wizard compilato. Dettagli in
   `docs/15-ricerche-consigliate.md`. Nuova dipendenza `@anthropic-ai/sdk` 0.132.0 (versione di oltre due settimane fa).
 - **Perché:** decisione del 22/10 (tabella in alto): utile ai mestieri che non trovano il loro servizio nel wizard.
+- **Revisione (Code Reviewer, pronto con riserve, corretto):** «Salta per ora» non chiamava l'azione (era `formAction` su un
+  pulsante che non invia il modulo); se Haiku non risponde si salvano solo descrizione e zona, le proposte buone di prima
+  restano; oltre 4 proposte si ignorano invece di rifiutare la risposta; chiavi delle schede uniche. Verificati: scritture
+  solo sull'organizzazione dell'utente, prompt injection senza effetti fuori dai testi del cliente stesso, limite di 10 al
+  giorno, conteggio uguale al wizard. Testi rivisti dal sales-copywriter.
 - **Indietro:** Admin → Servizi → «Spente» (il riquadro sparisce); drop delle colonne della 067.
 
 ## 23/10/2026 — worker del controllo siti fermo dopo l'import OSM · correzione pronta; da fare: revisione, main, `installa` sul VPS (stasera)

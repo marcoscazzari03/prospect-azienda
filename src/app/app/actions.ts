@@ -321,11 +321,11 @@ export async function saveBusinessProfile(_: ActionState, form: FormData): Promi
   } catch (e) {
     await reportError("suggestions", e, "/app");
   }
+  // Se Haiku non risponde si salvano solo descrizione e zona: le proposte buone di prima restano (Code Reviewer).
   await db.from("organizations").update({
     business_description: description,
     business_area: area,
-    business_suggestions: suggestions,
-    business_suggested_at: suggestions ? new Date().toISOString() : null,
+    ...(suggestions ? { business_suggestions: suggestions, business_suggested_at: new Date().toISOString() } : {}),
   }).eq("id", viewer.org.id);
   revalidatePath("/app");
   return suggestions ? {} : { error: "Non siamo riusciti a preparare le ricerche. Riprova, oppure crea una ricerca a mano." };

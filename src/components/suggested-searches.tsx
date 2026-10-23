@@ -1,5 +1,5 @@
 "use client";
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import { saveBusinessProfile, skipBusinessProfile, type ActionState } from "@/app/app/actions";
 import { Alert, Badge, Button, ButtonLink, Card, Field, Input, Textarea } from "@/components/ui";
 import { BUSINESS_LIMITS, aboutLeads, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
@@ -15,7 +15,7 @@ export function SuggestedSearches({ description, area, stored, skipped }: { desc
   // Proposte arrivate: si chiude il modulo e si mostrano le schede.
   const [state, action, pending] = useActionState<ActionState, FormData>(async (prev, form) => {
     const r = await saveBusinessProfile(prev, form);
-    if (!r.error) setEditing(false);
+    if (!r.error) startTransition(() => setEditing(false));
     return r;
   }, {});
 
@@ -51,7 +51,8 @@ export function SuggestedSearches({ description, area, stored, skipped }: { desc
             {description ? (
               <Button type="button" variant="ghost" onClick={() => setEditing(false)}>Annulla</Button>
             ) : (
-              <Button type="button" variant="ghost" formAction={skipBusinessProfile} formNoValidate>Salta per ora</Button>
+              <Button type="button" variant="ghost" disabled={pending}
+                onClick={() => startTransition(async () => { await skipBusinessProfile(); setEditing(false); })}>Salta per ora</Button>
             )}
           </div>
           {pending && <Skeletons />}
@@ -140,8 +141,8 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
     <>
       {header}
       <div className="grid gap-3 lg:grid-cols-3">
-        {stored.items.map((s) => (
-          <a key={s.title} href={wizardHref(s, area)} className="group flex flex-col gap-2 rounded-lg border border-line bg-white p-4 transition-colors hover:border-ledger focus:outline-none focus:ring-2 focus:ring-ledger/30">
+        {stored.items.map((s, i) => (
+          <a key={`${i}-${s.title}`} href={wizardHref(s, area)} className="group flex flex-col gap-2 rounded-lg border border-line bg-white p-4 transition-colors hover:border-ledger focus:outline-none focus:ring-2 focus:ring-ledger/30">
             <span className="font-display text-lg font-semibold leading-snug">{s.title}</span>
             <Badge tone="ledger" className="self-start font-mono">circa {formatNumber(aboutLeads(s.leads))} lead</Badge>
             <span className="text-sm text-muted line-clamp-2">{s.why}</span>
@@ -156,7 +157,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
 
 function Skeletons() {
   return (
-    <div className="grid gap-3 lg:grid-cols-3" aria-live="polite" aria-busy="true">
+    <div className="grid gap-3 lg:grid-cols-3" role="status" aria-busy="true">
       <span className="sr-only">Stiamo preparando le ricerche…</span>
       {[0, 1, 2].map((k) => <div key={k} className="h-36 animate-pulse rounded-lg bg-paper-2" />)}
     </div>
