@@ -51,6 +51,17 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — Avvisto, fase A: codice pronto senza effetti online · in revisione
+- **Cosa:** `BRAND` in due versioni (`src/lib/config.ts`), scelta con `NEXT_PUBLIC_BRAND=avvisto` (assente = Webora, com'è
+  oggi); logo provvisorio Avvisto in `src/components/logo.tsx` (una «A» con il punto ambra) e icona del browser generata dallo
+  stesso simbolo (`src/app/icon.tsx`, al posto di `icon.svg`); `public/email/logo-avvisto.png` e logo delle email da
+  `BRAND.emailLogo`; modelli email di Supabase in versione Avvisto (`supabase/templates/avvisto/`, test che li tiene
+  allineati); motore n8n: `HOST_APP` accetta già avvisto.it (test con imitazioni rifiutate); `bash worker.sh dominio URL`
+  per l'indirizzo dell'app sul VPS. Verificato in locale con `NEXT_PUBLIC_BRAND=avvisto`: homepage, accesso, prezzi,
+  telefono, icona.
+- **Restano invariati (interni, nessun cliente li vede):** nomi delle cartelle e dei servizi sul VPS, credenziali di n8n.
+- **Indietro:** revert del commit; sul VPS `APP_URL` si toglie da `/etc/webora/site-checks.env`.
+
 ## 23/10/2026 — ricerche consigliate: «Cancella la descrizione», sezione nel profilo, lead ricontati ogni notte · su main (Code Reviewer «pronto con riserve», corrette; testi del Sales Copywriter)
 - **Cosa:** pulsante «Rimuovi» (azione `clearBusinessProfile`: descrizione, zona e proposte cancellate, il riquadro torna alla
   riga «Vuoi ricerche già pronte…»); sezione «La tua attività» in Account → Profilo (solo con l'interruttore acceso) con

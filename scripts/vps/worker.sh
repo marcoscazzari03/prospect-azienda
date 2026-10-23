@@ -23,6 +23,7 @@
 #   bash worker.sh ferma            ferma i giri automatici
 #   bash worker.sh stato            ultimi giri e prossimi
 #   bash worker.sh aggiorna         scarica l'ultima versione del codice da main
+#   bash worker.sh dominio URL      indirizzo dell'app per i worker (passaggio ad Avvisto: bash worker.sh dominio https://avvisto.it)
 set -euo pipefail
 APP=/opt/webora/app
 ENVF=/etc/webora/site-checks.env
@@ -228,5 +229,12 @@ UNIT
   ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer $SITI.timer; [ -f /etc/systemd/system/$CC.timer ] && sudo systemctl disable --now $CC.timer || true ;;
   stato) systemctl list-timers $NOME.timer $CONT.timer $OSM.timer $SITI.timer $CC.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
   aggiorna) git -C "$APP" pull --ff-only && git -C "$APP" log --oneline -1 ;;
-  *) sed -n '2,25p' "$0"; exit 1 ;;
+  dominio)
+    # APP_URL nel file letto da tutti i servizi (docs/17-avvisto.md, fase C8): vale dal giro successivo.
+    case "${2:-}" in https://*) ;; *) echo "Uso: bash $0 dominio https://avvisto.it"; exit 1 ;; esac
+    U="${2%/}"
+    sudo sed -i '/^APP_URL=/d' "$ENVF"
+    printf 'APP_URL=%s\n' "$U" | sudo tee -a "$ENVF" >/dev/null
+    echo "Indirizzo dell'app per i worker: $U (dal prossimo giro)." ;;
+  *) sed -n '2,26p' "$0"; exit 1 ;;
 esac

@@ -1,15 +1,34 @@
-// Identità del prodotto: un solo punto da cambiare per il rebranding.
-// Nome e indirizzi del prodotto: al cambio di nome si cambiano qui (più logo in src/components/logo.tsx e public/email/logo.png,
-// EMAIL_FROM e APP_URL su Vercel, n8n/annunci/build.mjs e HOST_APP nel motore; elenco nel punto 67 della checklist).
-export const BRAND = {
-  name: "Webora Leads",
-  short: "Webora",
-  suffix: " Leads", // seconda parte del logo, in verde (vuota con un nome di una parola)
-  tagline: "Trova aziende in target e scopri nuove opportunità commerciali verificate",
-  owner: "Webora Studio",
-  supportEmail: "leads@weborastudio.it",
-  domain: "leads.weborastudio.it",
+// Identità del prodotto: un solo punto per il nome. Due versioni (passaggio ad Avvisto, docs/17-avvisto.md): si sceglie con
+// NEXT_PUBLIC_BRAND=avvisto su Vercel il giorno del passaggio, insieme a EMAIL_FROM e APP_URL; fino ad allora resta Webora.
+// Fuori da qui: modelli email di Supabase (supabase/templates/<versione>/), n8n (APP in n8n/annunci/build.mjs, HOST_APP nel
+// motore), APP_URL dei worker sul VPS.
+const BRANDS = {
+  webora: {
+    key: "webora",
+    name: "Webora Leads",
+    short: "Webora",
+    suffix: " Leads", // seconda parte del logo, in verde (vuota con un nome di una parola)
+    tagline: "Trova aziende in target e scopri nuove opportunità commerciali verificate",
+    owner: "Webora Studio",
+    supportEmail: "leads@weborastudio.it",
+    domain: "leads.weborastudio.it",
+    emailLogo: "/email/logo.png",
+  },
+  avvisto: {
+    key: "avvisto",
+    name: "Avvisto",
+    short: "Avvisto",
+    suffix: "",
+    tagline: "Trova i tuoi prossimi clienti tra le aziende italiane, con i motivi per contattarle",
+    owner: "Webora Studio",
+    supportEmail: "ciao@avvisto.it",
+    domain: "avvisto.it",
+    emailLogo: "/email/logo-avvisto.png",
+  },
 } as const;
+
+export const BRAND_KEY: keyof typeof BRANDS = process.env.NEXT_PUBLIC_BRAND === "avvisto" ? "avvisto" : "webora";
+export const BRAND: (typeof BRANDS)[keyof typeof BRANDS] = BRANDS[BRAND_KEY];
 
 // Beta su invito (dal 19/10): fascia sul sito e testi della registrazione. A fine beta: open = false.
 export const BETA = {

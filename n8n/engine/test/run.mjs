@@ -37,7 +37,9 @@ assert.equal(job.valida, true, job.errori.join(', '));
 assert.ok(job.lotti_previsti >= 2);
 const [bad] = run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, callback_url: 'https://weborastudio.it.evil.com/api/engine/callback' } }] }).map(i => i.json);
 assert.equal(bad.valida, false);
-for (const u of ['https://evil.weborastudio.it/api/engine/callback', 'http://leads.weborastudio.it/api/engine/callback']) {
+assert.equal(run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, callback_url: 'https://avvisto.it/api/engine/callback' } }] })[0].json.valida, true, 'avvisto.it ammesso');
+for (const u of ['https://evil.weborastudio.it/api/engine/callback', 'http://leads.weborastudio.it/api/engine/callback',
+  'https://www.avvisto.it/api/engine/callback', 'https://avvisto.it.evil.com/api/engine/callback', 'https://evilavvisto.it/api/engine/callback']) {
   assert.equal(run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, callback_url: u } }] })[0].json.valida, false, u);
 }
 const senzaSettore = (signals) => run(src('01-valida-richiesta.js'), { input: [{ body: { ...body, target: { ...body.target, industry: '', industry_keywords: [], signals } } }] })[0].json;

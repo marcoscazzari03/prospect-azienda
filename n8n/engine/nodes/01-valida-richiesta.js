@@ -3,8 +3,8 @@
 // rifiutare payload incompleti e a preparare il brief per l'AI.
 // URL di callback ammessi: SOLO il backend della piattaforma (anti-SSRF).
 // Host esatti dell'app (ripasso di sicurezza del 22/10: prima valeva qualsiasi sottodominio di weborastudio.it).
-// Al cambio di nome si aggiunge qui il dominio nuovo.
-const HOST_APP = ['leads.weborastudio.it'];
+// Avvisto (23/10, docs/17-avvisto.md): avvisto.it ammesso già prima del passaggio; il vecchio si toglie 2–4 settimane dopo.
+const HOST_APP = ['leads.weborastudio.it', 'avvisto.it'];
 const CALLBACK_AMMESSI = HOST_APP.map((h) => `https://${h}/api/engine/callback`);
 
 // Modello AI del motore: per cambiare basta questa riga (es. 'claude-opus-5-5').

@@ -61,7 +61,7 @@ ${c.preheader ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0
 <tr><td style="padding:0 4px 20px;">
 <a href="${SITE}" target="_blank" style="text-decoration:none;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-<td style="vertical-align:middle;"><img src="${SITE}/email/logo.png" width="32" height="32" alt="" style="display:block;border:0;"></td>
+<td style="vertical-align:middle;"><img src="${SITE}${BRAND.emailLogo}" width="32" height="32" alt="" style="display:block;border:0;"></td>
 <td style="vertical-align:middle;padding-left:10px;font-family:${SERIF};font-size:20px;font-weight:bold;color:${C.ink};">${esc(BRAND.short)}${BRAND.suffix ? `<span style="color:${C.ledger};">${esc(BRAND.suffix)}</span>` : ""}</td>
 </tr></table>
 </a>

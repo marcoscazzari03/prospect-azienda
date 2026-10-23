@@ -61,4 +61,6 @@ Ogni passo con la guida passo passo in chat.
 - E6. Logo definitivo quando c'è.
 
 ## Stato
-Vedi la checklist (sezione 🟣) e il registro.
+- 23/10: fase A scritta (A1, A2, A4, A5, A6), in revisione. A3: i testi prendono già il nome da `BRAND`; il posizionamento
+  nuovo (punto 83) si fa con il Sales Copywriter nella fase E. Il motore n8n va caricato dopo la revisione (A5).
+- Prossimo passo dell'utente: fase B (dominio e casella).
