@@ -134,6 +134,9 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
 67a. ~~**Io** – Fase A, codice pronto senza effetti online: `BRAND` in due versioni (`NEXT_PUBLIC_BRAND`), logo e icona
     provvisori, logo delle email, modelli email Avvisto, motore che accetta avvisto.it, `bash worker.sh dominio`~~ (23/10: su
     main, rivisto; nodo «Valida richiesta» caricato su n8n). **Tu:** pubblicare «Lead Engine | Search (v1)» su n8n.
+67b. **Io, dal 23/10** – Grafica Avvisto dalla bozza dell'utente (viola, logo della bozza, «Non sai da dove iniziare?», «Lasciati
+    ispirare», scelte rapide, statistiche con grafico): proposta dell'UI/UX Designer, poi tema, logo, menu e barra, Panoramica;
+    solo con `NEXT_PUBLIC_BRAND=avvisto`.
 66. **Tu, in corso (23/10)** – Fase B: ~~dominio comprato~~ (23/10); casella ciao@avvisto.it creata, in propagazione; comprare avvisto.it su Hostinger (solo il dominio, 5,99 €; deciso il 23/10); creare
     e provare ciao@avvisto.it con la casella gratuita; inoltro di leads@weborastudio.it verso ciao@avvisto.it. Il piano email
     di weborastudio.it (rinnovo 19/02/2027) resta finché serve leads@.

@@ -5,6 +5,12 @@ Decisioni dell'utente (23/10): sito e app su **avvisto.it** (www.avvisto.it rima
 **ciao@avvisto.it**, **logo provvisorio** fatto da Claude (da sostituire con quello definitivo). Il titolare resta Webora
 Studio («Avvisto è un servizio di Webora Studio») finché non c'è la società o la partita IVA nuova (punto 11).
 
+## Grafica (23/10, decisione dell'utente)
+Colore principale viola/indaco e logo della bozza (`docs/design/avvisto/`: Panoramica, riquadro «Non sai da dove iniziare?»,
+«Lasciati ispirare», scelte rapide, statistiche, logo). Si applica solo in versione Avvisto. Ordine: proposta dell'UI/UX
+Designer, poi tema (colori), logo, menu e barra in alto, Panoramica. Il logo provvisorio con la «A» verde resta solo fino al
+logo nuovo.
+
 ## Come si fa senza fermare il servizio
 1. **Prima (codice pronto, nome vecchio online):** tutto il codice sa già essere «Avvisto», ma lo diventa solo con
    `NEXT_PUBLIC_BRAND=avvisto` su Vercel. Fino ad allora il sito resta «Webora Leads».
