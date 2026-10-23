@@ -59,6 +59,8 @@ Come tornare indietro, in generale:
   allineati); motore n8n: `HOST_APP` accetta già avvisto.it (test con imitazioni rifiutate); `bash worker.sh dominio URL`
   per l'indirizzo dell'app sul VPS. Verificato in locale con `NEXT_PUBLIC_BRAND=avvisto`: homepage, accesso, prezzi,
   telefono, icona.
+- **Motore:** nodo «Valida richiesta» caricato su n8n il 23/10 (da pubblicare); icona di Webora in produzione verificata
+  dopo il deploy (`/icon`, PNG 64×64, stesso disegno).
 - **Restano invariati (interni, nessun cliente li vede):** nomi delle cartelle e dei servizi sul VPS, credenziali di n8n.
 - **Indietro:** revert del commit; sul VPS `APP_URL` si toglie da `/etc/webora/site-checks.env`.
 

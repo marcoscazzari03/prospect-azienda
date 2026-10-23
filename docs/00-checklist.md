@@ -131,10 +131,9 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 ## 🟣 Passaggio ad Avvisto (iniziato il 23/10, piano in `17-avvisto.md`)
 Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, logo provvisorio (Io), titolare Webora Studio.
 65. ~~**Insieme** – Scegliere il nome: **Avvisto**, marchio verificato libero (UIBM, EUIPO), avvisto.it libero~~ (21/10).
-67a. **Io, 23–24/10** – Fase A, codice pronto senza effetti online: `BRAND` in due versioni scelte da `NEXT_PUBLIC_BRAND`;
-    logo provvisorio, icona e logo delle email; testi con il nome (revisione del Sales Copywriter); modelli email di Supabase
-    in versione Avvisto; motore n8n che accetta già i callback verso avvisto.it; `APP_URL` del VPS nel file di configurazione;
-    Code Reviewer.
+67a. ~~**Io** – Fase A, codice pronto senza effetti online: `BRAND` in due versioni (`NEXT_PUBLIC_BRAND`), logo e icona
+    provvisori, logo delle email, modelli email Avvisto, motore che accetta avvisto.it, `bash worker.sh dominio`~~ (23/10: su
+    main, rivisto; nodo «Valida richiesta» caricato su n8n). **Tu:** pubblicare «Lead Engine | Search (v1)» su n8n.
 66. **Tu, appena possibile** – Fase B: comprare avvisto.it su Hostinger (circa 16 €/anno) e aggiungerlo al Business Web
     Hosting; creare e provare la casella ciao@avvisto.it; inoltro di leads@weborastudio.it verso ciao@avvisto.it.
 67. **Insieme, il giorno del passaggio (1–2 ore)** – Fase C: dominio su Vercel e DNS; dominio su Resend (SPF, DKIM, DMARC);
