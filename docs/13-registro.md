@@ -50,9 +50,11 @@ Come tornare indietro, in generale:
 
 ---
 
-## 23/10/2026 — disponibilità: prima le aziende con un contatto (migrazione 070) · in revisione; poi migrazione da eseguire
+## 23/10/2026 — disponibilità: prima le aziende con un contatto (migrazione 070) · rivista (Code Reviewer «pronto», QA «pronto con riserve» corrette); da eseguire, poi nessun deploy necessario
 - **Cosa:** `availability_contacts` (065) leggeva al massimo 501 aziende del gruppo, prese come capitava; ora ordina prima
-  quelle con email o modulo (`supabase/migrations/20261214000070_availability_ready_first.sql`, test SQL 41).
+  quelle con l'email, poi il solo modulo, poi le aziende ancora da provare, infine quelle provate senza email, come la
+  riserva (`supabase/migrations/20261214000070_availability_ready_first.sql`, test SQL 41). QA: 0,05–0,55 s in più con
+  10.000 aziende nel gruppo; con la regione circa 2 s, quasi tutti spesi nel calcolo delle candidate (già prima).
 - **Perché:** nei settori grandi le 501 erano quasi tutte «email non trovata»: Ristorante in tutta Italia contava 3 lead
   (ricerche consigliate dell'admin, 23/10), e lo stesso errore c'era nella stima del wizard.
 - **Indietro:** ripristinare la funzione dalla 065.

@@ -1,7 +1,8 @@
 -- Disponibilità: prima le aziende con un contatto (23/10, ricerche consigliate). availability_contacts (065) contava solo
 -- le prime 501 aziende del settore, prese come capitava: nei settori grandi (Ristorante in tutta Italia) erano quasi tutte
 -- aziende con «email non trovata», e il conteggio dava 3 lead invece di centinaia, nel wizard come nelle ricerche
--- consigliate. Ora tra le 501 entrano prima quelle con l'email, poi quelle con il solo modulo, poi le altre (come la riserva): stessi campi nella risposta, e oltre
+-- consigliate. Ora tra le 501 entrano prima quelle con l'email, poi quelle con il solo modulo, poi quelle
+-- ancora da provare, infine quelle provate senza email (come la riserva): stessi campi nella risposta, e oltre
 -- 500 il wizard mostra come prima il tetto della richiesta. Le funzioni pool restituiscono già tutto il gruppo (plpgsql
 -- lo calcola per intero prima del limite), quindi l'ordinamento costa poco.
 -- Indietro: ripristinare la funzione dalla 065.
@@ -16,14 +17,16 @@ begin
       select p.id from opportunity_pool(p_org, p_target, p_contacts, '{}') p
         join companies c on c.id = p.id
        where not is_platform_domain(p.domain) and not is_hosted_page(p.website, p.name) and not is_non_target_company(p.name)
-       order by coalesce(c.site_email, '') <> '' desc, coalesce(c.contact_form_url, '') <> '' desc
+       order by coalesce(c.site_email, '') <> '' desc, coalesce(c.contact_form_url, '') <> '' desc,
+                (c.email_missed_at is null or c.email_missed_at <= now() - interval '90 days') desc
        limit 501) x;
   else
     select array_agg(x.id) into v_ids from (
       select p.id from target_pool(p_org, p_target, p_contacts, '{}') p
         join companies c on c.id = p.id
        where not is_platform_domain(p.domain) and not is_hosted_page(p.website, p.name) and not is_non_target_company(p.name)
-       order by coalesce(c.site_email, '') <> '' desc, coalesce(c.contact_form_url, '') <> '' desc
+       order by coalesce(c.site_email, '') <> '' desc, coalesce(c.contact_form_url, '') <> '' desc,
+                (c.email_missed_at is null or c.email_missed_at <= now() - interval '90 days') desc
        limit 501) x;
   end if;
   return (
