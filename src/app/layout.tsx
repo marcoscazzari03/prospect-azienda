@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
-import { BRAND } from "@/lib/config";
+import { BRAND, BRAND_KEY } from "@/lib/config";
 import "./globals.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="it" className={`${inter.variable} ${fraunces.variable} ${jetbrains.variable} h-full`}>
+    <html lang="it" data-brand={BRAND_KEY} className={`${inter.variable} ${fraunces.variable} ${jetbrains.variable} h-full`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

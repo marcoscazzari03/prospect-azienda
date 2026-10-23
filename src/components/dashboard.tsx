@@ -137,7 +137,7 @@ export function ActivityCard({ since, summary, items }: { since: string; summary
                 key={c.text}
                 className={cx(
                   "rounded-full border px-2.5 py-1 text-xs font-medium",
-                  c.tone === "ledger" && "border-ledger/20 bg-ledger-soft text-ledger-2",
+                  c.tone === "ledger" && "border-ok/20 bg-ok-soft text-ok-2",
                   c.tone === "brick" && "border-brick/20 bg-brick-soft text-brick",
                   c.tone === "stamp" && "border-stamp/30 bg-stamp-soft text-stamp-ink",
                   c.tone === "ink" && "border-line bg-white text-ink",
@@ -159,7 +159,7 @@ export function ActivityCard({ since, summary, items }: { since: string; summary
                 <span
                   className={cx(
                     "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
-                    it.tone === "ledger" && "bg-ledger-soft text-ledger-2",
+                    it.tone === "ledger" && "bg-ok-soft text-ok-2",
                     it.tone === "stamp" && "bg-stamp-soft text-stamp-ink",
                     it.tone === "brick" && "bg-brick-soft text-brick",
                     it.tone === "ink" && "bg-paper-2 text-ink-2",

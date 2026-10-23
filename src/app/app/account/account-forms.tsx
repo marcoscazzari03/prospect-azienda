@@ -66,7 +66,7 @@ export function MfaSettings({ status }: { status: MfaStatus }) {
     return (
       <div className="flex flex-col gap-4">
         <p className="flex items-center gap-2 text-sm">
-          <Badge tone="ledger">Attiva</Badge>
+          <Badge tone="ok">Attiva</Badge>
           {status.since && <span className="text-ink-2">dal {new Date(status.since).toLocaleDateString("it-IT")}</span>}
         </p>
         {disableState.info && <Alert tone="ledger">{disableState.info}</Alert>}

@@ -18,6 +18,13 @@
   --color-stamp-soft: #fdf4dc;
   --color-brick: #b4472c;
   --color-brick-soft: #f9e5df;
+  /* Successo (completata, verificata, conferme): in Webora coincide con ledger, in Avvisto resta verde (23/10). */
+  --color-ok: #148057;
+  --color-ok-2: #0f6845;
+  --color-ok-soft: #e8f6ee;
+  --color-ok-bright: #22a06b;
+  --color-sky: #1d4ed8;
+  --color-sky-soft: #e3ecff;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-fraunces), Georgia, serif;
@@ -28,6 +35,22 @@
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: none; }
   }
+}
+
+/* Avvisto (docs/17-avvisto.md, proposta dell'UI/UX Designer del 23/10): viola/indaco al posto del verde, solo con
+   NEXT_PUBLIC_BRAND=avvisto (data-brand su <html>). Contrasti AA: ink 16:1, ink-2 9:1, muted 5,6:1, bianco su ledger 8,6:1;
+   ledger-bright solo per grafici e barre. */
+html[data-brand="avvisto"] {
+  --color-paper: #f6f6fb;
+  --color-paper-2: #ececf6;
+  --color-line: #e2e1ef;
+  --color-ink: #16142e;
+  --color-ink-2: #3b3a55;
+  --color-muted: #5d5b78;
+  --color-ledger: #4338ca;
+  --color-ledger-2: #3730a3;
+  --color-ledger-soft: #eeefff;
+  --color-ledger-bright: #7c6cf0;
 }
 
 html { background: var(--color-paper); }

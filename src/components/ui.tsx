@@ -61,6 +61,7 @@ export function Stat({ label, value, hint, tone = "ink" }: { label: string; valu
 const BADGE = {
   neutral: "bg-paper-2 text-ink-2 border-line",
   ledger: "bg-ledger-soft text-ledger-2 border-ledger/20",
+  ok: "bg-ok-soft text-ok-2 border-ok/20", // successo: verde anche in Avvisto
   stamp: "bg-stamp-soft text-stamp-ink border-stamp/30",
   brick: "bg-brick-soft text-brick border-brick/20",
   sky: "bg-sky-50 text-sky-700 border-sky-200",
@@ -73,7 +74,7 @@ export function Badge({ tone = "neutral", className, ...props }: ComponentProps<
 export function ProvenanceStamp({ status, type, href }: { status: string; type?: string; href?: string }) {
   const label =
     status === "validated" ? "Verificata" : status === "found_public" ? "Trovata sul sito" : status === "guessed" ? "Ipotizzata" : "Non verificata";
-  const tone = status === "validated" ? "ledger" : status === "found_public" ? "stamp" : "brick";
+  const tone = status === "validated" ? "ok" : status === "found_public" ? "stamp" : "brick";
   const inner = (
     <Badge tone={tone} title={href ? `Fonte: ${href}` : undefined}>
       <svg aria-hidden viewBox="0 0 16 16" className="h-3 w-3">
@@ -97,7 +98,7 @@ export function ProvenanceStamp({ status, type, href }: { status: string; type?:
 const STATUS: Record<string, { label: string; tone: keyof typeof BADGE; icon: string }> = {
   queued: { label: "In coda", tone: "neutral", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM8 4.5V8l2.5 1.5" },
   running: { label: "In corso", tone: "sky", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z" },
-  completed: { label: "Completata", tone: "ledger", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM5.25 8.25l1.75 1.75 3.75-4" },
+  completed: { label: "Completata", tone: "ok", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM5.25 8.25l1.75 1.75 3.75-4" },
   partial: { label: "Parziale", tone: "stamp", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM8 4.75v3.75M8 10.75v.25" },
   failed: { label: "Non riuscita", tone: "brick", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM5.75 5.75l4.5 4.5M10.25 5.75l-4.5 4.5" },
   cancelled: { label: "Annullata", tone: "neutral", icon: "M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM3.5 12.5l9-9" },
@@ -162,7 +163,7 @@ export function Select({ className, ...props }: ComponentProps<"select">) {
 
 export function Alert({ tone = "stamp", children }: { tone?: "stamp" | "brick" | "ledger"; children: ReactNode }) {
   return (
-    <div className={cx("rounded-lg border px-4 py-3 text-sm", tone === "stamp" && "border-stamp/40 bg-stamp-soft text-stamp-ink", tone === "brick" && "border-brick/30 bg-brick-soft text-brick", tone === "ledger" && "border-ledger/25 bg-ledger-soft text-ledger-2")}>
+    <div className={cx("rounded-lg border px-4 py-3 text-sm", tone === "stamp" && "border-stamp/40 bg-stamp-soft text-stamp-ink", tone === "brick" && "border-brick/30 bg-brick-soft text-brick", tone === "ledger" && "border-ok/25 bg-ok-soft text-ok-2")}>
       {children}
     </div>
   );

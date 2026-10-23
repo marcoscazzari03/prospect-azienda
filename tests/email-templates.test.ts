@@ -30,7 +30,8 @@ describe("email", () => {
   });
 
   // Versione Avvisto (docs/17-avvisto.md): stessi modelli col nome nuovo, da incollare in Supabase il giorno del passaggio.
-  // Si rigenerano con: NEXT_PUBLIC_BRAND=avvisto WRITE_TEMPLATES=1 npx vitest run tests/email-templates.test.ts
+  // Si rigenerano con: WRITE_TEMPLATES=1 npx vitest run tests/email-templates.test.ts (SENZA NEXT_PUBLIC_BRAND: la versione
+// Avvisto la imposta il test stesso; con la variabile si sovrascriverebbero i modelli di Webora, 23/10).
   it("i modelli Avvisto nel repository sono aggiornati", async () => {
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_BRAND", "avvisto");

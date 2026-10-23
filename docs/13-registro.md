@@ -52,6 +52,18 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — Avvisto: colori viola e logo della bozza (passi 1–2 dell'UI/UX Designer) · su main, visibile solo con `NEXT_PUBLIC_BRAND=avvisto`
+- **Cosa:** `data-brand` su `<html>` (`src/app/layout.tsx`); in `globals.css` le variabili viola per `html[data-brand="avvisto"]`
+  (paper #f6f6fb, ink #16142e, ledger #4338ca, ledger-2 #3730a3, ledger-soft #eeefff, ledger-bright #7c6cf0…, contrasti AA
+  dell'UI/UX Designer) e le nuove `--color-ok*` (verde dei successi, uguale a ledger in Webora) e `--color-sky*`; tono `ok` in
+  Badge, Alert di conferma, «Completata», email «Verificata», 2FA «Attiva», chip e icone dell'attività. Logo: il simbolo
+  della bozza ridisegnato in SVG (`src/components/logo.tsx`), «Avvisto.it» con «.it» viola, icona del browser su quadrato
+  lilla, `public/email/logo-avvisto.png`, colori delle email Avvisto (`src/lib/email/layout.ts`), modelli Supabase Avvisto
+  rigenerati. Verificato in locale (homepage, accesso, prezzi, telefono).
+- **Attenzione:** i modelli si rigenerano con `WRITE_TEMPLATES=1 npx vitest run tests/email-templates.test.ts` senza
+  `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli di Webora: successo il 23/10, ripristinati subito).
+- **Indietro:** revert del commit. In Webora nulla cambia (stessi colori, `ok` = `ledger`).
+
 ## 23/10/2026 — Avvisto: dominio comprato, Vercel e DNS impostati (fasi B e C1) · in attesa della propagazione
 - **Cosa:** avvisto.it su Hostinger (5,99 €), casella gratuita ciao@avvisto.it (Free Business Email, 12 mesi); su Vercel
   avvisto.it collegato a Production e www.avvisto.it con rinvio 308 ad avvisto.it; DNS: A @ → 216.198.79.1, CNAME www →

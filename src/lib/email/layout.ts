@@ -1,4 +1,4 @@
-import { BRAND } from "@/lib/config";
+import { BRAND, BRAND_KEY } from "@/lib/config";
 
 // Grafica delle email (app e modelli di accesso di Supabase in supabase/templates/).
 // HTML a tabelle con stili in linea: è quello che Gmail, Outlook e le app di posta leggono
@@ -14,15 +14,10 @@ export type EmailContent = {
   footer: string; // perché si riceve questa email
 };
 
-const C = {
-  paper: "#f4f5f7",
-  card: "#ffffff",
-  ink: "#111827",
-  ink2: "#374151",
-  muted: "#6b7280",
-  line: "#e3e6ea",
-  ledger: "#148057",
-};
+// Colori delle email: come globals.css, viola in versione Avvisto (23/10).
+const C = BRAND_KEY === "avvisto"
+  ? { paper: "#f6f6fb", card: "#ffffff", ink: "#16142e", ink2: "#3b3a55", muted: "#5d5b78", line: "#e2e1ef", ledger: "#4338ca" }
+  : { paper: "#f4f5f7", card: "#ffffff", ink: "#111827", ink2: "#374151", muted: "#6b7280", line: "#e3e6ea", ledger: "#148057" };
 const SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const SERIF = "Georgia, 'Times New Roman', serif";
 const SITE = `https://${BRAND.domain}`;

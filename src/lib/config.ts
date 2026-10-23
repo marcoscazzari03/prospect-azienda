@@ -18,7 +18,7 @@ const BRANDS = {
     key: "avvisto",
     name: "Avvisto",
     short: "Avvisto",
-    suffix: "",
+    suffix: ".it", // «Avvisto.it» nel logo, come nella bozza dell'utente
     tagline: "Trova i tuoi prossimi clienti tra le aziende italiane, con i motivi per contattarle",
     owner: "Webora Studio",
     supportEmail: "ciao@avvisto.it",
