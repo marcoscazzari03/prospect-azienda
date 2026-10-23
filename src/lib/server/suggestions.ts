@@ -68,7 +68,7 @@ async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: str
   const parsed = searchInputSchema.safeParse(suggestionSearchInput(s, area, signals));
   if (!parsed.success) {
     console.error("suggestions input", parsed.error.issues[0]?.message);
-    return 0;
+    return -1;
   }
   const { data, error } = await createAdminClient().rpc("availability_contacts", {
     p_org: orgId,
@@ -77,8 +77,9 @@ async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: str
     p_opportunity: parsed.data.signals.codes.length > 0,
   });
   if (error) {
+    // -1 e non 0: nei tentativi salvati un errore (tempo scaduto, database occupato) si distingue da «nessuna azienda».
     console.error("suggestions availability", error.message);
-    return 0;
+    return -1;
   }
   const d = (data ?? {}) as Record<string, unknown>;
   const n = (k: string) => Number(d[k]) || 0;
@@ -92,7 +93,7 @@ export async function generateSuggestions(orgId: string, description: string, ar
   const client = new Anthropic({ apiKey: key, timeout: 25_000, maxRetries: 1 });
   const response = await client.messages.parse({
     model: MODEL,
-    max_tokens: 1500,
+    max_tokens: 4000, // 1.500 troncava la risposta con 6 proposte (23/10: «Unterminated string in JSON»)
     system: prompt(offers),
     messages: [{
       role: "user",
@@ -107,7 +108,12 @@ export async function generateSuggestions(orgId: string, description: string, ar
   if (response.stop_reason === "refusal" || !response.parsed_output) throw new Error(`risposta non valida (${response.stop_reason})`);
   const answer = sanitizeAnswer(response.parsed_output, offers.map((o) => o.code));
   const toCount = answer.sells_to === "businesses" || answer.sells_to === "both" ? answer.suggestions : [];
-  const items = await Promise.all(toCount.map(async (s) => ({ ...s, leads: await countLeads(orgId, s, area, offers) })));
+  // Due conteggi alla volta, non sei insieme: in tutta Italia ognuno impiega qualche secondo e sei in parallelo rischiano il
+  // tempo massimo del database (23/10).
+  const items: Suggestion[] = [];
+  for (let i = 0; i < toCount.length; i += 2) {
+    items.push(...await Promise.all(toCount.slice(i, i + 2).map(async (s) => ({ ...s, leads: await countLeads(orgId, s, area, offers) }))));
+  }
   // Anche le proposte scartate (meno di 10 lead), per capire le risposte di Haiku nelle prove: non si mostrano.
   return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ title: s.title, industry: s.industry, keywords: s.keywords, leads: s.leads })) };
 }

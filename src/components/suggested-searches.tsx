@@ -99,13 +99,17 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
 }) {
   const [clients, setClients] = useState<string[]>([]);
   const header = (
-    <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
-      <div className="min-w-0">
-        <h2 className="font-display text-xl font-semibold">Ricerche consigliate per te</h2>
-        <p className="mt-1 line-clamp-2 text-sm text-muted">{description} · {area || "Tutta Italia"}</p>
+    <>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="font-display text-xl font-semibold">Ricerche consigliate per te</h2>
+          <p className="mt-1 line-clamp-2 text-sm text-muted">{description} · {area || "Tutta Italia"}</p>
+        </div>
+        <Button variant="ghost" size="sm" onClick={onEdit}>Modifica</Button>
       </div>
-      <Button variant="ghost" size="sm" onClick={onEdit}>Modifica</Button>
-    </div>
+      {/* Calcolo nuovo fallito con proposte vecchie salvate: l'errore si mostra sopra (23/10: sembravano proposte nuove). */}
+      {error && stored && <div className="mb-4"><Alert tone="stamp">{error} Qui sotto le proposte di prima.</Alert></div>}
+    </>
   );
   const retry = (
     <form action={action} className="contents">

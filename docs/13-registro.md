@@ -50,6 +50,14 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — ricerche consigliate: errori visibili, risposta più lunga, conteggi due alla volta · su main
+- **Cosa:** se il calcolo nuovo fallisce, la pagina mostra l'errore sopra le proposte di prima (prima sembravano nuove:
+  «cache»); conteggio in errore salvato come -1 nei tentativi (non 0); `max_tokens` di Haiku da 1.500 a 4.000 (11:56: «Unterminated
+  string in JSON»); conteggi due alla volta invece di sei insieme. File: `src/components/suggested-searches.tsx`,
+  `src/lib/server/suggestions.ts`.
+- **Perché:** dopo la migrazione 070 l'admin vedeva ancora «nessuna proposta» senza capire se il calcolo fosse nuovo.
+- **Indietro:** revert del commit.
+
 ## 23/10/2026 — disponibilità: prima le aziende con un contatto (migrazione 070) · rivista (Code Reviewer «pronto», QA «pronto con riserve» corrette); da eseguire, poi nessun deploy necessario
 - **Cosa:** `availability_contacts` (065) leggeva al massimo 501 aziende del gruppo, prese come capitava; ora ordina prima
   quelle con l'email, poi il solo modulo, poi le aziende ancora da provare, infine quelle provate senza email, come la
