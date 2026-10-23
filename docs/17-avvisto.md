@@ -2,8 +2,8 @@
 
 Documento vivo del rebranding dal nome vecchio (il vecchio indirizzo) ad **Avvisto** (avvisto.it), iniziato il 23/10.
 Decisioni dell'utente (23/10): sito e app su **avvisto.it** (www.avvisto.it rimanda lì), email di mittente e assistenza
-**ciao@avvisto.it**, **logo provvisorio** fatto da Claude (da sostituire con quello definitivo). Il titolare resta il nome vecchio
-Studio («Avvisto è un servizio dello studio») finché non c'è la società o la partita IVA nuova (punto 11).
+**ciao@avvisto.it**, **logo provvisorio** fatto da Claude (da sostituire con quello definitivo). Titolare nelle
+pagine legali: «Avvisto» (decisione del 23/10 sera) finché non c'è la partita IVA (punto 11), poi i dati veri.
 
 ## Grafica (23/10, decisione dell'utente)
 Colore principale viola/indaco e logo della bozza (`docs/design/avvisto/`: Panoramica, riquadro «Non sai da dove iniziare?»,
@@ -12,7 +12,7 @@ Designer, poi tema (colori), logo, menu e barra in alto, Panoramica. Il logo pro
 logo nuovo.
 
 **Dal 23/10 sera (richiesta dell'utente: «cambia definitivamente tutte le grafiche, ESATTAMENTE così, anche negli spazi»):** colori
-e struttura della bozza valgono per tutto il sito e con tutti e due i nomi; con `NEXT_PUBLIC_BRAND` cambiano solo nome, logo,
+e struttura della bozza valgono per tutto il sito (dal 23/10 sera c'è un solo nome, Avvisto: `NEXT_PUBLIC_BRAND` non esiste più;
 dominio ed email. Misure prese dalla bozza a 2000 px (menu 312 px, voci da 45 px, titolo 46 px, riquadro con modulo e colonna da
 370 px, statistiche da 106 px); sotto i 1700 px la colonna scende a 300 px, sotto i 1500 px le statistiche vanno su due colonne.
 Tolto dalla bozza quello che l'app non ha (campanella delle notifiche). Testi presi dalla bozza; «Dove cerchi clienti?» resta
@@ -20,17 +20,17 @@ Tolto dalla bozza quello che l'app non ha (campanella delle notifiche). Testi pr
 
 ## Come si fa senza fermare il servizio
 1. **Prima (codice pronto, nome vecchio online):** tutto il codice sa già essere «Avvisto», ma lo diventa solo con
-   `NEXT_PUBLIC_BRAND=avvisto` su Vercel. Fino ad allora il sito resta il nome vecchio.
+   `NEXT_PUBLIC_BRAND=avvisto` su Vercel (superato il 23/10 sera: un solo nome, senza variabile).
 2. **Il giorno del passaggio:** dominio e casella pronti, servizi esterni configurati, poi la variabile su Vercel e una
    nuova pubblicazione. Il vecchio indirizzo rimanda per sempre al nuovo (i link già inviati continuano a funzionare).
 3. **Dopo:** controlli da cliente, comunicazione alle agenzie della beta.
 
 ## Fase A — Codice pronto (Io, 23–24/10, nessun effetto online)
-- A1. `BRAND` con due versioni (il nome vecchio e Avvisto), scelta da `NEXT_PUBLIC_BRAND`; nome, dominio, email, titolare.
+- A1. `BRAND` con nome, dominio, email, titolare (dal 23/10 sera solo Avvisto).
 - A2. Logo provvisorio Avvisto: simbolo (`src/components/logo.tsx`), icona del browser, `public/email/logo-avvisto.png`.
-- A3. Testi con il nome: homepage, prezzi, FAQ, registrazione, email dell'app, pagine legali («servizio dello studio»),
+- A3. Testi con il nome: homepage, prezzi, FAQ, registrazione, email dell'app, pagine legali,
   file Excel, identificativo dei robot (`AvvistoBot`). Revisione del Sales Copywriter.
-- A4. Modelli email di Supabase in versione Avvisto (`supabase/templates/avvisto/`), da incollare il giorno del passaggio.
+- A4. Modelli email di Supabase (`supabase/templates/`), da incollare in Supabase il giorno del passaggio.
 - A5. Motore n8n: `HOST_APP` accetta **già** anche avvisto.it (callback verso l'app), così il passaggio non lo rompe.
 - A6. Worker sul VPS: `APP_URL` letto dal file di configurazione del server, non scritto nel codice.
 - A7. Code Reviewer sul diff (testi e configurazione: livello 1–2; callback del motore: livello 2).
@@ -51,8 +51,8 @@ Ogni passo con la guida passo passo in chat.
 - C1. **Vercel:** aggiungere avvisto.it e www.avvisto.it al progetto; record DNS su Hostinger (A / CNAME indicati da Vercel);
   attendere il certificato.
 - C2. **Resend:** aggiungere il dominio avvisto.it, record SPF/DKIM (e DMARC) su Hostinger, verifica.
-- C3. **Vercel, variabili:** `APP_URL=https://avvisto.it`, `EMAIL_FROM="Avvisto <ciao@avvisto.it>"`,
-  `NEXT_PUBLIC_BRAND=avvisto`; nuova pubblicazione.
+- C3. **Vercel, variabili:** `APP_URL=https://avvisto.it`, `EMAIL_FROM="Avvisto <ciao@avvisto.it>"`; nuova pubblicazione con il
+  codice solo Avvisto.
 - C4. **Supabase → Authentication:** Site URL `https://avvisto.it`, Redirect URLs con avvisto.it (tenere anche il vecchio per
   qualche settimana), modelli email Avvisto incollati, SMTP con il mittente nuovo.
 - C5. **Cloudflare Turnstile:** aggiungere avvisto.it ai domini ammessi.
@@ -60,14 +60,14 @@ Ogni passo con la guida passo passo in chat.
   nome e logo nel profilo pubblico.
 - C7. **n8n:** `APP` nei workflow degli annunci (`n8n/annunci/build.mjs`) e callback del motore verso avvisto.it; caricamento
   dei nodi e pubblicazione.
-- C8. **VPS:** `APP_URL=https://avvisto.it` nel file di configurazione, `bash worker.sh aggiorna`.
-- C9. **Rinvio permanente:** il vecchio indirizzo → avvisto.it (308, stesso percorso) da Vercel.
+- C8. **VPS:** `bash worker.sh rinomina` (cartelle e servizi col nome nuovo, `APP_URL=https://avvisto.it`, timer riaccesi).
+- C9. **Vecchio indirizzo staccato** da Vercel, senza rinvio (decisione dell'utente del 23/10 sera), per ultimo.
 
 ## Fase D — Verifica (Insieme, subito dopo)
 - D1. Registrazione nuova con email vera: conferma, accesso, verifica in due passaggi.
 - D2. Ricerca di prova: callback del motore, lead consegnati, export Excel con il nome nuovo.
 - D3. Email: benvenuto, reimpostazione password, avviso settimanale (mittente, logo, link).
-- D4. Vecchi link (`il vecchio indirizzo/app/...`) che portano alla pagina giusta.
+- D4. ~~Vecchi link verso la pagina giusta~~ (non più: vecchio indirizzo staccato senza rinvio).
 - D5. Worker sul VPS e workflow n8n che salvano senza errori (giro successivo).
 - D6. QA Tester sul percorso cliente, UI/UX Designer su homepage, prezzi, registrazione e app (telefono e computer).
 
@@ -93,5 +93,7 @@ Ogni passo con la guida passo passo in chat.
 - 23/10 sera, **decisioni dell'utente:** logo «C · Due toni» (A senza barra, gamba sinistra viola chiaro, destra viola scuro con la
   lente); solo il nome Avvisto ovunque, nessuna traccia del nome vecchio (codice, email, n8n, VPS, documenti vivi); titolare
   «Avvisto» nelle pagine legali fino alla partita IVA (checklist 11); vecchio indirizzo **staccato** del tutto, senza rinvio (i link
-  già inviati smettono di funzionare). Il codice non ha più due versioni: `NEXT_PUBLIC_BRAND` non serve. Ordine: Vercel (variabili e
-  pubblicazione) → Supabase → Turnstile → Stripe → n8n → VPS → staccare il vecchio indirizzo per ultimo.
+  già inviati smettono di funzionare). Il codice non ha più due versioni: `NEXT_PUBLIC_BRAND` non serve. Ordine (QA Tester): Redirect URLs di
+  Supabase con avvisto.it → Vercel (variabili e pubblicazione) → Supabase (Site URL, modelli, mittente) → Turnstile → webhook di
+  Stripe → nodi n8n → VPS (`rinomina` dalla copia nella home) → nessuna ricerca in corso → staccare il vecchio indirizzo per ultimo.
+  Le email di conferma inviate prima del cambio diventano link morti.

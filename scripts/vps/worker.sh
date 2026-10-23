@@ -244,7 +244,13 @@ UNIT
     # servizi e riaccende i timer che erano accesi. Da togliere da qui quando è stato eseguito.
     V=$(printf '%s' d2Vib3Jh | base64 -d)  # il nome vecchio (scritto così per non lasciarlo in chiaro nel repository)
     [ -d /opt/$V ] || { echo "Niente da rinominare: le cartelle hanno già il nome nuovo."; exit 0; }
-    for u in site-checks contacts osm siti cc; do
+    # La copia dentro /opt si sposta durante il comando e «installa» non partirebbe più (QA): solo quella nella home.
+    case "$(readlink -f "$0")" in /opt/*) echo "Lancia la copia nella home: bash ~/worker.sh rinomina"; exit 1 ;; esac
+    # Se «installa» è già stato lanciato col nome nuovo, mv metterebbe le cartelle vecchie dentro quelle nuove (Code Reviewer).
+    for d in /opt/avvisto /etc/avvisto; do
+      sudo test -e $d && { echo "$d esiste già: spostala prima (sudo mv $d $d.vuota) e rilancia."; exit 1; }
+    done
+    for u in site-checks contacts osm siti cc backup; do
       systemctl is-active --quiet $V-$u.service && { echo "Il servizio $u sta lavorando: riprova a giro finito (bash $0 stato)."; exit 1; }
     done
     ACCESI=""
@@ -257,10 +263,13 @@ UNIT
     [ -d /usr/local/lib/$V ] && sudo mv /usr/local/lib/$V /usr/local/lib/avvisto
     for d in osm cc; do [ -d /var/lib/$V-$d ] && sudo mv /var/lib/$V-$d /var/lib/avvisto-$d; done
     # Il backup usa DynamicUser: i dati veri stanno in /var/lib/private, in /var/lib c'è solo un collegamento.
-    [ -d /var/lib/private/$V-backup ] && sudo mv /var/lib/private/$V-backup /var/lib/private/avvisto-backup
+    sudo test -d /var/lib/private/$V-backup && sudo mv /var/lib/private/$V-backup /var/lib/private/avvisto-backup
     sudo rm -f /var/lib/$V-backup
     sudo rm -f /etc/systemd/system/$V-*.service /etc/systemd/system/$V-*.timer
     sudo systemctl daemon-reload
+    # Indirizzo dell'app: il vecchio verrà staccato, quindi sempre quello nuovo.
+    sudo sed -i '/^APP_URL=/d' /etc/avvisto/site-checks.env
+    printf 'APP_URL=https://avvisto.it\n' | sudo tee -a /etc/avvisto/site-checks.env >/dev/null
     bash "$0" installa
     [ -s /etc/avvisto/backup.env ] && bash "$0" installa-backup
     # shellcheck disable=SC2086

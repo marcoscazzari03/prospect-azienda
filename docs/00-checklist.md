@@ -39,7 +39,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 
 ## 🖥️ VPS e worker: stasera e domani
 94. **Insieme, 23/10 alle 20** – Sul VPS, un passo alla volta: riscaricare `worker.sh` da main; leggere il log del worker del
-    controllo siti fermo dal 22/10 alle 15:35 UTC (`journalctl -u avvisto-site-checks.service`); `bash worker.sh installa`
+    controllo siti fermo dal 22/10 alle 15:35 UTC (servizio ancora col nome vecchio); `bash worker.sh rinomina` (rilancia installa;
+    NON lanciare prima `installa`, creerebbe le cartelle nuove e `rinomina` si fermerebbe)
     (blocchi da 100 salvati subito, stop dopo 12 minuti, pagine ridotte a 500 KB, 16 thread di rete, segnali del punto 91);
     `bash worker.sh giro` e controllo dell'esito.
 95. **Tu, 24/10** – Query oraria di `site_checked_at`: se il worker fa circa 600 siti all'ora, spegnere «Aziende | Controllo
@@ -137,7 +138,7 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
     main, rivisto; nodo «Valida richiesta» caricato su n8n). **Tu:** pubblicare «Lead Engine | Search (v1)» su n8n.
 67b. **Io, dal 23/10** – Grafica Avvisto dalla bozza dell'utente (viola, logo della bozza, «Non sai da dove iniziare?», «Lasciati
     ispirare», scelte rapide, statistiche con grafico): proposta dell'UI/UX Designer, poi tema, logo, menu e barra, Panoramica;
-    solo con `NEXT_PUBLIC_BRAND=avvisto`. ~~Passi 1–2: colori e logo~~ (23/10). ~~Menu e barra su telefono, statistiche con
+    (in origine solo con `NEXT_PUBLIC_BRAND=avvisto`, superato il 23/10 sera). ~~Passi 1–2: colori e logo~~ (23/10). ~~Menu e barra su telefono, statistiche con
     variazione e grafico, «Lasciati ispirare», scelte rapide, «Non sai da dove iniziare?»~~ (23/10). ~~Grafica definitiva per tutto
     il sito, identica alla bozza anche negli spazi (colori, menu, intestazione, riquadro, statistiche, avatar con menu)~~ (23/10,
     richiesta dell'utente).
