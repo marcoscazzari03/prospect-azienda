@@ -141,7 +141,7 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
 66. **Tu, in corso (23/10)** – Fase B: ~~dominio comprato~~ (23/10); casella ciao@avvisto.it creata, in propagazione; comprare avvisto.it su Hostinger (solo il dominio, 5,99 €; deciso il 23/10); creare
     e provare ciao@avvisto.it con la casella gratuita; inoltro di leads@weborastudio.it verso ciao@avvisto.it. Il piano email
     di weborastudio.it (rinnovo 19/02/2027) resta finché serve leads@.
-67. **Insieme, il giorno del passaggio (1–2 ore)** – Fase C: dominio su Vercel e DNS; dominio su Resend (SPF, DKIM, DMARC);
+67. **Insieme, il giorno del passaggio (1–2 ore)** – Fase C: ~~dominio su Vercel e DNS~~ (23/10); ~~dominio su Resend (SPF, DKIM, DMARC)~~ (23/10);
     variabili su Vercel (`APP_URL`, `EMAIL_FROM`, `NEXT_PUBLIC_BRAND=avvisto`); Supabase (Site URL, Redirect URLs, modelli,
     mittente); Turnstile; webhook di Stripe; n8n; `APP_URL` sul VPS; rinvio permanente da leads.weborastudio.it.
 67d. **Insieme, subito dopo** – Fase D: registrazione, ricerca di prova, email, vecchi link, worker e workflow; QA Tester e

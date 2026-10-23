@@ -81,3 +81,5 @@ Ogni passo con la guida passo passo in chat.
   834fbe17190cdec4.vercel-dns-017.com, TTL 60; record della posta lasciati com'erano. Dominio attivo nel pomeriggio: avvisto.it
   apre l'app (ancora col nome Webora), www rimanda con 308, MX e SPF di Hostinger presenti. **C1 fatto.** Prossimo: prova della
   casella, poi C2 (Resend).
+- 23/10, 16:41: **C2 fatto** (avvisto.it «Verified» su Resend: DKIM, `send` e `rsend` su Hostinger; ricezione spenta). Prossimo:
+  prova della casella ciao@avvisto.it, poi il giorno del passaggio da C3 a C9 (fino ad allora niente variabili nuove su Vercel).

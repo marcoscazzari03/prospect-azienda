@@ -81,6 +81,15 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli di Webora: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. In Webora nulla cambia (stessi colori, `ok` = `ledger`).
 
+## 23/10/2026 — Avvisto: dominio verificato su Resend (C2) · verificato alle 16:41 (Resend «Verified», regione eu-west-1)
+- **Cosa:** dominio avvisto.it aggiunto su Resend; record su Hostinger con «Go to Hostinger»: TXT `resend._domainkey` (DKIM),
+  CNAME `send` → send.forge.rmta.net (SPF e MX di ritorno), CNAME `rsend` → rsend-euw1.forge.rmta.net; DMARC `p=none` già
+  presente. «Enable Receiving» lasciato spento (la posta in arrivo resta sulla casella di Hostinger). Controllato da
+  dns.google prima della verifica.
+- **Effetto online:** nessuno: l'app manda ancora da leads@weborastudio.it finché `EMAIL_FROM` non cambia (C3) e Supabase
+  non usa il mittente nuovo (C4).
+- **Indietro:** togliere il dominio da Resend e i tre record da Hostinger.
+
 ## 23/10/2026 — Avvisto: dominio comprato, Vercel e DNS impostati (fasi B e C1) · attivo dal 23/10 pomeriggio (Vercel «Valid Configuration», MX e SPF di Hostinger visibili)
 - **Cosa:** avvisto.it su Hostinger (5,99 €), casella gratuita ciao@avvisto.it (Free Business Email, 12 mesi); su Vercel
   avvisto.it collegato a Production e www.avvisto.it con rinvio 308 ad avvisto.it; DNS: A @ → 216.198.79.1, CNAME www →
