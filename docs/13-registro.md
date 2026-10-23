@@ -81,7 +81,7 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli di Webora: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. In Webora nulla cambia (stessi colori, `ok` = `ledger`).
 
-## 23/10/2026 — Avvisto: dominio comprato, Vercel e DNS impostati (fasi B e C1) · in attesa della propagazione
+## 23/10/2026 — Avvisto: dominio comprato, Vercel e DNS impostati (fasi B e C1) · attivo dal 23/10 pomeriggio (Vercel «Valid Configuration», MX e SPF di Hostinger visibili)
 - **Cosa:** avvisto.it su Hostinger (5,99 €), casella gratuita ciao@avvisto.it (Free Business Email, 12 mesi); su Vercel
   avvisto.it collegato a Production e www.avvisto.it con rinvio 308 ad avvisto.it; DNS: A @ → 216.198.79.1, CNAME www →
   834fbe17190cdec4.vercel-dns-017.com (TTL 60); MX/TXT della posta di Hostinger invariati.

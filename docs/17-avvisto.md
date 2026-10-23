@@ -78,5 +78,6 @@ Ogni passo con la guida passo passo in chat.
 - 23/10 pomeriggio: **B1 fatto** (avvisto.it comprato su Hostinger); **B2 in corso** (casella ciao@avvisto.it creata, «Collega il
   dominio» fatto, in attesa della propagazione). **C1 iniziato:** avvisto.it (Production) e www.avvisto.it (308 verso
   avvisto.it) aggiunti su Vercel; DNS su Hostinger: A @ 216.198.79.1 (al posto del parcheggio 2.57.91.91), CNAME www
-  834fbe17190cdec4.vercel-dns-017.com, TTL 60; record della posta lasciati com'erano. Alle 15:xx il registro .it non
-  risolveva ancora il dominio (NXDOMAIN): normale per una registrazione appena fatta.
+  834fbe17190cdec4.vercel-dns-017.com, TTL 60; record della posta lasciati com'erano. Dominio attivo nel pomeriggio: avvisto.it
+  apre l'app (ancora col nome Webora), www rimanda con 308, MX e SPF di Hostinger presenti. **C1 fatto.** Prossimo: prova della
+  casella, poi C2 (Resend).
