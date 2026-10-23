@@ -50,6 +50,19 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — checklist riscritta, query della resa giornaliera, approfondimento del punto 92 · documenti e query di sola lettura
+- **Cosa:** `docs/00-checklist.md` riscritta tutta allo stato del 23/10 (nuove voci 49b, 85a, 85b, 85g, 89b, 91b, 94–97; 69
+  superato perché il VPS lavora). Nuova query `supabase/queries/resa_giornaliera.sql`: R1 aziende nuove, siti controllati,
+  email e moduli trovati giorno per giorno (14 giorni); R2 imbuto di oggi; R3 campi coperti (settore, città, email, modulo,
+  tecnologie, almeno un segnale) su tutte le aziende e sui lead pronti. Provata su un Postgres locale con tutte le migrazioni.
+- **Punto 92, proposta (da decidere, nessun codice):** elenco dei domini .it dal grafo pubblico dei domini di Common Crawl
+  (file scaricabile, niente scraping di elenchi); homepage letta dal VPS con le stesse regole di `siti-osm.mjs`; si tiene solo
+  chi mostra una partita IVA valida (cifra di controllo), poi nome, città, settore, email e modulo dalle pagine. Prima una
+  prova su 5.000 domini per misurare la resa, poi il giro intero. Si parte solo quando il controllo siti non ha arretrato:
+  oggi il collo di bottiglia è il controllo siti (circa 55.850 aziende in attesa al 23/10), non il numero di aziende.
+- **Perché:** l'utente vuole allargare il database e sapere quanti lead pronti nascono al giorno e quali campi copriamo.
+- **Indietro:** nulla da annullare (documenti e query di sola lettura).
+
 ## 22/10/2026 — rotazione dei segreti del motore (punto 17) · completata il 22/10 (A e B verificati, `vercel.json` online con `5e44953`)
 - **Cosa:** l'utente ha cambiato `ENGINE_CALLBACK_SECRET` (n8n → app, credenziale n8n «Lead Engine - Callback verso
   backend», usata da tutti i workflow) e `N8N_ENGINE_HEADER_VALUE` (app → n8n, credenziale «Lead Engine - Webhook in
