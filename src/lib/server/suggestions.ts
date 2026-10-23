@@ -10,6 +10,7 @@ import { getEnabledOffers } from "@/lib/server/offer-rules";
 import { haikuAnswerSchema, pickSuggestions, sanitizeAnswer, type StoredSuggestions, type Suggestion } from "@/lib/domain/suggestions";
 import type { Json } from "@/lib/supabase/database.types";
 import type { Viewer } from "@/lib/server/dal";
+import { expectedLeads } from "@/lib/domain/pricing";
 
 // Ricerche consigliate (punti 84–85, docs/15-ricerche-consigliate.md). Interruttore in app_settings «suggested_searches»:
 // "off", "admin" (solo gli admin: prove, predefinito) o "all" (con Avvisto, dopo il 25/10).
@@ -54,8 +55,10 @@ function prompt(offers: { code: string; label: string; description: string }[]) 
   ].join("\n");
 }
 
-// Quanti lead il database ha già per una proposta: stesso calcolo del wizard (availability_contacts, migrazione 065),
-// contando le aziende con email o con il solo modulo di contatto.
+// Quanti lead il database può dare per una proposta: stesso calcolo e stessa stima del wizard (availability_contacts,
+// migrazione 065, ed expectedLeads): le aziende con email o modulo più una quota di quelle il cui contatto si cerca durante
+// la ricerca. Si mostra il valore basso della forbice. (23/10: contare solo i contatti già noti lasciava vuote le proposte,
+// perché quasi tutte le aziende nuove di OSM aspettano ancora il controllo siti.)
 async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: string, offers: Awaited<ReturnType<typeof getEnabledOffers>>) {
   const signals = s.offer ? offerChoice(s.offer, offers) : null;
   const parsed = searchInputSchema.safeParse({
@@ -80,7 +83,8 @@ async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: str
     return 0;
   }
   const d = (data ?? {}) as Record<string, unknown>;
-  return (Number(d.with_email) || 0) + (Number(d.form_only) || 0);
+  const n = (k: string) => Number(d[k]) || 0;
+  return expectedLeads({ total: n("total"), withEmail: n("with_email"), formOnly: n("form_only"), toTry: n("to_try") }, true, 1000).min;
 }
 
 export async function generateSuggestions(orgId: string, description: string, area: string, clients: string): Promise<StoredSuggestions> {
@@ -106,5 +110,6 @@ export async function generateSuggestions(orgId: string, description: string, ar
   const answer = sanitizeAnswer(response.parsed_output, offers.map((o) => o.code));
   const toCount = answer.sells_to === "businesses" || answer.sells_to === "both" ? answer.suggestions : [];
   const items = await Promise.all(toCount.map(async (s) => ({ ...s, leads: await countLeads(orgId, s, area, offers) })));
-  return { sellsTo: answer.sells_to, items: pickSuggestions(items) };
+  // Anche le proposte scartate (meno di 10 lead), per capire le risposte di Haiku nelle prove: non si mostrano.
+  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ title: s.title, industry: s.industry, keywords: s.keywords, leads: s.leads })) };
 }

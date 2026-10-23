@@ -40,8 +40,9 @@ registro (tabella in alto). Stato: **in produzione dal 23/10 solo per l'admin** 
   `src/lib/domain/suggestions.ts`): `sells_to` (aziende, entrambi, privati, non chiaro) e fino a 4 proposte (titolo, motivo,
   settore, parole chiave, servizio solo se tra quelli attivi). Al massimo 10 proposte al giorno per account. Chiave
   `ANTHROPIC_API_KEY` solo sul server (Vercel).
-- **Conteggio:** ogni proposta passa da `availability_contacts` come il wizard (aziende con email o modulo); si mostrano
-  solo quelle con almeno 10 lead, le più ricche prima, al massimo 3. «Circa X» arrotondato come il wizard.
+- **Conteggio:** ogni proposta passa da `availability_contacts` e dalla stima `expectedLeads` come il wizard (dal 23/10,
+  valore basso della forbice: contatti noti più una quota delle aziende da provare); si mostrano solo quelle con almeno 10
+  lead, le più ricche prima, al massimo 3. Tutte le proposte di Haiku con il conteggio restano in `business_suggestions.tried`.
 - **Interfaccia:** `src/components/suggested-searches.tsx` nella dashboard (`src/app/app/page.tsx`); il link della scheda apre
   `/app/ricerche/nuova?settore=…&parole=…&zona=…&servizio=…&nome=…`, valori iniziali che il server ricontrolla all'avvio.
 - **Test:** `tests/suggestions.test.ts` (pulizia della risposta, scelta delle proposte, link, arrotondamento).

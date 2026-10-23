@@ -20,7 +20,11 @@ export type HaikuAnswer = z.infer<typeof haikuAnswerSchema>;
 
 export type Suggestion = { title: string; why: string; industry: string; keywords: string[]; offer: string | null; leads: number };
 // Salvato sull'organizzazione (business_suggestions): l'esito e le proposte già contate.
-export type StoredSuggestions = { sellsTo: HaikuAnswer["sells_to"]; items: Suggestion[] };
+export type StoredSuggestions = {
+  sellsTo: HaikuAnswer["sells_to"];
+  items: Suggestion[];
+  tried?: Pick<Suggestion, "title" | "industry" | "keywords" | "leads">[]; // tutte le proposte di Haiku con il conteggio, per le prove
+};
 
 const clean = (v: string, max: number) => v.replace(/\s+/g, " ").trim().slice(0, max);
 

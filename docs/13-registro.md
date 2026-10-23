@@ -198,6 +198,9 @@ Come tornare indietro, in generale:
   restano; oltre 4 proposte si ignorano invece di rifiutare la risposta; chiavi delle schede uniche. Verificati: scritture
   solo sull'organizzazione dell'utente, prompt injection senza effetti fuori dai testi del cliente stesso, limite di 10 al
   giorno, conteggio uguale al wizard. Testi rivisti dal sales-copywriter.
+- **Prima prova (23/10):** «Falegnameria · Modena» senza proposte: si contavano solo le aziende con contatto già noto (8% del
+  database, le nuove di OSM aspettano il controllo siti). Ora la stessa stima del wizard (valore basso di `expectedLeads`) e le
+  proposte scartate salvate in `business_suggestions.tried` per le prove.
 - **Indietro:** Admin → Servizi → «Spente» (il riquadro sparisce); drop delle colonne della 067.
 
 ## 23/10/2026 — worker del controllo siti fermo dopo l'import OSM · correzione pronta; da fare: revisione, main, `installa` sul VPS (stasera)
