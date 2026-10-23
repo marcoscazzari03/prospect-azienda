@@ -85,6 +85,12 @@ export function wizardHref(s: Pick<Suggestion, "title" | "industry" | "keywords"
 }
 
 // «Circa X»: arrotondato come il wizard (sotto 10 il numero esatto, poi a 5 o a 10).
+// Oltre il tetto del conteggio (501 aziende lette, migrazione 065) il numero vero è più alto: «oltre 500».
+export const LEADS_CAP = 500;
+export function leadsLabel(n: number) {
+  return n > LEADS_CAP ? `oltre ${LEADS_CAP} lead` : `circa ${new Intl.NumberFormat("it-IT").format(aboutLeads(n))} lead`;
+}
+
 export function aboutLeads(n: number) {
   if (n < 10) return n;
   if (n < 100) return Math.floor(n / 5) * 5;

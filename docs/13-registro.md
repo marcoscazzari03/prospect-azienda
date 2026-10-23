@@ -50,6 +50,11 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — ricerche consigliate: «oltre 500 lead» · su main
+- **Cosa:** quando il conteggio arriva al tetto (501 aziende lette) e quasi tutte sono raggiungibili, la scheda dice «oltre 500
+  lead» invece di «circa 500» (`leadsLabel` in `src/lib/domain/suggestions.ts`). Richiesta dell'utente.
+- **Indietro:** revert del commit.
+
 ## 23/10/2026 — ricerche consigliate: con un servizio e pochi lead, la ricerca semplice dello stesso settore · su main
 - **Cosa:** in `generateSuggestions` una proposta con servizio (ricerca di opportunità) sotto i 10 lead si ricalcola senza
   servizio e si propone come ricerca semplice; i tentativi salvano anche `offer`.

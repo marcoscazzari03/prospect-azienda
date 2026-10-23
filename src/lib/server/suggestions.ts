@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { offerChoice } from "@/lib/domain/signals";
 import { getEnabledOffers } from "@/lib/server/offer-rules";
-import { BUSINESS_LIMITS, haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, type StoredSuggestions, type Suggestion } from "@/lib/domain/suggestions";
+import { BUSINESS_LIMITS, LEADS_CAP, haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, type StoredSuggestions, type Suggestion } from "@/lib/domain/suggestions";
 import type { Json } from "@/lib/supabase/database.types";
 import type { Viewer } from "@/lib/server/dal";
 import { expectedLeads } from "@/lib/domain/pricing";
@@ -86,7 +86,9 @@ async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: str
   const d = (data ?? {}) as Record<string, unknown>;
   debug.set(`${s.industry}|${s.offer ?? ""}`, { ...d, opportunity: parsed.data.signals.codes.length > 0, target: toTarget(parsed.data) });
   const n = (k: string) => Number(d[k]) || 0;
-  return expectedLeads({ total: n("total"), withEmail: n("with_email"), formOnly: n("form_only"), toTry: n("to_try") }, true, 1000).min;
+  const min = expectedLeads({ total: n("total"), withEmail: n("with_email"), formOnly: n("form_only"), toTry: n("to_try") }, true, 1000).min;
+  // Conteggio fermo al tetto (501 aziende) e quasi tutte raggiungibili: il numero vero è più alto, si mostra «oltre 500».
+  return n("total") > LEADS_CAP && min >= LEADS_CAP ? LEADS_CAP + 1 : min;
 }
 
 export async function generateSuggestions(orgId: string, description: string, area: string, clients: string): Promise<StoredSuggestions> {

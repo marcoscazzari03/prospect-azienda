@@ -2,8 +2,7 @@
 import { startTransition, useActionState, useState } from "react";
 import { saveBusinessProfile, skipBusinessProfile, type ActionState } from "@/app/app/actions";
 import { Alert, Badge, Button, ButtonLink, Card, Input, Textarea } from "@/components/ui";
-import { BUSINESS_LIMITS, aboutLeads, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
-import { formatNumber } from "@/lib/domain/pricing";
+import { BUSINESS_LIMITS, leadsLabel, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
 import { BRAND } from "@/lib/config";
 
 // Ricerche consigliate (punti 84–85, proposta del designer in docs/15-ricerche-consigliate.md): riquadro in cima alla
@@ -179,7 +178,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
         {stored.items.map((s, i) => (
           <a key={`${i}-${s.title}`} href={wizardHref(s, area)} className="group flex flex-col gap-2 rounded-lg border border-line bg-white p-4 transition-colors hover:border-ledger focus:outline-none focus:ring-2 focus:ring-ledger/30">
             <span className="font-display text-lg font-semibold leading-snug">{s.title}</span>
-            <Badge tone="ledger" className="self-start font-mono">circa {formatNumber(aboutLeads(s.leads))} lead</Badge>
+            <Badge tone="ledger" className="self-start font-mono">{leadsLabel(s.leads)}</Badge>
             <span className="text-sm text-muted line-clamp-2">{s.why}</span>
             <span className="mt-auto text-sm font-medium text-ledger-2 group-hover:underline">Apri la ricerca →</span>
           </a>

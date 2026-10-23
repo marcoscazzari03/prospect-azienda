@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aboutLeads, haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, wizardHref, type Suggestion } from "@/lib/domain/suggestions";
+import { aboutLeads, leadsLabel, haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, wizardHref, type Suggestion } from "@/lib/domain/suggestions";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { offerChoice } from "@/lib/domain/signals";
 import { DB_SECTORS } from "@/lib/domain/db-sectors";
@@ -55,6 +55,7 @@ describe("ricerche consigliate (punti 84-85)", () => {
 
   it("«circa X»: esatto sotto 10, poi arrotondato per difetto", () => {
     expect([aboutLeads(7), aboutLeads(47), aboutLeads(123)]).toEqual([7, 45, 120]);
+    expect([leadsLabel(47), leadsLabel(500), leadsLabel(501)]).toEqual(["circa 45 lead", "circa 500 lead", "oltre 500 lead"]);
   });
 
   it("i dati di una proposta passano il controllo della ricerca, con e senza servizio (23/10: davano 0 lead a tutto)", () => {
