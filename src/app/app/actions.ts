@@ -328,7 +328,7 @@ export async function saveBusinessProfile(_: ActionState, form: FormData): Promi
     business_suggested_at: suggestions ? new Date().toISOString() : null,
   }).eq("id", viewer.org.id);
   revalidatePath("/app");
-  return suggestions ? {} : { error: "Non siamo riusciti a preparare le ricerche. Riprova tra poco o avvia una ricerca a mano." };
+  return suggestions ? {} : { error: "Non siamo riusciti a preparare le ricerche. Riprova, oppure crea una ricerca a mano." };
 }
 
 export async function skipBusinessProfile() {

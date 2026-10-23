@@ -7,7 +7,7 @@ import { formatNumber } from "@/lib/domain/pricing";
 import { BRAND } from "@/lib/config";
 
 // Ricerche consigliate (punti 84–85, proposta del designer in docs/15-ricerche-consigliate.md): riquadro in cima alla
-// dashboard, saltabile. Testi provvisori, da rifinire con il copywriter.
+// dashboard, saltabile. Testi rivisti dal sales-copywriter il 23/10.
 const CLIENTI = ["Imprese edili", "Studi professionali", "Negozi", "Ristoranti e hotel", "Aziende industriali", "Altro"];
 
 export function SuggestedSearches({ description, area, stored, skipped }: { description: string; area: string; stored: StoredSuggestions | null; skipped: boolean }) {
@@ -22,7 +22,7 @@ export function SuggestedSearches({ description, area, stored, skipped }: { desc
   if (!description && skipped && !editing) {
     return (
       <Card className="mb-6 flex flex-wrap items-center justify-between gap-3 border-ledger/25 px-4 py-3 text-sm">
-        <span>Vuoi delle ricerche consigliate?</span>
+        <span>Vuoi ricerche già pronte per la tua attività?</span>
         <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>Descrivi la tua attività</Button>
       </Card>
     );
@@ -34,10 +34,10 @@ export function SuggestedSearches({ description, area, stored, skipped }: { desc
         <form action={action} className="grid gap-4">
           <div>
             <h2 className="font-display text-xl font-semibold">Di cosa si occupa la tua attività?</h2>
-            <p className="mt-1 text-sm text-muted">Ti proponiamo ricerche pronte da avviare. Non è obbligatorio.</p>
+            <p className="mt-1 text-sm text-muted">Ti suggeriamo ricerche di aziende già pronte. Puoi saltare: decidi tu se avviarle.</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <Field label="Cosa fai" htmlFor="business-description" hint="Una o due frasi: cosa vendi e a chi.">
+            <Field label="Cosa fai" htmlFor="business-description" hint="Una o due frasi: cosa offri e a quali aziende.">
               <Textarea id="business-description" name="description" required minLength={10} maxLength={BUSINESS_LIMITS.description} defaultValue={description}
                 placeholder="Es. Falegnameria: mobili su misura per negozi, uffici e hotel" className="min-h-20" />
             </Field>
@@ -84,15 +84,15 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
       <Button type="submit" variant="secondary" disabled={pending}>{pending ? "Stiamo preparando le ricerche…" : "Riprova"}</Button>
     </form>
   );
-  const tryAnyway = <ButtonLink href="/app/ricerche/nuova" variant="ghost">Prova comunque una ricerca</ButtonLink>;
+  const tryAnyway = <ButtonLink href="/app/ricerche/nuova" variant="ghost">Prova una ricerca</ButtonLink>;
 
   if (pending) return <>{header}<Skeletons /></>;
   if (!stored) {
     return (
       <>
         {header}
-        <Alert tone="stamp">{error ?? "Non siamo riusciti a preparare le ricerche. Riprova o avvia una ricerca a mano."}</Alert>
-        <div className="mt-3 flex flex-wrap gap-2">{retry}<ButtonLink href="/app/ricerche/nuova" variant="ghost">Nuova ricerca</ButtonLink></div>
+        <Alert tone="stamp">{error ?? "Non siamo riusciti a preparare le ricerche. Riprova, oppure crea una ricerca a mano."}</Alert>
+        <div className="mt-3 flex flex-wrap gap-2">{retry}<ButtonLink href="/app/ricerche/nuova" variant="ghost">Crea una ricerca a mano</ButtonLink></div>
       </>
     );
   }
@@ -100,7 +100,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
     return (
       <>
         {header}
-        <p className="text-sm">{BRAND.name} trova aziende a cui vendere i tuoi servizi. Se lavori soprattutto con privati, potrebbe non fare al caso tuo.</p>
+        <p className="text-sm">{BRAND.name} trova aziende, non privati. Se vendi soprattutto a privati, qui non troverai molto. Se vendi anche alle aziende, puoi provare una ricerca.</p>
         <div className="mt-3">{tryAnyway}</div>
       </>
     );
@@ -112,7 +112,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
         <form action={action} className="grid gap-3">
           <input type="hidden" name="description" value={description} />
           <input type="hidden" name="area" value={area} />
-          <p className="text-sm font-medium">A chi vendi di solito?</p>
+          <p className="text-sm font-medium">A chi vendi di solito? Scegli una o più risposte.</p>
           <div className="flex flex-wrap gap-2">
             {CLIENTI.map((c) => (
               <label key={c} className={`inline-flex min-h-11 cursor-pointer items-center rounded-full border px-4 text-sm focus-within:ring-2 focus-within:ring-ledger/30 ${clients.includes(c) ? "border-ledger bg-ledger-soft text-ledger-2" : "border-line"}`}>
@@ -131,7 +131,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
     return (
       <>
         {header}
-        <p className="text-sm">Non abbiamo trovato ricerche con lead disponibili in questa zona.</p>
+        <p className="text-sm">In questa zona non abbiamo trovato ricerche con abbastanza aziende. Prova ad allargare la zona.</p>
         <div className="mt-3 flex flex-wrap gap-2"><Button onClick={onEdit}>Modifica la zona</Button>{tryAnyway}</div>
       </>
     );
@@ -149,7 +149,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
           </a>
         ))}
       </div>
-      <p className="mt-3 text-xs text-muted">Si apre la ricerca già compilata: la controlli e la avvii tu.</p>
+      <p className="mt-3 text-xs text-muted">Si apre la ricerca già compilata. La controlli e la avvii tu: paghi solo i lead consegnati.</p>
     </>
   );
 }
