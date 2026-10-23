@@ -63,6 +63,8 @@ function prompt(offers: { code: string; label: string; description: string }[]) 
 // migrazione 065, ed expectedLeads): le aziende con email o modulo più una quota di quelle il cui contatto si cerca durante
 // la ricerca. Si mostra il valore basso della forbice. (23/10: contare solo i contatti già noti lasciava vuote le proposte,
 // perché quasi tutte le aziende nuove di OSM aspettano ancora il controllo siti.)
+// Ogni conteggio lascia la risposta grezza del database in `debug` (salvata nei tentativi, per le prove dell'admin).
+const debug = new Map<string, unknown>();
 async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: string, offers: Awaited<ReturnType<typeof getEnabledOffers>>) {
   const signals = s.offer ? offerChoice(s.offer, offers) : null;
   const parsed = searchInputSchema.safeParse(suggestionSearchInput(s, area, signals));
@@ -82,6 +84,7 @@ async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: str
     return -1;
   }
   const d = (data ?? {}) as Record<string, unknown>;
+  debug.set(`${s.industry}|${s.offer ?? ""}`, { ...d, opportunity: parsed.data.signals.codes.length > 0, target: toTarget(parsed.data) });
   const n = (k: string) => Number(d[k]) || 0;
   return expectedLeads({ total: n("total"), withEmail: n("with_email"), formOnly: n("form_only"), toTry: n("to_try") }, true, 1000).min;
 }
@@ -115,5 +118,5 @@ export async function generateSuggestions(orgId: string, description: string, ar
     items.push(...await Promise.all(toCount.slice(i, i + 2).map(async (s) => ({ ...s, leads: await countLeads(orgId, s, area, offers) }))));
   }
   // Anche le proposte scartate (meno di 10 lead), per capire le risposte di Haiku nelle prove: non si mostrano.
-  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ title: s.title, industry: s.industry, keywords: s.keywords, leads: s.leads })) };
+  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ title: s.title, industry: s.industry, keywords: s.keywords, leads: s.leads, db: debug.get(`${s.industry}|${s.offer ?? ""}`), at: new Date().toISOString() })) };
 }

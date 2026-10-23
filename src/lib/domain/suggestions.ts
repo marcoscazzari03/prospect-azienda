@@ -37,7 +37,8 @@ export type Suggestion = { title: string; why: string; industry: string; keyword
 export type StoredSuggestions = {
   sellsTo: HaikuAnswer["sells_to"];
   items: Suggestion[];
-  tried?: Pick<Suggestion, "title" | "industry" | "keywords" | "leads">[]; // tutte le proposte di Haiku con il conteggio, per le prove
+  // Tutte le proposte di Haiku con il conteggio e la risposta grezza del database, per le prove.
+  tried?: (Pick<Suggestion, "title" | "industry" | "keywords" | "leads"> & { db?: unknown; at?: string })[];
 };
 
 const clean = (v: string, max: number) => v.replace(/\s+/g, " ").trim().slice(0, max);

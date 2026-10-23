@@ -50,6 +50,12 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — ricerche consigliate: risposta grezza del database nei tentativi (diagnosi) · su main
+- **Cosa:** `business_suggestions.tried[].db` (conteggi di `availability_contacts`, tipo di ricerca e target) e `at`.
+- **Perché:** «Studio commercialista» in tutta Italia contava ancora Ristorante 3 dopo la 070, mentre la stessa chiamata a
+  mano nel SQL Editor dava 501 con email; «Web agency» (ricerche con servizio, `opportunity_pool`) funziona.
+- **Indietro:** togliere `debug` da `src/lib/server/suggestions.ts` quando la causa è trovata.
+
 ## 23/10/2026 — ricerche consigliate: errori visibili, risposta più lunga, conteggi due alla volta · su main
 - **Cosa:** se il calcolo nuovo fallisce, la pagina mostra l'errore sopra le proposte di prima (prima sembravano nuove:
   «cache»); conteggio in errore salvato come -1 nei tentativi (non 0); `max_tokens` di Haiku da 1.500 a 4.000 (11:56: «Unterminated
