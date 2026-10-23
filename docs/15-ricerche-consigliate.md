@@ -36,6 +36,12 @@ lampadina e contatore dei caratteri (massimo 300); a destra, solo da `lg`, il ri
 (ricerche già pronte, solo aziende del database, filtri già compilati); pulsante «Mostra le ricerche» con la lente. Esempio
 del campo a rotazione tra 6 attività che vendono ad aziende (`BUSINESS_EXAMPLES`), scelto sul server a ogni apertura.
 
+## Zona (23/10 sera, osservazione dell'utente)
+Il campo era «Dove lavori?», ma il suo valore diventa la zona delle ricerche proposte e del conteggio: chi lavora a Milano
+e vuole clienti in tutta la Lombardia vedeva solo Milano. Ora è «Dove cerchi clienti?» (anche più zone, «Milano e Monza»;
+vuoto o «tutta Italia» = tutta Italia), un solo campo invece di due (dove lavori non serve alle proposte). Haiku riceve
+«Zona in cui cerca clienti». Testo da far rivedere al Sales Copywriter prima dell'apertura a tutti.
+
 ## Come è fatto (23/10)
 - **Dati:** migrazione `20261211000067_business_profile.sql`, colonne sull'organizzazione: `business_description` (≤500),
   `business_area` (≤120), `business_suggestions` (proposte già filtrate e contate), `business_suggested_at`,

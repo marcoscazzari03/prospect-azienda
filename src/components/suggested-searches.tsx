@@ -55,12 +55,12 @@ export function SuggestedSearches({ description, area, stored, skipped, example 
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="business-area" className="text-sm font-medium">Dove lavori?</label>
+                <label htmlFor="business-area" className="text-sm font-medium">Dove cerchi clienti?</label>
                 <div className="relative">
                   <Glyph name="pin" className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
-                  <Input id="business-area" name="area" maxLength={BUSINESS_LIMITS.area} defaultValue={area} placeholder="Es. Modena" className="h-11 pl-10" />
+                  <Input id="business-area" name="area" maxLength={BUSINESS_LIMITS.area} defaultValue={area} placeholder="Es. Milano e Monza" className="h-11 pl-10" />
                 </div>
-                <p className="text-xs text-muted">Provincia o regione.</p>
+                <p className="text-xs text-muted">Province o regioni, anche più di una. Vuoto: tutta Italia.</p>
               </div>
             </div>
             {state.error && <Alert tone="stamp">{state.error}</Alert>}
@@ -102,7 +102,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
     <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
       <div className="min-w-0">
         <h2 className="font-display text-xl font-semibold">Ricerche consigliate per te</h2>
-        <p className="mt-1 line-clamp-2 text-sm text-muted">{description}{area ? ` · ${area}` : ""}</p>
+        <p className="mt-1 line-clamp-2 text-sm text-muted">{description} · {area || "Tutta Italia"}</p>
       </div>
       <Button variant="ghost" size="sm" onClick={onEdit}>Modifica</Button>
     </div>

@@ -94,7 +94,7 @@ export async function generateSuggestions(orgId: string, description: string, ar
       role: "user",
       content: [
         `Attività: ${description}`,
-        area ? `Zona in cui lavora: ${area}` : "",
+        `Zona in cui cerca clienti: ${area || "tutta Italia"}`,
         clients ? `A chi vende di solito, secondo il cliente: ${clients}` : "",
       ].filter(Boolean).join("\n"),
     }],

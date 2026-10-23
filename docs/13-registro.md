@@ -50,6 +50,13 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — ricerche consigliate: «Dove cerchi clienti?» invece di «Dove lavori?» · su main
+- **Cosa:** etichetta, esempio («Es. Milano e Monza») e aiuto («Province o regioni, anche più di una. Vuoto: tutta Italia.») del
+  campo zona in `src/components/suggested-searches.tsx`; riassunto con «Tutta Italia» se vuoto; prompt di Haiku «Zona in cui
+  cerca clienti» (`src/lib/server/suggestions.ts`).
+- **Perché:** il campo è la zona delle ricerche proposte, non la sede dell'attività (osservazione dell'utente); un solo campo.
+- **Indietro:** revert del commit. Nessun dato da cambiare (`business_area` resta la stessa colonna).
+
 ## 23/10/2026 — partita IVA delle aziende (migrazione 069) e correzioni della revisione del punto 92 · rivisto (Code Reviewer «pronto», QA «pronto con riserve» corrette); da fare: migrazione 069, main, VPS
 - **Cosa:** migrazione `20261213000069_company_vat.sql`: `vat_valid(text)` (stesse regole di `pivaValida` del worker),
   colonna `companies.vat_number` (`''` se non nota, controllo e indice parziale, non unica), `store_imported_companies` come
