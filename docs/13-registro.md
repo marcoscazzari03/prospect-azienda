@@ -51,6 +51,13 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — Avvisto: dominio comprato, Vercel e DNS impostati (fasi B e C1) · in attesa della propagazione
+- **Cosa:** avvisto.it su Hostinger (5,99 €), casella gratuita ciao@avvisto.it (Free Business Email, 12 mesi); su Vercel
+  avvisto.it collegato a Production e www.avvisto.it con rinvio 308 ad avvisto.it; DNS: A @ → 216.198.79.1, CNAME www →
+  834fbe17190cdec4.vercel-dns-017.com (TTL 60); MX/TXT della posta di Hostinger invariati.
+- **Effetto online:** nessuno per i clienti (il nome resta Webora finché `NEXT_PUBLIC_BRAND` non è impostato).
+- **Indietro:** togliere i due domini dal progetto su Vercel; il record A si può riportare a 2.57.91.91 (parcheggio Hostinger).
+
 ## 23/10/2026 — Avvisto, fase A: codice pronto senza effetti online · su main (Code Reviewer «pronto con riserve», corrette: `dominio` accetta solo i due indirizzi esatti)
 - **Cosa:** `BRAND` in due versioni (`src/lib/config.ts`), scelta con `NEXT_PUBLIC_BRAND=avvisto` (assente = Webora, com'è
   oggi); logo provvisorio Avvisto in `src/components/logo.tsx` (una «A» con il punto ambra) e icona del browser generata dallo
