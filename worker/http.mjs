@@ -70,7 +70,9 @@ export function richiesta(url, { method = 'GET', insicuro = false, redirect = 5,
       fn(valore);
     };
     const orologio = setTimeout(() => fine(reject, errore('timeout', 'ETIMEDOUT')), timeout);
-    const partenza = Date.now();
+    // Tempo misurato dalla connessione al sito (ultimo passaggio della catena di redirect), non dalla partenza: le code della
+    // risoluzione DNS, condivisa tra le corsie, non devono far sembrare lento un sito (Code Reviewer, 23/10).
+    let partenza = Date.now();
     const vai = (indirizzo, rimasti) => {
       if (chiuso) return;
       let u;
@@ -134,6 +136,7 @@ export function richiesta(url, { method = 'GET', insicuro = false, redirect = 5,
         return fine(reject, e);
       }
       attuale = req;
+      req.on('socket', (sock) => sock.once('connect', () => { partenza = Date.now(); }));
       req.on('error', (e) => fine(reject, e));
       req.end();
     };

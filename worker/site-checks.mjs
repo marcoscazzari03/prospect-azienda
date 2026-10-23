@@ -35,7 +35,7 @@ const www = (a) => (String(a.website || '').toLowerCase().includes('://www.') ? 
 export async function controlloHttps(a, req = richiesta) {
   try {
     const r = await req(`https://${www(a)}${a.domain}/`, { method: 'HEAD', redirect: 3, timeout: 8_000 });
-    return { eseguito: true, ...(r?.cert ? { cert: r.cert } : {}) };
+    return { eseguito: true, ...(r?.cert ? { cert: r.cert, url: r.url } : {}) };
   } catch (e) {
     return { eseguito: true, ...comeErroreN8n(e) };
   }
@@ -47,7 +47,7 @@ export async function apriSito(a, req = richiesta, misura = {}) {
   const protocollo = String(a.website || '').toLowerCase().startsWith('http://') ? 'http://' : 'https://';
   try {
     const r = await req(`${protocollo}${www(a)}${a.domain}/`, { insicuro: true, redirect: 5, timeout: 10_000 });
-    misura.ms = r.ms;
+    Object.assign(misura, { ms: r.ms, url: r.url, status: r.status });
     return r.body;
   } catch {
     return '';
@@ -60,8 +60,12 @@ export async function apriSito(a, req = richiesta, misura = {}) {
 //   slow_site:     homepage letta, prima risposta in 4 s o più «pass», entro 1,5 s «fail», in mezzo «non determinabile»
 //                  (una misura sola: niente prova su un caso dubbio).
 export const SOGLIE_VPS = { certGiorni: 14, lentoMs: 4_000, veloceMs: 1_500 };
-export function segnaliVps({ https, ms, letto, adesso = Date.now() }) {
-  const giorni = https?.cert && !https.error ? Math.floor((Date.parse(https.cert.scade) - adesso) / 86_400_000) : NaN;
+// Solo misure del sito dell'azienda: dopo un redirect verso un altro dominio (gruppo, piattaforma, nuovo sito) certificato e
+// tempo sono di qualcun altro, quindi «non determinabile» (Code Reviewer, 23/10). Il tempo vale solo con una risposta 2xx.
+const host = (u) => { try { return new URL(u).hostname.toLowerCase().replace(/^www\./, ''); } catch { return ''; } };
+export function segnaliVps({ dominio, https, ms, url, status, letto, adesso = Date.now() }) {
+  const suo = (u) => !u || host(u) === String(dominio || '').toLowerCase().replace(/^www\./, '');
+  const giorni = https?.cert && !https.error && suo(https.url) ? Math.floor((Date.parse(https.cert.scade) - adesso) / 86_400_000) : NaN;
   const data = Number.isFinite(giorni) ? new Date(https.cert.scade).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }) : '';
   const cert = !Number.isFinite(giorni) || giorni < 0
     ? { code: 'cert_expiring', status: 'undetermined', evidence: { detail: '' } }
@@ -69,7 +73,7 @@ export function segnaliVps({ https, ms, letto, adesso = Date.now() }) {
       ? { code: 'cert_expiring', status: 'pass', evidence: { detail: `Il certificato HTTPS scade il ${data} (fra ${giorni} giorni)`, expires_at: https.cert.scade, issuer: https.cert.emittente || '', days_left: giorni } }
       : { code: 'cert_expiring', status: 'fail', evidence: { detail: `Certificato valido fino al ${data}`, expires_at: https.cert.scade } };
   const secondi = Math.round((ms || 0) / 100) / 10;
-  const lento = !letto || !Number.isFinite(ms)
+  const lento = !letto || !Number.isFinite(ms) || !suo(url) || !(status >= 200 && status < 300)
     ? { code: 'slow_site', status: 'undetermined', evidence: { detail: '' } }
     : ms >= SOGLIE_VPS.lentoMs
       ? { code: 'slow_site', status: 'pass', evidence: { detail: `La homepage ha risposto in ${String(secondi).replace('.', ',')} secondi`, seconds: secondi } }
@@ -135,7 +139,7 @@ async function main() {
       const t0 = Date.now();
       const pagina = html.length > 500_000 ? html.slice(0, 400_000) + html.slice(-100_000) : html;
       const esito = valuta(regole, a, pagina, https, oggi);
-      esito.checks.push(...segnaliVps({ https, ms: misura.ms, letto: esito.letto }));
+      esito.checks.push(...segnaliVps({ dominio: a.domain, https, ms: misura.ms, url: misura.url, status: misura.status, letto: esito.letto }));
       if (Date.now() - t0 > 3_000) console.error(`valutazione lenta per ${a.domain}: ${Date.now() - t0} ms, ${html.length} caratteri`);
       return esito;
     } catch (e) {

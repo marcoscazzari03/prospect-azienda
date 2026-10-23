@@ -198,6 +198,13 @@ Come tornare indietro, in generale:
   su un campione: catalogo, servizi «Sicurezza del sito» e «Rifacimento del sito», ricerche solo dal database.
 - **Prove:** `worker/test.mjs` (soglie, casi dubbi, certificato già scaduto, tempo passato al segnale), test SQL 39 (salvati
   come prove, codice sconosciuto fuori, prova tolta quando il sito torna veloce); 420 controlli SQL.
+- **Revisione (Code Reviewer, pronto con riserve, corretto):** dopo un redirect verso un altro dominio certificato e tempo
+  non sono dell'azienda: «non determinabile»; tempo misurato dalla connessione al sito, non dalla partenza (le code del DNS
+  condivise tra le corsie facevano sembrare lenti i siti; `UV_THREADPOOL_SIZE=16` già nei servizi); «sito lento» solo con
+  risposta 2xx (non una pagina d'errore lenta); schema della route a 12 controlli per azienda (erano esattamente 10 su 10).
+  Verificato: `create_search` non è chiamabile dagli utenti (revoca nella 002), quindi nessuno può chiedere i codici nuovi.
+  **Per la fase 2:** `cert_expiring` deve valere solo con `expires_at` futuro (`signal_is_fresh` tiene buone 30 giorni le
+  prove dei siti, anche dopo un rinnovo).
 - **Indietro:** ripristinare `site_check_codes()` della 051; versione precedente del worker.
 
 ## 23/10/2026 — pagine dell'app troppo larghe su telefono · in produzione dal 23/10

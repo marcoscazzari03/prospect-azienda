@@ -38,7 +38,7 @@ const schema = z.object({
       code: z.string().max(40),
       status: z.enum(["pass", "fail", "undetermined"]),
       evidence: z.record(z.string(), z.unknown()).optional(),
-    })).max(10),
+    })).max(12), // 8 dei workflow + 2 del VPS (punto 91), con margine: un controllo in più non deve far rifiutare il blocco
   })).max(300),
 });
 
