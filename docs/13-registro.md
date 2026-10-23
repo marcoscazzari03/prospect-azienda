@@ -188,6 +188,14 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 23/10/2026 — pagine dell'app troppo larghe su telefono · in produzione dal 23/10
+- **Cosa:** su iPhone Panoramica, Crediti e Lead occupavano metà schermo (pagina larga circa il triplo, poi rimpicciolita).
+  Causa: griglie senza colonne fisse su telefono, che si allargano quanto la riga di testo più lunga anche se tagliata con
+  i puntini. Riprodotto su Chromium a 402 px: pagina larga 1.225 px, 402 con la correzione. Wizard e Amministrazione erano a
+  posto (colonne dichiarate).
+- **Correzione:** `src/app/globals.css`, `.grid > * { min-width: 0 }` per tutte le griglie.
+- **Indietro:** togliere la regola.
+
 ## 23/10/2026 — ricerche consigliate in dashboard (punti 84–85) · in produzione dal 23/10 solo per l'admin (migrazione 067 eseguita, `ANTHROPIC_API_KEY` su Vercel, main pubblicato); da fare: prove con descrizioni diverse, poi «Tutti» con Avvisto
 - **Cosa:** riquadro «Di cosa si occupa la tua attività?» in cima alla dashboard (saltabile), proposte di Claude Haiku verso
   aziende, contate sul database come il wizard, schede che aprono il wizard compilato. Dettagli in
