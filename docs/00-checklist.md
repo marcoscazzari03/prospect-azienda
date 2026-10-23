@@ -147,8 +147,9 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
     e dal motore; logo definitivo.
 68. **Tu, prima dei rinnovi** – Costi Hostinger: circa 234 €/anno (circa 250 con il dominio nuovo). Dominio weborastudio.it
     15,99 € (rinnovo 20/01/2027: tenerlo, serve al rinvio); Business Web Hosting 203,88 € (rinnovo 02/02/2027, controllare il
-    prezzo vero); Starter Business Email 14,16 € (rinnovo 19/02/2027: se leads@ sta sulle caselle dell'hosting, togliere il
-    rinnovo).
+    prezzo vero); Starter Business Email di weborastudio.it 14,16 € (rinnovo 19/02/2027: decidere quando leads@ non serve
+    più). Avvisto (dal 23/10): dominio avvisto.it 5,99 € (rinnovo 15,99 €/anno a ottobre 2027); Free Business Email per
+    ciao@avvisto.it (alias info@), gratis 12 mesi: controllare il prezzo del rinnovo prima di ottobre 2027.
 33. ~~**Tu** – Prezzo del rinnovo della casella Hostinger~~ (21/10: assorbito dal punto 68).
 
 ## 🟢 Per tutti i mestieri che vendono alle aziende (idea del 22/10)

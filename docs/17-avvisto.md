@@ -27,7 +27,9 @@ Studio («Avvisto è un servizio di Webora Studio») finché non c'è la societ�
   gratuita disponibile; confrontato con Keliweb, dominio gratis e casella 9,90 €), solo il dominio, senza collegarlo a un sito
   dell'hosting. Il registrar deve permettere record A, CNAME, TXT e MX nel suo pannello DNS (Vercel, Resend, posta); con Keliweb non
   serve aggiungerlo all'hosting di Hostinger (il sito resta su Vercel).
-- B2. Creare la casella **ciao@avvisto.it** e provarla (invio e ricezione): meglio presso lo stesso fornitore del dominio (un
+- B2. Creare la casella **ciao@avvisto.it** (Hostinger «Free Business Email», gratis 12 mesi; alias **info@avvisto.it**) e
+  provarla (invio e ricezione). Poi un account Google con ciao@avvisto.it («usa il tuo indirizzo email attuale») e il logo come
+  foto: logo accanto al mittente in Gmail (punto 30) e servizi Google (Search Console): meglio presso lo stesso fornitore del dominio (un
   solo pannello); in alternativa casella su Hostinger con i record MX puntati lì.
 - B3. Inoltro di leads@weborastudio.it verso ciao@avvisto.it (le risposte alle vecchie email arrivano lo stesso).
 
