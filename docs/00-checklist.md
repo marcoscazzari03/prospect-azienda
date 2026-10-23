@@ -38,11 +38,15 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 80. ~~**Io** – Controllare che «Aziende | Controllo siti» sia ripartito dopo la migrazione 061~~ (21/10: giro delle 18:25 riuscito).
 
 ## 🖥️ VPS e worker: stasera e domani
-94. **Insieme, 23/10 alle 20** – Sul VPS, un passo alla volta: riscaricare `worker.sh` da main; leggere il log del worker del
-    controllo siti fermo dal 22/10 alle 15:35 UTC (servizio ancora col nome vecchio); `bash worker.sh rinomina` (rilancia installa;
-    NON lanciare prima `installa`, creerebbe le cartelle nuove e `rinomina` si fermerebbe)
-    (blocchi da 100 salvati subito, stop dopo 12 minuti, pagine ridotte a 500 KB, 16 thread di rete, segnali del punto 91);
-    `bash worker.sh giro` e controllo dell'esito.
+94. **Insieme, 23/10 a mezzanotte** (spostato dalle 20, promemoria impostato) – Sul VPS, un passo alla volta: riscaricare
+    `worker.sh` da main; leggere il log del worker del controllo siti fermo dal 22/10 alle 15:35 UTC (servizio ancora col nome
+    vecchio); `bash ~/worker.sh rinomina` (rilancia installa; NON lanciare prima `installa`); `bash ~/worker.sh giro` e controllo
+    dell'esito; `bash ~/worker.sh prova-cc` (senza accendere `avvia-cc`).
+94b. **Insieme, subito dopo** – Fine del passaggio ad Avvisto: nessuna ricerca in corso; **Tu:** staccare il vecchio indirizzo da
+    Vercel (Domains), togliere la vecchia Redirect URL su Supabase e il vecchio hostname su Turnstile.
+94c. **Io, poi Tu** – Ricerche consigliate per tutti: tolgo la diagnosi `db` dai tentativi (`src/lib/server/suggestions.ts`,
+    revisione del Code Reviewer), poi in Amministrazione → Servizi opportunità «Ricerche consigliate» su «Tutti» (oggi le vede
+    solo l'amministratore: un account cliente nuovo non ha il riquadro «Di cosa si occupa la tua attività?»).
 95. **Tu, 24/10** – Query oraria di `site_checked_at`: se il worker fa circa 600 siti all'ora, spegnere «Aziende | Controllo
     siti» su n8n (libera circa 720 esecuzioni al mese). Finché il worker non lo fa, n8n resta acceso.
 89b. **Io, 24/10** – Controllare le chiamate Adzuna dopo 2–3 giri con le figure della manifattura (limite 2.500 al mese).
