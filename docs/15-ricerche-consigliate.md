@@ -1,7 +1,7 @@
 # Ricerche consigliate (punti 83–85)
 
 Documento vivo della funzione «Di cosa si occupa la tua attività?» e delle ricerche consigliate. Decisione del 22/10 nel
-registro (tabella in alto). Stato: **codice pronto (23/10)**, in revisione; poi migrazione 067, `ANTHROPIC_API_KEY` su Vercel, prove come admin.
+registro (tabella in alto). Stato: **in produzione dal 23/10 solo per l'admin** (interruttore «Solo admin»); prove in corso.
 
 ## Decisioni (22/10)
 - La domanda compare alla **prima apertura dell'app**, in un riquadro della dashboard che si può saltare; non nella
@@ -47,5 +47,5 @@ registro (tabella in alto). Stato: **codice pronto (23/10)**, in revisione; poi 
 - **Test:** `tests/suggestions.test.ts` (pulizia della risposta, scelta delle proposte, link, arrotondamento).
 
 ## Da fare
-Testi definitivi (sales-copywriter), revisione (code-reviewer, qa-tester), migrazione 067, chiave su Vercel, prove con
-descrizioni diverse (falegname, fotografo, commercialista, parrucchiere), poi il modulo anche nel profilo.
+Prove con descrizioni diverse (falegname, fotografo, commercialista, parrucchiere), poi il modulo anche nel profilo e
+«Tutti» con Avvisto.

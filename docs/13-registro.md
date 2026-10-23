@@ -188,7 +188,7 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
-## 23/10/2026 — ricerche consigliate in dashboard (punti 84–85) · codice pronto; da fare: revisione, migrazione 067, `ANTHROPIC_API_KEY` su Vercel, main
+## 23/10/2026 — ricerche consigliate in dashboard (punti 84–85) · in produzione dal 23/10 solo per l'admin (migrazione 067 eseguita, `ANTHROPIC_API_KEY` su Vercel, main pubblicato); da fare: prove con descrizioni diverse, poi «Tutti» con Avvisto
 - **Cosa:** riquadro «Di cosa si occupa la tua attività?» in cima alla dashboard (saltabile), proposte di Claude Haiku verso
   aziende, contate sul database come il wizard, schede che aprono il wizard compilato. Dettagli in
   `docs/15-ricerche-consigliate.md`. Nuova dipendenza `@anthropic-ai/sdk` 0.132.0 (versione di oltre due settimane fa).
