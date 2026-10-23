@@ -30,6 +30,12 @@ registro (tabella in alto). Stato: **in produzione dal 23/10 solo per l'admin** 
 5. **Da decidere:** togliere «Trova aziende con opportunità» dall'intestazione mentre le schede sono visibili; niente emoji
    nuove.
 
+## Grafica (23/10, bozza dell'utente)
+Icona accanto al titolo; icone nei campi («Cosa fai?» con l'edificio, «Dove lavori?» con il segnaposto); suggerimento con la
+lampadina e contatore dei caratteri (massimo 300); a destra, solo da `lg`, il riquadro «Ti suggeriremo:» con tre spunte
+(ricerche già pronte, solo aziende del database, filtri già compilati); pulsante «Mostra le ricerche» con la lente. Esempio
+del campo a rotazione tra 6 attività che vendono ad aziende (`BUSINESS_EXAMPLES`), scelto sul server a ogni apertura.
+
 ## Come è fatto (23/10)
 - **Dati:** migrazione `20261211000067_business_profile.sql`, colonne sull'organizzazione: `business_description` (≤500),
   `business_area` (≤120), `business_suggestions` (proposte già filtrate e contate), `business_suggested_at`,

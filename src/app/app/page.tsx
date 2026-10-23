@@ -10,7 +10,7 @@ import { formatNumber } from "@/lib/domain/pricing";
 import { SuggestedSearches } from "@/components/suggested-searches";
 import { suggestionsVisible } from "@/lib/server/suggestions";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { StoredSuggestions } from "@/lib/domain/suggestions";
+import { randomBusinessExample, type StoredSuggestions } from "@/lib/domain/suggestions";
 
 export const metadata: Metadata = { title: "Panoramica" };
 
@@ -50,6 +50,8 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
           area={business.business_area}
           stored={business.business_suggestions as StoredSuggestions | null}
           skipped={Boolean(business.business_skipped_at)}
+          // Scelto qui sul server, così browser e server mostrano la stessa frase.
+          example={randomBusinessExample()}
         />
       )}
 

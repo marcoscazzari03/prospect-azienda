@@ -3,10 +3,21 @@ import { splitZones } from "@/lib/domain/search-input";
 
 // Ricerche consigliate (punti 84–85): risposta di Haiku, controlli e link al wizard. Logica pura, senza chiamate.
 
-export const BUSINESS_LIMITS = { description: 500, area: 120, minLeads: 10, maxSuggestions: 3 } as const;
+export const BUSINESS_LIMITS = { description: 300, area: 120, minLeads: 10, maxSuggestions: 3 } as const;
 
 // Cosa chiediamo a Haiku: a chi vende l'attività e fino a 4 ricerche verso aziende (ne mostriamo al massimo 3, quelle
 // con più lead nel database).
+// Esempi del campo «Cosa fai?», uno a caso a ogni apertura: tutte attività che vendono ad aziende.
+export const BUSINESS_EXAMPLES = [
+  "Falegnameria: mobili su misura per negozi, uffici e hotel",
+  "Web agency: siti nuovi e rifacimento di siti per piccole imprese",
+  "Impresa di pulizie per uffici, condomini e capannoni",
+  "Fotografo: foto professionali per hotel, ristoranti e aziende",
+  "Consulente IT: assistenza informatica e reti per studi e aziende",
+  "Studio commercialista per artigiani e piccole imprese",
+] as const;
+export const randomBusinessExample = () => BUSINESS_EXAMPLES[Math.floor(Math.random() * BUSINESS_EXAMPLES.length)];
+
 export const haikuAnswerSchema = z.object({
   sells_to: z.enum(["businesses", "consumers", "both", "unclear"]),
   suggestions: z.array(z.object({

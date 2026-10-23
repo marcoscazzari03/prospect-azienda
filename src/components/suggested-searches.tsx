@@ -1,7 +1,7 @@
 "use client";
 import { startTransition, useActionState, useState } from "react";
 import { saveBusinessProfile, skipBusinessProfile, type ActionState } from "@/app/app/actions";
-import { Alert, Badge, Button, ButtonLink, Card, Field, Input, Textarea } from "@/components/ui";
+import { Alert, Badge, Button, ButtonLink, Card, Input, Textarea } from "@/components/ui";
 import { BUSINESS_LIMITS, aboutLeads, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
 import { formatNumber } from "@/lib/domain/pricing";
 import { BRAND } from "@/lib/config";
@@ -10,8 +10,9 @@ import { BRAND } from "@/lib/config";
 // dashboard, saltabile. Testi rivisti dal sales-copywriter il 23/10.
 const CLIENTI = ["Imprese edili", "Studi professionali", "Negozi", "Ristoranti e hotel", "Aziende industriali", "Altro"];
 
-export function SuggestedSearches({ description, area, stored, skipped }: { description: string; area: string; stored: StoredSuggestions | null; skipped: boolean }) {
+export function SuggestedSearches({ description, area, stored, skipped, example }: { description: string; area: string; stored: StoredSuggestions | null; skipped: boolean; example: string }) {
   const [editing, setEditing] = useState(!description && !skipped);
+  const [length, setLength] = useState(description.length);
   // Proposte arrivate: si chiude il modulo e si mostrano le schede.
   const [state, action, pending] = useActionState<ActionState, FormData>(async (prev, form) => {
     const r = await saveBusinessProfile(prev, form);
@@ -31,31 +32,59 @@ export function SuggestedSearches({ description, area, stored, skipped }: { desc
   return (
     <Card className="mb-6 border-ledger/25 p-5">
       {editing || !description ? (
-        <form action={action} className="grid gap-4">
-          <div>
-            <h2 className="font-display text-xl font-semibold">Di cosa si occupa la tua attività?</h2>
-            <p className="mt-1 text-sm text-muted">Ti suggeriamo ricerche di aziende già pronte. Puoi saltare: decidi tu se avviarle.</p>
+        <form action={action} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
+          <div className="grid gap-4">
+            <div className="flex items-start gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ledger-soft text-ledger-2"><Glyph name="target" className="h-6 w-6" /></span>
+              <div>
+                <h2 className="font-display text-xl font-semibold">Di cosa si occupa la tua attività?</h2>
+                <p className="mt-1 text-sm text-muted">Ti suggeriamo ricerche di aziende già pronte. Puoi saltare: decidi tu se avviarle.</p>
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="business-description" className="text-sm font-medium">Cosa fai?</label>
+                <div className="relative">
+                  <Glyph name="building" className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-muted" />
+                  <Textarea id="business-description" name="description" required minLength={10} maxLength={BUSINESS_LIMITS.description} defaultValue={description}
+                    onChange={(e) => setLength(e.target.value.length)} placeholder={`Es. ${example}`} className="min-h-24 pl-10" />
+                </div>
+                <div className="flex items-center justify-between gap-2 text-xs text-muted">
+                  <span className="flex items-center gap-1"><Glyph name="bulb" className="h-4 w-4 text-stamp" />Una o due frasi: cosa offri e a quali aziende.</span>
+                  <span className="font-mono">{length}/{BUSINESS_LIMITS.description}</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="business-area" className="text-sm font-medium">Dove lavori?</label>
+                <div className="relative">
+                  <Glyph name="pin" className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
+                  <Input id="business-area" name="area" maxLength={BUSINESS_LIMITS.area} defaultValue={area} placeholder="Es. Modena" className="h-11 pl-10" />
+                </div>
+                <p className="text-xs text-muted">Provincia o regione.</p>
+              </div>
+            </div>
+            {state.error && <Alert tone="stamp">{state.error}</Alert>}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Button type="submit" disabled={pending} className="h-11 w-full sm:w-auto">
+                <Glyph name="search" className="h-4 w-4" />{pending ? "Stiamo preparando le ricerche…" : "Mostra le ricerche"}
+              </Button>
+              {description ? (
+                <Button type="button" variant="secondary" className="h-11" onClick={() => setEditing(false)}>Annulla</Button>
+              ) : (
+                <Button type="button" variant="secondary" className="h-11" disabled={pending}
+                  onClick={() => startTransition(async () => { await skipBusinessProfile(); setEditing(false); })}>Salta per ora</Button>
+              )}
+            </div>
+            {pending && <Skeletons />}
           </div>
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <Field label="Cosa fai" htmlFor="business-description" hint="Una o due frasi: cosa offri e a quali aziende.">
-              <Textarea id="business-description" name="description" required minLength={10} maxLength={BUSINESS_LIMITS.description} defaultValue={description}
-                placeholder="Es. Falegnameria: mobili su misura per negozi, uffici e hotel" className="min-h-20" />
-            </Field>
-            <Field label="Dove lavori" htmlFor="business-area" hint="Provincia o regione.">
-              <Input id="business-area" name="area" maxLength={BUSINESS_LIMITS.area} defaultValue={area} placeholder="Es. Modena" className="h-11" />
-            </Field>
-          </div>
-          {state.error && <Alert tone="stamp">{state.error}</Alert>}
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Button type="submit" disabled={pending} className="h-11 w-full sm:w-auto">{pending ? "Stiamo preparando le ricerche…" : "Mostra le ricerche"}</Button>
-            {description ? (
-              <Button type="button" variant="ghost" onClick={() => setEditing(false)}>Annulla</Button>
-            ) : (
-              <Button type="button" variant="ghost" disabled={pending}
-                onClick={() => startTransition(async () => { await skipBusinessProfile(); setEditing(false); })}>Salta per ora</Button>
-            )}
-          </div>
-          {pending && <Skeletons />}
+          <aside className="hidden self-center rounded-xl bg-ledger-soft/60 p-4 lg:block">
+            <p className="flex items-center gap-2 text-sm font-semibold"><Glyph name="sparkle" className="h-5 w-5 text-ledger-2" />Ti suggeriremo:</p>
+            <ul className="mt-3 grid gap-2 text-sm">
+              {["Ricerche già pronte per la tua attività", "Solo aziende presenti nel nostro database", "Filtri e impostazioni già compilati"].map((t) => (
+                <li key={t} className="flex items-start gap-2"><Glyph name="check" className="mt-0.5 h-4 w-4 shrink-0 text-ledger" />{t}</li>
+              ))}
+            </ul>
+          </aside>
         </form>
       ) : (
         <Results description={description} area={area} stored={stored} onEdit={() => setEditing(true)} action={action} pending={pending} error={state.error} />
@@ -161,5 +190,23 @@ function Skeletons() {
       <span className="sr-only">Stiamo preparando le ricerche…</span>
       {[0, 1, 2].map((k) => <div key={k} className="h-36 animate-pulse rounded-lg bg-paper-2" />)}
     </div>
+  );
+}
+
+// Icone del riquadro (stesso disegno di quelle della dashboard: tratto da 1,6 su 20×20).
+const GLYPH: Record<string, string> = {
+  target: "M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM10 14a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM10 10.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zM14 6l3-3",
+  building: "M4 18V4a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v14M13 8h2a1 1 0 0 1 1 1v9M2 18h16M7 6h2M7 9h2M7 12h2M9 18v-3",
+  pin: "M10 18s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10zM10 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  bulb: "M7.5 14h5M8 17h4M10 2a5 5 0 0 0-3 9c.6.5 1 1.2 1 2h4c0-.8.4-1.5 1-2a5 5 0 0 0-3-9z",
+  search: "M9 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM17 17l-3.5-3.5",
+  sparkle: "M10 2l1.6 4.4L16 8l-4.4 1.6L10 14l-1.6-4.4L4 8l4.4-1.6zM16 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z",
+  check: "M4 10.5l4 4 8-9",
+};
+function Glyph({ name, className }: { name: keyof typeof GLYPH; className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={GLYPH[name]} />
+    </svg>
   );
 }
