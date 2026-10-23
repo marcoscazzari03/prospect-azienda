@@ -172,10 +172,10 @@ Il lavoro gira sul VPS (gratis), senza Google Maps, PagineGialle o Registro Impr
     (23/10: migrazione 068 eseguita, su main, attiva dopo `installa`, punto 94).
 91b. **Io, 3–5 giorni dopo** – Data Quality su un campione di `cert_expiring` e `slow_site`; poi fase 2: segnali nel catalogo
     dell'app (`cert_expiring` solo con scadenza futura).
-92. **Io, dopo lo smaltimento della coda** – Siti italiani da Common Crawl per le aziende che non sono in nessun elenco
-    (approfondito il 23/10, registro): elenco dei domini .it dal grafo pubblico di Common Crawl, homepage letta sul VPS,
-    tenute solo quelle con partita IVA valida (prova che è un'attività), nome, città, settore ed email dalla pagina. Prova
-    su 5.000 domini prima del giro intero. Da partire quando il controllo siti non ha più arretrato.
+92. **Io** – Aziende da Common Crawl per quelle che non sono in nessun elenco (`docs/16-common-crawl.md`): ~~worker con
+    partita IVA valida, nome, città e settore da Haiku tramite l'app~~ (23/10: codice pronto, campione di 600 domini con il
+    21% di attività e il 70% con città; in revisione). **Insieme, dopo la revisione:** `installa`, `prova-cc`, `giro-cc` sul
+    VPS; `avvia-cc` quando il controllo siti non ha più arretrato. **Da decidere:** salvare la partita IVA (migrazione).
 93. **Tu, con il legale** – Albi professionali (commercialisti, avvocati): si possono usare? Contengono dati di persone.
 96. **Tu, 26–28/10** – `copertura_settori.sql` e `resa_giornaliera.sql` (nuova del 23/10: aziende nuove, lead pronti al
     giorno e campi coperti) per vedere quanto si avvicina la soglia.

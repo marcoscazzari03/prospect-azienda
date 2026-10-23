@@ -10,6 +10,7 @@ import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo, segnaliVps
 import { richiesta, privato } from './http.mjs';
 import { pagineDaAprire, haModulo, trovaContatti } from './contacts.mjs';
 import { caricaRegoleSiti, luogoSullaPagina, cercaSito, daProvare, dominioDaScartare } from './siti-osm.mjs';
+import { dominioDaRiga, pivaValida, trovaPiva, trovaLuogo, trovaNome, analizzaPagina, schedaDi, senzaDoppioni, daProvare as daProvareCc, classifica, apriHomepage } from './cc.mjs';
 import { caricaOsm, filtri, caricaProvince, dentro, puntoDi, leggiAttivita, normalizza, semplifica } from './osm.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -281,5 +282,74 @@ assert.deepEqual(misura, { ms: 1234, url: 'https://a.it/', status: 200 }, 'tempo
 assert.deepEqual(await controlloHttps({ domain: 'a.it', website: 'https://a.it' }, async () => ({ status: 200, body: '', cert: { scade: '2026-11-01T00:00:00.000Z', emittente: 'R11' } })),
   { eseguito: true, cert: { scade: '2026-11-01T00:00:00.000Z', emittente: 'R11' }, url: undefined }, 'certificato dal controllo HTTPS');
 console.log('ok  segnali del VPS: certificato in scadenza (14 giorni), sito lento (4 s), casi dubbi non determinabili');
+
+// 10. Aziende da Common Crawl (punto 92): elenco dei domini, partita IVA, luogo, nome, doppioni, settore.
+{
+assert.equal(dominioDaRiga('94367200\tit.rossimobili\t2'), 'rossimobili.it');
+assert.deepEqual(['1\tit.comune.modena\t1', '2\tit.abruzzo.alberghi\t1', '3\tfr.rossi\t1', '4\tit.xn--forl-cesena-fcb\t1', '5\tit.-ab\t1'].map(dominioDaRiga), ['', '', '', '', ''],
+  'solo .it di secondo livello, niente domini geografici, IDN o non validi');
+assert.ok(pivaValida('02023170042') && pivaValida('04304320619'), 'partite IVA vere del campione');
+assert.ok(!pivaValida('02023170043') && !pivaValida('00000000000') && !pivaValida('0202317004'), 'cifra di controllo, zeri, lunghezza');
+assert.ok(!pivaValida('94000410178') && !pivaValida('92078070601'), 'codici fiscali di associazioni ed enti (8 e 9): fuori');
+assert.equal(trovaPiva('© 2026 Rossi Srl · P.IVA 02023170042 · Privacy')?.piva, '02023170042');
+assert.equal(trovaPiva('Partita Iva: IT04304320619')?.piva, '04304320619', 'prefisso IT');
+assert.equal(trovaPiva('Ordine n. 02023170042 spedito'), null, 'undici cifre senza etichetta: non è una partita IVA');
+assert.equal(trovaPiva('Sito realizzato da Agenzia Web Srl P.IVA 02023170042'), null, 'partita IVA della web agency nei crediti');
+assert.equal(trovaPiva('Rossi Srl P.IVA 02023170043 - Realizzato da Web Srl P.IVA 04304320619'), null, 'prima non valida, poi solo quella dei crediti');
+const luogoCc = (t, v = 0) => { const l = trovaLuogo(t, v); return l ? `${l.citta} ${l.sigla}` : null; };
+assert.equal(luogoCc('Via Emilia 1, 41121 Modena (MO)'), 'Modena MO');
+assert.equal(luogoCc('VIA ROMA 2 · 20121 MILANO MI · Tel 02'), 'Milano MI', 'maiuscole e sigla staccata: non «Mila NO»');
+assert.equal(luogoCc('28053 CASTELLETTO SOPRA TICINO ( NO )'), 'Castelletto sopra Ticino NO');
+assert.equal(luogoCc('via Variopinto 6, 80077 Ischia (Na) Partita Iva'), 'Ischia NA', 'sigla minuscola tra parentesi');
+assert.equal(luogoCc('Via Campidoglio 129, Ceprano ( Fr ) 03012'), 'Ceprano FR', 'città prima del CAP');
+assert.equal(luogoCc('Acireale 95024 (CT)'), 'Acireale CT');
+assert.equal(luogoCc('Sede: 00187 Roma'), 'Roma RM', 'capoluogo senza sigla');
+assert.equal(luogoCc('00187 Pippo'), null, 'senza sigla e non capoluogo: niente');
+assert.equal(luogoCc('Filiale 40121 Bologna (BO) ........................ Sede 41121 Modena (MO) P.IVA', 70), 'Modena MO', 'il più vicino alla partita IVA');
+assert.equal(luogoCc('31029 P. IVA 02023170042'), null, '«P. IVA» non è una città');
+const nomeCc = (h, d, t = '', dove = -1) => trovaNome(h, t, d, dove);
+assert.equal(nomeCc('<meta property="og:site_name" content="Rossi Mobili">', 'rossimobili.it'), 'Rossi Mobili');
+assert.equal(nomeCc('<title>Home | Hotel Pierre Riccione</title>', 'hotelpierrericcione.it'), 'Hotel Pierre Riccione');
+assert.equal(nomeCc('<title>CTA Kennedy: Home</title>', 'ctakennedy.it'), 'CTA Kennedy');
+assert.equal(nomeCc('<title>Benvenuti su lachorus!</title>', 'lachorus.it'), 'lachorus');
+assert.equal(nomeCc('<title>Caldaie e impianti</title>', 'xyz.it', 'Copyright 2026 Termo Bianchi S.r.l. P.IVA 02023170042', 45), 'Termo Bianchi S.r.l.', 'ragione sociale vicino alla partita IVA');
+assert.equal(nomeCc('', 'rossi-mobili.it'), 'Rossi Mobili', 'infine il dominio');
+const paginaCc = (corpo, testa = '<title>Rossi Mobili | Arredi su misura</title><meta name="description" content="Mobili su misura per negozi e uffici">') =>
+  `<html><head>${testa}</head><body><nav>Menu</nav><h1>Arredi su misura</h1><p>${'Testo della pagina. '.repeat(30)}</p><footer>${corpo}</footer></body></html>`;
+const az = analizzaPagina(paginaCc('Rossi Mobili Srl - Via Emilia 1, 41121 Modena (MO) - P.IVA 02023170042'), 'rossimobili.it');
+assert.deepEqual({ piva: az.piva, nome: az.nome, citta: az.citta, provincia: az.provincia, regione: az.regione }, { piva: '02023170042', nome: 'Rossi Mobili', citta: 'Modena', provincia: 'Modena', regione: 'Emilia-Romagna' });
+assert.match(az.scheda, /^Titolo: Rossi Mobili \| Arredi su misura\nDescrizione: Mobili su misura per negozi e uffici\nIntestazioni: Arredi su misura\nTesto: /);
+assert.ok(!az.scheda.includes('Menu'), 'scheda senza menu, come il nodo 07');
+assert.equal(analizzaPagina(paginaCc('P.IVA 02023170042', '<title>Questo dominio è in vendita</title>').replace('Testo della pagina', 'Questo dominio è in vendita'), 'x.it'), null, 'dominio in vendita');
+assert.equal(analizzaPagina(paginaCc('Nessun dato fiscale'), 'x.it'), null, 'senza partita IVA');
+assert.equal(analizzaPagina('<p>P.IVA 02023170042</p>', 'x.it'), null, 'pagina troppo corta');
+assert.ok(!/[\uD800-\uDFFF]/.test(schedaDi(`<title>Ciao ${'x'.repeat(149)}😀</title>`).replace(/😀/g, '')), 'nessun mezzo emoji nella scheda');
+assert.deepEqual(senzaDoppioni([{ dominio: 'b.it', piva: '1' }, { dominio: 'c.it', piva: '1' }, { dominio: 'd.it', piva: '2' }, { dominio: 'e.it', piva: '3' }], new Map([['3', 'z.it']])).map(t => t.dominio),
+  ['b.it', 'd.it'], 'stessa partita IVA: il primo dominio, anche dai giri precedenti');
+async function* gen(v) { yield* v; }
+assert.deepEqual(await daProvareCc(gen(['a.it', 'b.it', '', 'c.it', 'd.it']), new Map([['a.it', Date.parse('2026-10-01')], ['c.it', Date.parse('2025-01-01')]]), 2, Date.parse('2026-10-23')),
+  ['b.it', 'c.it'], 'salta i provati nell\'ultimo anno');
+// Il sito su un altro dominio (rimando a un portale) non vale; senza https si prova www e poi http.
+const vistiCc = [];
+const reqFinta = (mappa) => async (url) => { vistiCc.push(url); const r = mappa[url]; if (!r) throw new Error('ENOTFOUND'); return r; };
+assert.equal(await apriHomepage('a.it', reqFinta({ 'https://a.it/': { status: 200, url: 'https://www.portale.it/a', body: 'x' } })), null, 'rimando a un altro dominio');
+assert.equal((await apriHomepage('b.it', reqFinta({ 'http://b.it/': { status: 200, url: 'http://www.b.it/', body: 'ok' } })))?.html, 'ok', 'solo http');
+assert.deepEqual(vistiCc.slice(1), ['https://b.it/', 'https://www.b.it/', 'http://b.it/']);
+const chiamate = [];
+const postFinta = async (url, o) => {
+  const corpo = JSON.parse(o.body);
+  chiamate.push({ url, n: corpo.companies.length, segreto: o.headers['x-engine-secret'] });
+  if (corpo.companies[0].name === 'Errore') return { ok: false, json: async () => ({}) };
+  return { ok: true, json: async () => ({ results: corpo.companies.map((c, i) => ({ industry: i === 1 ? '' : `Settore ${c.name}`, keywords: Array(12).fill('p') })) }) };
+};
+const trov = [...Array(21).keys()].map(i => ({ nome: `A${i}`, scheda: 'Titolo: x' })).concat([{ nome: 'Errore' }]);
+trov.splice(20, 0, trov.pop());
+assert.equal(await classifica(trov, 'https://app', 's'.repeat(32), postFinta), 19, '20 + 2 in due lotti; il secondo fallisce; un\'azienda senza settore');
+assert.deepEqual(chiamate.map(c => [c.url, c.n]), [['https://app/api/engine/companies-classify', 20], ['https://app/api/engine/companies-classify', 2]]);
+assert.equal(trov[0].settore, 'Settore A0');
+assert.equal(trov[0].parole.length, 10, 'al massimo 10 parole chiave, come l\'import');
+assert.equal(trov[1].settore, undefined);
+console.log('ok  Common Crawl: domini, partita IVA, luogo, nome, scheda, doppioni, settore');
+}
 
 console.log('\nTest del worker superati.');

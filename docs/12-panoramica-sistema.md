@@ -184,6 +184,7 @@ database non copre.
 | Annunci \| Raccolta Adzuna | ogni 2 giorni alle 6:10 | 86 ricerche per titolo in tutta Italia (ultimi 3 giorni; dal punto 89 anche operai, manutentori e magazzinieri, con pochi titoli per stare nelle 2.500 chiamate al mese); scarta le agenzie per il lavoro |
 | Annunci \| Siti aziende | alle 7:40 e alle 11:40 | trova il sito di 120 aziende degli annunci: prima prova i domini probabili (gratis), poi al massimo 3 ricerche web con Claude Haiku |
 | Annunci \| Settore aziende | ogni 4 ore | classifica il settore dalla homepage con Claude Haiku; esclude chi vende *al* settore («per hotel» non vuol dire hotel) |
+| Aziende da Common Crawl (VPS, non n8n) | ogni 3 ore alle :25, quando acceso (`avvia-cc`) | punto 92, `worker/cc.mjs`: 3.000 domini .it dall'elenco pubblico di Common Crawl; tiene solo i siti con partita IVA valida, nome, città e provincia dalla pagina, settore da Haiku tramite l'app (`/api/engine/companies-classify`); origine `cc` |
 | Lead Engine \| Search (v1) | a ogni ricerca | il motore (sezione 8) |
 | Lead Engine \| Errori | quando il motore si blocca | chiude la ricerca e restituisce i crediti |
 

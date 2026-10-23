@@ -139,6 +139,11 @@ Il worker (`worker/site-checks.mjs`) fa il lavoro di «Aziende | Controllo siti�
 6. Siti delle attività OSM senza sito (punto 88, `worker/siti-osm.mjs`): ogni ora alle :50, 3.000 attività, domini
    indovinati dal nome e verificati sulla homepage (nome e luogo). Prima volta: `bash worker.sh prova-siti` (300 attività,
    senza salvare, con esempi da controllare), poi `bash worker.sh giro-siti` e `bash worker.sh stato-siti`.
+6b. Aziende da Common Crawl (punto 92, `worker/cc.mjs`, `docs/16-common-crawl.md`): la prima volta scarica l'elenco dei domini
+   .it di Common Crawl (circa 1 GB, pochi minuti) in `/var/lib/webora-cc`, poi a ogni giro 3.000 domini. Serve
+   `ANTHROPIC_API_KEY` su Vercel (già messa per le ricerche consigliate). Prima volta: `bash worker.sh installa`, poi
+   `bash worker.sh prova-cc` (300 domini senza salvare, esempi con il settore), `bash worker.sh giro-cc` e
+   `bash worker.sh stato-cc`; il giro ogni 3 ore si accende a parte con `bash worker.sh avvia-cc`.
 7. Backup notturno del database (punto 90, `scripts/vps/backup.sh`), finché non c'è Supabase Pro: ogni notte alle 1:40 UTC
    `pg_dump` dello schema `public` e dei dati di `auth.users`/`auth.identities`, controllati con `pg_restore --list` e cifrati
    con age in `/var/lib/webora-backup` (ultimi 7 giorni più le domeniche fino a 35 giorni). Sul server c'è solo la chiave

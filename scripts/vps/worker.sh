@@ -11,6 +11,10 @@
 #   bash worker.sh stato-osm        ultime righe del popolamento OSM
 #   bash worker.sh prova-siti       siti delle attività OSM senza sito: 300 attività, SENZA salvare (mostra esempi)
 #   bash worker.sh giro-siti        siti: un giro vero adesso (3000 attività), in sottofondo
+#   bash worker.sh prova-cc         aziende da Common Crawl (punto 92): scarica l'elenco dei .it (la prima volta, pochi
+#                                   minuti) e prova 300 domini, SENZA salvare (mostra esempi con il settore)
+#   bash worker.sh giro-cc          Common Crawl: un giro vero adesso (3000 domini), in sottofondo;  stato-cc  ultimi giri
+#   bash worker.sh avvia-cc         Common Crawl ogni 3 ore (alle :25); si ferma con «ferma»
 #   bash worker.sh installa-backup  backup notturno del database (punto 90): chiede la stringa di connessione di Supabase
 #                                   e crea la chiave di cifratura, da copiare e conservare fuori dal server
 #   bash worker.sh backup           un backup adesso;  bash worker.sh stato-backup  archivi e ultimi giri
@@ -27,6 +31,7 @@ NOME=webora-site-checks
 CONT=webora-contacts
 OSM=webora-osm
 SITI=webora-siti
+CC=webora-cc
 BACKUP=webora-backup
 
 # Servizio e timer systemd per un giro del worker: nome, descrizione, comando, quando (OnCalendar), durata massima,
@@ -101,6 +106,11 @@ Nice=10" "Persistent=true"
     unita "$SITI" "siti delle attività OSM" "/usr/bin/node worker/siti-osm.mjs" "*-*-* *:50:00" 50min 1500M "StateDirectory=webora-osm
 Environment=UV_THREADPOOL_SIZE=16
 Nice=5" ""
+    # Aziende da Common Crawl (punto 92): elenco dei domini e domini provati in /var/lib/webora-cc. Non parte con «avvia»:
+    # si accende con «avvia-cc» quando il controllo siti non ha più arretrato.
+    unita "$CC" "aziende da Common Crawl" "/usr/bin/node worker/cc.mjs" "*-*-* 00/3:25:00" 50min 1500M "StateDirectory=webora-cc
+Environment=UV_THREADPOOL_SIZE=16
+Nice=5" ""
     sudo systemctl daemon-reload
     echo "Installato. Prossimo passo: bash $0 prova"
     ;;
@@ -111,6 +121,10 @@ Nice=5" ""
   stato-osm) systemctl is-active $OSM.service || true; sudo journalctl -u $OSM.service -n 15 --no-pager ;;
   prova-siti) prova --property=StateDirectory=webora-osm --setenv=LIMIT=300 --setenv=UV_THREADPOOL_SIZE=16 /usr/bin/node worker/siti-osm.mjs ;;
   giro-siti) sudo systemctl start --no-block $SITI.service && echo "Partito in sottofondo. Per seguirlo: bash $0 stato-siti" ;;
+  prova-cc) prova --property=StateDirectory=webora-cc --property=MemoryMax=1500M --setenv=LIMIT=300 --setenv=UV_THREADPOOL_SIZE=16 /usr/bin/node worker/cc.mjs ;;
+  giro-cc) sudo systemctl start --no-block $CC.service && echo "Partito in sottofondo. Per seguirlo: bash $0 stato-cc" ;;
+  stato-cc) systemctl is-active $CC.service || true; sudo journalctl -u $CC.service -n 10 --no-pager ;;
+  avvia-cc) sudo systemctl enable --now $CC.timer && systemctl list-timers $CC.timer --no-pager ;;
   stato-siti) systemctl is-active $SITI.service || true; sudo journalctl -u $SITI.service -n 10 --no-pager ;;
   giro) sudo systemctl start $NOME.service || echo "Giro non riuscito: ecco le ultime righe."; sudo journalctl -u $NOME.service -n 5 --no-pager ;;
   giro-contatti) sudo systemctl start $CONT.service || echo "Giro non riuscito: ecco le ultime righe."; sudo journalctl -u $CONT.service -n 5 --no-pager ;;
@@ -211,8 +225,8 @@ UNIT
     # shellcheck disable=SC2086
     sudo systemctl enable --now $TIMER && systemctl list-timers $TIMER --no-pager ;;
   # Il backup resta acceso anche con «ferma» (per spegnerlo: sudo systemctl disable --now webora-backup.timer).
-  ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer $SITI.timer ;;
+  ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer $SITI.timer; [ -f /etc/systemd/system/$CC.timer ] && sudo systemctl disable --now $CC.timer || true ;;
   stato) systemctl list-timers $NOME.timer $CONT.timer $OSM.timer $SITI.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
   aggiorna) git -C "$APP" pull --ff-only && git -C "$APP" log --oneline -1 ;;
-  *) sed -n '2,21p' "$0"; exit 1 ;;
+  *) sed -n '2,25p' "$0"; exit 1 ;;
 esac

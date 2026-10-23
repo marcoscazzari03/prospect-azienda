@@ -50,6 +50,25 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — aziende da Common Crawl (punto 92) · codice pronto, in revisione; non installato sul VPS
+- **Cosa:** nuovo worker `worker/cc.mjs`: elenco dei domini .it dal grafo pubblico di Common Crawl (1.487.050 di secondo
+  livello), homepage aperta dal VPS, tenute solo le attività con partita IVA valida (non nei crediti della web agency, non
+  codici fiscali di enti che iniziano per 8 o 9, non domini in vendita), nome, città e provincia dalla pagina, doppioni per
+  partita IVA esclusi. Nuova route `/api/engine/companies-classify` (segreto del worker): settore e parole chiave da Claude
+  Haiku con lo stesso testo di «Aziende | Settore» (`src/lib/domain/industry.ts`), chiave solo su Vercel. Import con origine
+  `cc` (`companies-import` accetta `"cc"`). Comandi `prova-cc`, `giro-cc`, `stato-cc`, `avvia-cc` in `worker.sh`; servizio
+  `webora-cc` ogni 3 ore alle :25, **non** acceso da `avvia`. Test in `worker/test.mjs` (sezione 10) e
+  `tests/industry.test.ts`. Documento vivo `docs/16-common-crawl.md`.
+- **Misura del campione:** 600 domini, 300 aperti, 124 con partita IVA valida (21%), 87 con città (70%).
+- **Perché:** allargare il database alle aziende che non sono in OSM né negli annunci (manifattura, uffici, studi), senza
+  elenchi di terzi. Il settore da Haiku perché «Aziende | Settore» su n8n classifica 120 aziende ogni 4 ore e non le `cc`.
+- **Dove:** `worker/cc.mjs`, `src/app/api/engine/companies-classify/route.ts`, `src/lib/domain/industry.ts`,
+  `src/app/api/engine/companies-import/route.ts`, `scripts/vps/worker.sh`.
+- **Indietro:** `bash worker.sh ferma` (o `sudo systemctl disable --now webora-cc.timer`); le aziende importate si tolgono
+  con `delete from companies where origin = 'cc'` (prima controllare che non abbiano lead consegnati); revert del commit
+  per la route.
+- **Costo:** circa 0,01 centesimi per azienda (Haiku), circa 0,50 € al giorno al ritmo proposto.
+
 ## 23/10/2026 — checklist riscritta, query della resa giornaliera, approfondimento del punto 92 · documenti e query di sola lettura
 - **Cosa:** `docs/00-checklist.md` riscritta tutta allo stato del 23/10 (nuove voci 49b, 85a, 85b, 85g, 89b, 91b, 94–97; 69
   superato perché il VPS lavora). Nuova query `supabase/queries/resa_giornaliera.sql`: R1 aziende nuove, siti controllati,

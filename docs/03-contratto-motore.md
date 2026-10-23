@@ -238,6 +238,19 @@ traduzione restano senza settore e le classifica Claude Haiku («Annunci | Setto
   un blocco intero superava il tempo massimo delle query). Errore: 500 `{ error, saved_before, …conteggi }` (i pezzi prima di
   `saved_before` sono salvati; ripetere la chiamata è sicuro). Solo dati d'azienda;
   le aziende già presenti non vengono sovrascritte (si aggiungono luoghi ed etichette).
+- `source` è anche `"osm_sito"` (siti trovati alle attività OSM senza sito, punto 88) o `"cc"` (aziende dai domini .it di
+  Common Crawl con partita IVA valida, punto 92, `worker/cc.mjs`): stesse regole, origine distinta per misurarle o toglierle.
+
+## Settore delle aziende di Common Crawl (`/api/engine/companies-classify`, punto 92)
+
+Chiamata dal worker sul VPS (`worker/cc.mjs`, `SITE_CHECKS_SECRET` o segreto del motore) prima dell'import: l'app chiede il
+settore a Claude Haiku con lo stesso testo del workflow «Aziende | Settore» (`src/lib/domain/industry.ts`); la chiave di
+Anthropic resta su Vercel.
+
+- `POST { companies: [{ name, card }] }` (da 1 a 20; `card` fino a 1.600 caratteri: titolo, descrizione, intestazioni e
+  inizio del testo della homepage) → `{ results: [{ industry, keywords }], usage }`, una voce per azienda nello stesso
+  ordine (`industry` vuoto se il testo non basta, al massimo 10 parole chiave). 400 dati non validi, 401 segreto, 502
+  risposta del modello non valida (il worker importa comunque l'azienda, senza settore), 503 chiave mancante.
 
 ## Riserva dal database (ricerche opportunità)
 
