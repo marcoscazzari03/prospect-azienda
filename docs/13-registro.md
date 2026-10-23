@@ -83,6 +83,12 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 23/10/2026 — Ricerche consigliate per tutti i clienti · in produzione dal 23/10 sera
+- **Cosa:** l'utente ha messo «Ricerche consigliate» su «Tutti» (Amministrazione → Servizi opportunità): il riquadro «Di cosa si
+  occupa la tua attività?» compare anche agli account cliente (massimo 10 proposte al giorno per organizzazione). Rinominate anche
+  l'organizzazione dell'amministratore e la credenziale Anthropic su n8n («Avvisto - Anthropic").
+- **Indietro:** interruttore su «Solo amministratori».
+
 ## 23/10/2026 — Ricerche consigliate: tolta la diagnosi del database, tentativi non inviati dalla pagina (punto 94c) · su main dal 23/10
 - **Cosa:** `src/lib/server/suggestions.ts` non salva più nei tentativi la risposta grezza di `availability_contacts` (`db`,
   aggiunta per capire le zero proposte); `src/app/app/page.tsx` manda al browser le proposte senza `tried` (prima i tentativi,

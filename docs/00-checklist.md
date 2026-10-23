@@ -44,9 +44,9 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
     dell'esito; `bash ~/worker.sh prova-cc` (senza accendere `avvia-cc`).
 94b. **Insieme, subito dopo** – Fine del passaggio ad Avvisto: nessuna ricerca in corso; **Tu:** staccare il vecchio indirizzo da
     Vercel (Domains), togliere la vecchia Redirect URL su Supabase e il vecchio hostname su Turnstile.
-94c. **Io, poi Tu** – Ricerche consigliate per tutti: ~~tolgo la diagnosi `db` dai tentativi (`src/lib/server/suggestions.ts`)~~
-    (23/10), poi in Amministrazione → Servizi opportunità «Ricerche consigliate» su «Tutti» (oggi le vede
-    solo l'amministratore: un account cliente nuovo non ha il riquadro «Di cosa si occupa la tua attività?»).
+94c. ~~**Io, poi Tu** – Ricerche consigliate per tutti: tolta la diagnosi `db` dai tentativi, poi «Ricerche consigliate» su
+    «Tutti» in Amministrazione → Servizi opportunità~~ (23/10). ~~Organizzazione dell'amministratore rinominata, credenziale
+    Anthropic su n8n rinominata in «Avvisto - Anthropic»~~ (23/10, Tu).
 95. **Tu, 24/10** – Query oraria di `site_checked_at`: se il worker fa circa 600 siti all'ora, spegnere «Aziende | Controllo
     siti» su n8n (libera circa 720 esecuzioni al mese). Finché il worker non lo fa, n8n resta acceso.
 89b. **Io, 24/10** – Controllare le chiamate Adzuna dopo 2–3 giri con le figure della manifattura (limite 2.500 al mese).
@@ -153,8 +153,8 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
     ~~codice solo Avvisto, logo C, nessuna traccia del nome vecchio~~ (23/10, Io); variabili su Vercel (`APP_URL`, `EMAIL_FROM`;
     `NEXT_PUBLIC_BRAND` non serve più); Supabase (Site URL, Redirect URLs, modelli, mittente); Turnstile; webhook di Stripe;
     n8n (nodi caricati e pubblicati); VPS (`rinomina`, `dominio`); **ultimo:** staccare il vecchio indirizzo da Vercel (decisione
-    dell'utente: nessun rinvio). Poi: rinominare su n8n la credenziale Anthropic in «Avvisto - Anthropic» e l'organizzazione
-    dell'amministratore nell'app (Account).
+    dell'utente: nessun rinvio). Fatto il 23/10: credenziale Anthropic e organizzazione dell'amministratore
+    rinominate.
 67d. **Insieme, subito dopo** – Fase D: registrazione, ricerca di prova, email, vecchi link, worker e workflow; QA Tester e
     UI/UX Designer.
 67e. **Insieme, dopo** – Fase E: email alle agenzie della beta e firma; posizionamento (83) e ricerche consigliate per tutti
