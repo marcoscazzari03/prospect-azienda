@@ -102,6 +102,12 @@ Come tornare indietro, in generale:
   (`rinomina` simulato: primo e secondo lancio, servizio attivo, backup assente), corrette: `rinomina` solo dalla copia nella home
   (lanciata da /opt si spostava sotto i piedi e lasciava i worker spenti), controllo anche del backup in corso, ordine dei passi
   esterni (Redirect URLs prima di tutto, nessuna ricerca in corso prima dello stacco).
+- **Passaggio esterno (23/10 sera):** Supabase (Redirect URL `https://avvisto.it/auth/conferma`, Site URL, mittente ciao@avvisto.it,
+  5 modelli), Vercel (`APP_URL`, `EMAIL_FROM`, nuova pubblicazione), Turnstile (avvisto.it, widget «Avvisto»), Stripe (webhook
+  «Avvisto» verso avvisto.it) fatti dall'utente. n8n (Claude): URL su avvisto.it in Raccolta Adzuna, Siti aziende, Settore aziende,
+  Controllo siti, Popolamento OSM (anche il robot) ed Errori; «Valida richiesta» del motore con `HOST_APP = ['avvisto.it']`; tutti
+  pubblicati. «Aziende | Popolamento OSM» era spento (sostituito dal VPS): la pubblicazione l'aveva riacceso, rispento subito.
+  Restano: VPS stasera (`rinomina`), poi staccare il vecchio indirizzo da Vercel e toglierlo da Supabase e Turnstile.
 - **Indietro:** `git revert`; su n8n la versione precedente dei workflow; sul VPS le cartelle si rinominano a mano al contrario.
 
 ## 23/10/2026 — Grafica definitiva della bozza per tutto il sito (colori, menu, Panoramica) · su main dal 23/10

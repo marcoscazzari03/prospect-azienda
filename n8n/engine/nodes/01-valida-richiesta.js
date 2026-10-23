@@ -3,7 +3,6 @@
 // rifiutare payload incompleti e a preparare il brief per l'AI.
 // URL di callback ammessi: SOLO il backend della piattaforma (anti-SSRF).
 // Host esatti dell'app (ripasso di sicurezza del 22/10: solo host esatti, niente sottodomini; dal 23/10 solo avvisto.it).
-// Avvisto (23/10, docs/17-avvisto.md): avvisto.it ammesso già prima del passaggio; il vecchio si toglie 2–4 settimane dopo.
 const HOST_APP = ['avvisto.it'];
 const CALLBACK_AMMESSI = HOST_APP.map((h) => `https://${h}/api/engine/callback`);
 
