@@ -42,6 +42,11 @@ e vuole clienti in tutta la Lombardia vedeva solo Milano. Ora è «Dove cerchi c
 vuoto o «tutta Italia» = tutta Italia), un solo campo invece di due (dove lavori non serve alle proposte). Haiku riceve
 «Zona in cui cerca clienti». Testo da far rivedere al Sales Copywriter prima dell'apertura a tutti.
 
+## Settori (23/10 sera)
+Haiku sceglie solo tra i settori del database (`src/lib/domain/db-sectors.ts`, gli stessi di OpenStreetMap) e la ricerca usa
+le parole chiave di quel settore: con settori inventati («PMI», «artigiani») un commercialista in tutta Italia riceveva 0
+proposte. Fino a 6 proposte da Haiku, se ne mostrano 3.
+
 ## Come è fatto (23/10)
 - **Dati:** migrazione `20261211000067_business_profile.sql`, colonne sull'organizzazione: `business_description` (≤500),
   `business_area` (≤120), `business_suggestions` (proposte già filtrate e contate), `business_suggested_at`,

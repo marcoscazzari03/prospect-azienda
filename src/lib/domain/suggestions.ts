@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { splitZones } from "@/lib/domain/search-input";
+import { DB_SECTORS } from "@/lib/domain/db-sectors";
 
 // Ricerche consigliate (punti 84–85): risposta di Haiku, controlli e link al wizard. Logica pura, senza chiamate.
 
 export const BUSINESS_LIMITS = { description: 300, area: 120, minLeads: 10, maxSuggestions: 3 } as const;
 
-// Cosa chiediamo a Haiku: a chi vende l'attività e fino a 4 ricerche verso aziende (ne mostriamo al massimo 3, quelle
-// con più lead nel database).
+// Cosa chiediamo a Haiku: a chi vende l'attività e fino a 6 ricerche verso aziende, ognuna su un settore del database (ne
+// mostriamo al massimo 3, quelle con più lead).
 // Esempi del campo «Cosa fai?», uno a caso a ogni apertura: tutte attività che vendono ad aziende.
 export const BUSINESS_EXAMPLES = [
   "Falegnameria: mobili su misura per negozi, uffici e hotel",
@@ -39,21 +40,28 @@ export type StoredSuggestions = {
 };
 
 const clean = (v: string, max: number) => v.replace(/\s+/g, " ").trim().slice(0, max);
+const SECTORS = new Map(DB_SECTORS.map(([name, keywords]) => [name.toLowerCase(), { name, keywords: [...keywords] }]));
 
-// Testi entro limiti sicuri, parole chiave brevi e senza doppioni, servizio solo se è tra quelli attivi.
+// Testi entro limiti sicuri, servizio solo se è tra quelli attivi. Il settore deve essere uno di quelli del database
+// (DB_SECTORS), con le sue parole chiave: un settore inventato («PMI», «Artigiani») o parole chiave che le aziende non
+// hanno davano 0 lead (23/10). Le proposte con un settore sconosciuto si scartano.
 export function sanitizeAnswer(a: HaikuAnswer, offerCodes: readonly string[]): HaikuAnswer {
   return {
     sells_to: a.sells_to,
     suggestions: a.suggestions
-      .map((s) => ({
-        title: clean(s.title, 90),
-        why: clean(s.why, 160),
-        industry: clean(s.industry, 80),
-        keywords: [...new Set(s.keywords.map((k) => clean(k, 40).toLowerCase()).filter((k) => k.length >= 3))].slice(0, 6),
-        offer: s.offer && offerCodes.includes(s.offer) ? s.offer : null,
-      }))
+      .map((s) => {
+        const sector = SECTORS.get(clean(s.industry, 80).toLowerCase());
+        return {
+          title: clean(s.title, 90),
+          why: clean(s.why, 160),
+          industry: sector?.name ?? "",
+          keywords: sector?.keywords ?? [],
+          offer: s.offer && offerCodes.includes(s.offer) ? s.offer : null,
+        };
+      })
       .filter((s) => s.title && s.industry)
-      .slice(0, 4), // Haiku ne propone fino a 4: oltre si ignorano invece di rifiutare la risposta
+      .filter((s, i, all) => all.findIndex((x) => x.industry === s.industry && x.offer === s.offer) === i)
+      .slice(0, 6), // Haiku ne propone fino a 6: oltre si ignorano invece di rifiutare la risposta
   };
 }
 

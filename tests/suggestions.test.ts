@@ -2,24 +2,40 @@ import { describe, expect, it } from "vitest";
 import { aboutLeads, haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, wizardHref, type Suggestion } from "@/lib/domain/suggestions";
 import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { offerChoice } from "@/lib/domain/signals";
+import { DB_SECTORS } from "@/lib/domain/db-sectors";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 const s = (title: string, leads: number, extra: Partial<Suggestion> = {}): Suggestion => ({ title, why: "perché", industry: "Hotel", keywords: [], offer: null, leads, ...extra });
 
 describe("ricerche consigliate (punti 84-85)", () => {
-  it("risposta di Haiku: testi tagliati, parole chiave pulite, servizio solo se attivo", () => {
+  it("risposta di Haiku: testi tagliati, solo settori del database con le loro parole chiave, servizio solo se attivo", () => {
     const raw = haikuAnswerSchema.parse({
       sells_to: "both",
       suggestions: [
-        { title: "  Studi   di architettura ", why: "x".repeat(400), industry: "Studi di architettura", keywords: ["Architetto", "architetto", "ab", "interior design"], offer: "web_redesign" },
+        { title: "  Studi   di architettura ", why: "x".repeat(400), industry: "studio di architettura", keywords: ["interior design"], offer: "web_redesign" },
         { title: "Hotel", why: "Arredi", industry: "Hotel", keywords: [], offer: "inventato" },
+        { title: "Piccole imprese", why: "Contabilità", industry: "PMI", keywords: ["pmi"], offer: null },
+        { title: "Hotel di nuovo", why: "Doppione", industry: "Hotel", keywords: [], offer: null },
         { title: "", why: "", industry: "", keywords: [], offer: null },
       ],
     });
     const a = sanitizeAnswer(raw, ["web_redesign"]);
-    expect(a.suggestions).toHaveLength(2);
-    expect(a.suggestions[0]).toMatchObject({ title: "Studi di architettura", keywords: ["architetto", "interior design"], offer: "web_redesign" });
+    expect(a.suggestions.map((s) => s.industry)).toEqual(["Studio di architettura", "Hotel"]);
+    expect(a.suggestions[0]).toMatchObject({ title: "Studi di architettura", keywords: ["architetti", "architetto", "architettura", "progettazione"], offer: "web_redesign" });
     expect(a.suggestions[0].why.length).toBe(160);
     expect(a.suggestions[1].offer).toBeNull();
+  });
+
+  it("i settori proposti sono gli stessi di OpenStreetMap (lib-osm.js), con le stesse parole chiave", () => {
+    const lib = readFileSync(join(process.cwd(), "n8n", "annunci", "nodes", "lib-osm.js"), "utf8");
+    const settori = new Function(`${lib}; return SETTORI;`)() as Record<string, Record<string, [string, string[]]>>;
+    const attesi = new Map<string, Set<string>>();
+    for (const tipo of Object.values(settori)) for (const [nome, parole] of Object.values(tipo)) {
+      if (!attesi.has(nome)) attesi.set(nome, new Set());
+      parole.forEach((p) => attesi.get(nome)!.add(p));
+    }
+    expect(DB_SECTORS.map(([n, k]) => [n, [...k]])).toEqual([...attesi].map(([n, k]) => [n, [...k]]));
   });
 
   it("solo proposte con almeno 10 lead, le più ricche prima, al massimo 3", () => {

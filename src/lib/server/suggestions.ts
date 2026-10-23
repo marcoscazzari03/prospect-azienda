@@ -11,6 +11,7 @@ import { haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInp
 import type { Json } from "@/lib/supabase/database.types";
 import type { Viewer } from "@/lib/server/dal";
 import { expectedLeads } from "@/lib/domain/pricing";
+import { DB_SECTORS } from "@/lib/domain/db-sectors";
 
 // Ricerche consigliate (punti 84–85, docs/15-ricerche-consigliate.md). Interruttore in app_settings «suggested_searches»:
 // "off", "admin" (solo gli admin: prove, predefinito) o "all" (con Avvisto, dopo il 25/10).
@@ -36,18 +37,21 @@ const MODEL = "claude-haiku-5-5";
 function prompt(offers: { code: string; label: string; description: string }[]) {
   return [
     `Sei il consulente commerciale di ${BRAND.name}, un servizio italiano che trova AZIENDE (mai privati) a cui un'attività può`,
-    "vendere i propri prodotti o servizi. Il database contiene aziende italiane con il loro settore (categorie come",
-    "«Studio di architettura», «Hotel», «Ristorante», «Impresa edile», «Produzione industriale», «Agenzia immobiliare»).",
+    "vendere i propri prodotti o servizi. Il database contiene aziende italiane classificate in questi settori (e solo questi):",
+    DB_SECTORS.map(([name]) => name).join(" · "),
     "",
     "Dalla descrizione dell'attività:",
     "1. sells_to: «businesses» se vende soprattutto ad aziende, «both» se vende sia a privati sia ad aziende, «consumers»",
     "   se vende quasi solo a privati (parrucchiere, estetista, dentista di famiglia), «unclear» se la descrizione non basta.",
-    "2. suggestions: fino a 4 tipi di AZIENDE che possono comprare da lei, solo se sells_to è businesses o both. Ognuna con:",
+    "2. suggestions: fino a 6 tipi di AZIENDE che possono comprare da lei, solo se sells_to è businesses o both. Ognuna con:",
     "   - title: breve, in italiano, senza la zona (es. «Studi di architettura e interior design»);",
     "   - why: una frase semplice sul perché quell'azienda ne ha bisogno (massimo 140 caratteri);",
-    "   - industry: il settore delle aziende da cercare, al plurale o come categoria (es. «Studi di architettura»);",
-    "   - keywords: 2–5 parole in italiano che compaiono nel settore di quelle aziende (es. «architetto», «architettura»);",
+    "   - industry: ESATTAMENTE uno dei settori dell'elenco sopra, scritto uguale (es. «Studio di architettura»);",
+    "   - keywords: 2–5 parole in italiano che descrivono quelle aziende (es. «architetto», «architettura»);",
     "   - offer: il codice di uno dei servizi qui sotto SOLO se l'attività vende proprio quel servizio, altrimenti null.",
+    "Per un servizio utile a quasi tutte le aziende (commercialista, pulizie, assistenza informatica, assicurazioni) scegli",
+    "settori dell'elenco con molte piccole attività che ne hanno bisogno davvero (es. Ristorante, Officina auto, Impresa edile,",
+    "Parrucchiere, Abbigliamento), non categorie generiche come «PMI» o «artigiani», che non sono nell'elenco.",
     "Niente aziende di cui non si può essere clienti (enti pubblici, scuole statali), niente privati, niente inventato.",
     "",
     "Servizi con segnali di bisogno (codice: nome — per chi):",

@@ -161,8 +161,10 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
     return (
       <>
         {header}
-        <p className="text-sm">In questa zona non abbiamo trovato ricerche con abbastanza aziende. Prova ad allargare la zona.</p>
-        <div className="mt-3 flex flex-wrap gap-2"><Button onClick={onEdit}>Modifica la zona</Button>{tryAnyway}</div>
+        <p className="text-sm">{area
+          ? "In questa zona non abbiamo trovato ricerche con abbastanza aziende. Prova ad allargare la zona."
+          : "Non abbiamo trovato ricerche con abbastanza aziende. Prova a descrivere meglio cosa offri e a chi."}</p>
+        <div className="mt-3 flex flex-wrap gap-2"><Button onClick={onEdit}>{area ? "Modifica la zona" : "Modifica la descrizione"}</Button>{tryAnyway}</div>
       </>
     );
   }
