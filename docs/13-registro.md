@@ -83,11 +83,13 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
-## 23/10/2026 — Ricerche consigliate: tolta la diagnosi del database, tentativi solo sul server (punto 94c) · sul branch, in revisione
+## 23/10/2026 — Ricerche consigliate: tolta la diagnosi del database, tentativi non inviati dalla pagina (punto 94c) · su main dal 23/10
 - **Cosa:** `src/lib/server/suggestions.ts` non salva più nei tentativi la risposta grezza di `availability_contacts` (`db`,
   aggiunta per capire le zero proposte); `src/app/app/page.tsx` manda al browser le proposte senza `tried` (prima i tentativi,
   con la diagnosi, finivano nella pagina). Le vecchie diagnosi salvate spariscono al ricalcolo notturno. Serve prima di mettere
-  le ricerche consigliate su «Tutti» (oggi solo l'amministratore).
+  le ricerche consigliate su «Tutti» (oggi solo l'amministratore). Code Reviewer «pronto con riserve»: la colonna resta leggibile
+  dal cliente via API per la propria organizzazione (solo conteggi e criteri suoi, nessun dato di altri); revoca della colonna
+  rinviata.
 - **Indietro:** `git revert`.
 
 ## 23/10/2026 — Solo Avvisto: nome unico, logo C, vecchio indirizzo tolto · sul branch, in revisione; poi passaggio esterno
