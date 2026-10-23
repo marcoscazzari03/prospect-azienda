@@ -59,7 +59,8 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
         <SuggestedSearches
           description={business.business_description}
           area={business.business_area}
-          stored={business.business_suggestions as StoredSuggestions | null}
+          // Al browser solo le proposte da mostrare: i tentativi (anche le proposte scartate) restano sul server.
+          stored={stripTried(business.business_suggestions as StoredSuggestions | null)}
           skipped={Boolean(business.business_skipped_at)}
           // Scelto qui sul server, così browser e server mostrano la stessa frase.
           example={randomBusinessExample()}
@@ -106,4 +107,10 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
       )}
     </>
   );
+}
+
+function stripTried(s: StoredSuggestions | null) {
+  if (!s) return s;
+  const { tried: _tried, ...rest } = s;
+  return rest;
 }

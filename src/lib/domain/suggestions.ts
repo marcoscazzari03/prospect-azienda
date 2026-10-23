@@ -38,7 +38,7 @@ export type StoredSuggestions = {
   sellsTo: HaikuAnswer["sells_to"];
   items: Suggestion[];
   // Tutte le proposte di Haiku con il conteggio e la risposta grezza del database, per le prove.
-  tried?: (Pick<Suggestion, "title" | "industry" | "keywords" | "leads"> & { why?: string; offer?: string | null; db?: unknown; at?: string })[];
+  tried?: (Pick<Suggestion, "title" | "industry" | "keywords" | "leads"> & { why?: string; offer?: string | null; at?: string })[];
   countedAt?: string; // ultimo conteggio dei lead (alla proposta o nel ricalcolo notturno)
 };
 

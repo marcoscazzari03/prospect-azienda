@@ -44,8 +44,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
     dell'esito; `bash ~/worker.sh prova-cc` (senza accendere `avvia-cc`).
 94b. **Insieme, subito dopo** – Fine del passaggio ad Avvisto: nessuna ricerca in corso; **Tu:** staccare il vecchio indirizzo da
     Vercel (Domains), togliere la vecchia Redirect URL su Supabase e il vecchio hostname su Turnstile.
-94c. **Io, poi Tu** – Ricerche consigliate per tutti: tolgo la diagnosi `db` dai tentativi (`src/lib/server/suggestions.ts`,
-    revisione del Code Reviewer), poi in Amministrazione → Servizi opportunità «Ricerche consigliate» su «Tutti» (oggi le vede
+94c. **Io, poi Tu** – Ricerche consigliate per tutti: ~~tolgo la diagnosi `db` dai tentativi (`src/lib/server/suggestions.ts`)~~
+    (23/10, in revisione), poi in Amministrazione → Servizi opportunità «Ricerche consigliate» su «Tutti» (oggi le vede
     solo l'amministratore: un account cliente nuovo non ha il riquadro «Di cosa si occupa la tua attività?»).
 95. **Tu, 24/10** – Query oraria di `site_checked_at`: se il worker fa circa 600 siti all'ora, spegnere «Aziende | Controllo
     siti» su n8n (libera circa 720 esecuzioni al mese). Finché il worker non lo fa, n8n resta acceso.

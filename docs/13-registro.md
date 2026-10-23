@@ -83,6 +83,13 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 23/10/2026 — Ricerche consigliate: tolta la diagnosi del database, tentativi solo sul server (punto 94c) · sul branch, in revisione
+- **Cosa:** `src/lib/server/suggestions.ts` non salva più nei tentativi la risposta grezza di `availability_contacts` (`db`,
+  aggiunta per capire le zero proposte); `src/app/app/page.tsx` manda al browser le proposte senza `tried` (prima i tentativi,
+  con la diagnosi, finivano nella pagina). Le vecchie diagnosi salvate spariscono al ricalcolo notturno. Serve prima di mettere
+  le ricerche consigliate su «Tutti» (oggi solo l'amministratore).
+- **Indietro:** `git revert`.
+
 ## 23/10/2026 — Solo Avvisto: nome unico, logo C, vecchio indirizzo tolto · sul branch, in revisione; poi passaggio esterno
 - **Cosa:** `src/lib/config.ts` con un solo `BRAND` (Avvisto, avvisto.it, ciao@avvisto.it, titolare «Avvisto»); tolti `BRAND_KEY`,
   `data-brand` e la versione vecchia di colori e modelli; «un servizio di …» tolto da piè di pagina, accesso ed email. Logo «C · Due

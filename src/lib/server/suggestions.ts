@@ -63,10 +63,7 @@ function prompt(offers: { code: string; label: string; description: string }[]) 
 // migrazione 065, ed expectedLeads): le aziende con email o modulo più una quota di quelle il cui contatto si cerca durante
 // la ricerca. Si mostra il valore basso della forbice. (23/10: contare solo i contatti già noti lasciava vuote le proposte,
 // perché quasi tutte le aziende nuove di OSM aspettano ancora il controllo siti.)
-// Ogni conteggio lascia la risposta grezza del database in `debug` (una mappa per chiamata; salvata nei tentativi, per le
-// prove dell'admin).
-type Debug = Map<string, unknown>;
-async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: string, offers: Awaited<ReturnType<typeof getEnabledOffers>>, debug: Debug) {
+async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: string, offers: Awaited<ReturnType<typeof getEnabledOffers>>) {
   const signals = s.offer ? offerChoice(s.offer, offers) : null;
   const parsed = searchInputSchema.safeParse(suggestionSearchInput(s, area, signals));
   if (!parsed.success) {
@@ -85,7 +82,6 @@ async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: str
     return -1;
   }
   const d = (data ?? {}) as Record<string, unknown>;
-  debug.set(`${s.industry}|${s.offer ?? ""}`, { ...d, opportunity: parsed.data.signals.codes.length > 0, target: toTarget(parsed.data) });
   const n = (k: string) => Number(d[k]) || 0;
   const min = expectedLeads({ total: n("total"), withEmail: n("with_email"), formOnly: n("form_only"), toTry: n("to_try") }, true, 1000).min;
   // Conteggio fermo al tetto (501 aziende) e quasi tutte raggiungibili: il numero vero è più alto, si mostra «oltre 500».
@@ -95,17 +91,17 @@ async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: str
 // Due conteggi alla volta, non sei insieme: in tutta Italia ognuno impiega qualche secondo e sei in parallelo rischiano il
 // tempo massimo del database (23/10).
 // Con una scadenza (cron) restituisce null se il tempo finisce prima di aver contato tutto.
-async function countAll(orgId: string, list: Omit<Suggestion, "leads">[], area: string, offers: Awaited<ReturnType<typeof getEnabledOffers>>, debug: Debug, deadline = Infinity) {
+async function countAll(orgId: string, list: Omit<Suggestion, "leads">[], area: string, offers: Awaited<ReturnType<typeof getEnabledOffers>>, deadline = Infinity) {
   const items: Suggestion[] = [];
   for (let i = 0; i < list.length; i += 2) {
     if (Date.now() > deadline) return null;
     items.push(...await Promise.all(list.slice(i, i + 2).map(async (s) => {
-      const leads = await countLeads(orgId, s, area, offers, debug);
+      const leads = await countLeads(orgId, s, area, offers);
       // Con un servizio la ricerca chiede anche il segnale (per un commercialista: un annuncio per contabile), e le aziende
       // sono poche: sotto la soglia si propone la ricerca semplice dello stesso settore (23/10: 0 proposte su 6).
       if (s.offer && leads < BUSINESS_LIMITS.minLeads) {
         const plain = { ...s, offer: null };
-        return { ...plain, leads: await countLeads(orgId, plain, area, offers, debug) };
+        return { ...plain, leads: await countLeads(orgId, plain, area, offers) };
       }
       return { ...s, leads };
     })));
@@ -135,10 +131,10 @@ export async function generateSuggestions(orgId: string, description: string, ar
   if (response.stop_reason === "refusal" || !response.parsed_output) throw new Error(`risposta non valida (${response.stop_reason})`);
   const answer = sanitizeAnswer(response.parsed_output, offers.map((o) => o.code));
   const toCount = answer.sells_to === "businesses" || answer.sells_to === "both" ? answer.suggestions : [];
-  const debug: Debug = new Map();
-  const items = (await countAll(orgId, toCount, area, offers, debug)) ?? [];
-  // Anche le proposte scartate (meno di 10 lead), per capire le risposte di Haiku nelle prove: non si mostrano.
-  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ ...s, db: debug.get(`${s.industry}|${s.offer ?? ""}`) })), countedAt: new Date().toISOString() };
+  const items = (await countAll(orgId, toCount, area, offers)) ?? [];
+  // Anche le proposte scartate (meno di 10 lead), per il ricalcolo notturno: non si mostrano. (Fino al 23/10 c'era anche la
+  // risposta grezza del database, per le prove: tolta prima di aprire le proposte a tutti.)
+  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items, countedAt: new Date().toISOString() };
 }
 
 // Ricalcolo notturno dei lead delle proposte già fatte (cron watchdog, 23/10): il database cresce ogni giorno, le proposte
@@ -160,7 +156,7 @@ export async function recountSuggestions(deadline: number, limit = 10) {
     // Tutte le proposte di Haiku (dal 23/10 i tentativi hanno anche il motivo), altrimenti quelle mostrate.
     const tried = (o.stored.tried ?? []).filter((t): t is Suggestion => typeof (t as Suggestion).why === "string");
     const list = (tried.length ? tried : o.stored.items).map(({ title, why, industry, keywords, offer }) => ({ title, why, industry, keywords, offer: offer ?? null }));
-    const items = await countAll(o.id, list, o.business_area ?? "", offers, new Map(), deadline);
+    const items = await countAll(o.id, list, o.business_area ?? "", offers, deadline);
     // Tempo finito o un conteggio in errore (-1): restano le proposte di prima, non si svuotano (Code Reviewer).
     if (!items || items.some((s) => s.leads < 0)) continue;
     const next: StoredSuggestions = { sellsTo: o.stored.sellsTo, items: pickSuggestions(items), tried: items, countedAt: new Date().toISOString() };
