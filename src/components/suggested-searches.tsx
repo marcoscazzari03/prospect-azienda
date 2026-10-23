@@ -32,7 +32,7 @@ export function SuggestedSearches({ description, area, stored, skipped, example 
   return (
     <Card className="mb-6 border-ledger/25 p-5">
       {editing || !description ? (
-        <form action={action} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
+        <form action={action} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="grid gap-4">
             <div className="flex items-start gap-3">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ledger-soft text-ledger-2"><Glyph name="target" className="h-6 w-6" /></span>
@@ -77,7 +77,7 @@ export function SuggestedSearches({ description, area, stored, skipped, example 
             </div>
             {pending && <Skeletons />}
           </div>
-          <aside className="hidden self-center rounded-xl bg-ledger-soft/60 p-4 lg:block">
+          <aside className="hidden self-center rounded-xl bg-ledger-soft/60 p-5 lg:block">
             <p className="flex items-center gap-2 text-sm font-semibold"><Glyph name="sparkle" className="h-5 w-5 text-ledger-2" />Ti suggeriremo:</p>
             <ul className="mt-3 grid gap-2 text-sm">
               {["Ricerche già pronte per la tua attività", "Solo aziende presenti nel nostro database", "Filtri e impostazioni già compilati"].map((t) => (
