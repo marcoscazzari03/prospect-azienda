@@ -89,7 +89,8 @@ export function wizardHref(s: Pick<Suggestion, "title" | "industry" | "keywords"
 // Oltre il tetto del conteggio (501 aziende lette, migrazione 065) il numero vero è più alto: «oltre 500».
 export const LEADS_CAP = 500;
 export function leadsLabel(n: number) {
-  return n > LEADS_CAP ? `oltre ${LEADS_CAP} lead` : `circa ${new Intl.NumberFormat("it-IT").format(aboutLeads(n))} lead`;
+  // «aziende», non «lead»: sono aziende raggiungibili, i lead consegnati possono essere meno (Sales Copywriter).
+  return n > LEADS_CAP ? `oltre ${LEADS_CAP} aziende` : `circa ${new Intl.NumberFormat("it-IT").format(aboutLeads(n))} aziende`;
 }
 
 export function aboutLeads(n: number) {

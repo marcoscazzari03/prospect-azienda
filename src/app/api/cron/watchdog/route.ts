@@ -14,6 +14,7 @@ import { recountSuggestions } from "@/lib/server/suggestions";
 export const maxDuration = 300;
 
 export async function GET(request: Request) {
+  const started = Date.now();
   const secret = env.cronSecret();
   const auth = request.headers.get("authorization") ?? "";
   if (!secret || !safeEqual(auth, `Bearer ${secret}`)) {
@@ -30,6 +31,7 @@ export async function GET(request: Request) {
   await createAdminClient().from("error_events").delete().lt("at", new Date(Date.now() - 90 * 86_400_000).toISOString());
   // Ricerche consigliate: lead ricontati ogni notte (per ultimo: se manca tempo, il resto è già fatto).
   let suggestions = 0;
-  try { suggestions = await recountSuggestions(); } catch (e) { await reportError("cron", e, "recount_suggestions"); }
+  // Entro 240 s dall'inizio della richiesta: il cron ne ha 300 (Code Reviewer).
+  try { suggestions = await recountSuggestions(started + 240_000); } catch (e) { await reportError("cron", e, "recount_suggestions"); }
   return NextResponse.json({ closed, expired: expired ?? 0, repeats, alerts, purged: purged ?? null, suggestions });
 }

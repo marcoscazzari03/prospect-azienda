@@ -60,7 +60,7 @@ export function BusinessSection({ description, area }: { description: string; ar
           <p><span className="text-muted">Dove cerchi clienti:</span> {area || "Tutta Italia"}</p>
           <div className="flex flex-wrap gap-2">
             <ButtonLink href="/app?attivita=modifica#attivita" variant="secondary">Modifica e aggiorna le proposte</ButtonLink>
-            <form action={clearBusinessProfile}><Button type="submit" variant="ghost">Rimuovi</Button></form>
+            <form action={clearBusinessProfile}><Button type="submit" variant="ghost">Cancella la descrizione</Button></form>
           </div>
         </div>
       ) : (

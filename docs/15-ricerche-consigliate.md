@@ -54,7 +54,9 @@ Dalla migrazione 070 entrano prima quelle con un contatto; vale anche per la sti
 ## Aggiornamento e rimozione (23/10 sera, richiesta dell'utente)
 - I lead delle proposte si ricontano ogni notte nel cron (`recountSuggestions`), senza Haiku: le proposte restano, cambiano i
   numeri (e quali 3 si vedono).
-- «Rimuovi» nel riquadro e nel profilo cancella descrizione, zona e proposte.
+- «Cancella la descrizione» nel riquadro e nel profilo cancella descrizione, zona e proposte.
+- Testi rivisti dal Sales Copywriter (23/10): «Cosa offri alle aziende?», «circa X aziende» / «oltre 500 aziende» (sono aziende
+  raggiungibili, i lead consegnati possono essere meno), «Non parte niente da solo», «Paghi solo i lead consegnati, con i crediti».
 - Profilo: sezione «La tua attività», con il link al modulo nella Panoramica.
 
 ## Come è fatto (23/10)

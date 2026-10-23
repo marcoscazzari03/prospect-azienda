@@ -50,13 +50,19 @@ Come tornare indietro, in generale:
 
 ---
 
-## 23/10/2026 — ricerche consigliate: «Rimuovi», sezione nel profilo, lead ricontati ogni notte · in revisione
+## 23/10/2026 — ricerche consigliate: «Cancella la descrizione», sezione nel profilo, lead ricontati ogni notte · su main (Code Reviewer «pronto con riserve», corrette; testi del Sales Copywriter)
 - **Cosa:** pulsante «Rimuovi» (azione `clearBusinessProfile`: descrizione, zona e proposte cancellate, il riquadro torna alla
   riga «Vuoi ricerche già pronte…»); sezione «La tua attività» in Account → Profilo (solo con l'interruttore acceso) con
   «Modifica e aggiorna le proposte» (apre il modulo nella Panoramica, `/app?attivita=modifica#attivita`) e «Rimuovi»;
   `recountSuggestions` nel cron notturno (`/api/cron/watchdog`, 3:00 UTC): ricontano i lead di tutte le proposte di Haiku già
   salvate, senza chiamare Haiku, fino a 10 organizzazioni a notte; i tentativi salvano la proposta intera e `countedAt`.
   Testo «I numeri si aggiornano ogni notte».
+- **Revisione:** un conteggio in errore o il tempo finito lasciano le proposte di prima (non si svuotano); scadenza a 240 s
+  dall'inizio del cron, controllata anche tra un conteggio e l'altro; il ricalcolo non sovrascrive se il cliente ha
+  cancellato o rifatto le proposte (condizione su `business_suggested_at`); diagnosi `db` separata per ogni chiamata.
+- **Testi (Sales Copywriter):** «Cosa offri alle aziende?», «circa X aziende» / «oltre 500 aziende», «Cancella la descrizione»,
+  «Crea una ricerca», «Non parte niente da solo: le controlli e le avvii tu», «Paghi solo i lead consegnati, con i crediti»;
+  scartato «aziende con un motivo documentato» (non vale per le ricerche semplici).
 - **Perché:** richiesta dell'utente («aggiorna tutti i giorni» e «cancella»): aggiornamento automatico invece di un
   interruttore, perché costa zero (niente Haiku).
 - **Indietro:** revert del commit.

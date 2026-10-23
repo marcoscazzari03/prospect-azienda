@@ -3,7 +3,6 @@ import { startTransition, useActionState, useState } from "react";
 import { clearBusinessProfile, saveBusinessProfile, skipBusinessProfile, type ActionState } from "@/app/app/actions";
 import { Alert, Badge, Button, ButtonLink, Card, Input, Textarea } from "@/components/ui";
 import { BUSINESS_LIMITS, leadsLabel, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
-import { BRAND } from "@/lib/config";
 
 // Ricerche consigliate (punti 84–85, proposta del designer in docs/15-ricerche-consigliate.md): riquadro in cima alla
 // dashboard, saltabile. Testi rivisti dal sales-copywriter il 23/10.
@@ -40,12 +39,12 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ledger-soft text-ledger-2"><Glyph name="target" className="h-6 w-6" /></span>
               <div>
                 <h2 className="font-display text-xl font-semibold">Di cosa si occupa la tua attività?</h2>
-                <p className="mt-1 text-sm text-muted">Ti suggeriamo ricerche di aziende già pronte. Puoi saltare: decidi tu se avviarle.</p>
+                <p className="mt-1 text-sm text-muted">Ti proponiamo ricerche già pronte. Non parte niente da solo: le controlli e le avvii tu.</p>
               </div>
             </div>
             <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="business-description" className="text-sm font-medium">Cosa fai?</label>
+                <label htmlFor="business-description" className="text-sm font-medium">Cosa offri alle aziende?</label>
                 <div className="relative">
                   <Glyph name="building" className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-muted" />
                   <Textarea id="business-description" name="description" required minLength={10} maxLength={BUSINESS_LIMITS.description} defaultValue={description}
@@ -62,7 +61,7 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
                   <Glyph name="pin" className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
                   <Input id="business-area" name="area" maxLength={BUSINESS_LIMITS.area} defaultValue={area} placeholder="Es. Milano e Monza" className="h-11 pl-10" />
                 </div>
-                <p className="text-xs text-muted">Province o regioni, anche più di una. Vuoto: tutta Italia.</p>
+                <p className="text-xs text-muted">Province o regioni, anche più di una. Se lasci vuoto, cerchiamo in tutta Italia.</p>
               </div>
             </div>
             {state.error && <Alert tone="stamp">{state.error}</Alert>}
@@ -82,7 +81,7 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
           <aside className="hidden self-center rounded-xl bg-ledger-soft/60 p-5 lg:block">
             <p className="flex items-center gap-2 text-sm font-semibold"><Glyph name="sparkle" className="h-5 w-5 text-ledger-2" />Ti suggeriremo:</p>
             <ul className="mt-3 grid gap-2 text-sm">
-              {["Ricerche già pronte per la tua attività", "Solo aziende presenti nel nostro database", "Filtri e impostazioni già compilati"].map((t) => (
+              {["Ricerche già pronte per la tua attività", "Solo aziende presenti nel nostro database", "Ricerca già impostata: zona e filtri sono già scelti"].map((t) => (
                 <li key={t} className="flex items-start gap-2"><Glyph name="check" className="mt-0.5 h-4 w-4 shrink-0 text-ledger" />{t}</li>
               ))}
             </ul>
@@ -109,7 +108,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
         </div>
         <div className="flex gap-1">
           <Button variant="ghost" size="sm" onClick={onEdit}>Modifica</Button>
-          <form action={clearBusinessProfile}><Button type="submit" variant="ghost" size="sm">Rimuovi</Button></form>
+          <form action={clearBusinessProfile}><Button type="submit" variant="ghost" size="sm">Cancella la descrizione</Button></form>
         </div>
       </div>
       {/* Calcolo nuovo fallito con proposte vecchie salvate: l'errore si mostra sopra (23/10: sembravano proposte nuove). */}
@@ -123,7 +122,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
       <Button type="submit" variant="secondary" disabled={pending}>{pending ? "Stiamo preparando le ricerche…" : "Riprova"}</Button>
     </form>
   );
-  const tryAnyway = <ButtonLink href="/app/ricerche/nuova" variant="ghost">Prova una ricerca</ButtonLink>;
+  const tryAnyway = <ButtonLink href="/app/ricerche/nuova" variant="ghost">Crea una ricerca</ButtonLink>;
 
   if (pending) return <>{header}<Skeletons /></>;
   if (!stored) {
@@ -139,7 +138,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
     return (
       <>
         {header}
-        <p className="text-sm">{BRAND.name} trova aziende, non privati. Se vendi soprattutto a privati, qui non troverai molto. Se vendi anche alle aziende, puoi provare una ricerca.</p>
+        <p className="text-sm">Qui trovi solo aziende, non privati. Se vendi anche ad aziende, descrivi quella parte e riprova, oppure crea una ricerca.</p>
         <div className="mt-3">{tryAnyway}</div>
       </>
     );
@@ -190,7 +189,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
           </a>
         ))}
       </div>
-      <p className="mt-3 text-xs text-muted">Si apre la ricerca già compilata. La controlli e la avvii tu: paghi solo i lead consegnati. I numeri si aggiornano ogni notte.</p>
+      <p className="mt-3 text-xs text-muted">Si apre la ricerca già compilata. La controlli e la avvii tu. Paghi solo i lead consegnati, con i crediti. I numeri si aggiornano ogni notte.</p>
     </>
   );
 }
