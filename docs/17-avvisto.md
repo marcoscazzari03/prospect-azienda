@@ -23,8 +23,9 @@ Studio («Avvisto è un servizio di Webora Studio») finché non c'è la societ�
 - A7. Code Reviewer sul diff (testi e configurazione: livello 1–2; callback del motore: livello 2).
 
 ## Fase B — Dominio e casella (Tu, appena possibile)
-- B1. Comprare **avvisto.it**: su Hostinger (aggiunto al Business Web Hosting) oppure su **Keliweb** (ipotesi dell'utente del
-  23/10). Il registrar deve permettere record A, CNAME, TXT e MX nel suo pannello DNS (Vercel, Resend, posta); con Keliweb non
+- B1. Comprare **avvisto.it** su **Hostinger** (decisione dell'utente del 23/10: 5,99 € il primo anno, poi 15,99 €; casella
+  gratuita disponibile; confrontato con Keliweb, dominio gratis e casella 9,90 €), solo il dominio, senza collegarlo a un sito
+  dell'hosting. Il registrar deve permettere record A, CNAME, TXT e MX nel suo pannello DNS (Vercel, Resend, posta); con Keliweb non
   serve aggiungerlo all'hosting di Hostinger (il sito resta su Vercel).
 - B2. Creare la casella **ciao@avvisto.it** e provarla (invio e ricezione): meglio presso lo stesso fornitore del dominio (un
   solo pannello); in alternativa casella su Hostinger con i record MX puntati lì.
