@@ -165,3 +165,15 @@ export async function resetUserMfa(form: FormData) {
   await audit(admin.user.id, "user.mfa_reset", p.userId);
   revalidatePath(`/admin/clienti/${p.orgId}`);
 }
+
+// Ricerche consigliate in dashboard (punti 84–85): spente, solo per gli admin (prove) o per tutti.
+export async function updateSuggestedMode(form: FormData) {
+  const admin = await requireAdmin();
+  const mode = z.enum(["off", "admin", "all"]).parse(form.get("mode"));
+  await createAdminClient()
+    .from("app_settings")
+    .upsert({ key: "suggested_searches", value: mode, updated_at: new Date().toISOString(), updated_by: admin.user.id });
+  await audit(admin.user.id, "settings.suggested_searches", "suggested_searches", { mode });
+  revalidatePath("/admin/servizi");
+  revalidatePath("/app");
+}

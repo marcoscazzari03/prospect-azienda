@@ -1,7 +1,7 @@
 # Ricerche consigliate (punti 83–85)
 
 Documento vivo della funzione «Di cosa si occupa la tua attività?» e delle ricerche consigliate. Decisione del 22/10 nel
-registro (tabella in alto). Stato: **progetto**, codice dal 23/10.
+registro (tabella in alto). Stato: **codice pronto (23/10)**, in revisione; poi migrazione 067, `ANTHROPIC_API_KEY` su Vercel, prove come admin.
 
 ## Decisioni (22/10)
 - La domanda compare alla **prima apertura dell'app**, in un riquadro della dashboard che si può saltare; non nella
@@ -30,7 +30,22 @@ registro (tabella in alto). Stato: **progetto**, codice dal 23/10.
 5. **Da decidere:** togliere «Trova aziende con opportunità» dall'intestazione mentre le schede sono visibili; niente emoji
    nuove.
 
+## Come è fatto (23/10)
+- **Dati:** migrazione `20261211000067_business_profile.sql`, colonne sull'organizzazione: `business_description` (≤500),
+  `business_area` (≤120), `business_suggestions` (proposte già filtrate e contate), `business_suggested_at`,
+  `business_skipped_at`. Si scrivono solo dal server (azioni `saveBusinessProfile` e `skipBusinessProfile` in
+  `src/app/app/actions.ts`, sull'organizzazione dell'utente collegato).
+- **Interruttore:** `app_settings` «suggested_searches» = `off` / `admin` (predefinito) / `all`; si cambia in Admin → Servizi.
+- **Haiku:** `src/lib/server/suggestions.ts`, modello `claude-haiku-5-5`, risposta JSON validata (`haikuAnswerSchema` in
+  `src/lib/domain/suggestions.ts`): `sells_to` (aziende, entrambi, privati, non chiaro) e fino a 4 proposte (titolo, motivo,
+  settore, parole chiave, servizio solo se tra quelli attivi). Al massimo 10 proposte al giorno per account. Chiave
+  `ANTHROPIC_API_KEY` solo sul server (Vercel).
+- **Conteggio:** ogni proposta passa da `availability_contacts` come il wizard (aziende con email o modulo); si mostrano
+  solo quelle con almeno 10 lead, le più ricche prima, al massimo 3. «Circa X» arrotondato come il wizard.
+- **Interfaccia:** `src/components/suggested-searches.tsx` nella dashboard (`src/app/app/page.tsx`); il link della scheda apre
+  `/app/ricerche/nuova?settore=…&parole=…&zona=…&servizio=…&nome=…`, valori iniziali che il server ricontrolla all'avvio.
+- **Test:** `tests/suggestions.test.ts` (pulizia della risposta, scelta delle proposte, link, arrotondamento).
+
 ## Da fare
-Testi (sales-copywriter), colonne `business_description` e `business_area` sull'organizzazione, interruttore in
-`app_settings`, azione server con Haiku (risposta JSON validata, tetto di chiamate per organizzazione), conteggio con
-`availability_contacts`, componente della dashboard e del profilo, test; revisione (code-reviewer) prima della pubblicazione.
+Testi definitivi (sales-copywriter), revisione (code-reviewer, qa-tester), migrazione 067, chiave su Vercel, prove con
+descrizioni diverse (falegname, fotografo, commercialista, parrucchiere), poi il modulo anche nel profilo.

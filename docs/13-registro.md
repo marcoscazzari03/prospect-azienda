@@ -188,6 +188,13 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 23/10/2026 — ricerche consigliate in dashboard (punti 84–85) · codice pronto; da fare: revisione, migrazione 067, `ANTHROPIC_API_KEY` su Vercel, main
+- **Cosa:** riquadro «Di cosa si occupa la tua attività?» in cima alla dashboard (saltabile), proposte di Claude Haiku verso
+  aziende, contate sul database come il wizard, schede che aprono il wizard compilato. Dettagli in
+  `docs/15-ricerche-consigliate.md`. Nuova dipendenza `@anthropic-ai/sdk` 0.132.0 (versione di oltre due settimane fa).
+- **Perché:** decisione del 22/10 (tabella in alto): utile ai mestieri che non trovano il loro servizio nel wizard.
+- **Indietro:** Admin → Servizi → «Spente» (il riquadro sparisce); drop delle colonne della 067.
+
 ## 23/10/2026 — worker del controllo siti fermo dopo l'import OSM · correzione pronta; da fare: revisione, main, `installa` sul VPS (stasera)
 - **Cosa si è visto:** query oraria su `site_checked_at` (23/10): il worker ha salvato alle 15:05 e 15:35 UTC del 22/10, poi
   più niente; n8n «Aziende | Controllo siti» continua a 150 l'ora. La coda non è il problema (`pending_site_checks(300)` in

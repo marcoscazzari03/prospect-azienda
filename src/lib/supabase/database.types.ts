@@ -395,14 +395,14 @@ isOneToOne: false
                   ]
                 },"organizations": {
                   Row: {
-                    "country": string,"created_at": string,"id": string,"name": string,"plan_id": string,"status": string,"stripe_customer_id": string | null,"vat_id": string | null
+                    "business_area": string,"business_description": string,"business_skipped_at": string | null,"business_suggested_at": string | null,"business_suggestions": Json | null,"country": string,"created_at": string,"id": string,"name": string,"plan_id": string,"status": string,"stripe_customer_id": string | null,"vat_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "country"?: string,"created_at"?: string,"id"?: string,"name": string,"plan_id"?: string,"status"?: string,"stripe_customer_id"?: string | null,"vat_id"?: string | null
+                    "business_area"?: string,"business_description"?: string,"business_skipped_at"?: string | null,"business_suggested_at"?: string | null,"business_suggestions"?: Json | null,"country"?: string,"created_at"?: string,"id"?: string,"name": string,"plan_id"?: string,"status"?: string,"stripe_customer_id"?: string | null,"vat_id"?: string | null
                   }
                   Update: {
-                    "country"?: string,"created_at"?: string,"id"?: string,"name"?: string,"plan_id"?: string,"status"?: string,"stripe_customer_id"?: string | null,"vat_id"?: string | null
+                    "business_area"?: string,"business_description"?: string,"business_skipped_at"?: string | null,"business_suggested_at"?: string | null,"business_suggestions"?: Json | null,"country"?: string,"created_at"?: string,"id"?: string,"name"?: string,"plan_id"?: string,"status"?: string,"stripe_customer_id"?: string | null,"vat_id"?: string | null
                   }
                   Relationships: [
                     {

@@ -7,6 +7,10 @@ import { closeStaleRuns } from "@/lib/server/searches";
 import { activitySince, activitySummary } from "@/lib/server/activity";
 import { dashboardData, PERIODS, type Period } from "@/lib/server/dashboard";
 import { formatNumber } from "@/lib/domain/pricing";
+import { SuggestedSearches } from "@/components/suggested-searches";
+import { suggestionsVisible } from "@/lib/server/suggestions";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { StoredSuggestions } from "@/lib/domain/suggestions";
 
 export const metadata: Metadata = { title: "Panoramica" };
 
@@ -16,7 +20,11 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
   const period = (PERIODS.find((p) => String(p) === periodo) ?? 30) as Period;
   await closeStaleRuns(viewer.org.id);
   const since = await activitySince(viewer.user.id);
-  const [activity, d] = await Promise.all([activitySummary(since), dashboardData(period)]);
+  const [activity, d, suggest] = await Promise.all([activitySummary(since), dashboardData(period), suggestionsVisible(viewer)]);
+  // Ricerche consigliate (punti 84–85): solo se l'interruttore dell'Admin le mostra a questo utente.
+  const business = suggest
+    ? (await createAdminClient().from("organizations").select("business_description, business_area, business_suggestions, business_skipped_at").eq("id", viewer.org.id).maybeSingle()).data
+    : null;
   const firstName = viewer.fullName.split(" ")[0];
   const quota = d.totalLeads ? Math.round((d.signalLeads / d.totalLeads) * 100) : null;
 
@@ -35,6 +43,15 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
           </>
         }
       />
+
+      {business && (
+        <SuggestedSearches
+          description={business.business_description}
+          area={business.business_area}
+          stored={business.business_suggestions as StoredSuggestions | null}
+          skipped={Boolean(business.business_skipped_at)}
+        />
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard icon="coins" label="Crediti usati nel mese" value={formatNumber(d.monthCredits)} hint={`${formatNumber(viewer.credits)} ancora disponibili`} href="/app/crediti" />

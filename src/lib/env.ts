@@ -19,7 +19,7 @@ export const env = {
   engineHeaderName: () => process.env.N8N_ENGINE_HEADER_NAME ?? "X-Engine-Key",
   engineHeaderValue: () => process.env.N8N_ENGINE_HEADER_VALUE ?? "",
   engineCallbackSecret: () => process.env.ENGINE_CALLBACK_SECRET ?? "",
-  // Solo per il controllo siti del worker sul VPS (22/10): non apre callback, annunci né import.
+  // Solo per il worker sul VPS (22/10): controllo siti, contatti e import OSM; non apre callback né annunci.
   siteChecksSecret: () => process.env.SITE_CHECKS_SECRET ?? "",
   n8nBaseUrl: () => process.env.N8N_BASE_URL ?? "",
   stripeSecretKey: () => process.env.STRIPE_SECRET_KEY ?? "",
@@ -29,5 +29,7 @@ export const env = {
   alertEmail: () => process.env.ALERT_EMAIL ?? "", // destinatario degli avvisi di errore (facoltativo: altrimenti gli admin)
   // Facoltativo: verifica delle caselle con MillionVerifier (https://www.millionverifier.com).
   emailVerifierKey: () => (process.env.MILLIONVERIFIER_API_KEY ?? "").trim(),
+  // Ricerche consigliate con Claude Haiku (punti 84–85): solo sul server, mai nel browser.
+  anthropicApiKey: () => (process.env.ANTHROPIC_API_KEY ?? "").trim(),
   emailFrom: () => process.env.EMAIL_FROM ?? `${BRAND.name} <${BRAND.supportEmail}>`,
 };

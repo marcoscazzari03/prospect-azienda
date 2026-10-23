@@ -13,8 +13,21 @@ export const metadata: Metadata = { title: "Nuova ricerca" };
 
 export default async function NewSearchPage({ searchParams }: PageProps<"/app/ricerche/nuova">) {
   const viewer = await requireViewer();
-  const { da, tipo } = await searchParams;
+  const { da, tipo, settore, parole, zona, servizio, nome } = await searchParams;
   let defaults: WizardDefaults = {};
+  // Ricerca consigliata dalla dashboard (punti 84–85): settore, parole chiave, zona e servizio già scelti. Sono solo
+  // valori iniziali del modulo: il server li ricontrolla tutti all'avvio, come per ogni ricerca.
+  const testo = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : "");
+  if (typeof settore === "string" && typeof da !== "string") {
+    const offers = await getEnabledOffers();
+    defaults = {
+      name: testo(nome, 120),
+      industry: testo(settore, 200),
+      industryKeywords: testo(parole, 300).split(",").map((k) => k.trim()).filter(Boolean).slice(0, 10),
+      regions: testo(zona, 200).split(",").map((z) => z.trim()).filter(Boolean).slice(0, 20),
+      offer: offers.some((o) => o.code === servizio) ? (servizio as string) : undefined,
+    };
+  }
   if (typeof da === "string") {
     // "Ripeti la ricerca": stessi filtri; le aziende già ricevute sono escluse in automatico.
     const supabase = await createClient();

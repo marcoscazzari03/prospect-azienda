@@ -16,6 +16,8 @@ import { RATE_LIMITS, SEARCH_RULES } from "@/lib/config";
 import { rateHit } from "@/lib/server/rate";
 import { SIGNAL_RULES, offerChoice } from "@/lib/domain/signals";
 import { getEnabledOffers } from "@/lib/server/offer-rules";
+import { generateSuggestions, suggestionsVisible } from "@/lib/server/suggestions";
+import { BUSINESS_LIMITS } from "@/lib/domain/suggestions";
 
 export type ActionState = { error?: string; info?: string };
 
@@ -294,4 +296,43 @@ export async function deleteSearch(form: FormData) {
   revalidatePath("/app/ricerche");
   revalidatePath("/app/lead");
   redirect("/app/ricerche");
+}
+
+// Ricerche consigliate (punti 84–85): «Di cosa si occupa la tua attività?». Si salva sull'organizzazione dell'utente
+// (solo dal server, con la chiave di servizio) e Haiku propone le ricerche, già contate sul database.
+const businessSchema = z.object({
+  description: z.string().trim().min(10, "Scrivi almeno una frase su cosa fai").max(BUSINESS_LIMITS.description),
+  area: z.string().trim().max(BUSINESS_LIMITS.area).default(""),
+  clients: z.string().trim().max(200).default(""),
+});
+
+export async function saveBusinessProfile(_: ActionState, form: FormData): Promise<ActionState> {
+  const viewer = await requireViewer();
+  if (!(await suggestionsVisible(viewer))) return { error: "Funzione non disponibile." };
+  const parsed = businessSchema.safeParse({ description: form.get("description") ?? "", area: form.get("area") ?? "", clients: form.getAll("clients").map(String).join(", ") });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dati non validi" };
+  // Al massimo 10 proposte al giorno per account: ogni proposta è una chiamata ad Haiku.
+  if (!(await rateHit(viewer.org.id, "business_suggestions", 86_400, 10))) return { error: "Hai chiesto molte proposte oggi: riprova domani." };
+  const { description, area, clients } = parsed.data;
+  const db = createAdminClient();
+  let suggestions: Json | null = null;
+  try {
+    suggestions = (await generateSuggestions(viewer.org.id, description, area, clients)) as unknown as Json;
+  } catch (e) {
+    await reportError("suggestions", e, "/app");
+  }
+  await db.from("organizations").update({
+    business_description: description,
+    business_area: area,
+    business_suggestions: suggestions,
+    business_suggested_at: suggestions ? new Date().toISOString() : null,
+  }).eq("id", viewer.org.id);
+  revalidatePath("/app");
+  return suggestions ? {} : { error: "Non siamo riusciti a preparare le ricerche. Riprova tra poco o avvia una ricerca a mano." };
+}
+
+export async function skipBusinessProfile() {
+  const viewer = await requireViewer();
+  await createAdminClient().from("organizations").update({ business_skipped_at: new Date().toISOString() }).eq("id", viewer.org.id);
+  revalidatePath("/app");
 }

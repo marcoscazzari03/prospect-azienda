@@ -155,7 +155,7 @@ studi professionali; Centro quasi vuoto (Lazio 113, Piemonte 64, Toscana 43); Su
 a hotel, ristoranti e negozi»; l'apertura a tutti quando il database copre anche Centro e manifattura.
 83. **Insieme** – Posizionamento «Trova i tuoi prossimi clienti», con esempi di mestieri diversi (falegname, impresa di
     pulizie, fotografo, commercialista, consulente IT). Da fare insieme al passaggio ad Avvisto (punti 66–67).
-84. **Io** – (deciso il 22/10, in lavorazione dal 23/10) «Di cosa si occupa la tua attività?» alla prima apertura dell'app
+84. **Io** – (deciso il 22/10; 23/10: codice pronto con il punto 85, in revisione) «Di cosa si occupa la tua attività?» alla prima apertura dell'app
     (riquadro in dashboard, saltabile; non nella registrazione), modificabile nel profilo. Chi vende anche alle aziende:
     solo ricerche verso aziende; chi vende solo a privati: messaggio onesto e «Prova comunque una ricerca»; descrizione
     vaga: domanda di riserva «A chi vendi di solito?». Si costruisce subito con un interruttore nell'Admin (prima solo
