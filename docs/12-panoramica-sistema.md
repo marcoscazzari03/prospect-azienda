@@ -169,7 +169,8 @@ database non copre.
 **Tabelle principali:**
 - `companies`: azienda, dominio, sito, città, settore, etichette, luoghi, tecnologie del sito, date dei
   controlli, memoria di «referente non trovato» e «email non trovata», partita IVA (`vat_number`, dalla migrazione 069:
-  dal controllo siti e da Common Crawl; serve a non creare doppioni tra fonti diverse).
+  dal controllo siti e da Common Crawl; serve a non creare doppioni tra fonti diverse; `vat_sightings` conta su quanti domini
+  compare, dalla terza volta è di un fornitore e si toglie).
 - `company_checks` / `company_signals`: esito di ogni controllo e prove dei segnali.
 - `job_ads`: annunci di lavoro.
 - Magazzino dei lead già trovati: rivenduti ad altri clienti con criteri simili, ma mai due volte allo stesso

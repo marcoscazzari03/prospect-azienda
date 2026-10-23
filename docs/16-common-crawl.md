@@ -30,10 +30,11 @@ controlli.
    (CT)», «00187 Roma» se è un capoluogo); la sigla dà provincia e regione.
 6. **Partita IVA e doppioni** (migrazione 069, decisione dell'utente del 23/10): la partita IVA si salva in
    `companies.vat_number` (ricontrollata dal database con `vat_valid`). La stessa partita IVA su più domini (stessa azienda
-   con più siti) vale una volta sola: nel giro, tra giri diversi (`cc-provati.tsv`) e nel database (un'azienda con la
-   partita IVA già di un altro dominio non si importa). Anche il controllo siti legge la partita IVA dalla homepage di tutte
-   le aziende e la salva se manca e se non è già di un'altra (quella della web agency nel piè di pagina di molti siti):
-   così i doppioni si vedono anche con le aziende di OSM e degli annunci.
+   con più siti) vale una volta sola: nel giro, tra giri diversi (`cc-provati.tsv`) e nel database. Il database tiene ogni
+   coppia partita IVA–dominio vista (`vat_sightings`): su un dominio solo la partita IVA è dell'azienda; su due è
+   probabilmente la stessa azienda con due siti (la seconda, se nuova, non si importa); su tre o più è di un fornitore
+   (web agency o hosting nel piè di pagina): si toglie da tutte e non blocca più nessuna. Anche il controllo siti legge la
+   partita IVA dalla homepage di tutte le aziende, con la stessa regola: così i doppioni si vedono anche con OSM e annunci.
 7. **Settore**: l'app chiede a Claude Haiku settore e parole chiave (`/api/engine/companies-classify`, lotti di 20) con lo
    stesso testo del workflow «Aziende | Settore» (titolo, descrizione, intestazioni e inizio della homepage). La chiave di
    Anthropic resta su Vercel; tetto di 1.000 chiamate al giorno (circa 2 €). Se la chiamata fallisce o il tempo del giro è

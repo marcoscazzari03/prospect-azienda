@@ -4,11 +4,18 @@
 --                            provinciale valido, cifra di controllo: stesse regole di worker/cc.mjs (pivaValida).
 --   companies.vat_number     '' se non nota; indice per la ricerca dei doppioni (non unico: due aziende vecchie con la stessa
 --                            partita IVA non devono far fallire un salvataggio).
---   store_imported_companies come la 048, più «vat»: un'azienda con la partita IVA già di un altro dominio non si importa
---                            (conta tra le scartate); su un'azienda già presente si scrive solo se manca.
---   store_company_checks     come la 055, più «company.vat» dal controllo siti: si scrive solo se manca e se nessun'altra
---                            azienda ha la stessa (la partita IVA della web agency nel piè di pagina di molti siti).
--- Indietro: ripristinare le due funzioni dalla 048 e dalla 055; la colonna si può lasciare (nessuno la legge).
+--   vat_sightings            ogni coppia partita IVA–dominio vista (import e controllo siti). vat_seen() la registra e dice
+--                            su quanti domini è comparsa: 1 = è dell'azienda; 2 = probabilmente la stessa azienda con due
+--                            siti (niente doppione); 3 o più = di un fornitore (web agency, hosting nel piè di pagina):
+--                            si toglie da tutte le aziende e non blocca più nessuna (Code Reviewer, 23/10).
+--   store_imported_companies come la 048, più «vat»: un'azienda nuova con la partita IVA già di un altro dominio (vista su 2
+--                            domini) non si importa (conta tra le scartate); un'azienda già presente si aggiorna sempre e
+--                            riceve la partita IVA solo se le manca e se è soltanto sua.
+--   store_company_checks     come la 055, più «company.vat» dal controllo siti: stessa regola.
+-- Indietro: ripristinare le due funzioni dalla 048 e dalla 055; colonna e tabella si possono lasciare (nessuno le legge).
+
+-- Su un database in uso: se una query lunga tiene la tabella, meglio fallire subito e rilanciare che bloccare le letture.
+set lock_timeout = '5s';
 
 create or replace function public.vat_valid(p text) returns boolean language plpgsql immutable as $$
 declare
@@ -33,6 +40,32 @@ alter table public.companies drop constraint if exists companies_vat_number_chec
 alter table public.companies add constraint companies_vat_number_check check (vat_number = '' or vat_valid(vat_number));
 create index if not exists companies_vat_number_idx on public.companies (vat_number) where vat_number <> '';
 
+create table if not exists public.vat_sightings (
+  vat text not null check (vat_valid(vat)),
+  domain text not null,
+  seen_at timestamptz not null default now(),
+  primary key (vat, domain)
+);
+alter table public.vat_sightings enable row level security;
+revoke all on public.vat_sightings from public, anon, authenticated;
+
+-- Registra che la partita IVA compare sul dominio e restituisce su quanti domini è comparsa; dal terzo la toglie da tutte
+-- le aziende.
+create or replace function public.vat_seen(p_vat text, p_domain text) returns integer
+language plpgsql security definer set search_path = public as $$
+declare
+  v_count integer;
+begin
+  insert into vat_sightings (vat, domain) values (p_vat, p_domain) on conflict do nothing;
+  select count(*) into v_count from vat_sightings where vat = p_vat;
+  if v_count >= 3 then
+    update companies set vat_number = '' where vat_number = p_vat and vat_number <> '';
+  end if;
+  return v_count;
+end;
+$$;
+revoke all on function public.vat_seen(text, text) from public, anon, authenticated;
+
 create or replace function public.store_imported_companies(p_source text, p_items jsonb)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
@@ -48,6 +81,7 @@ declare
   v_name_industry text;
   v_name_keywords text[];
   v_vat text;
+  v_seen integer;
   v_received integer := 0;
   v_new_count integer := 0;
   v_updated integer := 0;
@@ -73,9 +107,14 @@ begin
     -- Partita IVA (dalla 069): solo se valida; la stessa partita IVA già su un altro dominio è la stessa azienda con un
     -- altro sito (o il sito di un fornitore): non si crea un doppione.
     v_vat := case when vat_valid(v_item ->> 'vat') then v_item ->> 'vat' else '' end;
-    if v_vat <> '' and exists (select 1 from companies o where o.vat_number = v_vat and o.domain <> v_domain) then
-      v_skipped := v_skipped + 1;
-      continue;
+    if v_vat <> '' then
+      v_seen := vat_seen(v_vat, v_domain);
+      if v_seen = 2 and not exists (select 1 from companies x where x.domain = v_domain)
+         and exists (select 1 from companies o where o.vat_number = v_vat and o.vat_number <> '' and o.domain <> v_domain) then
+        v_skipped := v_skipped + 1;
+        continue;
+      end if;
+      if v_seen <> 1 then v_vat := ''; end if;
     end if;
     v_industry := left(btrim(coalesce(v_item ->> 'industry', '')), 120);
     v_city := left(btrim(coalesce(v_item ->> 'city', '')), 80);
@@ -176,10 +215,10 @@ begin
       update companies set site_email = v_email, site_email_at = now(), email_missed_at = null where id = v_company;
     end if;
 
-    -- Partita IVA letta nella homepage dal worker (dalla 069): solo valida, solo se l'azienda non ne ha una e nessun'altra
-    -- azienda ha la stessa (in quel caso è quasi sempre quella della web agency nel piè di pagina).
+    -- Partita IVA letta nella homepage dal worker (dalla 069): solo valida, solo se l'azienda non ne ha una e se finora è
+    -- comparsa soltanto su questo dominio (vat_seen).
     v_vat := coalesce(v_item #>> '{company,vat}', '');
-    if vat_valid(v_vat) and not exists (select 1 from companies o where o.vat_number = v_vat and o.id <> v_company) then
+    if vat_valid(v_vat) and vat_seen(v_vat, v_domain) = 1 then
       update companies set vat_number = v_vat where id = v_company and vat_number = '';
     end if;
 

@@ -62,6 +62,10 @@ Come tornare indietro, in generale:
   entro 6.000 caratteri dalla partita IVA, test con pagine di 1,5 MB (meno di 300 ms); giro entro i 50 minuti del servizio
   (pagine fino a 30, settore fino a 40); `\bvat\b` come etichetta; tetto di 1.000 chiamate al giorno su
   `/api/engine/companies-classify` (`rate_hit`).
+- **Seconda revisione (Code Reviewer, «pronto con riserve»):** una partita IVA della web agency scritta sul primo cliente
+  restava per sempre e faceva scartare gli altri: ora `vat_sightings` e `vat_seen()` contano su quanti domini compare (1 =
+  dell'azienda, 2 = stessa azienda con due siti, 3 o più = fornitore, tolta da tutte); un dominio già presente si aggiorna
+  sempre invece di essere scartato; `vat_number <> ''` nelle ricerche per usare l'indice; `lock_timeout` di 5 s.
 - **Correzioni della QA («NON PRONTO»):** dominio con «--» che faceva fallire il giro (nome di riserva) e analisi di ogni
   pagina protetta da un try/catch; crediti «sito by», «web agency», «a cura di»; città con trattino o «nell'»
   («Bolzano-Bozen», «Reggio nell'Emilia»); og:site_name generico («Il mio blog WordPress») ignorato; siti non aperti
