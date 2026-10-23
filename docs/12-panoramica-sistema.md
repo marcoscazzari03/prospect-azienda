@@ -162,13 +162,14 @@ segnali della homepage non determinabili e vecchie prove tolte (migrazione 055; 
 
 ## 7. Il database delle aziende e i workflow che lo riempiono
 
-Il cuore del prodotto è un **database comune delle aziende**: circa 12.000 aziende al 21/10 (OSM 10.485, Adzuna 1.217), in crescita ogni
+Il cuore del prodotto è un **database comune delle aziende**: circa 12.000 aziende al 21/10 (OSM 10.485, Adzuna 1.217), 73.416 al 23/10 dopo OSM da Geofabrik, in crescita ogni
 notte. Le ricerche lo usano per primo (giro detto «database first»); la ricerca AI parte solo per la parte che il
 database non copre.
 
 **Tabelle principali:**
 - `companies`: azienda, dominio, sito, città, settore, etichette, luoghi, tecnologie del sito, date dei
-  controlli, memoria di «referente non trovato» e «email non trovata».
+  controlli, memoria di «referente non trovato» e «email non trovata», partita IVA (`vat_number`, dalla migrazione 069:
+  dal controllo siti e da Common Crawl; serve a non creare doppioni tra fonti diverse).
 - `company_checks` / `company_signals`: esito di ogni controllo e prove dei segnali.
 - `job_ads`: annunci di lavoro.
 - Magazzino dei lead già trovati: rivenduti ad altri clienti con criteri simili, ma mai due volte allo stesso

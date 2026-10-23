@@ -221,6 +221,8 @@ del motore (`n8n/engine/nodes/lib-controlli-sito.js`).
 - `GET ?limit=150` → `{ companies: [{ company_id, domain, name, website }] }`: mai controllate prima, poi
   controllate da più di 25 giorni (le prove valgono 30); escluse opposizioni e aziende chiuse.
 - `POST { items: [{ company, checks }] }` → `{ ok, saved }`, salvati da `store_company_checks` (origine `seed`).
+  `company.vat` (solo dal worker sul VPS, migrazione 069): partita IVA della homepage, salvata se valida, se l'azienda non
+  ne ha una e se nessun'altra azienda ha la stessa.
 
 ## Popolamento del database aziende (`/api/engine/companies-import`)
 
@@ -238,6 +240,8 @@ traduzione restano senza settore e le classifica Claude Haiku («Annunci | Setto
   un blocco intero superava il tempo massimo delle query). Errore: 500 `{ error, saved_before, …conteggi }` (i pezzi prima di
   `saved_before` sono salvati; ripetere la chiamata è sicuro). Solo dati d'azienda;
   le aziende già presenti non vengono sovrascritte (si aggiungono luoghi ed etichette).
+- Ogni azienda può avere `vat` (partita IVA, 11 cifre, ricontrollata da `vat_valid`, migrazione 069): salvata in
+  `companies.vat_number`; se è già di un altro dominio l'azienda non si importa (conta in `skipped`).
 - `source` è anche `"osm_sito"` (siti trovati alle attività OSM senza sito, punto 88) o `"cc"` (aziende dai domini .it di
   Common Crawl con partita IVA valida, punto 92, `worker/cc.mjs`): stesse regole, origine distinta per misurarle o toglierle.
 
@@ -250,7 +254,8 @@ Anthropic resta su Vercel.
 - `POST { companies: [{ name, card }] }` (da 1 a 20; `card` fino a 1.600 caratteri: titolo, descrizione, intestazioni e
   inizio del testo della homepage) → `{ results: [{ industry, keywords }], usage }`, una voce per azienda nello stesso
   ordine (`industry` vuoto se il testo non basta, al massimo 10 parole chiave). 400 dati non validi, 401 segreto, 502
-  risposta del modello non valida (il worker importa comunque l'azienda, senza settore), 503 chiave mancante.
+  risposta del modello non valida (il worker importa comunque l'azienda, senza settore), 503 chiave mancante, 429 oltre
+  1.000 chiamate al giorno.
 
 ## Riserva dal database (ricerche opportunità)
 

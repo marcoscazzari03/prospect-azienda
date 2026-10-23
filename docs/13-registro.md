@@ -50,6 +50,23 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — partita IVA delle aziende (migrazione 069) e correzioni della revisione del punto 92 · da rivedere; poi migrazione da eseguire, main, VPS
+- **Cosa:** migrazione `20261213000069_company_vat.sql`: `vat_valid(text)` (stesse regole di `pivaValida` del worker),
+  colonna `companies.vat_number` (`''` se non nota, controllo e indice parziale, non unica), `store_imported_companies` come
+  la 048 più `vat` (azienda con la partita IVA già di un altro dominio non importata, contata tra le scartate),
+  `store_company_checks` come la 055 più `company.vat` (scritta solo se manca e se non è già di un'altra azienda). Worker:
+  funzioni della partita IVA in `worker/piva.mjs`, usate da `cc.mjs` e dal controllo siti (`site-checks.mjs` manda `vat`);
+  route `companies-import` e `site-checks` accettano `vat`. Test SQL 40, test del worker.
+- **Correzioni della revisione (Code Reviewer, «NON PRONTO»):** regex con tempi quadratici su pagine costruite apposta
+  (città senza limite di parole, `<script`/`<header` senza chiusura, `<` senza `>`): ora funzioni lineari, luogo cercato
+  entro 6.000 caratteri dalla partita IVA, test con pagine di 1,5 MB (meno di 300 ms); giro entro i 50 minuti del servizio
+  (pagine fino a 30, settore fino a 40); `\bvat\b` come etichetta; tetto di 1.000 chiamate al giorno su
+  `/api/engine/companies-classify` (`rate_hit`).
+- **Perché:** la partita IVA (decisione dell'utente del 23/10) evita doppioni tra fonti diverse con domini diversi e si potrà
+  mostrare nei lead.
+- **Indietro:** ripristinare `store_imported_companies` dalla 048 e `store_company_checks` dalla 055; la colonna si può
+  lasciare. Worker: revert del commit.
+
 ## 23/10/2026 — aziende da Common Crawl (punto 92) · codice pronto, in revisione; non installato sul VPS
 - **Cosa:** nuovo worker `worker/cc.mjs`: elenco dei domini .it dal grafo pubblico di Common Crawl (1.487.050 di secondo
   livello), homepage aperta dal VPS, tenute solo le attività con partita IVA valida (non nei crediti della web agency, non

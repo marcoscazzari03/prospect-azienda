@@ -10,6 +10,7 @@ import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo, segnaliVps
 import { richiesta, privato } from './http.mjs';
 import { pagineDaAprire, haModulo, trovaContatti } from './contacts.mjs';
 import { caricaRegoleSiti, luogoSullaPagina, cercaSito, daProvare, dominioDaScartare } from './siti-osm.mjs';
+import { pivaDaPagina, testoDi } from './piva.mjs';
 import { dominioDaRiga, pivaValida, trovaPiva, trovaLuogo, trovaNome, analizzaPagina, schedaDi, senzaDoppioni, daProvare as daProvareCc, classifica, apriHomepage } from './cc.mjs';
 import { caricaOsm, filtri, caricaProvince, dentro, puntoDi, leggiAttivita, normalizza, semplifica } from './osm.mjs';
 
@@ -349,6 +350,23 @@ assert.deepEqual(chiamate.map(c => [c.url, c.n]), [['https://app/api/engine/comp
 assert.equal(trov[0].settore, 'Settore A0');
 assert.equal(trov[0].parole.length, 10, 'al massimo 10 parole chiave, come l\'import');
 assert.equal(trov[1].settore, undefined);
+assert.equal(trovaPiva('Contatto privato 02023170042'), null, '«vat» dentro «privato» non è un\'etichetta');
+assert.equal(pivaDaPagina(paginaCc('Rossi Srl P.IVA 02023170042')), '02023170042', 'partita IVA per il controllo siti');
+assert.equal(pivaDaPagina('<p>P.IVA 02023170042</p>'), '', 'pagina troppo corta');
+assert.equal(testoDi('<p>a</p><script>x</script>b<style>y</style>c<script>z').trim(), 'a · b c', 'script e stili tolti, anche senza chiusura');
+// Pagine costruite apposta (1,5 MB): ogni funzione deve restare lineare (il 23/10 una regex impiegava minuti).
+const N = 1_500_000;
+const riempi = (t) => t.repeat(Math.ceil(N / t.length)).slice(0, N);
+for (const [caso, html] of Object.entries({
+  maiuscole: 'P.IVA 02023170042 ' + riempi('Parola Grande '), script: riempi('<script '), header: '<p>P.IVA 02023170042</p>' + riempi('<header '),
+  meta: riempi('<meta property="og:site_name" content="x" '), minore: riempi('< a '), cifre: riempi('P.IVA 12345678901 '),
+  cap: riempi('41121 Modena Modena Modena (MO) P.IVA 02023170042 '), titoli: riempi('<h1 '),
+})) {
+  const t = performance.now();
+  analizzaPagina(html, 'x.it');
+  pivaDaPagina(html);
+  assert.ok(performance.now() - t < 2_000, `pagina enorme «${caso}»: ${Math.round(performance.now() - t)} ms`);
+}
 console.log('ok  Common Crawl: domini, partita IVA, luogo, nome, scheda, doppioni, settore');
 }
 

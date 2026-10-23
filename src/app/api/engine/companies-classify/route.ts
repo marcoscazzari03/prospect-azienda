@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { env } from "@/lib/env";
 import { workerAuthorized } from "@/lib/server/worker-auth";
+import { rateHit } from "@/lib/server/rate";
 import { classifyRequestSchema, industryAnswerSchema, industryPrompt, INDUSTRY_SYSTEM, sanitizeIndustries } from "@/lib/domain/industry";
 
 // Settore delle aziende trovate dal worker di Common Crawl sul VPS (punto 92, docs/16-common-crawl.md):
@@ -11,6 +12,8 @@ import { classifyRequestSchema, industryAnswerSchema, industryPrompt, INDUSTRY_S
 // centesimi per azienda con Haiku (misura del Settore del 22/10, registro).
 export const maxDuration = 60;
 const MODEL = "claude-haiku-5-5";
+// Tetto di spesa: 1.000 chiamate al giorno (20.000 aziende, circa 2 €); al ritmo proposto ne servono circa 250 (Code Reviewer).
+const DAILY_CALLS = 1000;
 
 export async function POST(request: Request) {
   if (!workerAuthorized(request)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -18,6 +21,9 @@ export async function POST(request: Request) {
   if (!parsed.success) return NextResponse.json({ error: "aziende non valide" }, { status: 400 });
   const key = env.anthropicApiKey();
   if (!key) return NextResponse.json({ error: "settore non disponibile" }, { status: 503 });
+  if (!(await rateHit("vps", "companies_classify", 86_400, DAILY_CALLS))) {
+    return NextResponse.json({ error: "limite giornaliero raggiunto" }, { status: 429 });
+  }
   const companies = parsed.data.companies;
   try {
     const client = new Anthropic({ apiKey: key, timeout: 45_000, maxRetries: 1 });

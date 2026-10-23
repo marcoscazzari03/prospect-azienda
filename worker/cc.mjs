@@ -19,6 +19,9 @@ import { fileURLToPath } from 'node:url';
 import { richiesta } from './http.mjs';
 import { inParallelo } from './site-checks.mjs';
 import { PROVINCE } from './osm.mjs';
+import { pivaValida, testoDi, togliBlocchi, trovaPiva } from './piva.mjs';
+
+export { pivaValida, trovaPiva };
 
 export const RELEASE = 'cc-main-2026-aug-sep-oct';
 const RIPROVA_GIORNI = 365;
@@ -63,53 +66,17 @@ async function scaricaElenco(cartella, release) {
   return file;
 }
 
-// Partita IVA italiana: 11 cifre, ufficio provinciale valido (cifre 8–10) e cifra di controllo (algoritmo di Luhn).
-// Le 11 cifre che iniziano per 8 o 9 sono codici fiscali di enti e associazioni senza partita IVA (Pro Loco, bande,
-// associazioni sportive, fondazioni: 12 su 135 nel campione del 23/10): non sono clienti.
-export function pivaValida(p) {
-  if (!/^[0-7]\d{10}$/.test(p) || /^0+$/.test(p)) return false;
-  const ufficio = Number(p.slice(7, 10));
-  if (!((ufficio >= 1 && ufficio <= 100) || [120, 121, 888, 999].includes(ufficio))) return false;
-  let somma = 0;
-  for (let i = 0; i < 11; i++) {
-    let c = Number(p[i]);
-    if (i % 2 === 1) { c *= 2; if (c > 9) c -= 9; }
-    somma += c;
-  }
-  return somma % 10 === 0;
-}
-
-const testoDi = (html) => String(html ?? '')
-  .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<noscript[\s\S]*?<\/noscript>/gi, ' ')
-  .replace(/<br\s*\/?>|<\/(?:p|div|li|span|td|footer|h\d)>/gi, ' · ')
-  .replace(/<[^>]+>/g, ' ')
-  .replace(/&nbsp;|&#160;|&#xa0;/gi, ' ').replace(/&amp;/gi, '&').replace(/&#039;|&#39;|&rsquo;|&apos;/gi, "'")
-  .replace(/&[a-z]+;|&#\d+;/gi, ' ')
-  .replace(/\s+/g, ' ');
-
 // Dominio parcheggiato, in vendita o sito in costruzione: la partita IVA lì è del fornitore, non di un'azienda.
 const PARCHEGGIATO = /dominio (?:è )?(?:in vendita|registrato|parcheggiato|acquistato)|domain (?:is )?(?:for sale|parked)|this domain (?:has been|is) registered|sito (?:in costruzione|in allestimento)|under construction|coming soon|questo dominio è stato/i;
-// Partita IVA della web agency nel piè di pagina («Realizzato da …», «Powered by …»): non è quella dell'azienda.
-const CREDITI = /realizzat[oa] da|sviluppat[oa] da|powered by|designed by|web ?design|credits|crediti|made by|progettato da/i;
-
-// La prima partita IVA valida con un'etichetta vicina («P.IVA», «Partita IVA», «VAT», «C.F. e P.IVA»), non nei crediti.
-export function trovaPiva(testo) {
-  for (const m of testo.matchAll(/(?:^|[^\d])(?:IT ?)?(\d{11})(?!\d)/g)) {
-    const prima = testo.slice(Math.max(0, m.index - 60), m.index + 1);
-    if (!/p\.? ?i\.? ?v\.? ?a|partita ?iva|vat|c\.? ?f\.?|codice fiscale/i.test(prima)) continue;
-    if (CREDITI.test(testo.slice(Math.max(0, m.index - 150), m.index))) continue;
-    if (pivaValida(m[1])) return { piva: m[1], dove: m.index };
-  }
-  return null;
-}
-
 const SIGLE = new Map(PROVINCE.map(([sigla, provincia, regione]) => [sigla, { provincia, regione }]));
 const CAPOLUOGHI = new Map(PROVINCE.flatMap(([sigla, provincia]) => provincia.split('-').map(p => [p.toLowerCase(), sigla])));
 const pulisciCitta = (c) => c.replace(/^[\s,.\-–·]+|[\s,.\-–·]+$/g, '').replace(/\s+/g, ' ');
 
 // Indirizzo italiano: «41121 Modena (MO)», «20121 MILANO MI», «80077 Ischia (Na)», «Acireale 95024 (CT)», «Ceprano ( Fr )»,
 // «00187 Roma». Si sceglie quello più vicino alla partita IVA (la sede dell'azienda, non le filiali o i clienti in pagina).
-const CITTA = String.raw`[A-ZÀ-Ý][A-Za-zÀ-ÿ'’.]*(?:\s+(?:[A-ZÀ-Ý][A-Za-zÀ-ÿ'’.]*|di|del|della|dei|degli|dello|de'|d'|sul|sulla|sui|sopra|sotto|in|nel|nella|nelle|al|alla|le|la))*?`;
+// Al massimo 4 parole: senza limite, da ogni parola maiuscola la regex provava tutte quelle dopo (tempo quadratico,
+// Code Reviewer 23/10).
+const CITTA = String.raw`[A-ZÀ-Ý][A-Za-zÀ-ÿ'’.]{0,30}(?:\s+(?:[A-ZÀ-Ý][A-Za-zÀ-ÿ'’.]{0,30}|di|del|della|dei|degli|dello|de'|d'|sul|sulla|sui|sopra|sotto|in|nel|nella|nelle|al|alla|le|la)){0,3}?`;
 const SEP = String.raw`[\s·,\-–]*`;
 const LUOGHI = [
   // CAP, città, sigla tra parentesi (anche minuscola) o staccata da uno spazio: «MILANO MI», non «MILA» + «NO».
@@ -155,11 +122,12 @@ const decodifica = (s) => testoDi(s).replace(/ · /g, ' ').trim();
 export function trovaNome(html, testo, dominio, dovePiva = -1) {
   const base = norm(dominio.replace(/\.it$/, ''));
   const somiglia = (s) => { const n = norm(s); return n.length >= 3 && (n.includes(base) || base.includes(n)); };
-  const sito = decodifica(attributo(html, /<meta[^>]+property=["']og:site_name["'][^>]*content=["']([^"']{2,120})/i)
-    || attributo(html, /<meta[^>]+content=["']([^"']{2,120})["'][^>]*property=["']og:site_name/i));
+  const testa = html.slice(0, 200_000);
+  const sito = decodifica(attributo(testa, /<meta[^<>]+property=["']og:site_name["'][^<>]*content=["']([^"'<>]{2,120})/i)
+    || attributo(testa, /<meta[^<>]+content=["']([^"'<>]{2,120})["'][^<>]*property=["']og:site_name/i));
   const primo = pezziDi(sito)[0];
   if (primo && primo.length <= 60) return primo;
-  const titolo = decodifica(attributo(html, /<title[^>]*>([\s\S]{1,300}?)<\/title>/i));
+  const titolo = decodifica(attributo(testa, /<title[^<>]*>([\s\S]{1,300}?)<\/title>/i));
   const pezzi = pezziDi(titolo);
   const simile = pezzi.find(somiglia);
   if (simile && simile.length <= 60) return simile;
@@ -176,13 +144,16 @@ export function trovaNome(html, testo, dominio, dovePiva = -1) {
 // La scheda per il settore, come il nodo 07 di «Aziende | Settore»: titolo, descrizione, intestazioni e inizio del testo
 // (senza menu e piè di pagina).
 const pulisci = (v) => decodifica(v).replace(/[\u0000-\u001f]/g, ' ');
-export function schedaDi(html) {
-  const meta = (nome) => pulisci(attributo(html, new RegExp(`<meta[^>]+(?:name|property)=["']${nome}["'][^>]+content=["']([^"']*)`, 'i'))
-    || attributo(html, new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+(?:name|property)=["']${nome}["']`, 'i')));
-  const titolo = pulisci(attributo(html, /<title[^>]*>([\s\S]{1,300}?)<\/title>/i));
+// Regex con «[^<>]» e lunghezze limitate: lineari anche sulle pagine costruite apposta (Code Reviewer).
+export function schedaDi(html0) {
+  const html = html0.slice(0, 500_000);
+  const testa = html.slice(0, 200_000);
+  const meta = (nome) => pulisci(attributo(testa, new RegExp(`<meta[^<>]+(?:name|property)=["']${nome}["'][^<>]+content=["']([^"'<>]{0,1000})`, 'i'))
+    || attributo(testa, new RegExp(`<meta[^<>]+content=["']([^"'<>]{0,1000})["'][^<>]+(?:name|property)=["']${nome}["']`, 'i')));
+  const titolo = pulisci(attributo(testa, /<title[^<>]*>([\s\S]{1,300}?)<\/title>/i));
   const descrizione = meta('description') || meta('og:description');
-  const intestazioni = [...html.slice(0, 500_000).matchAll(/<h[1-3][^>]*>([\s\S]{0,500}?)<\/h[1-3]>/gi)].map(m => pulisci(m[1])).filter(t => t.length > 2).slice(0, 6);
-  const corpo = pulisci(html.slice(0, 500_000).replace(/<(nav|header|footer)[\s\S]*?<\/\1>/gi, ' ')).slice(0, 700);
+  const intestazioni = [...html.matchAll(/<h[1-3][^<>]{0,500}>([\s\S]{0,500}?)<\/h[1-3]>/gi)].map(m => pulisci(m[1])).filter(t => t.length > 2).slice(0, 6);
+  const corpo = pulisci(togliBlocchi(togliBlocchi(html, ['script', 'style', 'noscript']), ['nav', 'header', 'footer'])).slice(0, 700);
   return [titolo && `Titolo: ${titolo.slice(0, 150)}`, descrizione && `Descrizione: ${descrizione.slice(0, 300)}`,
     intestazioni.length && `Intestazioni: ${intestazioni.join(' | ').slice(0, 300)}`, corpo && `Testo: ${corpo}`]
     .filter(Boolean).join('\n').replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '').slice(0, 1600);
@@ -195,7 +166,9 @@ export function analizzaPagina(html, dominio) {
   if (PARCHEGGIATO.test(testo.slice(0, 5_000))) return null;
   const p = trovaPiva(testo);
   if (!p) return null;
-  const luogo = trovaLuogo(testo, p.dove);
+  // Solo vicino alla partita IVA: la sede è lì, e il testo da leggere resta piccolo anche su pagine enormi.
+  const da = Math.max(0, p.dove - 6_000);
+  const luogo = trovaLuogo(testo.slice(da, p.dove + 6_000), p.dove - da);
   return { piva: p.piva, nome: trovaNome(html, testo, dominio, p.dove), scheda: schedaDi(html), ...(luogo || {}) };
 }
 
@@ -250,11 +223,12 @@ export function senzaDoppioni(trovate, pive) {
 
 // Settore e parole chiave dall'app (Haiku, /api/engine/companies-classify) a lotti di 20; un lotto fallito resta senza
 // settore (store_imported_companies prova comunque dal nome). Restituisce quante aziende hanno avuto il settore.
-export async function classifica(trovate, app, segreto, post = fetch) {
+export async function classifica(trovate, app, segreto, post = fetch, scadenza = Infinity) {
   let classificate = 0;
   const lotti = [];
   for (let k = 0; k < trovate.length; k += 20) lotti.push(trovate.slice(k, k + 20));
   await inParallelo(lotti, 4, async (lotto) => {
+    if (Date.now() > scadenza) return; // tempo finito: queste aziende entrano senza settore
     try {
       const r = await post(`${app}/api/engine/companies-classify`, {
         method: 'POST', headers: { 'x-engine-secret': segreto, 'Content-Type': 'application/json' },
@@ -282,7 +256,10 @@ async function main() {
   const parallelo = Math.min(Math.max(Number(process.env.CONCURRENCY) || 16, 1), 32);
   const release = /^cc-main-\d{4}-[a-z-]+$/.test(process.env.CC_RELEASE || '') ? process.env.CC_RELEASE : RELEASE;
   const inizio = Date.now();
-  const scadenza = inizio + 40 * 60_000; // il servizio ha 50 minuti
+  // Il servizio ha 50 minuti, compreso l'eventuale scaricamento dell'elenco: pagine fino a 30 minuti (più 40 s per quelle
+  // già aperte), settore fino a 40 (più 60 s per i lotti in corso), poi l'import (al massimo 150 s) (Code Reviewer).
+  const scadenza = inizio + 30 * 60_000;
+  const scadenzaSettore = inizio + 40 * 60_000;
 
   const fileElenco = await scaricaElenco(cartella, release);
   const fileProvati = join(cartella, 'cc-provati.tsv');
@@ -302,10 +279,10 @@ async function main() {
   const conPiva = fatti.filter(e => e.piva);
   const trovate = senzaDoppioni(conPiva, pive);
   // In prova solo il primo lotto, per vedere i settori negli esempi (con il segreto, cioè sul VPS).
-  const classificate = segreto.length >= 32 ? await classifica(prova ? trovate.slice(0, 20) : trovate, app, segreto) : 0;
+  const classificate = segreto.length >= 32 ? await classifica(prova ? trovate.slice(0, 20) : trovate, app, segreto, fetch, scadenzaSettore) : 0;
   const aziende = trovate.map(t => ({
     domain: t.dominio, name: t.nome, website: host(t.url) === t.dominio ? t.url : `https://${t.dominio}`,
-    city: t.citta || '', province: t.provincia || '', region: t.regione || '',
+    city: t.citta || '', province: t.provincia || '', region: t.regione || '', vat: t.piva,
     ...(t.settore ? { industry: t.settore, keywords: t.parole } : {}),
   }));
   const riepilogo = {

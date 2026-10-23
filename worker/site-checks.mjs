@@ -14,6 +14,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { richiesta, comeErroreN8n } from './http.mjs';
+import { pivaDaPagina } from './piva.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -88,8 +89,9 @@ export function valuta(regole, a, html0, https, oggi) {
   const html = html0.length > 2e6 ? html0.slice(0, 1e6) + html0.slice(-1e6) : html0;
   const { esiti, tecnologie } = regole.controlliSito({ html, website: a.website, oggi, richiesti: CODICI, https: https || {} });
   const email = html.length >= 500 ? regole.emailAziendale(html, a.website) : '';
+  const vat = pivaDaPagina(html); // partita IVA della homepage (migrazione 069, punto 92)
   return {
-    company: { domain: a.domain, name: a.name, website: a.website, technologies: tecnologie, ...(email ? { email } : {}) },
+    company: { domain: a.domain, name: a.name, website: a.website, technologies: tecnologie, ...(email ? { email } : {}), ...(vat ? { vat } : {}) },
     checks: Object.values(esiti),
     letto: html.length >= 500,
   };

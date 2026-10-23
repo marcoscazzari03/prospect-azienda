@@ -175,7 +175,8 @@ Il lavoro gira sul VPS (gratis), senza Google Maps, PagineGialle o Registro Impr
 92. **Io** – Aziende da Common Crawl per quelle che non sono in nessun elenco (`docs/16-common-crawl.md`): ~~worker con
     partita IVA valida, nome, città e settore da Haiku tramite l'app~~ (23/10: codice pronto, campione di 600 domini con il
     21% di attività e il 70% con città; in revisione). **Insieme, dopo la revisione:** `installa`, `prova-cc`, `giro-cc` sul
-    VPS; `avvia-cc` quando il controllo siti non ha più arretrato. **Da decidere:** salvare la partita IVA (migrazione).
+    VPS; `avvia-cc` quando il controllo siti non ha più arretrato. ~~Salvare la partita IVA~~ (23/10: migrazione 069
+    pronta, anche dal controllo siti per tutte le aziende). **Tu, dopo la seconda revisione:** eseguire la migrazione 069.
 93. **Tu, con il legale** – Albi professionali (commercialisti, avvocati): si possono usare? Contengono dati di persone.
 96. **Tu, 26–28/10** – `copertura_settori.sql` e `resa_giornaliera.sql` (nuova del 23/10: aziende nuove, lead pronti al
     giorno e campi coperti) per vedere quanto si avvicina la soglia.

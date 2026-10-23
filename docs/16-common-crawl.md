@@ -1,6 +1,7 @@
 # Aziende da Common Crawl (punto 92)
 
-Documento vivo. Stato: **codice pronto il 23/10, in revisione; non installato sul VPS.** Si accende quando il controllo siti
+Documento vivo. Stato: **codice pronto il 23/10, corretto dopo la prima revisione (regex lente, tempi del giro, tetto di
+spesa), migrazione 069 per la partita IVA da eseguire; non installato sul VPS.** Si accende quando il controllo siti
 ha smaltito l'arretrato (circa 55.850 aziende in attesa al 23/10).
 
 ## Perché
@@ -27,12 +28,20 @@ controlli.
    infine il dominio.
 5. **Luogo**: l'indirizzo più vicino alla partita IVA («41121 Modena (MO)», «20121 MILANO MI», «Ischia (Na)», «Acireale 95024
    (CT)», «00187 Roma» se è un capoluogo); la sigla dà provincia e regione.
-6. **Doppioni**: la stessa partita IVA su più domini (stessa azienda con più siti) vale una volta sola, anche tra giri diversi
-   (`cc-provati.tsv`). La partita IVA serve solo a questo: oggi non si salva nel database.
+6. **Partita IVA e doppioni** (migrazione 069, decisione dell'utente del 23/10): la partita IVA si salva in
+   `companies.vat_number` (ricontrollata dal database con `vat_valid`). La stessa partita IVA su più domini (stessa azienda
+   con più siti) vale una volta sola: nel giro, tra giri diversi (`cc-provati.tsv`) e nel database (un'azienda con la
+   partita IVA già di un altro dominio non si importa). Anche il controllo siti legge la partita IVA dalla homepage di tutte
+   le aziende e la salva se manca e se non è già di un'altra (quella della web agency nel piè di pagina di molti siti):
+   così i doppioni si vedono anche con le aziende di OSM e degli annunci.
 7. **Settore**: l'app chiede a Claude Haiku settore e parole chiave (`/api/engine/companies-classify`, lotti di 20) con lo
    stesso testo del workflow «Aziende | Settore» (titolo, descrizione, intestazioni e inizio della homepage). La chiave di
-   Anthropic resta su Vercel. Se la chiamata fallisce l'azienda entra lo stesso, con il settore dal nome quando è evidente.
-8. **Import**: `/api/engine/companies-import` con origine `cc`. Le aziende già presenti non vengono sovrascritte (si
+   Anthropic resta su Vercel; tetto di 1.000 chiamate al giorno (circa 2 €). Se la chiamata fallisce o il tempo del giro è
+   finito, l'azienda entra lo stesso, con il settore dal nome quando è evidente.
+8. **Tempi**: pagine aperte fino a 30 minuti dall'avvio, settore fino a 40, poi l'import (il servizio ne ha 50). Il testo
+   delle pagine si legge con funzioni lineari (niente regex che rileggono la pagina da ogni punto): su pagine di 1,5 MB
+   costruite apposta, meno di 300 ms (test in `worker/test.mjs`).
+9. **Import**: `/api/engine/companies-import` con origine `cc`. Le aziende già presenti non vengono sovrascritte (si
    riempiono solo i campi vuoti). Poi seguono il percorso di tutte le altre: controllo siti, contatti, segnali.
 
 ## Misure del campione (23/10)
@@ -58,8 +67,9 @@ senza salvare, con esempi e settori), `giro-cc` (un giro vero in sottofondo), `s
 `ferma` (spegne anche questo).
 
 ## Da fare
-1. Revisione (livello 3: chiave di Anthropic usata da una route nuova), poi main.
+1. Seconda revisione (migrazione 069 e correzioni), poi **Tu:** migrazione 069 su Supabase, poi main.
 2. Sul VPS: `installa`, `prova-cc`, controllo degli esempi, `giro-cc`; misura di nuove e già presenti.
 3. `avvia-cc` quando il controllo siti non ha più arretrato.
-4. Da decidere: salvare la partita IVA (migrazione) per i doppioni con OSM e per mostrarla nei lead; saltare i domini già nel
-   database; Data Quality su un campione delle aziende `cc` (settore, città, nome).
+4. Da decidere: mostrare la partita IVA nei lead e nell'export; saltare i domini già nel database; Data Quality su un
+   campione delle aziende `cc` (settore, città, nome; i professionisti senza ragione sociale hanno come nome il proprio, come
+   già succede con OSM).
