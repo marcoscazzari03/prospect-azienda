@@ -52,7 +52,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 23/10/2026 — Panoramica nuova: statistiche con variazione e grafico, «Lasciati ispirare», scelte rapide, barra su telefono · in revisione
+## 23/10/2026 — Panoramica nuova: statistiche con variazione e grafico, «Lasciati ispirare», scelte rapide, barra su telefono · su main (Code Reviewer «pronto con riserve», corrette)
 - **Cosa (per tutti e due i nomi, i colori restano del marchio):** `src/lib/domain/month-stats.ts` (mese in corso contro gli
   stessi giorni del mese prima, serie di 30 giorni, quota di lead con opportunità in punti; test `tests/month-stats.test.ts`),
   `dashboardData` legge dal 1° del mese precedente; `StatCard` con icona colorata (verde, viola, ambra, blu), variazione
@@ -63,6 +63,10 @@ Come tornare indietro, in generale:
   pagina Account), voci del menu alte almeno 44 px; riquadro del piano con il nome vero. Dalla bozza tolti: campanella,
   «Piano Pro», E-commerce e Gestione social (non sono servizi), «Dove lavori?». Verificato con un'anteprima locale (computer e
   telefono a 402 px, nessuno scorrimento orizzontale).
+- **Revisione:** consegne lette a pagine da 1.000 in ordine (Supabase restituisce al massimo 1.000 righe per richiesta: con
+  più consegne le statistiche sarebbero state sbagliate), del JSON dei segnali solo il primo elemento; giorni del grafico
+  costruiti dal calendario (cambio d'ora); `aria-label` dei crediti con il numero; «Lasciati ispirare» chiede conferma prima
+  di sostituire un testo scritto; spiegazione della variazione in punti nel `title`.
 - **Indietro:** revert del commit.
 
 ## 23/10/2026 — Avvisto: colori viola e logo della bozza (passi 1–2 dell'UI/UX Designer) · su main, visibile solo con `NEXT_PUBLIC_BRAND=avvisto`

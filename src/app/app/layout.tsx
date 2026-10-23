@@ -29,7 +29,7 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
           <Logo href="/app" />
           {/* Telefono (grafica Avvisto, 23/10): crediti e profilo da 44 px; «Esci» è nella pagina dell'account. */}
           <div className="flex items-center gap-2 md:hidden">
-            <Link href="/app/crediti" className="flex h-11 items-center rounded-full bg-ledger-soft px-4 font-mono text-sm font-semibold text-ledger-2" aria-label="Crediti disponibili">
+            <Link href="/app/crediti" className="flex h-11 items-center rounded-full bg-ledger-soft px-4 font-mono text-sm font-semibold text-ledger-2" aria-label={`${formatNumber(viewer.credits)} crediti disponibili`}>
               {formatNumber(viewer.credits)} cr.
             </Link>
             <Link href="/app/account" className="flex h-11 w-11 items-center justify-center rounded-full bg-paper-2 text-xs font-semibold text-ink-2" aria-label="Il mio account">

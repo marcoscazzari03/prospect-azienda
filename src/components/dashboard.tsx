@@ -44,7 +44,7 @@ function DeltaBadge({ delta }: { delta: Delta }) {
   const up = delta.kind === "new" || delta.value >= 0;
   const text = delta.kind === "new" ? "nuovo" : `${delta.value >= 0 ? "+" : "−"}${Math.abs(delta.value)}${delta.kind === "pct" ? "%" : " pt"}`;
   return (
-    <span className={cx("inline-flex items-center gap-0.5 font-mono text-xs font-semibold", up ? "text-ok" : "text-brick")} title="rispetto agli stessi giorni del mese scorso">
+    <span className={cx("inline-flex items-center gap-0.5 font-mono text-xs font-semibold", up ? "text-ok" : "text-brick")} title={delta.kind === "pp" ? "quota di questo mese rispetto agli stessi giorni del mese scorso" : "rispetto agli stessi giorni del mese scorso"}>
       {delta.kind !== "new" && <span aria-hidden>{up ? "↑" : "↓"}</span>}
       {text}
     </span>

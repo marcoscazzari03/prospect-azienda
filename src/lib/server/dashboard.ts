@@ -21,8 +21,17 @@ export async function dashboardData(period: Period) {
   const prevMonthStart = new Date(Date.UTC(Number(monthKey.slice(0, 4)), Number(monthKey.slice(5, 7)) - 2, 1));
   const since = new Date(Math.min(from.getTime(), prevMonthStart.getTime(), now.getTime() - 30 * 86_400_000) - 86_400_000).toISOString();
 
-  const [{ data: recent }, { count: total }, { count: withSignals }, { data: stages }, { data: running }, { data: searches }] = await Promise.all([
-    supabase.from("deliveries").select("delivered_at, credits, signals:data->signals").gte("delivered_at", since).limit(20000),
+  // Consegne dal mese precedente, a pagine da 1.000 (il massimo di righe per richiesta di Supabase; Code Reviewer 23/10),
+  // in ordine; del JSON dei segnali solo il primo elemento.
+  const recent: { delivered_at: string; credits: number; signal: unknown }[] = [];
+  for (let page = 0; page < 20; page++) {
+    const { data } = await supabase.from("deliveries").select("delivered_at, credits, signal:data->signals->0")
+      .gte("delivered_at", since).order("delivered_at", { ascending: false }).range(page * 1000, page * 1000 + 999);
+    recent.push(...(data ?? []));
+    if (!data || data.length < 1000) break;
+  }
+
+  const [{ count: total }, { count: withSignals }, { data: stages }, { data: running }, { data: searches }] = await Promise.all([
     supabase.from("deliveries").select("id", { count: "exact", head: true }).is("deleted_at", null),
     // Lead con almeno un'opportunità verificata (data.signals presente).
     supabase.from("deliveries").select("id", { count: "exact", head: true }).is("deleted_at", null).not("data->signals", "is", null),
@@ -40,7 +49,7 @@ export async function dashboardData(period: Period) {
   const perDay = new Map<string, number>();
   let monthLeads = 0;
   let monthCredits = 0;
-  for (const d of recent ?? []) {
+  for (const d of recent) {
     const k = dayKey(new Date(d.delivered_at));
     if (k >= fromKey) perDay.set(k, (perDay.get(k) ?? 0) + 1);
     if (k.startsWith(monthKey)) {
@@ -57,7 +66,7 @@ export async function dashboardData(period: Period) {
   const pipeline = Object.fromEntries(LEAD_STAGES.map((s) => [s, 0])) as Record<LeadStage, number>;
   for (const r of stages ?? []) if (r.stage in pipeline) pipeline[r.stage as LeadStage]++;
 
-  const stats = monthStats((recent ?? []).map((r) => ({ delivered_at: r.delivered_at, credits: r.credits, signal: Array.isArray(r.signals) ? r.signals.length > 0 : Boolean(r.signals) })), now, TZ);
+  const stats = monthStats(recent.map((r) => ({ delivered_at: r.delivered_at, credits: r.credits, signal: r.signal != null })), now, TZ);
 
   return {
     days,

@@ -17,6 +17,9 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
   const [text, setText] = useState(description);
   // «Lasciati ispirare» (grafica Avvisto, 23/10): scrive nel campo un esempio diverso dal testo attuale, senza inviare niente.
   const inspire = () => {
+    // Un testo scritto dal cliente si sostituisce solo dopo conferma (Code Reviewer).
+    const typed = text.trim() && !(BUSINESS_EXAMPLES as readonly string[]).includes(text);
+    if (typed && !window.confirm("Sostituire quello che hai scritto con un esempio?")) return;
     const others = BUSINESS_EXAMPLES.filter((e) => e !== text);
     setText(others[(others.indexOf(example as (typeof others)[number]) + 1 + text.length) % others.length]);
   };

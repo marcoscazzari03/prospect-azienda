@@ -24,7 +24,10 @@ export function monthStats(rows: DeliveryRow[], now: Date, tz = "Europe/Rome") {
   const cur = { leads: 0, credits: 0, signals: 0 };
   const old = { leads: 0, credits: 0, signals: 0 };
   const series = new Map<string, { leads: number; credits: number }>();
-  const from = dayKey(new Date(now.getTime() - 29 * 86_400_000), tz);
+  // Giorni del calendario di Roma costruiti da anno, mese e giorno (non sottraendo 24 ore: la notte del cambio d'ora un
+  // giorno comparirebbe due volte; Code Reviewer).
+  const days = Array.from({ length: 30 }, (_, i) => new Date(Date.UTC(y, m - 1, d - 29 + i)).toISOString().slice(0, 10));
+  const from = days[0];
   for (const r of rows) {
     const k = dayKey(new Date(r.delivered_at), tz);
     const bucket = k.startsWith(month) && k <= today ? cur : k.startsWith(prev) && k <= prevUntil ? old : null;
@@ -40,7 +43,6 @@ export function monthStats(rows: DeliveryRow[], now: Date, tz = "Europe/Rome") {
       series.set(k, s);
     }
   }
-  const days = Array.from({ length: 30 }, (_, i) => dayKey(new Date(now.getTime() - (29 - i) * 86_400_000), tz));
   const share = (b: typeof cur) => (b.leads ? (b.signals / b.leads) * 100 : null);
   const shareNow = share(cur);
   const shareBefore = share(old);
