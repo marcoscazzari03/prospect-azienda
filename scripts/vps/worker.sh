@@ -91,8 +91,9 @@ case "${1:-}" in
     fi
     # osmium legge il file di OpenStreetMap (popolamento OSM, punto 87).
     command -v osmium >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool; }
-    unita "$NOME" "controllo siti" "/usr/bin/node worker/site-checks.mjs" "*-*-* *:05,35:00" 20min 1G "" ""
-    unita "$CONT" "contatti" "/usr/bin/node worker/contacts.mjs" "*-*-* *:15,45:00" 20min 1G "" ""
+    # Più thread per le risoluzioni DNS: con molti siti morti le 4 predefinite fanno da collo di bottiglia (23/10).
+    unita "$NOME" "controllo siti" "/usr/bin/node worker/site-checks.mjs" "*-*-* *:05,35:00" 20min 1G "Environment=UV_THREADPOOL_SIZE=16" ""
+    unita "$CONT" "contatti" "/usr/bin/node worker/contacts.mjs" "*-*-* *:15,45:00" 20min 1G "Environment=UV_THREADPOOL_SIZE=16" ""
     # Il file dell'Italia (circa 2 GB) e i suoi derivati restano in /var/lib/webora-osm, l'unica cartella scrivibile.
     unita "$OSM" "popolamento OSM" "/bin/bash $APP/scripts/vps/osm.sh" "Mon *-*-* 02:20:00" 3h 2500M "StateDirectory=webora-osm
 Nice=10" "Persistent=true"

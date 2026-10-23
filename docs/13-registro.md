@@ -188,6 +188,18 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 23/10/2026 — worker del controllo siti fermo dopo l'import OSM · correzione pronta; da fare: revisione, main, `installa` sul VPS (stasera)
+- **Cosa si è visto:** query oraria su `site_checked_at` (23/10): il worker ha salvato alle 15:05 e 15:35 UTC del 22/10, poi
+  più niente; n8n «Aziende | Controllo siti» continua a 150 l'ora. La coda non è il problema (`pending_site_checks(300)` in
+  9 s in produzione, sotto i 30 s del worker; 150 in 6 s); il salvataggio non dipende dal numero di aziende. Il worker dei
+  contatti, che ha un tetto di 15 minuti, lavora (4.755 aziende in 24 ore). Ipotesi, da confermare con i log: con le 52.000
+  aziende nuove di OSM (molti siti morti o lentissimi) il giro di 300 arrivava ai 20 minuti di systemd ed era interrotto
+  prima dell'unico salvataggio finale, ogni volta.
+- **Correzione:** `worker/site-checks.mjs` lavora a blocchi da 100, ognuno salvato subito, e non apre blocchi nuovi dopo
+  14 minuti; in caso di errore scrive anche il testo della risposta. `worker.sh`: `UV_THREADPOOL_SIZE=16` per controllo
+  siti e contatti (risoluzioni DNS). Si spegne «Aziende | Controllo siti» su n8n solo dopo un giorno di worker regolare.
+- **Indietro:** versione precedente di `worker/site-checks.mjs`, poi `bash worker.sh aggiorna`.
+
 ## 22/10/2026 — backup notturno cifrato del database sul VPS (punto 90) · rivisto, su main, **non installato** (22/10: l'utente rimanda, i backup arriveranno con Supabase Pro; il codice resta pronto)
 - **Perché:** Supabase gratuito non ha backup scaricabili; il database ora ha circa 70.000 aziende e cresce ogni ora.
 - **Cosa:** `scripts/vps/backup.sh` (servizio `webora-backup`, ogni notte alle 1:40 UTC): `pg_dump` di PostgreSQL 17 (repository

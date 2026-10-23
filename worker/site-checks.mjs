@@ -94,7 +94,7 @@ async function main() {
 
   const regole = caricaRegole();
   const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
-  const items = await inParallelo(aziende, parallelo, async (a) => {
+  const controlla = async (a) => {
     // Al massimo 30 s per azienda (le richieste hanno già un tempo massimo; questo copre qualsiasi altro intoppo).
     const [https, html] = await Promise.race([
       Promise.all([controlloHttps(a), apriSito(a)]),
@@ -107,22 +107,29 @@ async function main() {
       console.error(`valutazione non riuscita per ${a.domain}: ${e?.message || e}`);
       return { company: { domain: a.domain, name: a.name, website: a.website }, checks: CODICI.map(code => ({ code, status: 'undetermined', evidence: { detail: '' } })), letto: false };
     }
-  });
-
-  const stats = { aziende: items.length, illeggibili: items.filter(i => !i.letto).length, email: items.filter(i => i.company.email).length, segnali: {} };
-  for (const i of items) for (const c of i.checks) if (c.status === 'pass') stats.segnali[c.code] = (stats.segnali[c.code] || 0) + 1;
+  };
   // Nome e sito entro i 300 caratteri dello schema della route: un valore troppo lungo farebbe rifiutare tutto il lotto (QA).
   const corto = (v) => String(v ?? '').slice(0, 300);
-  const corpo = items.map((i) => ({ company: { ...i.company, name: corto(i.company.name), website: corto(i.company.website) }, checks: i.checks }));
 
-  if (prova) {
-    console.log(JSON.stringify({ prova: true, secondi: Math.round((Date.now() - inizio) / 1000), stats }, null, 2));
-    return;
+  // A blocchi da 100, ognuno salvato subito, e niente blocchi nuovi dopo 14 minuti: con le aziende nuove di OSM (molti
+  // siti morti o lentissimi) un giro intero arrivava ai 20 minuti di systemd e veniva interrotto prima di salvare
+  // (23/10: worker fermo dalle 15:35 UTC del 22/10, mentre n8n con 150 aziende andava).
+  const scadenza = inizio + 14 * 60_000;
+  const stats = { aziende: 0, salvate: 0, illeggibili: 0, email: 0, segnali: {}, blocchi_saltati: 0 };
+  for (let k = 0; k < aziende.length; k += 100) {
+    if (Date.now() > scadenza) { stats.blocchi_saltati++; continue; }
+    const items = await inParallelo(aziende.slice(k, k + 100), parallelo, controlla);
+    stats.aziende += items.length;
+    stats.illeggibili += items.filter(i => !i.letto).length;
+    stats.email += items.filter(i => i.company.email).length;
+    for (const i of items) for (const c of i.checks) if (c.status === 'pass') stats.segnali[c.code] = (stats.segnali[c.code] || 0) + 1;
+    if (prova) continue;
+    const corpo = items.map((i) => ({ company: { ...i.company, name: corto(i.company.name), website: corto(i.company.website) }, checks: i.checks }));
+    const s = await fetch(`${app}/api/engine/site-checks`, { method: 'POST', headers: intestazioni, body: JSON.stringify({ items: corpo }), signal: AbortSignal.timeout(60_000) });
+    if (!s.ok) throw new Error(`salvataggio del blocco ${k / 100 + 1}: HTTP ${s.status} ${(await s.text().catch(() => '')).slice(0, 200)} (salvate prima: ${stats.salvate})`);
+    stats.salvate += Number((await s.json()).saved) || 0;
   }
-  const s = await fetch(`${app}/api/engine/site-checks`, { method: 'POST', headers: intestazioni, body: JSON.stringify({ items: corpo }), signal: AbortSignal.timeout(60_000) });
-  if (!s.ok) throw new Error(`salvataggio: HTTP ${s.status}`);
-  const salvate = (await s.json()).saved;
-  console.log(JSON.stringify({ salvate, secondi: Math.round((Date.now() - inizio) / 1000), stats }));
+  console.log(JSON.stringify({ ...(prova ? { prova: true } : {}), secondi: Math.round((Date.now() - inizio) / 1000), ...stats }));
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
