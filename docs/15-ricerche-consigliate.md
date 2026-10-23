@@ -55,7 +55,7 @@ proposte. Fino a 6 proposte da Haiku, se ne mostrano 3.
 - **Interruttore:** `app_settings` «suggested_searches» = `off` / `admin` (predefinito) / `all`; si cambia in Admin → Servizi.
 - **Haiku:** `src/lib/server/suggestions.ts`, modello `claude-haiku-5-5`, risposta JSON validata (`haikuAnswerSchema` in
   `src/lib/domain/suggestions.ts`): `sells_to` (aziende, entrambi, privati, non chiaro) e fino a 4 proposte (titolo, motivo,
-  settore, parole chiave, servizio solo se tra quelli attivi). Al massimo 10 proposte al giorno per account. Chiave
+  settore, parole chiave, servizio solo se tra quelli attivi). Al massimo 10 proposte al giorno per account (100 per l'admin, dal 23/10). Chiave
   `ANTHROPIC_API_KEY` solo sul server (Vercel).
 - **Conteggio:** ogni proposta passa da `availability_contacts` e dalla stima `expectedLeads` come il wizard (dal 23/10,
   valore basso della forbice: contatti noti più una quota delle aziende da provare); si mostrano solo quelle con almeno 10

@@ -311,8 +311,8 @@ export async function saveBusinessProfile(_: ActionState, form: FormData): Promi
   if (!(await suggestionsVisible(viewer))) return { error: "Funzione non disponibile." };
   const parsed = businessSchema.safeParse({ description: form.get("description") ?? "", area: form.get("area") ?? "", clients: form.getAll("clients").map(String).join(", ") });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dati non validi" };
-  // Al massimo 10 proposte al giorno per account: ogni proposta è una chiamata ad Haiku.
-  if (!(await rateHit(viewer.org.id, "business_suggestions", 86_400, 10))) return { error: "Hai chiesto molte proposte oggi: riprova domani." };
+  // Al massimo 10 proposte al giorno per account (100 per l'admin, che le prova): ogni proposta è una chiamata ad Haiku.
+  if (!(await rateHit(viewer.org.id, "business_suggestions", 86_400, viewer.isAdmin ? 100 : 10))) return { error: "Hai chiesto molte proposte oggi: riprova domani." };
   const { description, area, clients } = parsed.data;
   const db = createAdminClient();
   let suggestions: Json | null = null;

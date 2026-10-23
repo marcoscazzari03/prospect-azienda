@@ -50,6 +50,11 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — ricerche consigliate: 100 proposte al giorno per l'admin · su main
+- **Cosa:** `saveBusinessProfile` in `src/app/app/actions.ts`: tetto giornaliero 100 per l'admin, 10 per gli altri.
+- **Perché:** l'admin le prova e arrivava al limite (23/10). Costo massimo circa 3 centesimi al giorno.
+- **Indietro:** revert del commit. Per sbloccare a mano: `delete from rate_events where kind = 'business_suggestions';`.
+
 ## 23/10/2026 — ricerche consigliate solo sui settori del database · su main (Code Reviewer «pronto con riserve», corrette)
 - **Cosa:** Haiku riceve l'elenco dei 144 settori del database (`src/lib/domain/db-sectors.ts`, uguale a `SETTORI` di
   `n8n/annunci/nodes/lib-osm.js`, controllato da un test) e deve sceglierne uno per proposta; `sanitizeAnswer` tiene solo
