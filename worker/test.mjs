@@ -315,6 +315,12 @@ assert.equal(nomeCc('<title>CTA Kennedy: Home</title>', 'ctakennedy.it'), 'CTA K
 assert.equal(nomeCc('<title>Benvenuti su lachorus!</title>', 'lachorus.it'), 'lachorus');
 assert.equal(nomeCc('<title>Caldaie e impianti</title>', 'xyz.it', 'Copyright 2026 Termo Bianchi S.r.l. P.IVA 02023170042', 45), 'Termo Bianchi S.r.l.', 'ragione sociale vicino alla partita IVA');
 assert.equal(nomeCc('', 'rossi-mobili.it'), 'Rossi Mobili', 'infine il dominio');
+assert.equal(nomeCc('', 'rossi--mobili.it'), 'Rossi Mobili', 'doppio trattino nel dominio (QA: faceva fallire il giro)');
+assert.equal(nomeCc('<meta property="og:site_name" content="Il mio blog WordPress"><title>Rossi Mobili</title>', 'rossimobili.it'), 'Rossi Mobili', 'og:site_name generico');
+assert.equal(luogoCc('39100 Bolzano-Bozen (BZ)'), 'Bolzano-Bozen BZ');
+assert.equal(luogoCc('42121 Reggio nell\'Emilia (RE)'), "Reggio nell'Emilia RE");
+assert.equal(trovaPiva('Sito by Pixel Srl P.IVA 02023170042'), null, 'crediti «sito by»');
+assert.equal(trovaPiva('Web agency Pixel Srl P.IVA 02023170042'), null, 'crediti «web agency»');
 const paginaCc = (corpo, testa = '<title>Rossi Mobili | Arredi su misura</title><meta name="description" content="Mobili su misura per negozi e uffici">') =>
   `<html><head>${testa}</head><body><nav>Menu</nav><h1>Arredi su misura</h1><p>${'Testo della pagina. '.repeat(30)}</p><footer>${corpo}</footer></body></html>`;
 const az = analizzaPagina(paginaCc('Rossi Mobili Srl - Via Emilia 1, 41121 Modena (MO) - P.IVA 02023170042'), 'rossimobili.it');

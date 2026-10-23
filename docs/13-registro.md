@@ -62,6 +62,10 @@ Come tornare indietro, in generale:
   entro 6.000 caratteri dalla partita IVA, test con pagine di 1,5 MB (meno di 300 ms); giro entro i 50 minuti del servizio
   (pagine fino a 30, settore fino a 40); `\bvat\b` come etichetta; tetto di 1.000 chiamate al giorno su
   `/api/engine/companies-classify` (`rate_hit`).
+- **Correzioni della QA («NON PRONTO»):** dominio con «--» che faceva fallire il giro (nome di riserva) e analisi di ogni
+  pagina protetta da un try/catch; crediti «sito by», «web agency», «a cura di»; città con trattino o «nell'»
+  («Bolzano-Bozen», «Reggio nell'Emilia»); og:site_name generico («Il mio blog WordPress») ignorato; siti non aperti
+  riprovati dopo 30 giorni (segnati «x» in `cc-provati.tsv`); `stato` mostra anche il timer di Common Crawl.
 - **Perché:** la partita IVA (decisione dell'utente del 23/10) evita doppioni tra fonti diverse con domini diversi e si potrà
   mostrare nei lead.
 - **Indietro:** ripristinare `store_imported_companies` dalla 048 e `store_company_checks` dalla 055; la colonna si può

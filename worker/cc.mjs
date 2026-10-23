@@ -76,7 +76,9 @@ const pulisciCitta = (c) => c.replace(/^[\s,.\-–·]+|[\s,.\-–·]+$/g, '').re
 // «00187 Roma». Si sceglie quello più vicino alla partita IVA (la sede dell'azienda, non le filiali o i clienti in pagina).
 // Al massimo 4 parole: senza limite, da ogni parola maiuscola la regex provava tutte quelle dopo (tempo quadratico,
 // Code Reviewer 23/10).
-const CITTA = String.raw`[A-ZÀ-Ý][A-Za-zÀ-ÿ'’.]{0,30}(?:\s+(?:[A-ZÀ-Ý][A-Za-zÀ-ÿ'’.]{0,30}|di|del|della|dei|degli|dello|de'|d'|sul|sulla|sui|sopra|sotto|in|nel|nella|nelle|al|alla|le|la)){0,3}?`;
+// Trattino dentro la parola («Bolzano-Bozen», «Forlì-Cesena»); «nell'Emilia», «dell'Adda» (QA).
+const PAROLA = String.raw`[A-ZÀ-Ý][A-Za-zÀ-ÿ'’.\-]{0,30}`;
+const CITTA = String.raw`${PAROLA}(?:\s+(?:${PAROLA}|(?:nell|dell|sull|all)['’]${PAROLA}|di|del|della|dei|degli|dello|de'|d'|sul|sulla|sui|sopra|sotto|in|nel|nella|nelle|al|alla|le|la)){0,3}?`;
 const SEP = String.raw`[\s·,\-–]*`;
 const LUOGHI = [
   // CAP, città, sigla tra parentesi (anche minuscola) o staccata da uno spazio: «MILANO MI», non «MILA» + «NO».
@@ -109,7 +111,7 @@ export function trovaLuogo(testo, vicinoA = 0) {
 }
 
 const norm = (v) => String(v ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
-const GENERICI = /^(home|homepage|home page|benvenuti|benvenuto|welcome|index|sito ufficiale|official site|chi siamo|pagina iniziale)$/i;
+const GENERICI = /^(home|homepage|home page|benvenuti|benvenuto|welcome|index|sito ufficiale|official site|chi siamo|pagina iniziale)$|wordpress|il mio blog|my blog|just another|untitled|senza titolo/i;
 // Pezzi di un titolo: «Hotel Pierre | Riccione», «CTA Kennedy: Home», «Home::Studio Rossi», «Gli Ori ► Gli Ori».
 const pezziDi = (t) => t.split(/\s*(?:\||:{1,3}|►|»|•)\s*|\s+[–—\-·~]\s+/)
   .map(s => s.replace(/^(?:benvenuti|benvenuto|welcome)\s+(?:su|in|da|al|nel|nella|to|on)?\s*/i, '').replace(/[!.\s]+$/, '').trim())
@@ -138,7 +140,8 @@ export function trovaNome(html, testo, dominio, dovePiva = -1) {
   }
   if (primo) return primo.slice(0, 60).replace(/\s+\S*$/, '');
   if (pezzi.length && pezzi[0].length <= 60) return pezzi[0];
-  return dominio.replace(/\.it$/, '').split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+  // «rossi--mobili.it»: senza filter un pezzo vuoto faceva fallire tutto il giro (QA).
+  return dominio.replace(/\.it$/, '').split('-').filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
 }
 
 // La scheda per il settore, come il nodo 07 di «Aziende | Settore»: titolo, descrizione, intestazioni e inizio del testo
@@ -193,8 +196,9 @@ function leggiProvati(file) {
   for (const riga of readFileSync(file, 'utf8').split('\n')) {
     const [dominio, data, piva] = riga.split('\t');
     if (!dominio || !data) continue;
-    provati.set(dominio, Date.parse(data));
-    if (piva && piva !== '-' && !pive.has(piva)) pive.set(piva, dominio);
+    // Sito non aperto («x»: spento, rete, tempo scaduto): si riprova dopo 30 giorni invece che dopo un anno (QA).
+    provati.set(dominio, Date.parse(data) - (piva === 'x' ? (RIPROVA_GIORNI - 30) * 86_400_000 : 0));
+    if (piva && piva.length === 11 && !pive.has(piva)) pive.set(piva, dominio);
   }
   return { provati, pive };
 }
@@ -272,7 +276,8 @@ async function main() {
       apriHomepage(dominio).catch(() => null),
       new Promise((r) => setTimeout(() => r(null), 40_000).unref()),
     ]);
-    const dati = pagina ? analizzaPagina(pagina.html, dominio) : null;
+    let dati = null;
+    try { dati = pagina ? analizzaPagina(pagina.html, dominio) : null; } catch { /* una pagina strana non ferma il giro (QA) */ }
     return { dominio, aperto: Boolean(pagina), url: pagina?.url, ...(dati || {}) };
   });
   const fatti = esiti.filter(Boolean);
@@ -305,7 +310,7 @@ async function main() {
   }
   // Solo dopo il salvataggio: se fallisce, il giro dopo riprova gli stessi domini.
   const oggi = new Date().toISOString().slice(0, 10);
-  appendFileSync(fileProvati, fatti.map(e => `${e.dominio}\t${oggi}\t${e.piva || '-'}\n`).join(''));
+  appendFileSync(fileProvati, fatti.map(e => `${e.dominio}\t${oggi}\t${e.piva || (e.aperto ? '-' : 'x')}\n`).join(''));
   console.log(JSON.stringify({ ...totali, ...riepilogo, esempi: undefined, secondi: Math.round((Date.now() - inizio) / 1000) }));
 }
 

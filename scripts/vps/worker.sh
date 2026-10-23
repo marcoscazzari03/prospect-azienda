@@ -226,7 +226,7 @@ UNIT
     sudo systemctl enable --now $TIMER && systemctl list-timers $TIMER --no-pager ;;
   # Il backup resta acceso anche con «ferma» (per spegnerlo: sudo systemctl disable --now webora-backup.timer).
   ferma) sudo systemctl disable --now $NOME.timer $CONT.timer $OSM.timer $SITI.timer; [ -f /etc/systemd/system/$CC.timer ] && sudo systemctl disable --now $CC.timer || true ;;
-  stato) systemctl list-timers $NOME.timer $CONT.timer $OSM.timer $SITI.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
+  stato) systemctl list-timers $NOME.timer $CONT.timer $OSM.timer $SITI.timer $CC.timer --no-pager || true; sudo journalctl -u $NOME.service -u $CONT.service -n 20 --no-pager ;;
   aggiorna) git -C "$APP" pull --ff-only && git -C "$APP" log --oneline -1 ;;
   *) sed -n '2,25p' "$0"; exit 1 ;;
 esac

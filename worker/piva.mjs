@@ -51,7 +51,7 @@ export const testoDi = (html) => togliBlocchi(String(html ?? ''), ['script', 'st
   .replace(/\s+/g, ' ');
 
 // Partita IVA della web agency nel piè di pagina («Realizzato da …», «Powered by …»): non è quella dell'azienda.
-const CREDITI = /realizzat[oa] da|sviluppat[oa] da|powered by|designed by|web ?design|credits|crediti|made by|progettato da/i;
+const CREDITI = /realizzat[oa] da|sviluppat[oa] da|powered by|designed by|web ?design|credits|crediti|made by|progettato da|sito by|site by|web ?agency|agenzia web|a cura di/i;
 
 // La prima partita IVA valida con un'etichetta vicina («P.IVA», «Partita IVA», «VAT», «C.F. e P.IVA»), non nei crediti.
 export function trovaPiva(testo) {
