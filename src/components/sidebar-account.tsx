@@ -4,21 +4,27 @@ import { formatNumber } from "@/lib/domain/pricing";
 // Piede della barra laterale: crediti con barra di utilizzo, link al proprio account e uscita.
 const FREE_MAIL = /^(gmail|googlemail|outlook|hotmail|live|yahoo|icloud|me|libero|virgilio|tiscali|alice|tim|aol|proton|protonmail)\.[a-z.]+$/i;
 
+// Iniziali per l'avatar (nome, altrimenti la parte prima della @).
+export function initialsOf(fullName: string | undefined, email: string) {
+  const name = (fullName ?? "").trim();
+  return (name ? name.split(/\s+/).map((w) => w[0]) : email.split("@")[0].match(/[a-z]/gi) ?? ["?"]).slice(0, 2).join("").toUpperCase();
+}
+
 export function SidebarAccount({ credits, total, planName, email, orgName, fullName }: { credits: number; total: number; planName: string; email: string; orgName: string; fullName?: string }) {
   const pct = total > 0 ? Math.min(100, Math.round((credits / total) * 100)) : 0;
   const name = (fullName ?? "").trim();
-  const initials = (name ? name.split(/\s+/).map((w) => w[0]) : email.split("@")[0].match(/[a-z]/gi) ?? ["?"]).slice(0, 2).join("").toUpperCase();
+  const initials = initialsOf(fullName, email);
   const account = FREE_MAIL.test(orgName) ? "Account personale" : orgName;
   return (
     <div className="flex flex-col gap-3 border-t border-line p-4">
       <Link href="/app/crediti" className="group rounded-xl border border-line bg-white p-4 shadow-[0_1px_2px_rgba(17,24,39,0.04)] transition-colors hover:border-ink-2/40">
-        <span className="flex items-center justify-between text-sm text-muted">
-          Crediti disponibili
+        <span className="flex items-center justify-between text-sm font-medium text-ink">
+          Piano {planName}
           <svg viewBox="0 0 20 20" className="h-4 w-4 text-ink-2 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden>
             <path d="M8 5l5 5-5 5" />
           </svg>
         </span>
-        <span className="mt-1 block font-mono text-3xl font-semibold text-ledger">{formatNumber(credits)}</span>
+        <span className="mt-1 block font-mono text-3xl font-semibold text-ledger">{formatNumber(credits)}<span className="ml-1.5 font-sans text-sm font-normal text-muted">crediti</span></span>
         {total > 0 && (
           <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-paper-2" role="progressbar" aria-valuenow={credits} aria-valuemax={total} aria-label="Crediti rimasti">
             <span className="block h-full rounded-full bg-ledger-bright" style={{ width: `${pct}%` }} />
@@ -33,7 +39,6 @@ export function SidebarAccount({ credits, total, planName, email, orgName, fullN
             "Nessun credito attivo"
           )}
         </span>
-        <span className="mt-0.5 block text-xs text-muted">Piano {planName}</span>
       </Link>
 
       <Link href="/app/account" className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-paper-2" title="Il mio account">

@@ -3,7 +3,7 @@ import { Logo } from "@/components/logo";
 import { AppNav, type NavItem } from "@/components/app-nav";
 import { requireViewer } from "@/lib/server/dal";
 import { formatNumber } from "@/lib/domain/pricing";
-import { SidebarAccount } from "@/components/sidebar-account";
+import { SidebarAccount, initialsOf } from "@/components/sidebar-account";
 import { validCreditsTotal } from "@/lib/server/credits";
 
 export const dynamic = "force-dynamic";
@@ -27,10 +27,14 @@ export default async function AppLayout({ children }: LayoutProps<"/app">) {
       <aside className="border-b border-line bg-card md:sticky md:top-0 md:flex md:h-screen md:w-80 md:flex-col md:border-b-0 md:border-r">
         <div className="flex items-center justify-between px-4 py-4 md:px-5 md:py-6">
           <Logo href="/app" />
-          <div className="flex items-center gap-3 md:hidden">
-            <Link href="/app/crediti" className="font-mono text-sm font-semibold text-ledger">{formatNumber(viewer.credits)} cr.</Link>
-            <Link href="/app/account" className="text-xs text-ink-2">Account</Link>
-            <form action="/auth/esci" method="post"><button className="text-xs text-ink-2">Esci</button></form>
+          {/* Telefono (grafica Avvisto, 23/10): crediti e profilo da 44 px; «Esci» è nella pagina dell'account. */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Link href="/app/crediti" className="flex h-11 items-center rounded-full bg-ledger-soft px-4 font-mono text-sm font-semibold text-ledger-2" aria-label="Crediti disponibili">
+              {formatNumber(viewer.credits)} cr.
+            </Link>
+            <Link href="/app/account" className="flex h-11 w-11 items-center justify-center rounded-full bg-paper-2 text-xs font-semibold text-ink-2" aria-label="Il mio account">
+              {initialsOf(viewer.fullName, viewer.email)}
+            </Link>
           </div>
         </div>
         <div className="px-3 pb-3 md:flex-1">

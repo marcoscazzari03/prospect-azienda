@@ -52,6 +52,19 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — Panoramica nuova: statistiche con variazione e grafico, «Lasciati ispirare», scelte rapide, barra su telefono · in revisione
+- **Cosa (per tutti e due i nomi, i colori restano del marchio):** `src/lib/domain/month-stats.ts` (mese in corso contro gli
+  stessi giorni del mese prima, serie di 30 giorni, quota di lead con opportunità in punti; test `tests/month-stats.test.ts`),
+  `dashboardData` legge dal 1° del mese precedente; `StatCard` con icona colorata (verde, viola, ambra, blu), variazione
+  («+12%», «nuovo», «+4 pt») e grafico piccolo (nascosto sotto 400 px); riquadro attività con «Lasciati ispirare» (scrive un
+  esempio nel campo, nessun invio), scelte rapide dei servizi del catalogo (Rifacimento del sito, Manutenzione WordPress,
+  Sicurezza informatica, Marketing digitale, Sicurezza del sito → ricerca di opportunità sul servizio) e riquadro «Non sai da
+  dove iniziare?» → `/app/ricerche/nuova?tipo=opportunita`; barra su telefono con crediti e iniziali da 44 px («Esci» nella
+  pagina Account), voci del menu alte almeno 44 px; riquadro del piano con il nome vero. Dalla bozza tolti: campanella,
+  «Piano Pro», E-commerce e Gestione social (non sono servizi), «Dove lavori?». Verificato con un'anteprima locale (computer e
+  telefono a 402 px, nessuno scorrimento orizzontale).
+- **Indietro:** revert del commit.
+
 ## 23/10/2026 — Avvisto: colori viola e logo della bozza (passi 1–2 dell'UI/UX Designer) · su main, visibile solo con `NEXT_PUBLIC_BRAND=avvisto`
 - **Cosa:** `data-brand` su `<html>` (`src/app/layout.tsx`); in `globals.css` le variabili viola per `html[data-brand="avvisto"]`
   (paper #f6f6fb, ink #16142e, ledger #4338ca, ledger-2 #3730a3, ledger-soft #eeefff, ledger-bright #7c6cf0…, contrasti AA

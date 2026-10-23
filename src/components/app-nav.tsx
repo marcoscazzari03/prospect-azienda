@@ -29,7 +29,7 @@ export function AppNav({ items }: { items: NavItem[] }) {
             href={it.href}
             aria-current={active ? "page" : undefined}
             className={cx(
-              "flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-colors",
+              "flex min-h-11 shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] transition-colors",
               active ? "bg-ledger-soft font-medium text-ledger-2" : "text-ink-2 hover:bg-paper-2 hover:text-ink",
             )}
           >

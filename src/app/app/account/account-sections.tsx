@@ -46,6 +46,10 @@ export function ProfileSection({ account: a }: { account: AccountData }) {
   return (
     <Section id="profilo" title="Profilo" text="I tuoi dati e quelli della tua azienda.">
       <ProfileForm fullName={a.fullName} company={a.orgName} email={a.email} canEditCompany={a.owner} />
+      {/* Su telefono «Esci» non è più nella barra in alto (grafica Avvisto, 23/10). */}
+      <form action="/auth/esci" method="post" className="mt-6 border-t border-line pt-4 md:hidden">
+        <Button type="submit" variant="ghost">Esci</Button>
+      </form>
     </Section>
   );
 }

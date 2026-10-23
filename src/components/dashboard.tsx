@@ -4,6 +4,7 @@ import { Card, cx } from "./ui";
 import type { ActivityItem } from "@/lib/server/activity";
 import { LEAD_STAGES, LEAD_STAGE_LABEL, type LeadStage } from "@/lib/domain/leads";
 import { PERIODS, type Period } from "@/lib/server/dashboard";
+import type { Delta } from "@/lib/domain/month-stats";
 
 // Elementi della panoramica del cliente.
 
@@ -29,18 +30,63 @@ export function Icon({ name, className = "h-5 w-5" }: { name: keyof typeof ICON;
   );
 }
 
-export function StatCard({ icon, label, value, hint, href, tone = "ink" }: { icon: keyof typeof ICON; label: string; value: ReactNode; hint?: ReactNode; href?: string; tone?: "ink" | "ledger" | "stamp" }) {
+// Colore dell'icona e del grafico piccolo di ogni statistica (grafica Avvisto, 23/10: verde, viola, ambra, blu).
+const STAT_TONE = {
+  ok: { tile: "bg-ok-soft text-ok-2", line: "var(--color-ok-bright)" },
+  ledger: { tile: "bg-ledger-soft text-ledger-2", line: "var(--color-ledger-bright)" },
+  stamp: { tile: "bg-stamp-soft text-stamp-ink", line: "var(--color-stamp)" },
+  sky: { tile: "bg-sky-soft text-sky", line: "var(--color-sky)" },
+} as const;
+
+// Variazione rispetto agli stessi giorni del mese prima: «+12%», «−5%», «+3 pt» o «nuovo».
+function DeltaBadge({ delta }: { delta: Delta }) {
+  if (!delta) return null;
+  const up = delta.kind === "new" || delta.value >= 0;
+  const text = delta.kind === "new" ? "nuovo" : `${delta.value >= 0 ? "+" : "−"}${Math.abs(delta.value)}${delta.kind === "pct" ? "%" : " pt"}`;
+  return (
+    <span className={cx("inline-flex items-center gap-0.5 font-mono text-xs font-semibold", up ? "text-ok" : "text-brick")} title="rispetto agli stessi giorni del mese scorso">
+      {delta.kind !== "new" && <span aria-hidden>{up ? "↑" : "↓"}</span>}
+      {text}
+    </span>
+  );
+}
+
+// Grafico piccolo degli ultimi 30 giorni: una linea con un'ombra leggera, senza assi.
+function Sparkline({ values, color }: { values: number[]; color: string }) {
+  if (!values.length || values.every((v) => v === 0)) return null;
+  const max = Math.max(...values);
+  const pts = values.map((v, i) => [(i / (values.length - 1)) * 80, 30 - (v / max) * 26]);
+  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+  return (
+    <svg viewBox="0 0 80 32" className="hidden h-7 w-16 shrink-0 min-[400px]:block" aria-hidden>
+      <path d={`${line} L80 32 L0 32 Z`} fill={color} opacity="0.12" />
+      <path d={line} fill="none" stroke={color} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function StatCard({ icon, label, value, hint, href, tone = "ledger", delta = null, series }: {
+  icon: keyof typeof ICON; label: string; value: ReactNode; hint?: ReactNode; href?: string;
+  tone?: keyof typeof STAT_TONE; delta?: Delta; series?: number[];
+}) {
+  const t = STAT_TONE[tone];
   const body = (
     <Card className={cx("flex h-full items-start gap-4 p-5", href && "transition-colors hover:border-ink-2/30")}>
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ledger-soft text-ledger-2">
+      <span className={cx("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", t.tile)}>
         <Icon name={icon} />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-center justify-between text-sm text-muted">
+        <span className="flex items-center justify-between gap-2 text-sm text-muted">
           {label}
           {href && <Icon name="arrow" className="h-4 w-4 text-ink-2" />}
         </span>
-        <span className={cx("mt-1 block font-mono text-3xl font-semibold tabular-nums", tone === "ledger" && "text-ledger", tone === "stamp" && "text-stamp-ink")}>{value}</span>
+        <span className="mt-1 flex items-center justify-between gap-2">
+          <span className="flex min-w-0 flex-wrap items-baseline gap-x-2">
+            <span className="font-mono text-3xl font-semibold tabular-nums">{value}</span>
+            <DeltaBadge delta={delta} />
+          </span>
+          {series && <Sparkline values={series} color={t.line} />}
+        </span>
         {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
       </span>
     </Card>

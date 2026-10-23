@@ -9,6 +9,7 @@ import { dashboardData, PERIODS, type Period } from "@/lib/server/dashboard";
 import { formatNumber } from "@/lib/domain/pricing";
 import { SuggestedSearches } from "@/components/suggested-searches";
 import { suggestionsVisible } from "@/lib/server/suggestions";
+import { getEnabledOffers } from "@/lib/server/offer-rules";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { randomBusinessExample, type StoredSuggestions } from "@/lib/domain/suggestions";
 
@@ -25,6 +26,11 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
   const business = suggest
     ? (await createAdminClient().from("organizations").select("business_description, business_area, business_suggestions, business_skipped_at").eq("id", viewer.org.id).maybeSingle()).data
     : null;
+  // Scelte rapide del riquadro (grafica Avvisto, 23/10): i servizi attivi del catalogo, prima quelli più richiesti.
+  const QUICK = ["web_redesign", "wp_maintenance", "cybersecurity", "digital_marketing", "site_security"];
+  const services = business
+    ? (await getEnabledOffers()).filter((o) => QUICK.includes(o.code)).sort((a, b) => QUICK.indexOf(a.code) - QUICK.indexOf(b.code)).map((o) => ({ code: o.code, label: o.label }))
+    : [];
   const firstName = viewer.fullName.split(" ")[0];
   const quota = d.totalLeads ? Math.round((d.signalLeads / d.totalLeads) * 100) : null;
 
@@ -53,20 +59,22 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
           // Scelto qui sul server, così browser e server mostrano la stessa frase.
           example={randomBusinessExample()}
           startEditing={attivita === "modifica"}
+          services={services}
         />
       )}
 
+      {/* Statistiche (grafica Avvisto, 23/10): variazione sugli stessi giorni del mese scorso e grafico degli ultimi 30 giorni. */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon="coins" label="Crediti usati nel mese" value={formatNumber(d.monthCredits)} hint={`${formatNumber(viewer.credits)} ancora disponibili`} href="/app/crediti" />
-        <StatCard icon="users" label="Lead consegnati" value={formatNumber(d.totalLeads)} hint={d.monthLeads ? `+${formatNumber(d.monthLeads)} questo mese` : "Nessuno questo mese"} tone="ledger" href="/app/lead" />
+        <StatCard icon="coins" tone="ok" label="Crediti usati nel mese" value={formatNumber(d.monthCredits)} delta={d.stats.credits.delta} series={d.stats.credits.series} hint={`${formatNumber(viewer.credits)} ancora disponibili`} href="/app/crediti" />
+        <StatCard icon="users" tone="ledger" label="Lead consegnati" value={formatNumber(d.totalLeads)} delta={d.stats.leads.delta} series={d.stats.leads.series} hint={d.monthLeads ? `+${formatNumber(d.monthLeads)} questo mese` : "Nessuno questo mese"} href="/app/lead" />
         <StatCard
           icon="clock"
+          tone="stamp"
           label="Ricerche in corso"
           value={d.activeSearches}
-          tone={d.activeSearches ? "stamp" : "ink"}
           hint={d.activeSearches ? `${formatNumber(d.reserved)} crediti riservati` : "Nessuna ricerca attiva"}
         />
-        <StatCard icon="target" label="Con opportunità" value={quota === null ? "—" : `${quota}%`} hint={`${formatNumber(d.signalLeads)} lead con un segnale verificato`} />
+        <StatCard icon="target" tone="sky" label="Con opportunità" value={quota === null ? "—" : `${quota}%`} delta={d.stats.signals.delta} hint={`${formatNumber(d.signalLeads)} lead con un segnale verificato`} />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">

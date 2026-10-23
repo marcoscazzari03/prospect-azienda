@@ -2,18 +2,24 @@
 import { startTransition, useActionState, useState } from "react";
 import { clearBusinessProfile, saveBusinessProfile, skipBusinessProfile, type ActionState } from "@/app/app/actions";
 import { Alert, Badge, Button, ButtonLink, Card, Input, Textarea } from "@/components/ui";
-import { BUSINESS_LIMITS, leadsLabel, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
+import { BUSINESS_EXAMPLES, BUSINESS_LIMITS, leadsLabel, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
 
 // Ricerche consigliate (punti 84–85, proposta del designer in docs/15-ricerche-consigliate.md): riquadro in cima alla
 // dashboard, saltabile. Testi rivisti dal sales-copywriter il 23/10.
 const CLIENTI = ["Imprese edili", "Studi professionali", "Negozi", "Ristoranti e hotel", "Aziende industriali", "Altro"];
 
-export function SuggestedSearches({ description, area, stored, skipped, example, startEditing = false }: {
+export function SuggestedSearches({ description, area, stored, skipped, example, startEditing = false, services = [] }: {
   description: string; area: string; stored: StoredSuggestions | null; skipped: boolean; example: string; startEditing?: boolean;
+  services?: { code: string; label: string }[]; // scelte rapide: servizi attivi del catalogo
 }) {
   // startEditing: arrivati dal profilo con «Modifica» (/app?attivita=modifica).
   const [editing, setEditing] = useState(startEditing || (!description && !skipped));
-  const [length, setLength] = useState(description.length);
+  const [text, setText] = useState(description);
+  // «Lasciati ispirare» (grafica Avvisto, 23/10): scrive nel campo un esempio diverso dal testo attuale, senza inviare niente.
+  const inspire = () => {
+    const others = BUSINESS_EXAMPLES.filter((e) => e !== text);
+    setText(others[(others.indexOf(example as (typeof others)[number]) + 1 + text.length) % others.length]);
+  };
   // Proposte arrivate: si chiude il modulo e si mostrano le schede.
   const [state, action, pending] = useActionState<ActionState, FormData>(async (prev, form) => {
     const r = await saveBusinessProfile(prev, form);
@@ -36,7 +42,7 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
         <form action={action} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="grid gap-4">
             <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ledger-soft text-ledger-2"><Glyph name="target" className="h-6 w-6" /></span>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ledger-soft text-ledger-2"><Glyph name="sparkle" className="h-6 w-6" /></span>
               <div>
                 <h2 className="font-display text-xl font-semibold">Di cosa si occupa la tua attività?</h2>
                 <p className="mt-1 text-sm text-muted">Ti proponiamo ricerche già pronte. Non parte niente da solo: le controlli e le avvii tu.</p>
@@ -47,12 +53,12 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
                 <label htmlFor="business-description" className="text-sm font-medium">Cosa offri alle aziende?</label>
                 <div className="relative">
                   <Glyph name="building" className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-muted" />
-                  <Textarea id="business-description" name="description" required minLength={10} maxLength={BUSINESS_LIMITS.description} defaultValue={description}
-                    onChange={(e) => setLength(e.target.value.length)} placeholder={`Es. ${example}`} className="min-h-24 pl-10" />
+                  <Textarea id="business-description" name="description" required minLength={10} maxLength={BUSINESS_LIMITS.description} value={text}
+                    onChange={(e) => setText(e.target.value)} placeholder={`Es. ${example}`} className="min-h-24 pl-10" />
                 </div>
                 <div className="flex items-center justify-between gap-2 text-xs text-muted">
                   <span className="flex items-center gap-1"><Glyph name="bulb" className="h-4 w-4 text-stamp" />Una o due frasi: cosa offri e a quali aziende.</span>
-                  <span className="font-mono">{length}/{BUSINESS_LIMITS.description}</span>
+                  <span className="font-mono">{text.length}/{BUSINESS_LIMITS.description}</span>
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
@@ -65,26 +71,42 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
               </div>
             </div>
             {state.error && <Alert tone="stamp">{state.error}</Alert>}
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <Button type="submit" disabled={pending} className="h-11 w-full sm:w-auto">
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              <Button type="submit" disabled={pending} className="h-12 w-full sm:h-11 sm:w-auto">
                 <Glyph name="search" className="h-4 w-4" />{pending ? "Stiamo preparando le ricerche…" : "Mostra le ricerche"}
               </Button>
+              <Button type="button" variant="secondary" className="h-12 w-full sm:h-11 sm:w-auto" disabled={pending} onClick={inspire}>
+                <Glyph name="sparkle" className="h-4 w-4 text-ledger-2" />Lasciati ispirare
+              </Button>
               {description ? (
-                <Button type="button" variant="secondary" className="h-11" onClick={() => setEditing(false)}>Annulla</Button>
+                <Button type="button" variant="ghost" className="h-11" onClick={() => setEditing(false)}>Annulla</Button>
               ) : (
-                <Button type="button" variant="secondary" className="h-11" disabled={pending}
+                <Button type="button" variant="ghost" className="h-11" disabled={pending}
                   onClick={() => startTransition(async () => { await skipBusinessProfile(); setEditing(false); })}>Salta per ora</Button>
               )}
             </div>
             {pending && <Skeletons />}
+            {/* Scelte rapide: i servizi del catalogo, aprono la ricerca di opportunità già impostata sul servizio. */}
+            {services.length > 0 && !pending && (
+              <div>
+                <p className="mb-2 text-sm text-muted">Oppure parti da un servizio:</p>
+                <div className="flex flex-wrap gap-2">
+                  {services.map((s) => (
+                    <a key={s.code} href={`/app/ricerche/nuova?tipo=opportunita&servizio=${encodeURIComponent(s.code)}`}
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-ledger/20 bg-ledger-soft/60 px-4 text-sm text-ledger-2 hover:border-ledger/50">
+                      <Glyph name="trend" className="h-4 w-4" />{s.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          <aside className="hidden self-center rounded-xl bg-ledger-soft/60 p-5 lg:block">
-            <p className="flex items-center gap-2 text-sm font-semibold"><Glyph name="sparkle" className="h-5 w-5 text-ledger-2" />Ti suggeriremo:</p>
-            <ul className="mt-3 grid gap-2 text-sm">
-              {["Ricerche già pronte per la tua attività", "Solo aziende presenti nel nostro database", "Ricerca già impostata: zona e filtri sono già scelti"].map((t) => (
-                <li key={t} className="flex items-start gap-2"><Glyph name="check" className="mt-0.5 h-4 w-4 shrink-0 text-ledger" />{t}</li>
-              ))}
-            </ul>
+          {/* «Non sai da dove iniziare?» (bozza dell'utente): porta alla scelta del servizio; su telefono senza illustrazione. */}
+          <aside className="flex flex-col gap-3 self-stretch rounded-xl bg-ledger-soft/60 p-5 lg:justify-center">
+            <Illustration />
+            <p className="font-display text-lg font-semibold">Non sai da dove iniziare?</p>
+            <p className="text-sm text-ink-2">Scegli il servizio che vendi: ti mostriamo le aziende con un&apos;opportunità già verificata.</p>
+            <ButtonLink href="/app/ricerche/nuova?tipo=opportunita" variant="secondary" className="h-11 self-start">Vedi i suggerimenti →</ButtonLink>
           </aside>
         </form>
       ) : (
@@ -212,11 +234,26 @@ const GLYPH: Record<string, string> = {
   search: "M9 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM17 17l-3.5-3.5",
   sparkle: "M10 2l1.6 4.4L16 8l-4.4 1.6L10 14l-1.6-4.4L4 8l4.4-1.6zM16 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z",
   check: "M4 10.5l4 4 8-9",
+  trend: "M3 14l5-5 3 3 6-6M12 6h5v5",
 };
 function Glyph({ name, className }: { name: keyof typeof GLYPH; className?: string }) {
   return (
     <svg viewBox="0 0 20 20" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d={GLYPH[name]} />
+    </svg>
+  );
+}
+
+// Illustrazione del riquadro «Non sai da dove iniziare?»: una scheda con l'edificio e la freccia, solo da lg.
+function Illustration() {
+  return (
+    <svg viewBox="0 0 160 84" className="mx-auto hidden h-20 w-40 lg:block" aria-hidden>
+      <rect x="22" y="14" width="96" height="62" rx="10" fill="#ffffff" stroke="var(--color-line)" transform="rotate(-6 70 45)" />
+      <rect x="38" y="44" width="56" height="5" rx="2.5" fill="var(--color-line)" transform="rotate(-6 70 45)" />
+      <rect x="38" y="55" width="40" height="5" rx="2.5" fill="var(--color-line)" transform="rotate(-6 70 45)" />
+      <path d="M44 24h14v14H44zM48 28h2M54 28h2M48 32h2M54 32h2" fill="none" stroke="var(--color-ledger-2)" strokeWidth="1.6" transform="rotate(-6 70 45)" />
+      <circle cx="122" cy="20" r="14" fill="var(--color-ledger)" />
+      <path d="M122 27V13M116 19l6-6 6 6" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
