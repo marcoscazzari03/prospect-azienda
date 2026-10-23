@@ -50,7 +50,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 23/10/2026 — partita IVA delle aziende (migrazione 069) e correzioni della revisione del punto 92 · da rivedere; poi migrazione da eseguire, main, VPS
+## 23/10/2026 — partita IVA delle aziende (migrazione 069) e correzioni della revisione del punto 92 · rivisto (Code Reviewer «pronto», QA «pronto con riserve» corrette); da fare: migrazione 069, main, VPS
 - **Cosa:** migrazione `20261213000069_company_vat.sql`: `vat_valid(text)` (stesse regole di `pivaValida` del worker),
   colonna `companies.vat_number` (`''` se non nota, controllo e indice parziale, non unica), `store_imported_companies` come
   la 048 più `vat` (azienda con la partita IVA già di un altro dominio non importata, contata tra le scartate),
@@ -66,6 +66,9 @@ Come tornare indietro, in generale:
   restava per sempre e faceva scartare gli altri: ora `vat_sightings` e `vat_seen()` contano su quanti domini compare (1 =
   dell'azienda, 2 = stessa azienda con due siti, 3 o più = fornitore, tolta da tutte); un dominio già presente si aggiorna
   sempre invece di essere scartato; `vat_number <> ''` nelle ricerche per usare l'indice; `lock_timeout` di 5 s.
+- **Limite accettato (Code Reviewer):** una web agency con soli 2 clienti nel database resta con la sua partita IVA sul
+  primo e il secondo non entra (e non si ripropone per un anno da Common Crawl); due import in parallelo con la stessa
+  partita IVA possono scriverla entrambi (indice non unico: nessun errore).
 - **Seconda QA («pronto con riserve»):** una partita IVA scritta male non fa più rifiutare tutto il lotto (`.catch` nelle
   route `site-checks` e `companies-import`); i doppioni li decide solo il database (tolto `senzaDoppioni` dal worker, che gli
   nascondeva la terza volta); i crediti valgono solo per la partita IVA che segue («Sito by Pixel P.IVA … | Rossi Srl P.IVA …»).
