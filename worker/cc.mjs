@@ -238,11 +238,11 @@ export async function classifica(trovate, app, segreto, post = fetch, scadenza =
 }
 
 async function main() {
-  const cartella = process.env.STATE_DIRECTORY || '/var/lib/webora-cc';
+  const cartella = process.env.STATE_DIRECTORY || '/var/lib/avvisto-cc';
   const prova = ['1', 'true', 'si', 'sì', 'yes'].includes(String(process.env.DRY_RUN || '').toLowerCase());
   const segreto = process.env.SITE_CHECKS_SECRET || '';
   if (!prova && segreto.length < 32) throw new Error('SITE_CHECKS_SECRET mancante o troppo corto');
-  const app = (process.env.APP_URL || 'https://leads.weborastudio.it').replace(/\/+$/, '');
+  const app = (process.env.APP_URL || 'https://avvisto.it').replace(/\/+$/, '');
   const limite = Math.min(Math.max(Number(process.env.LIMIT) || 3000, 1), 10_000);
   const parallelo = Math.min(Math.max(Number(process.env.CONCURRENCY) || 16, 1), 32);
   const release = /^cc-main-\d{4}-[a-z-]+$/.test(process.env.CC_RELEASE || '') ? process.env.CC_RELEASE : RELEASE;

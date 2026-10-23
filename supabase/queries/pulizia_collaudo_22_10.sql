@@ -1,6 +1,6 @@
 -- Punto 19 (22/10): pulizia dei dati di collaudo, decisa dall'utente dopo `inventario_collaudo.sql`.
 -- CANCELLA DATI: le organizzazioni di prova «Scazza» e «Prova» (nessuna ricerca, nessun lead, nessun acquisto, solo i 15
--- crediti di benvenuto) e i loro utenti. «Webora» (admin, storico dei collaudi) resta com'è.
+-- crediti di benvenuto) e i loro utenti. l'organizzazione dell'amministratore (storico dei collaudi) resta com'è.
 -- Sicurezze: si ferma senza toccare niente se una delle due ha ricerche, lead, segnalazioni, acquisti, pagamenti,
 -- abbonamenti, un cliente Stripe, ticket, esportazioni, liste o avvisi, se il nome non corrisponde o se non le trova entrambe. Cancella un utente solo se non è admin e non appartiene ad altre
 -- organizzazioni. Restano aziende, controlli dei siti, prove dei segnali, annunci e tutto il resto.
@@ -47,5 +47,5 @@ begin
   raise notice 'Utenti cancellati: %', v_n;
 end $$;
 
--- Controllo: deve restare solo «Webora».
+-- Controllo: deve restare solo l'organizzazione dell'amministratore.
 select o.name, o.plan_id, (select count(*) from memberships m where m.org_id = o.id) as utenti from organizations o;

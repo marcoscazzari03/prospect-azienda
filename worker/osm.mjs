@@ -183,7 +183,7 @@ async function main() {
   const prova = ['1', 'true', 'si', 'sì', 'yes'].includes(String(process.env.DRY_RUN || '').toLowerCase());
   const segreto = process.env.SITE_CHECKS_SECRET || '';
   if (!prova && segreto.length < 32) throw new Error('SITE_CHECKS_SECRET mancante o troppo corto');
-  const app = (process.env.APP_URL || 'https://leads.weborastudio.it').replace(/\/+$/, '');
+  const app = (process.env.APP_URL || 'https://avvisto.it').replace(/\/+$/, '');
   const inizio = Date.now();
 
   const province = await caricaProvince(righeDi(fileConfini));

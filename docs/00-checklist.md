@@ -1,4 +1,4 @@
-# Checklist di Webora Leads
+# Checklist di Avvisto
 
 Formato (deciso il 19/10): sezioni con colore e titolo, ruolo in grassetto (**Tu**, **Io**, **Insieme**), numeri
 progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data. Quando l'utente chiede «riscrivimi
@@ -39,7 +39,7 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 
 ## 🖥️ VPS e worker: stasera e domani
 94. **Insieme, 23/10 alle 20** – Sul VPS, un passo alla volta: riscaricare `worker.sh` da main; leggere il log del worker del
-    controllo siti fermo dal 22/10 alle 15:35 UTC (`journalctl -u webora-site-checks.service`); `bash worker.sh installa`
+    controllo siti fermo dal 22/10 alle 15:35 UTC (`journalctl -u avvisto-site-checks.service`); `bash worker.sh installa`
     (blocchi da 100 salvati subito, stop dopo 12 minuti, pagine ridotte a 500 KB, 16 thread di rete, segnali del punto 91);
     `bash worker.sh giro` e controllo dell'esito.
 95. **Tu, 24/10** – Query oraria di `site_checked_at`: se il worker fa circa 600 siti all'ora, spegnere «Aziende | Controllo
@@ -64,7 +64,7 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 73. **Tu** – Controlli a mano: avvisi di spesa (punto 18), Deployment Protection su Vercel, conservazione breve delle
     esecuzioni su n8n. ~~Rotazione del segreto del motore~~ (22/10, punto 17).
 74. ~~**Io** – Motore e workflow n8n: DNS «jolly», porte e IP scartati, domini validati, callback solo verso
-    leads.weborastudio.it~~ (21/10); ~~**Tu:** pubblicare i 3 workflow~~ (21/10). Redirect, IP e certificati: ~~con il worker
+    avvisto.it~~ (21/10); ~~**Tu:** pubblicare i 3 workflow~~ (21/10). Redirect, IP e certificati: ~~con il worker
     (punto 49)~~ (22/10).
 75. ~~**Io** – Testi del sito anche per i professionisti con partita IVA~~ (21/10).
 76. ~~**Tu** – Eseguire la migrazione 058~~ (21/10).
@@ -83,7 +83,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
    **6/11** (deciso il 21/10).
 
 ## 🔴 Bloccanti per il lancio a pagamento (non per la beta)
-11. **Tu** – Partita IVA, regime fiscale, fatturazione elettronica (SDI), con il commercialista.
+11. **Tu** – Partita IVA, regime fiscale, fatturazione elettronica (SDI), con il commercialista. **Poi (Io):** dati veri del
+    titolare in privacy, termini e firma delle email (dal 23/10 c'è scritto solo «Avvisto», `BRAND.owner` in `src/lib/config.ts`).
 12. **Tu** – Parere del legale (`09-domande-consulenti.md`): caso Lusha, art. 130 (vale anche per le caselle aziendali?),
     LIA/DPIA, ODbL, Adzuna, DPA, informativa, termini, pagina «Sicurezza e privacy», chiusura dell'account, riga «rispondete
     no» e firma delle email. Niente promesse di «contatto senza consenso» finché non risponde per iscritto.
@@ -94,7 +95,7 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 16. **Tu** – Repository GitHub privato (insieme al passaggio ad Avvisto).
 17. ~~**Insieme** – Rotazione del segreto del motore~~ (22/10: i due segreti cambiati e verificati).
 18. **Tu** – Avvisi di spesa su Anthropic, Vercel, Supabase (Anthropic ora serve anche alle ricerche consigliate).
-19. ~~**Insieme** – Pulizia dei dati di collaudo~~ (22/10: resta solo «Webora» con lo storico dei collaudi).
+19. ~~**Insieme** – Pulizia dei dati di collaudo~~ (22/10: resta solo l'organizzazione dell'amministratore con lo storico dei collaudi).
 29. **Tu, con il legale** – Contratto sul trattamento dei dati (DPA) pronto da firmare per i clienti.
 5f. **Insieme, dopo la beta** – Nuovo listino (proposta nel registro, 20/10 sera): pacchetti 59/249/790 €, Scale tolto,
     20 crediti di benvenuto, lead con solo modulo a 1 credito, niente supplemento AI; abbonamenti con l'avviso settimanale
@@ -129,7 +130,7 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 63. ~~**Io** – Radici calcolate una volta per le ricerche in target (migrazione 059)~~ (21/10: da 1,5 a 5 volte più veloce).
 
 ## 🟣 Passaggio ad Avvisto (iniziato il 23/10, piano in `17-avvisto.md`)
-Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, logo provvisorio (Io), titolare Webora Studio.
+Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, logo provvisorio (Io). Dalla sera del 23/10: solo il nome Avvisto ovunque, titolare «Avvisto» nelle pagine legali fino alla partita IVA (punto 11).
 65. ~~**Insieme** – Scegliere il nome: **Avvisto**, marchio verificato libero (UIBM, EUIPO), avvisto.it libero~~ (21/10).
 67a. ~~**Io** – Fase A, codice pronto senza effetti online: `BRAND` in due versioni (`NEXT_PUBLIC_BRAND`), logo e icona
     provvisori, logo delle email, modelli email Avvisto, motore che accetta avvisto.it, `bash worker.sh dominio`~~ (23/10: su
@@ -139,22 +140,25 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
     solo con `NEXT_PUBLIC_BRAND=avvisto`. ~~Passi 1–2: colori e logo~~ (23/10). ~~Menu e barra su telefono, statistiche con
     variazione e grafico, «Lasciati ispirare», scelte rapide, «Non sai da dove iniziare?»~~ (23/10). ~~Grafica definitiva per tutto
     il sito, identica alla bozza anche negli spazi (colori, menu, intestazione, riquadro, statistiche, avatar con menu)~~ (23/10,
-    richiesta dell'utente; i colori valgono anche con il nome Webora).
+    richiesta dell'utente).
 66. **Tu, in corso (23/10)** – Fase B: ~~dominio comprato~~ (23/10); casella ciao@avvisto.it creata, in propagazione; comprare avvisto.it su Hostinger (solo il dominio, 5,99 €; deciso il 23/10); creare
-    e provare ciao@avvisto.it con la casella gratuita; inoltro di leads@weborastudio.it verso ciao@avvisto.it. Il piano email
-    di weborastudio.it (rinnovo 19/02/2027) resta finché serve leads@.
-67. **Insieme, il giorno del passaggio (1–2 ore)** – Fase C: ~~dominio su Vercel e DNS~~ (23/10); ~~dominio su Resend (SPF, DKIM, DMARC)~~ (23/10);
-    variabili su Vercel (`APP_URL`, `EMAIL_FROM`, `NEXT_PUBLIC_BRAND=avvisto`); Supabase (Site URL, Redirect URLs, modelli,
-    mittente); Turnstile; webhook di Stripe; n8n; `APP_URL` sul VPS; rinvio permanente da leads.weborastudio.it.
+    e provare ciao@avvisto.it con la casella gratuita; inoltro della casella vecchia verso ciao@avvisto.it. Il piano email
+    del vecchio dominio (rinnovo 19/02/2027) resta finché serve la casella vecchia.
+67. **Insieme, il 23/10 sera** – Fase C: ~~dominio su Vercel e DNS~~ (23/10); ~~dominio su Resend (SPF, DKIM, DMARC)~~ (23/10);
+    ~~codice solo Avvisto, logo C, nessuna traccia del nome vecchio~~ (23/10, Io); variabili su Vercel (`APP_URL`, `EMAIL_FROM`;
+    `NEXT_PUBLIC_BRAND` non serve più); Supabase (Site URL, Redirect URLs, modelli, mittente); Turnstile; webhook di Stripe;
+    n8n (nodi caricati e pubblicati); VPS (`rinomina`, `dominio`); **ultimo:** staccare il vecchio indirizzo da Vercel (decisione
+    dell'utente: nessun rinvio). Poi: rinominare su n8n la credenziale Anthropic in «Avvisto - Anthropic» e l'organizzazione
+    dell'amministratore nell'app (Account).
 67d. **Insieme, subito dopo** – Fase D: registrazione, ricerca di prova, email, vecchi link, worker e workflow; QA Tester e
     UI/UX Designer.
 67e. **Insieme, dopo** – Fase E: email alle agenzie della beta e firma; posizionamento (83) e ricerche consigliate per tutti
     (85b); social e Google Search Console; repository privato (16); tra 2–4 settimane togliere il vecchio dominio da Supabase
     e dal motore; logo definitivo.
-68. **Tu, prima dei rinnovi** – Costi Hostinger: circa 234 €/anno (circa 250 con il dominio nuovo). Dominio weborastudio.it
-    15,99 € (rinnovo 20/01/2027: tenerlo, serve al rinvio); Business Web Hosting 203,88 € (rinnovo 02/02/2027, controllare il
-    prezzo vero); Starter Business Email di weborastudio.it 14,16 € (rinnovo 19/02/2027: decidere quando leads@ non serve
-    più). Avvisto (dal 23/10): dominio avvisto.it 5,99 € (rinnovo 15,99 €/anno a ottobre 2027); Free Business Email per
+68. **Tu, prima dei rinnovi** – Costi Hostinger: circa 234 €/anno (circa 250 con il dominio nuovo). Dominio vecchio dello studio
+    15,99 € (rinnovo 20/01/2027: decidere se tenerlo, il sottodominio dell'app è staccato dal 23/10); Business Web Hosting 203,88 € (rinnovo 02/02/2027, controllare il
+    prezzo vero); Starter Business Email del vecchio dominio 14,16 € (rinnovo 19/02/2027: decidere quando la casella vecchia non
+    serve più). Avvisto (dal 23/10): dominio avvisto.it 5,99 € (rinnovo 15,99 €/anno a ottobre 2027); Free Business Email per
     ciao@avvisto.it (alias info@), gratis 12 mesi: controllare il prezzo del rinnovo prima di ottobre 2027.
 33. ~~**Tu** – Prezzo del rinnovo della casella Hostinger~~ (21/10: assorbito dal punto 68).
 
@@ -278,8 +282,8 @@ Il lavoro gira sul VPS (gratis), senza Google Maps, PagineGialle o Registro Impr
 - 5. ~~**Tu** – Invitate 3 agenzie (Gopher, Mutart, Studio360) con PDF di esempi reali~~
 - 6. ~~**Io** – Clausola «Riservatezza delle ricerche» nei termini~~
 - 7. ~~**Io** – Piano della beta e testi dell'invito (`10-beta.md`)~~
-- 8. ~~**Tu** – Casella leads@weborastudio.it attiva e provata~~
+- 8. ~~**Tu** – Casella ciao@avvisto.it attiva e provata~~
 - 19b–19c. ~~Falsi «Senza HTTPS», prima correzione, e ricontrollo di 341 aziende~~
 - 26. ~~Ripasso di sicurezza (migrazione 046)~~
-- 32–32b. ~~Email dell'app con la grafica Webora; modelli di accesso incollati in Supabase~~
+- 32–32b. ~~Email dell'app con la grafica precedente; modelli di accesso incollati in Supabase~~
 - ~~Homepage rifatta, «Per chi è», wizard con «Vendi altro?», regole sul settore (migrazione 045)~~

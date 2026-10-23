@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { renderEmail } from "@/lib/email/layout";
 import { SUPABASE_TEMPLATES } from "@/lib/email/supabase-templates";
@@ -10,12 +10,12 @@ describe("email", () => {
     const { html, text } = renderEmail({
       heading: "Ricerca <b>",
       paragraphs: [`La ricerca «<script>alert(1)</script>» è pronta.`],
-      cta: { label: "Apri", url: `https://leads.weborastudio.it/app?a=1&b="x"` },
+      cta: { label: "Apri", url: `https://avvisto.it/app?a=1&b="x"` },
       footer: "Prova.",
     });
     expect(html).not.toContain("<script>");
     expect(html).toContain("&lt;script&gt;");
-    expect(html).toContain('href="https://leads.weborastudio.it/app?a=1&amp;b=&quot;x&quot;"');
+    expect(html).toContain('href="https://avvisto.it/app?a=1&amp;b=&quot;x&quot;"');
     expect(text).toContain("<script>"); // il testo semplice resta testo
   });
 
@@ -24,32 +24,11 @@ describe("email", () => {
     for (const t of SUPABASE_TEMPLATES) {
       const { html } = renderEmail(t.content);
       const path = `${DIR}/${t.file}`;
+      // Solo il nome Avvisto (23/10: nessuna traccia del nome vecchio).
+      expect(html).toContain("https://avvisto.it/email/logo-avvisto.png");
+      expect(html).not.toMatch(/studio\.it/i); // nessun indirizzo del dominio vecchio
       if (process.env.WRITE_TEMPLATES) writeFileSync(path, html);
       expect(readFileSync(path, "utf8")).toBe(html);
-    }
-  });
-
-  // Versione Avvisto (docs/17-avvisto.md): stessi modelli col nome nuovo, da incollare in Supabase il giorno del passaggio.
-  // Si rigenerano con: WRITE_TEMPLATES=1 npx vitest run tests/email-templates.test.ts (SENZA NEXT_PUBLIC_BRAND: la versione
-// Avvisto la imposta il test stesso; con la variabile si sovrascriverebbero i modelli di Webora, 23/10).
-  it("i modelli Avvisto nel repository sono aggiornati", async () => {
-    vi.resetModules();
-    vi.stubEnv("NEXT_PUBLIC_BRAND", "avvisto");
-    try {
-      const { renderEmail: render } = await import("@/lib/email/layout");
-      const { SUPABASE_TEMPLATES: templates } = await import("@/lib/email/supabase-templates");
-      const dir = `${DIR}/avvisto`;
-      if (process.env.WRITE_TEMPLATES) mkdirSync(dir, { recursive: true });
-      for (const t of templates) {
-        const { html } = render(t.content);
-        expect(html).toContain("https://avvisto.it/email/logo-avvisto.png");
-        expect(html).not.toMatch(/webora leads|leads\.weborastudio/i);
-        if (process.env.WRITE_TEMPLATES) writeFileSync(`${dir}/${t.file}`, html);
-        expect(readFileSync(`${dir}/${t.file}`, "utf8")).toBe(html);
-      }
-    } finally {
-      vi.unstubAllEnvs();
-      vi.resetModules();
     }
   });
 

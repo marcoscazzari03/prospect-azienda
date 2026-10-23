@@ -3,9 +3,9 @@
 // valutazione di n8n/annunci/nodes/09-valuta-siti.js, ma con più siti in parallelo e più siti per giro.
 //   GET  {APP}/api/engine/site-checks?limit=N   aziende da controllare (coda con priorità, migrazione 064)
 //   POST {APP}/api/engine/site-checks           esiti, salvati da store_company_checks
-// Configurazione (variabili d'ambiente, sul server in /etc/webora/site-checks.env, mai nel repository):
+// Configurazione (variabili d'ambiente, sul server in /etc/avvisto/site-checks.env, mai nel repository):
 //   SITE_CHECKS_SECRET  obbligatorio, segreto che apre solo questa route
-//   APP_URL             predefinito https://leads.weborastudio.it
+//   APP_URL             predefinito https://avvisto.it
 //   LIMIT               aziende per giro, predefinito 300 (massimo dell'app)
 //   CONCURRENCY         siti aperti insieme, predefinito 8
 //   DRY_RUN=1           controlla e stampa, senza salvare
@@ -114,7 +114,7 @@ export async function inParallelo(elenco, n, fn) {
 async function main() {
   const segreto = process.env.SITE_CHECKS_SECRET || '';
   if (segreto.length < 32) throw new Error('SITE_CHECKS_SECRET mancante o troppo corto');
-  const app = (process.env.APP_URL || 'https://leads.weborastudio.it').replace(/\/+$/, '');
+  const app = (process.env.APP_URL || 'https://avvisto.it').replace(/\/+$/, '');
   const limite = Math.min(Math.max(Number(process.env.LIMIT) || 300, 1), 300);
   const parallelo = Math.min(Math.max(Number(process.env.CONCURRENCY) || 8, 1), 32);
   const prova = ['1', 'true', 'si', 'sì', 'yes'].includes(String(process.env.DRY_RUN || '').toLowerCase());

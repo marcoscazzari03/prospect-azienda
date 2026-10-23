@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Popolamento da OpenStreetMap sul VPS (punto 87, 22/10), lanciato da systemd (webora-osm.service) una volta a settimana.
+# Popolamento da OpenStreetMap sul VPS (punto 87, 22/10), lanciato da systemd (avvisto-osm.service) una volta a settimana.
 # Scarica l'Italia da Geofabrik (solo se è cambiata, con il controllo md5), tiene le attività e i confini delle province
 # con osmium e passa tutto a worker/osm.mjs, che salva le aziende con un sito. Cartella dei dati: $STATE_DIRECTORY
-# (/var/lib/webora-osm). Variabili come gli altri worker; DRY_RUN=1 conta senza salvare.
+# (/var/lib/avvisto-osm). Variabili come gli altri worker; DRY_RUN=1 conta senza salvare.
 set -euo pipefail
-cd "${STATE_DIRECTORY:-/var/lib/webora-osm}"
-APP=${APP_DIR:-/opt/webora/app}
+cd "${STATE_DIRECTORY:-/var/lib/avvisto-osm}"
+APP=${APP_DIR:-/opt/avvisto/app}
 URL=https://download.geofabrik.de/europe/italy-latest.osm.pbf
 PBF=italy-latest.osm.pbf
 

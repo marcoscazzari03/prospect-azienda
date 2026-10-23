@@ -7,21 +7,21 @@ Lista aggiornata delle attività aperte (spuntare man mano).
 ## Configurazione
 - [x] Supabase: migrazioni eseguite, Site URL e Redirect URL impostati
 - [x] Vercel: progetto creato, variabili d'ambiente, produzione da `main`
-- [x] Dominio `leads.weborastudio.it` collegato a Vercel (record DNS)
+- [x] Dominio `il vecchio indirizzo` collegato a Vercel (record DNS)
 - [x] n8n: credenziali "Lead Engine" create e workflow attivato
 - [x] Prima ricerca reale end-to-end (09/10: 3/3 lead, ~2 minuti)
 - [ ] Prove con "Mista" e "Solo nominative", volumi più alti, taratura dei prompt (rimandata: prima scegliere il primo mercato)
 - [x] Email: Resend (dominio verificato, record su sottodomini), SMTP in Supabase, testi in italiano, notifiche app
 - [x] Stripe in modalità test (chiavi, webhook, portale clienti): acquisto di prova accreditato
 - [x] Motore: ruoli con alternative e sinonimi (es. «Titolare / CEO»)
-- [x] Casella Hostinger leads@weborastudio.it (19/10, provata). Piano «Starter Business Email» in prova gratuita fino al
+- [x] Casella Hostinger la casella vecchia (19/10, provata). Piano «Starter Business Email» in prova gratuita fino al
       19/02/2027 con rinnovo automatico: controllare il prezzo del rinnovo prima della scadenza.
-- [ ] Logo accanto al mittente: account Google creato con leads@weborastudio.it («Usa il tuo indirizzo email attuale»)
-      e logo Webora come foto profilo (lo vedono i destinatari Gmail). BIMI (tutte le caselle, serve DMARC
+- [ ] Logo accanto al mittente: account Google creato con la casella vecchia («Usa il tuo indirizzo email attuale»)
+      e logo precedente come foto profilo (lo vedono i destinatari Gmail). BIMI (tutte le caselle, serve DMARC
       quarantine/reject e un certificato del marchio a pagamento): solo più avanti, con più volume.
 - [ ] Firma con il logo per leads@ nella webmail di Hostinger (email della beta scritte a mano).
 - [ ] Email dell'app più belle: oggi sono solo testo (`src/lib/server/email.ts`). Versione HTML con logo e grafica
-      Webora (con la versione testo per chi non legge l'HTML), e stessi modelli per le email di accesso nel pannello
+      il nome vecchio (con la versione testo per chi non legge l'HTML), e stessi modelli per le email di accesso nel pannello
       di Supabase (conferma, reset password, magic link).
 
 ## Prodotto
@@ -46,7 +46,7 @@ Fonti email per qualità: 1) nominativa trovata sul sito  2) Icypeas (al posto d
 - [x] Workflow "TEST | Icypeas email finder" archiviato
 - [x] Motore AI: Claude Sonnet 5.5 (pianificazione + ricerca web lato server) al posto di OpenAI; modello in `01-valida-richiesta.js`, nodi OpenAI disattivati nel workflow per tornare indietro
 - [x] Costo reale di Claude dai token (input/output) e dalle ricerche web, in *Prezzi e costi* (migrazione `20261026000020_engine_costs_errors.sql`)
-- [ ] Chiave Anthropic dedicata a Webora Leads (oggi si usa la credenziale «US VIRAL - Anthropic»)
+- [ ] Chiave Anthropic dedicata al servizio (oggi si usa la credenziale «US VIRAL - Anthropic»)
 - [x] Motore: email d'ufficio (segreteria.cognome@gmail.com, studiodentisticorossi@…, info-rossi@…) classificate come generiche
 - [ ] Budget mensile di arricchimento da rivedere
 - [ ] Testo dell'invito per la beta
@@ -234,7 +234,7 @@ all'architettura; il resto si decide con i clienti.
       «Come usare questi contatti» sopra i lead (pagina Lead e pagina della ricerca), foglio «Come usarli» nell'export
       Excel, termini e FAQ aggiornati (anche per il modulo di contatto). Testo unico in `CONTACT_NOTICE` (leads.ts).
 - [ ] Legale e commercialista (`09-domande-consulenti.md`): stato del caso Lusha, LIA, art. 130, ODbL, Adzuna, P.IVA.
-- [ ] Sicurezza (`08-messa-in-produzione.md`, Fase 1): 2FA sugli account, chiave Anthropic dedicata a Webora Leads.
+- [ ] Sicurezza (`08-messa-in-produzione.md`, Fase 1): 2FA sugli account, chiave Anthropic dedicata al servizio.
       (Utente: Supabase, Vercel, n8n, GitHub, Stripe, Anthropic, Resend; chiave nuova da inserire nelle credenziali n8n.)
 
 ### B. Test: email facoltativa con modulo di contatto

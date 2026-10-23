@@ -1,4 +1,4 @@
--- Modalità «Solo azienda» (decisa il 18/10): Webora Leads si posiziona come intelligence
+-- Modalità «Solo azienda» (decisa il 18/10): il servizio si posiziona come intelligence
 -- commerciale sulle aziende, non come database di contatti. Si consegnano azienda, sito,
 -- settore, segnali con la prova ed email generica del dominio aziendale (info@,
 -- commerciale@); nessun nome di persona, nessuna email nominativa, nessuna casella gratuita.

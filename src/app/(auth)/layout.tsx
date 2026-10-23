@@ -28,7 +28,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
       <main className="flex flex-col px-4 py-10 sm:px-10">
         <div className="mb-8 md:hidden">
           <Logo />
-          <p className="mt-2 text-sm text-ink-2">Un servizio di {BRAND.owner} · Nessuna carta · Paghi solo i lead consegnati</p>
+          <p className="mt-2 text-sm text-ink-2">Nessuna carta · Paghi solo i lead consegnati</p>
         </div>
         <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">{children}</div>
       </main>

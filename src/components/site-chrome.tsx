@@ -57,7 +57,7 @@ export function SiteFooter() {
         {col("Legale", [["/sicurezza", "Sicurezza e privacy"], ["/privacy", "Informativa privacy"], ["/termini", "Termini di servizio"]])}
       </div>
       <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-2 border-t border-line px-4 py-4 text-xs text-muted sm:px-6">
-        <p>© {new Date().getFullYear()} {BRAND.name}, un servizio di {BRAND.owner}. Tutti i diritti riservati.</p>
+        <p>© {new Date().getFullYear()} {BRAND.name}. Tutti i diritti riservati.</p>
         <p>Fatto con <span className="text-brick">♥</span> in Italia · {BRAND.supportEmail}</p>
       </div>
     </footer>

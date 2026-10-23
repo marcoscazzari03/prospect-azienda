@@ -43,7 +43,7 @@ const overpass = node({
       sendHeaders: true,
       headerParameters: { parameters: [
         // Overpass rifiuta (406) le richieste senza un User-Agent che identifichi il servizio.
-        { name: 'User-Agent', value: 'WeboraLeads/1.0 (+https://leads.weborastudio.it)' },
+        { name: 'User-Agent', value: 'AvvistoBot/1.0 (+https://avvisto.it)' },
         { name: 'Accept', value: 'application/json' }
       ] },
       sendBody: true,
@@ -87,7 +87,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/companies-import',
+      url: 'https://avvisto.it/api/engine/companies-import',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,

@@ -19,15 +19,16 @@ Come tornare indietro, in generale:
 
 | Data | Decisione | Motivo |
 |---|---|---|
-| 23/10 sera | **Grafica definitiva per tutto il sito:** colori e struttura della bozza (`docs/design/avvisto/bozza-panoramica.webp`) identici anche negli spazi, **per tutti e due i nomi** (supera «solo in versione Avvisto» della riga sotto); `NEXT_PUBLIC_BRAND` cambia solo nome, logo, dominio ed email. Il logo delle email di Webora resta verde (email a cura dell'utente) | richiesta dell'utente |
+| 23/10 sera | **Solo Avvisto:** nessuna traccia del nome vecchio (codice, email, n8n, VPS, documenti; il registro e l'archivio usano formule neutre); logo «C · Due toni»; titolare «Avvisto» nelle pagine legali fino alla partita IVA; vecchio indirizzo staccato senza rinvio | decisione dell'utente |
+| 23/10 sera | **Grafica definitiva per tutto il sito:** colori e struttura della bozza (`docs/design/avvisto/bozza-panoramica.webp`) identici anche negli spazi, **per tutti e due i nomi** (supera «solo in versione Avvisto» della riga sotto); `NEXT_PUBLIC_BRAND` cambia solo nome, logo, dominio ed email. Il logo delle email del nome vecchio resta verde (email a cura dell'utente) | richiesta dell'utente |
 | 23/10 | **Avvisto, grafica:** colore principale viola/indaco e logo della bozza dell'utente (`docs/design/avvisto/`), al posto del verde e del logo provvisorio; dalla bozza: riquadro «Non sai da dove iniziare?», «Lasciati ispirare», scelte rapide, statistiche con variazione e grafico piccolo. Tutto solo in versione Avvisto (`NEXT_PUBLIC_BRAND`); prima la proposta dell'UI/UX Designer | decisione dell'utente |
-| 23/10 | **Avvisto:** sito e app su avvisto.it (www rimanda lì), email di mittente e assistenza ciao@avvisto.it, logo provvisorio di Claude, titolare Webora Studio; passaggio anticipato rispetto al 25/10 (piano in `17-avvisto.md`) | decisione dell'utente: iniziare subito il rebranding |
+| 23/10 | **Avvisto:** sito e app su avvisto.it (www rimanda lì), email di mittente e assistenza ciao@avvisto.it, logo provvisorio di Claude, titolare lo studio; passaggio anticipato rispetto al 25/10 (piano in `17-avvisto.md`) | decisione dell'utente: iniziare subito il rebranding |
 | 22/10 | **Ricerche consigliate (punti 84–85):** domanda «Di cosa si occupa la tua attività?» alla prima apertura dell'app, non nella registrazione; Haiku propone 3 ricerche solo verso aziende e solo se il database ha i lead; chi vende solo a privati riceve un messaggio onesto, non ricerche forzate. Interruttore nell'Admin: prima solo admin, per tutti con Avvisto dopo il 25/10 | utile ai mestieri che oggi non trovano il loro servizio nel wizard, senza vendere crediti a chi non può usarli e senza sporcare i numeri della beta |
 | 22/10 | Produzione solo con il database coperto anche per manifattura, uffici e studi professionali in tutte le regioni (soglia proposta: 500 aziende con contatto per regione principale e macro-settore). Fonti ammesse: OpenStreetMap, siti delle aziende, annunci, Common Crawl; no Google Maps, PagineGialle, Registro Imprese; albi professionali solo dopo il parere del legale | oggi 22% di aziende con contatto, Centro e manifattura quasi vuoti (decisione dell'utente) |
 | 22/10 | Prezzi di Claude Haiku 5.5 (usato da «Settore aziende» e «Siti aziende»): 0,10 $ per milione di token in ingresso e 0,50 $ in uscita fino a 100.000 token per richiesta (0,50/2,50 $ oltre); circa 0,092 € e 0,46 € con il cambio delle tariffe della migrazione 020. Le ricerche web costano a parte, come per Sonnet. Misura del 22/10: 3 giri del Settore (114.782 token in ingresso, 46.655 in uscita) ≈ 0,03 €, non 0,30 € come stimato nel resoconto | i costi dei workflow con Haiku non erano scritti da nessuna parte (proposta 3 del resoconto); fonte: documentazione Anthropic dei modelli |
 | 22/10 | Agenti per livello di rischio (CLAUDE.md): revisione prima della produzione (main, migrazione, nodi n8n) e non prima di ogni push sul branch; livelli 0–3; designer solo per pagine nuove o cambi di flusso; seconda revisione solo se la correzione va oltre il proposto o tocca il livello 3; brief e risposte corti | meno tempo e token, stessa sicurezza (decisione dell'utente) |
 | 22/10 | `sales-copywriter`, `ui-ux-designer` e `business-analyst` sul modello Sonnet (`model: sonnet` nei file degli agenti); `code-reviewer`, `qa-tester` e `data-quality` restano sul modello principale. Indietro: `model: inherit` | più veloci ed economici dove non serve il massimo (decisione dell'utente) |
-| 20/10 | «Prospect \| Search» e «Prospect Avvocati \| Search» su n8n sono di un altro progetto **attivo**: non toccarli e non proporre di disattivarli. Usano ChatGPT, non la chiave Anthropic di Webora | indicazione dell'utente |
+| 20/10 | «Prospect \| Search» e «Prospect Avvocati \| Search» su n8n sono di un altro progetto **attivo**: non toccarli e non proporre di disattivarli. Usano ChatGPT, non la chiave Anthropic del nome vecchio | indicazione dell'utente |
 | 20/10 | Nessuna promessa di «contatto senza consenso» nel marketing finché il legale non risponde per iscritto (art. 130 vale anche per le aziende secondo il Garante) | rischio legale |
 | 20/10 | Il listino non promette funzioni che l'app non ha (tolto «Fino a 3 utenti») | fiducia dei clienti |
 | 20/10 | Frase di apertura dei lead: costruita dalla prova, **senza AI** (costo zero, niente dettagli inventati) | qualità e costi |
@@ -35,7 +36,7 @@ Come tornare indietro, in generale:
 | 21/10 | Il futuro worker del controllo siti (punto 49) girerà sul VPS Hetzner dell'utente, da reinstallare; n8n Cloud resta per motore, Adzuna, OSM e settore. Dopo il 30/10 | niente tetto di esecuzioni, segnali «certificato in scadenza» e PageSpeed, costo già sostenuto |
 | 21/10 sera | Sospeso anche il promemoria del 24–25/10 alle agenzie del 19/10; **Supabase Pro** rinviato alla messa in produzione definitiva | decisione dell'utente |
 | 21/10 sera | **Cambio di tattica:** inviti nuovi in pausa per 3–4 giorni per vedere se rispondono le 13 agenzie invitate; intanto si sistema tutto il lato tecnico e di sicurezza (checklist 70–73). Se non risponde nessuno, verso il 25/10 si passa al nome nuovo **Avvisto** (marchio verificato libero dall'utente, avvisto.it libero) | decisione dell'utente |
-| 21/10 | **Nome nuovo:** una parola, staccato da Webora; dominio .it a parte su Hostinger, aggiunto al Business Web Hosting che c'è già (niente server nuovo); l'app resta su Vercel; passaggio dopo il 30/10, con la seconda ondata (checklist 65–69) | costo minimo (circa 16 €/anno in più) e nessun cambio a metà beta |
+| 21/10 | **Nome nuovo:** una parola, staccato dal nome vecchio; dominio .it a parte su Hostinger, aggiunto al Business Web Hosting che c'è già (niente server nuovo); l'app resta su Vercel; passaggio dopo il 30/10, con la seconda ondata (checklist 65–69) | costo minimo (circa 16 €/anno in più) e nessun cambio a metà beta |
 | 21/10 | Beta: inviti a 15 al giorno dal 22 al 24/10; promemoria alle agenzie del 19/10 il 24–25/10 (non il 27/10); se il 30/10 le agenzie attive sono meno di 3, decisione rinviata al **6/11** | arrivare al 30/10 con abbastanza giorni d'uso (Business Analyst) |
 | 21/10 | **Pagine che non sono il sito** (blocco anti-bot, dominio in vendita, pagina del server, trasloco, pagina provvisoria): segnali della homepage non determinabili e vecchie prove tolte (`invalid_page`, migrazione 055). Gli errori momentanei (404, 5xx) danno non determinabile ma **non** tolgono le prove | prove false ai clienti senza perdere prove vere per un guasto passeggero |
 | 21/10 | **Squadra di agenti:** questa chat coordina; per ogni domanda si interpellano gli agenti pertinenti; il `code-reviewer` rivede ogni modifica di codice, SQL o n8n prima di ogni push, e con «NON PRONTO» non si pubblica (regola in `CLAUDE.md`) | richiesta dell'utente |
@@ -73,19 +74,34 @@ Come tornare indietro, in generale:
 ## 23/10/2026 — Avvisto: colori viola e logo della bozza (passi 1–2 dell'UI/UX Designer) · su main, visibile solo con `NEXT_PUBLIC_BRAND=avvisto`
 - **Cosa:** `data-brand` su `<html>` (`src/app/layout.tsx`); in `globals.css` le variabili viola per `html[data-brand="avvisto"]`
   (paper #f6f6fb, ink #16142e, ledger #4338ca, ledger-2 #3730a3, ledger-soft #eeefff, ledger-bright #7c6cf0…, contrasti AA
-  dell'UI/UX Designer) e le nuove `--color-ok*` (verde dei successi, uguale a ledger in Webora) e `--color-sky*`; tono `ok` in
+  dell'UI/UX Designer) e le nuove `--color-ok*` (verde dei successi, uguale a ledger con il nome vecchio) e `--color-sky*`; tono `ok` in
   Badge, Alert di conferma, «Completata», email «Verificata», 2FA «Attiva», chip e icone dell'attività. Logo: il simbolo
   della bozza ridisegnato in SVG (`src/components/logo.tsx`), «Avvisto.it» con «.it» viola, icona del browser su quadrato
   lilla, `public/email/logo-avvisto.png`, colori delle email Avvisto (`src/lib/email/layout.ts`), modelli Supabase Avvisto
   rigenerati. Verificato in locale (homepage, accesso, prezzi, telefono).
 - **Attenzione:** i modelli si rigenerano con `WRITE_TEMPLATES=1 npx vitest run tests/email-templates.test.ts` senza
-  `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli di Webora: successo il 23/10, ripristinati subito).
-- **Indietro:** revert del commit. In Webora nulla cambia (stessi colori, `ok` = `ledger`).
+  `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
+- **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
+
+## 23/10/2026 — Solo Avvisto: nome unico, logo C, vecchio indirizzo tolto · sul branch, in revisione; poi passaggio esterno
+- **Cosa:** `src/lib/config.ts` con un solo `BRAND` (Avvisto, avvisto.it, ciao@avvisto.it, titolare «Avvisto»); tolti `BRAND_KEY`,
+  `data-brand` e la versione vecchia di colori e modelli; «un servizio di …» tolto da piè di pagina, accesso ed email. Logo «C · Due
+  toni» in `src/components/logo.tsx` (anche chiaro, per l'amministrazione), icona del browser e `public/email/logo-avvisto.png`;
+  tolto `public/email/logo.png`. Modelli di Supabase rigenerati in `supabase/templates/` (tolta la cartella `avvisto/`; il test
+  controlla che non ci sia il dominio vecchio). n8n: `APP` e URL dei workflow su https://avvisto.it, robot `AvvistoBot/1.0`,
+  etichetta della credenziale «Avvisto - Anthropic», `HOST_APP = ['avvisto.it']` (il motore rifiuta i callback verso il vecchio
+  indirizzo). Worker: `APP_URL` predefinito https://avvisto.it, cartelle `/opt/avvisto`, `/etc/avvisto`, `/var/lib/avvisto-*`,
+  servizi `avvisto-*`; `bash worker.sh rinomina` sposta tutto dal nome vecchio una volta sola e riaccende i timer accesi;
+  `dominio` accetta solo https://avvisto.it. README, `.env.example`, nome del pacchetto, agenti e documenti vivi col nome nuovo;
+  attività programmate rinominate («Avvisto – analisi giornaliera»).
+- **Ordine del passaggio (il motore accetta solo avvisto.it):** prima `APP_URL=https://avvisto.it` ed `EMAIL_FROM` su Vercel con la
+  pubblicazione di questo commit, poi i nodi n8n; per ultimo il vecchio indirizzo staccato da Vercel.
+- **Indietro:** `git revert`; su n8n la versione precedente dei workflow; sul VPS le cartelle si rinominano a mano al contrario.
 
 ## 23/10/2026 — Grafica definitiva della bozza per tutto il sito (colori, menu, Panoramica) · su main dal 23/10
 - **Cosa:** richiesta dell'utente: grafica «ESATTAMENTE così, anche negli spazi» (`docs/design/avvisto/bozza-panoramica.webp`).
   Colori della bozza come predefiniti in `src/app/globals.css` (sfondo #f8f6f5, viola #362793, verde, arancio e blu delle
-  statistiche), non più solo con `NEXT_PUBLIC_BRAND=avvisto`; logo in grassetto senza grazie (Webora: quadrato viola con la W).
+  statistiche), non più solo con `NEXT_PUBLIC_BRAND=avvisto`; logo in grassetto senza grazie (il nome vecchio: quadrato viola con la W).
   Menu (`app-nav.tsx`, `app/app/layout.tsx`): largo 312 px, voci da 45 px con le icone della bozza (Panoramica, Nuova ricerca,
   Ricerche, Aziende e lead, Crediti e piano, Impostazioni → account; separatore; Guida e supporto → assistenza, Torna al sito);
   in fondo il riquadro del piano (`PlanCard`). Avatar con menu in alto a destra (`header-account.tsx`: account, crediti, Esci),
@@ -97,8 +113,8 @@ Come tornare indietro, in generale:
 - **Verifica:** screenshot alla larghezza della bozza (2000 px) confrontati con la bozza, poi a 1440 px e telefono (402 px,
   nessuno scorrimento orizzontale); sotto i 1700 px colonna del riquadro a 300 px, sotto i 1500 px statistiche su due colonne,
   grafico piccolo solo se la scheda è larga almeno 340 px. Typecheck, lint, 121 test.
-- **Effetto online:** dopo il push su main il sito attuale (nome Webora) diventa viola, favicon compresa; il logo delle email di
-  Webora resta verde.
+- **Effetto online:** dopo il push su main il sito attuale (nome vecchio) diventa viola, favicon compresa; il logo delle email di
+  il nome vecchio resta verde.
 - **Revisione:** Code Reviewer «pronto con riserve», corrette: decisione nella tabella in alto, contenitore dei bottoni vuoto
   sotto il titolo (16 px in più su telefono e nelle pagine senza bottoni), id dei gradienti con `useId`, menu dell'avatar senza
   ruoli ARIA da menu (link semplici). Avatar da 1024 px in su. Trovato in verifica: in Tailwind 4 le soglie scritte in px
@@ -111,7 +127,7 @@ Come tornare indietro, in generale:
   CNAME `send` → send.forge.rmta.net (SPF e MX di ritorno), CNAME `rsend` → rsend-euw1.forge.rmta.net; DMARC `p=none` già
   presente. «Enable Receiving» lasciato spento (la posta in arrivo resta sulla casella di Hostinger). Controllato da
   dns.google prima della verifica.
-- **Effetto online:** nessuno: l'app manda ancora da leads@weborastudio.it finché `EMAIL_FROM` non cambia (C3) e Supabase
+- **Effetto online:** nessuno: l'app manda ancora da la casella vecchia finché `EMAIL_FROM` non cambia (C3) e Supabase
   non usa il mittente nuovo (C4).
 - **Indietro:** togliere il dominio da Resend e i tre record da Hostinger.
 
@@ -119,21 +135,21 @@ Come tornare indietro, in generale:
 - **Cosa:** avvisto.it su Hostinger (5,99 €), casella gratuita ciao@avvisto.it (Free Business Email, 12 mesi); su Vercel
   avvisto.it collegato a Production e www.avvisto.it con rinvio 308 ad avvisto.it; DNS: A @ → 216.198.79.1, CNAME www →
   834fbe17190cdec4.vercel-dns-017.com (TTL 60); MX/TXT della posta di Hostinger invariati.
-- **Effetto online:** nessuno per i clienti (il nome resta Webora finché `NEXT_PUBLIC_BRAND` non è impostato).
+- **Effetto online:** nessuno per i clienti (il nome resta il nome vecchio finché `NEXT_PUBLIC_BRAND` non è impostato).
 - **Indietro:** togliere i due domini dal progetto su Vercel; il record A si può riportare a 2.57.91.91 (parcheggio Hostinger).
 
 ## 23/10/2026 — Avvisto, fase A: codice pronto senza effetti online · su main (Code Reviewer «pronto con riserve», corrette: `dominio` accetta solo i due indirizzi esatti)
-- **Cosa:** `BRAND` in due versioni (`src/lib/config.ts`), scelta con `NEXT_PUBLIC_BRAND=avvisto` (assente = Webora, com'è
+- **Cosa:** `BRAND` in due versioni (`src/lib/config.ts`), scelta con `NEXT_PUBLIC_BRAND=avvisto` (assente = il nome vecchio, com'è
   oggi); logo provvisorio Avvisto in `src/components/logo.tsx` (una «A» con il punto ambra) e icona del browser generata dallo
   stesso simbolo (`src/app/icon.tsx`, al posto di `icon.svg`); `public/email/logo-avvisto.png` e logo delle email da
   `BRAND.emailLogo`; modelli email di Supabase in versione Avvisto (`supabase/templates/avvisto/`, test che li tiene
   allineati); motore n8n: `HOST_APP` accetta già avvisto.it (test con imitazioni rifiutate); `bash worker.sh dominio URL`
   per l'indirizzo dell'app sul VPS. Verificato in locale con `NEXT_PUBLIC_BRAND=avvisto`: homepage, accesso, prezzi,
   telefono, icona.
-- **Motore:** nodo «Valida richiesta» caricato su n8n il 23/10 (da pubblicare); icona di Webora in produzione verificata
+- **Motore:** nodo «Valida richiesta» caricato su n8n il 23/10 (da pubblicare); icona del nome vecchio in produzione verificata
   dopo il deploy (`/icon`, PNG 64×64, stesso disegno).
 - **Restano invariati (interni, nessun cliente li vede):** nomi delle cartelle e dei servizi sul VPS, credenziali di n8n.
-- **Indietro:** revert del commit; sul VPS `APP_URL` si toglie da `/etc/webora/site-checks.env`.
+- **Indietro:** revert del commit; sul VPS `APP_URL` si toglie da `/etc/avvisto/site-checks.env`.
 
 ## 23/10/2026 — ricerche consigliate: «Cancella la descrizione», sezione nel profilo, lead ricontati ogni notte · su main (Code Reviewer «pronto con riserve», corrette; testi del Sales Copywriter)
 - **Cosa:** pulsante «Rimuovi» (azione `clearBusinessProfile`: descrizione, zona e proposte cancellate, il riquadro torna alla
@@ -251,14 +267,14 @@ Come tornare indietro, in generale:
   partita IVA esclusi. Nuova route `/api/engine/companies-classify` (segreto del worker): settore e parole chiave da Claude
   Haiku con lo stesso testo di «Aziende | Settore» (`src/lib/domain/industry.ts`), chiave solo su Vercel. Import con origine
   `cc` (`companies-import` accetta `"cc"`). Comandi `prova-cc`, `giro-cc`, `stato-cc`, `avvia-cc` in `worker.sh`; servizio
-  `webora-cc` ogni 3 ore alle :25, **non** acceso da `avvia`. Test in `worker/test.mjs` (sezione 10) e
+  `avvisto-cc` ogni 3 ore alle :25, **non** acceso da `avvia`. Test in `worker/test.mjs` (sezione 10) e
   `tests/industry.test.ts`. Documento vivo `docs/16-common-crawl.md`.
 - **Misura del campione:** 600 domini, 300 aperti, 124 con partita IVA valida (21%), 87 con città (70%).
 - **Perché:** allargare il database alle aziende che non sono in OSM né negli annunci (manifattura, uffici, studi), senza
   elenchi di terzi. Il settore da Haiku perché «Aziende | Settore» su n8n classifica 120 aziende ogni 4 ore e non le `cc`.
 - **Dove:** `worker/cc.mjs`, `src/app/api/engine/companies-classify/route.ts`, `src/lib/domain/industry.ts`,
   `src/app/api/engine/companies-import/route.ts`, `scripts/vps/worker.sh`.
-- **Indietro:** `bash worker.sh ferma` (o `sudo systemctl disable --now webora-cc.timer`); le aziende importate si tolgono
+- **Indietro:** `bash worker.sh ferma` (o `sudo systemctl disable --now avvisto-cc.timer`); le aziende importate si tolgono
   con `delete from companies where origin = 'cc'` (prima controllare che non abbiano lead consegnati); revert del commit
   per la route.
 - **Costo:** circa 0,01 centesimi per azienda (Haiku), circa 0,50 € al giorno al ritmo proposto.
@@ -299,10 +315,10 @@ Come tornare indietro, in generale:
 - **Indietro:** rimettere i valori precedenti su entrambi i lati (o due valori nuovi uguali sui due lati); per `vercel.json`
   togliere la condizione `[ "$P" != "$(git rev-parse HEAD)" ]`.
 
-## 22/10/2026 — pulizia dei dati di collaudo (punto 19) · eseguita il 22/10 (resta solo «Webora», 1 utente)
-- **Inventario** (`supabase/queries/inventario_collaudo.sql`, sola lettura): 3 organizzazioni, tutte dell'utente. «Webora»
+## 22/10/2026 — pulizia dei dati di collaudo (punto 19) · eseguita il 22/10 (resta solo l'organizzazione dell'amministratore, 1 utente)
+- **Inventario** (`supabase/queries/inventario_collaudo.sql`, sola lettura): 3 organizzazioni, tutte dell'utente. l'organizzazione dell'amministratore
   (admin, 44 ricerche e 195 lead di collaudo), «Scazza» e «Prova» (nessuna ricerca, solo i crediti di benvenuto).
-- **Decisione dell'utente:** cancellare «Scazza» e «Prova» con i loro utenti; tenere «Webora» (storico dei collaudi: costi,
+- **Decisione dell'utente:** cancellare «Scazza» e «Prova» con i loro utenti; tenere l'organizzazione dell'amministratore (storico dei collaudi: costi,
   resa del motore, misure usate dalla pagina Admin e dal resoconto; i suoi 195 lead escludono quelle aziende solo dalle
   ricerche di prova dell'admin).
 - **Script:** `supabase/queries/pulizia_collaudo_22_10.sql`, un solo blocco: si ferma se le due organizzazioni hanno
@@ -311,7 +327,7 @@ Come tornare indietro, in generale:
   prova (blocco con una ricerca, pulizia, seconda esecuzione bloccata, admin membro di «Prova» non cancellato).
 - **Revisione:** Code Reviewer PRONTO, QA FUNZIONA. Aggiunti i controlli su pagamenti, abbonamenti, cliente Stripe, ticket,
   esportazioni e liste, e il blocco delle due righe tra controllo e cancellazione. QA: acquisto, segnalazione, avviso, nome
-  diverso, piano diverso, già cancellata → si ferma; utente anche in Webora → resta; crediti di Webora e aziende invariati.
+  diverso, piano diverso, già cancellata → si ferma; utente anche nell'organizzazione dell'amministratore → resta; crediti dell'amministratore e aziende invariati.
 - **Indietro:** non si torna indietro se non dal backup; gli account si possono ricreare con una nuova registrazione.
 
 ## 22/10/2026 — disponibilità come la riserva, prova del certificato, filtro porte nel motore · in produzione (migrazione 065 eseguita e workflow pubblicati il 22/10)
@@ -476,17 +492,17 @@ Come tornare indietro, in generale:
 
 ## 22/10/2026 — backup notturno cifrato del database sul VPS (punto 90) · rivisto, su main, **non installato** (22/10: l'utente rimanda, i backup arriveranno con Supabase Pro; il codice resta pronto)
 - **Perché:** Supabase gratuito non ha backup scaricabili; il database ora ha circa 70.000 aziende e cresce ogni ora.
-- **Cosa:** `scripts/vps/backup.sh` (servizio `webora-backup`, ogni notte alle 1:40 UTC): `pg_dump` di PostgreSQL 17 (repository
+- **Cosa:** `scripts/vps/backup.sh` (servizio `avvisto-backup`, ogni notte alle 1:40 UTC): `pg_dump` di PostgreSQL 17 (repository
   ufficiale PGDG) dello schema `public` e dei dati di `auth.users` e `auth.identities`, controllo con `pg_restore --list` (si
   ferma se meno di 10 tabelle con dati), cifratura con age per la sola chiave pubblica; la chiave privata non sta sul
-  server (la mostra una volta `installa-backup`, la tiene l'utente). Connessione in `/etc/webora/backup.env` come variabili
+  server (la mostra una volta `installa-backup`, la tiene l'utente). Connessione in `/etc/avvisto/backup.env` come variabili
   di libpq (la password non passa mai sulla riga di comando). Tenuti 7 giorni più le domeniche fino a 35 giorni.
   `worker.sh`: `installa-backup`, `backup`, `stato-backup`; `avvia` e `ferma` comprendono il timer del backup se c'è.
 - **Prove:** in locale su `bench39` (40 tabelle, 2,8 MB cifrati), ripristino in un database vuoto con le 17.500 aziende,
   pulizia degli archivi vecchi con date finte (tenuti gli ultimi 7 giorni e le domeniche entro 35 giorni).
 - **Revisione (Code Reviewer, pronto con riserve, corretto):** il backup gira con un utente temporaneo di systemd
   (`DynamicUser`), non con «worker» che apre siti esterni; `backup.env` solo root (la legge systemd), script e chiave pubblica
-  copiati da root in `/usr/local/lib/webora/`; password chiesta a parte (niente codifica `%xx` da fare a mano); motivo
+  copiati da root in `/usr/local/lib/avvisto/`; password chiesta a parte (niente codifica `%xx` da fare a mano); motivo
   scritto anche con 0 tabelle; schermo e storico del terminale puliti dopo la chiave; `ferma` non spegne il backup.
 - **QA (funziona con problemi, corretto):** prima del backup si contano le aziende (almeno 1.000, altrimenti si ferma: un
   database svuotato non sostituisce i backup buoni); avanzi in chiaro di un giro interrotto a forza cancellati all'inizio;
@@ -495,7 +511,7 @@ Come tornare indietro, in generale:
   secondo giro nello stesso giorno, chiave sbagliata, caratteri speciali nella password.
 - **Limiti:** i backup stanno sullo stesso VPS (proteggono da un guasto di Supabase o da un errore, non dalla perdita del
   VPS); un backup fallito non manda ancora avvisi (lo si vede con `stato-backup`). Copia fuori dal VPS e avvisi: dopo.
-- **Indietro:** `sudo systemctl disable --now webora-backup.timer`; `sudo rm /etc/webora/backup.env` per togliere la password.
+- **Indietro:** `sudo systemctl disable --now avvisto-backup.timer`; `sudo rm /etc/avvisto/backup.env` per togliere la password.
 
 ## 22/10/2026 — annunci di lavoro anche per la manifattura (punto 89) · rivisto (Code Reviewer, Sales Copywriter), su main; in produzione dal 22/10 (nodi di «Annunci | Raccolta Adzuna» e «Lead Engine» pubblicati)
 - **Perché:** manifattura e industria sono i settori più deboli; gli annunci per operai, manutentori e magazzinieri sono
@@ -525,7 +541,7 @@ Come tornare indietro, in generale:
 - **Perché:** il popolamento OSM ha trovato 397.605 attività con un nome ma senza sito: senza dominio non entrano nel
   database. Solo la parte gratuita (domini indovinati); la ricerca web con Haiku per i casi difficili, con un tetto di spesa,
   è una decisione a parte.
-- **Cosa:** `worker/siti-osm.mjs` (servizio `webora-siti`, ogni ora alle :50, 3.000 attività per giro, 16 in parallelo,
+- **Cosa:** `worker/siti-osm.mjs` (servizio `avvisto-siti`, ogni ora alle :50, 3.000 attività per giro, 16 in parallelo,
   massimo 40 minuti): legge le attività senza sito dal file del popolamento (`senza-sito.json`, rifatto quando il file
   cambia), sceglie prima uffici, manifattura e artigiani, salta i nomi presenti in 4 o più posti («Bar Sport») e quelle
   provate negli ultimi 180 giorni (`siti-provati.tsv`). Per ognuna: domini dal nome e verifica con i nodi n8n
@@ -545,12 +561,12 @@ Come tornare indietro, in generale:
   nome), 2 non apribili da qui (protezione anti-bot), nessuno sbagliato.
 - **Primo giro vero (22/10, 16:12–16:18 UTC):** 3.000 attività in 366 s, **257 siti trovati (8,6%)**: 241 aziende nuove, 16
   già presenti. Giro ogni ora alle :50: circa 5 giorni per tutte le 355.000, stima 25–30.000 aziende nuove.
-- **Indietro:** `sudo systemctl disable --now webora-siti.timer`; le aziende aggiunte hanno `origin = 'osm_sito'`.
+- **Indietro:** `sudo systemctl disable --now avvisto-siti.timer`; le aziende aggiunte hanno `origin = 'osm_sito'`.
 
 ## 22/10/2026 — tutta Italia da OpenStreetMap sul VPS (punto 87) · in produzione dal 22/10 (primo giro: 52.284 aziende nuove, 15.132 aggiornate; giro ogni lunedì alle 2:20 UTC); da spegnere «Aziende | Popolamento OSM» su n8n
 - **Perché:** il popolamento n8n chiede a Overpass 8 province a notte (due settimane per un giro, province perse per i
   timeout: Milano, Brescia, Bologna...) e solo i tipi con sito; manifattura e uffici sono i settori più deboli del database.
-- **Cosa:** `scripts/vps/osm.sh` (ogni lunedì alle 2:20 UTC, servizio `webora-osm`, dati in `/var/lib/webora-osm`): scarica
+- **Cosa:** `scripts/vps/osm.sh` (ogni lunedì alle 2:20 UTC, servizio `avvisto-osm`, dati in `/var/lib/avvisto-osm`): scarica
   `italy-latest.osm.pbf` da Geofabrik solo se cambiato (md5), tiene con osmium le attività dei tipi utili e i confini con
   il codice ISO; `worker/osm.mjs` assegna la provincia (indirizzo, altrimenti confini semplificati a circa 50 m) e passa le
   attività con sito al nodo n8n «Normalizza OSM» eseguito così com'è, poi le salva a blocchi di 2.000 su
@@ -581,7 +597,7 @@ Come tornare indietro, in generale:
 - **Primo giro vero (22/10, 15:43–15:54 UTC, 276 s per l'elaborazione):** 107 province su 107, 70.012 aziende inviate:
   **52.284 nuove**, 15.132 aggiornate, 2.596 saltate (fuori target o in opposizione). Le nuove entrano nelle code del
   controllo siti e dei contatti (circa 4 giorni) e, se senza settore, di Haiku.
-- **Indietro:** `sudo systemctl disable --now webora-osm.timer`; riaccendere «Aziende | Popolamento OSM» su n8n.
+- **Indietro:** `sudo systemctl disable --now avvisto-osm.timer`; riaccendere «Aziende | Popolamento OSM» su n8n.
 
 ## 22/10/2026 — contatti per tutto il database (punto 86) · in produzione dal 22/10 (migrazione 066 eseguita, main pubblicato, primo giro: 150 aziende in 42 s, 116 siti letti, 18 email e 35 moduli salvati; giro alle :15 e :45 UTC)
 - **Perché:** solo il 22% delle aziende vive ha un'email o un modulo (2.530 su 11.623): il controllo siti legge solo la
@@ -617,7 +633,7 @@ Come tornare indietro, in generale:
 - **Prove:** `node worker/test.mjs`: esiti identici a «Valuta siti» su 120 casi (16 pagine × 2 indirizzi × 4 esiti HTTPS),
   indirizzi interni, porte e protocolli rifiutati, redirect, gzip, limite di 3 MB, 404, HEAD.
 - **Servizio:** systemd con `ProtectSystem=strict`, `ProtectHome`, `NoNewPrivileges`, `MemoryMax=1G`; segreto in
-  `/etc/webora/site-checks.env` (root:worker, 640), mai nel repository.
+  `/etc/avvisto/site-checks.env` (root:worker, 640), mai nel repository.
 - **Revisione (Code Reviewer: NON PRONTO, corretto):** tempo massimo su tutta la richiesta, redirect e lettura compresi
   (prima un sito che manda un byte al secondo restava aperto: con 8 così si perdeva il giro) e 30 s al massimo per azienda;
   un redirect verso un indirizzo malformato era un'eccezione non gestita che fermava il worker, ora è un rifiuto; bloccati
@@ -729,7 +745,7 @@ Come tornare indietro, in generale:
 - **Indietro:** togliere `git` e `ignoreCommand` da `vercel.json`.
 
 ## 21/10/2026 — nome in un solo punto del codice (punto 72) · in produzione al push (nessun cambiamento visibile)
-- **Cosa:** i «Webora Leads» e gli indirizzi scritti a mano nell'app ora vengono da `BRAND` (`src/lib/config.ts`), con il nuovo
+- **Cosa:** i nomi e gli indirizzi scritti a mano nell'app ora vengono da `BRAND` (`src/lib/config.ts`), con il nuovo
   campo `suffix` (la parte verde del logo, vuota con un nome di una parola); in `n8n/annunci/build.mjs` l'indirizzo dell'app e
   la firma del bot sono le costanti `APP` e `BOT` (workflow generati identici: niente da ricaricare).
 - **Perché:** il passaggio ad Avvisto diventa un cambio di configurazione più logo e testi.
@@ -748,7 +764,7 @@ Come tornare indietro, in generale:
   - nomi DNS «jolly» (nip.io, sslip.io, localtest.me e simili) scartati in `04-deduplica-candidati.js`,
     `06-esito-ricerca-web.js` e «Homepage da leggere» del Settore, che ora scarta anche gli IP e i nomi interni;
   - pagina del referente senza porte strane (`14-valuta-segnali-sito.js`);
-  - callback del motore solo verso `https://leads.weborastudio.it/api/engine/callback` (`01-valida-richiesta.js`, `HOST_APP`):
+  - callback del motore solo verso `il vecchio indirizzo/api/engine/callback` (`01-valida-richiesta.js`, `HOST_APP`):
     **al cambio di nome va aggiunto il dominio nuovo**;
   - nell'app `publicDomain()` (`src/lib/domain/engine.ts`) usata da `urlOnDomain` e dalle route `api/engine/*`.
   - **Non fatto, con motivo:** i redirect verso indirizzi interni e la verifica dell'IP non si possono controllare dentro n8n:
@@ -790,7 +806,7 @@ Come tornare indietro, in generale:
 
 ## 21/10/2026 — nome nuovo e costi di Hostinger (punti 65–69) · decisione, nessuna modifica all'app
 
-- **Cosa:** piano per il cambio di nome e controllo dei costi. Oggi Hostinger costa circa 234 €/anno: dominio weborastudio.it
+- **Cosa:** piano per il cambio di nome e controllo dei costi. Oggi Hostinger costa circa 234 €/anno: dominio il dominio vecchio
   15,99 € (rinnovo 20/01/2027), Business Web Hosting 203,88 € (rinnovo 02/02/2027), Starter Business Email in prova 14,16 €
   (rinnovo 19/02/2027). Con il dominio nuovo sono circa 250 €/anno.
 - **Nome:** l'utente propone Prosperia (prosperia.it); prosperia.com risulta già registrato. Parere di Sales & Copy: sconsigliato,
@@ -801,7 +817,7 @@ Come tornare indietro, in generale:
   Risultano liberi: avvisto.it, scovia.it, spuntia.it e .com, fiutia.it e .com, opportia.it, pistia.it.
 - **Scelta in prova (21/10):** **Avvisto** («ho avvistato un'occasione»); avvisto.it confermato libero su Hostinger. Restano da fare
   il controllo del marchio e l'acquisto del dominio (checklist 65–66).
-- **Passaggio (dopo il 30/10):** DNS verso Vercel, rinvio permanente da leads.weborastudio.it, dominio su Resend, indirizzi in
+- **Passaggio (dopo il 30/10):** DNS verso Vercel, rinvio permanente da il vecchio indirizzo, dominio su Resend, indirizzi in
   Supabase, Stripe, Turnstile e callback di n8n, casella email nuova con leads@ inoltrata, firma, testi e documenti.
 - **Dove:** `docs/00-checklist.md` (punti 65–69; il 33 assorbito dal 68).
 - **Come tornare indietro:** nessuna modifica tecnica; si tolgono i punti dalla checklist.
@@ -1060,7 +1076,7 @@ Come tornare indietro, in generale:
 - **Cosa:** `.claude/agents/business-analyst.md`: resoconto giornaliero e settimanale (ricerche, qualità, database, costi
   AI e per lead, esecuzioni n8n del mese, beta rispetto alle soglie del 30/10); ogni numero misurato / stimato / mancante;
   i dati che stanno solo su Supabase li chiede con una query in sola lettura da far eseguire all'utente. Solo lettura su n8n.
-- **Attività programmata** «Webora Leads – analisi giornaliera» (ogni giorno alle 7:52, in questa sessione): il testo ora fa
+- **Attività programmata** «il nome vecchio – analisi giornaliera» (ogni giorno alle 7:52, in questa sessione): il testo ora fa
   preparare il resoconto al `business-analyst` (e un controllo breve al `data-quality` se ci sono segnali nuovi).
 - **Indietro:** cancellare il file; nell'attività programmata rimettere il testo del 14/10 (analisi fatta dalla chat).
 
@@ -1112,7 +1128,7 @@ Come tornare indietro, in generale:
 
 ## 21/10/2026 — primo agente: Code Reviewer · creato
 - **Cosa:** `.claude/agents/code-reviewer.md`: revisore in sola lettura (strumenti Read, Grep, Glob, Bash solo per comandi
-  di lettura e controlli), aree critiche di Webora, esito PRONTO / PRONTO CON RISERVE / NON PRONTO, dettagli delle
+  di lettura e controlli), aree critiche del nome vecchio, esito PRONTO / PRONTO CON RISERVE / NON PRONTO, dettagli delle
   vulnerabilità mai nel repository. Si carica all'avvio di una sessione: nella sessione in cui è nato si prova con un
   agente generico che legge lo stesso file. Prima prova sul punto 52 (commit 2bc6ccb).
 - **Prima revisione (punto 52): PRONTO CON RISERVE.** Trovato un problema Medio vero: un settore senza termini utili
@@ -1286,7 +1302,7 @@ Come tornare indietro, in generale:
 - **Cosa:** controllo sull'host del sito salvato (www se lo usa); contano solo certificato scaduto, autofirmato o di un
   altro sito; catena incompleta ed errori di handshake diventano «non determinabile». 341 prove ricontrollate.
 
-### Email con la grafica Webora · in produzione (commit a9b356f, a325b47)
+### Email con la grafica precedente · in produzione (commit a9b356f, a325b47)
 - **Cosa:** modello unico HTML + testo (`src/lib/email/layout.ts`), logo in `public/email/logo.png`, 5 modelli per Supabase
   in `supabase/templates/` (incollati nel pannello), schermata «Controlla la tua email».
 

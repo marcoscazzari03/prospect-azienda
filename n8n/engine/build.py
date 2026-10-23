@@ -20,7 +20,7 @@ ICYPEAS = "{ id: 'sdOCb0GxGnanvIRo', name: 'Icypeas API' }"
 IN_AUTH = "newCredential('Lead Engine - Webhook in ingresso')"
 CB_AUTH = "newCredential('Lead Engine - Callback verso backend')"
 MODEL = "gpt-5.6-luna"
-ANTHROPIC = "{ id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' }"
+ANTHROPIC = "{ id: 'LyaIAvxLwaL5YMIO', name: 'Avvisto - Anthropic' }"
 # Motore AI: "anthropic" (Claude, modello scelto in 01-valida-richiesta.js) o "openai".
 AI_PROVIDER = "anthropic"
 

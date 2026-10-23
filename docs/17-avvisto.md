@@ -1,9 +1,9 @@
 # Passaggio ad Avvisto
 
-Documento vivo del rebranding da «Webora Leads» (leads.weborastudio.it) ad **Avvisto** (avvisto.it), iniziato il 23/10.
+Documento vivo del rebranding dal nome vecchio (il vecchio indirizzo) ad **Avvisto** (avvisto.it), iniziato il 23/10.
 Decisioni dell'utente (23/10): sito e app su **avvisto.it** (www.avvisto.it rimanda lì), email di mittente e assistenza
-**ciao@avvisto.it**, **logo provvisorio** fatto da Claude (da sostituire con quello definitivo). Il titolare resta Webora
-Studio («Avvisto è un servizio di Webora Studio») finché non c'è la società o la partita IVA nuova (punto 11).
+**ciao@avvisto.it**, **logo provvisorio** fatto da Claude (da sostituire con quello definitivo). Il titolare resta il nome vecchio
+Studio («Avvisto è un servizio dello studio») finché non c'è la società o la partita IVA nuova (punto 11).
 
 ## Grafica (23/10, decisione dell'utente)
 Colore principale viola/indaco e logo della bozza (`docs/design/avvisto/`: Panoramica, riquadro «Non sai da dove iniziare?»,
@@ -20,15 +20,15 @@ Tolto dalla bozza quello che l'app non ha (campanella delle notifiche). Testi pr
 
 ## Come si fa senza fermare il servizio
 1. **Prima (codice pronto, nome vecchio online):** tutto il codice sa già essere «Avvisto», ma lo diventa solo con
-   `NEXT_PUBLIC_BRAND=avvisto` su Vercel. Fino ad allora il sito resta «Webora Leads».
+   `NEXT_PUBLIC_BRAND=avvisto` su Vercel. Fino ad allora il sito resta il nome vecchio.
 2. **Il giorno del passaggio:** dominio e casella pronti, servizi esterni configurati, poi la variabile su Vercel e una
    nuova pubblicazione. Il vecchio indirizzo rimanda per sempre al nuovo (i link già inviati continuano a funzionare).
 3. **Dopo:** controlli da cliente, comunicazione alle agenzie della beta.
 
 ## Fase A — Codice pronto (Io, 23–24/10, nessun effetto online)
-- A1. `BRAND` con due versioni (Webora e Avvisto), scelta da `NEXT_PUBLIC_BRAND`; nome, dominio, email, titolare.
+- A1. `BRAND` con due versioni (il nome vecchio e Avvisto), scelta da `NEXT_PUBLIC_BRAND`; nome, dominio, email, titolare.
 - A2. Logo provvisorio Avvisto: simbolo (`src/components/logo.tsx`), icona del browser, `public/email/logo-avvisto.png`.
-- A3. Testi con il nome: homepage, prezzi, FAQ, registrazione, email dell'app, pagine legali («servizio di Webora Studio»),
+- A3. Testi con il nome: homepage, prezzi, FAQ, registrazione, email dell'app, pagine legali («servizio dello studio»),
   file Excel, identificativo dei robot (`AvvistoBot`). Revisione del Sales Copywriter.
 - A4. Modelli email di Supabase in versione Avvisto (`supabase/templates/avvisto/`), da incollare il giorno del passaggio.
 - A5. Motore n8n: `HOST_APP` accetta **già** anche avvisto.it (callback verso l'app), così il passaggio non lo rompe.
@@ -44,7 +44,7 @@ Tolto dalla bozza quello che l'app non ha (campanella delle notifiche). Testi pr
   provarla (invio e ricezione). Poi un account Google con ciao@avvisto.it («usa il tuo indirizzo email attuale») e il logo come
   foto: logo accanto al mittente in Gmail (punto 30) e servizi Google (Search Console): meglio presso lo stesso fornitore del dominio (un
   solo pannello); in alternativa casella su Hostinger con i record MX puntati lì.
-- B3. Inoltro di leads@weborastudio.it verso ciao@avvisto.it (le risposte alle vecchie email arrivano lo stesso).
+- B3. Inoltro di la casella vecchia verso ciao@avvisto.it (le risposte alle vecchie email arrivano lo stesso).
 
 ## Fase C — Servizi esterni (Insieme, il giorno del passaggio, circa 1–2 ore)
 Ogni passo con la guida passo passo in chat.
@@ -61,13 +61,13 @@ Ogni passo con la guida passo passo in chat.
 - C7. **n8n:** `APP` nei workflow degli annunci (`n8n/annunci/build.mjs`) e callback del motore verso avvisto.it; caricamento
   dei nodi e pubblicazione.
 - C8. **VPS:** `APP_URL=https://avvisto.it` nel file di configurazione, `bash worker.sh aggiorna`.
-- C9. **Rinvio permanente:** leads.weborastudio.it → avvisto.it (308, stesso percorso) da Vercel.
+- C9. **Rinvio permanente:** il vecchio indirizzo → avvisto.it (308, stesso percorso) da Vercel.
 
 ## Fase D — Verifica (Insieme, subito dopo)
 - D1. Registrazione nuova con email vera: conferma, accesso, verifica in due passaggi.
 - D2. Ricerca di prova: callback del motore, lead consegnati, export Excel con il nome nuovo.
 - D3. Email: benvenuto, reimpostazione password, avviso settimanale (mittente, logo, link).
-- D4. Vecchi link (`leads.weborastudio.it/app/...`) che portano alla pagina giusta.
+- D4. Vecchi link (`il vecchio indirizzo/app/...`) che portano alla pagina giusta.
 - D5. Worker sul VPS e workflow n8n che salvano senza errori (giro successivo).
 - D6. QA Tester sul percorso cliente, UI/UX Designer su homepage, prezzi, registrazione e app (telefono e computer).
 
@@ -86,7 +86,12 @@ Ogni passo con la guida passo passo in chat.
   dominio» fatto, in attesa della propagazione). **C1 iniziato:** avvisto.it (Production) e www.avvisto.it (308 verso
   avvisto.it) aggiunti su Vercel; DNS su Hostinger: A @ 216.198.79.1 (al posto del parcheggio 2.57.91.91), CNAME www
   834fbe17190cdec4.vercel-dns-017.com, TTL 60; record della posta lasciati com'erano. Dominio attivo nel pomeriggio: avvisto.it
-  apre l'app (ancora col nome Webora), www rimanda con 308, MX e SPF di Hostinger presenti. **C1 fatto.** Prossimo: prova della
+  apre l'app (ancora col nome vecchio), www rimanda con 308, MX e SPF di Hostinger presenti. **C1 fatto.** Prossimo: prova della
   casella, poi C2 (Resend).
 - 23/10, 16:41: **C2 fatto** (avvisto.it «Verified» su Resend: DKIM, `send` e `rsend` su Hostinger; ricezione spenta). Prossimo:
   prova della casella ciao@avvisto.it, poi il giorno del passaggio da C3 a C9 (fino ad allora niente variabili nuove su Vercel).
+- 23/10 sera, **decisioni dell'utente:** logo «C · Due toni» (A senza barra, gamba sinistra viola chiaro, destra viola scuro con la
+  lente); solo il nome Avvisto ovunque, nessuna traccia del nome vecchio (codice, email, n8n, VPS, documenti vivi); titolare
+  «Avvisto» nelle pagine legali fino alla partita IVA (checklist 11); vecchio indirizzo **staccato** del tutto, senza rinvio (i link
+  già inviati smettono di funzionare). Il codice non ha più due versioni: `NEXT_PUBLIC_BRAND` non serve. Ordine: Vercel (variabili e
+  pubblicazione) → Supabase → Turnstile → Stripe → n8n → VPS → staccare il vecchio indirizzo per ultimo.

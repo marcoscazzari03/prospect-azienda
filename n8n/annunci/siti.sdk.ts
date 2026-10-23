@@ -33,7 +33,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies?limit=120',
+      url: 'https://avvisto.it/api/engine/job-ads/companies?limit=120',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -126,7 +126,7 @@ const claudeSito = node({
         timeout: 120000
       }
     },
-    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' } }
+    credentials: { anthropicApi: { id: 'LyaIAvxLwaL5YMIO', name: 'Avvisto - Anthropic' } }
   },
   output: [{ content: [], usage: {} }]
 });
@@ -187,7 +187,7 @@ const salvaWeb = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies',
+      url: 'https://avvisto.it/api/engine/job-ads/companies',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,
@@ -211,7 +211,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/job-ads/companies',
+      url: 'https://avvisto.it/api/engine/job-ads/companies',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,

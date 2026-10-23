@@ -1,4 +1,4 @@
-# Documenti di Webora Leads
+# Documenti di Avvisto
 
 Indice dei documenti, con lo stato di ognuno. Regola (dal 21/10): a ogni modifica si aggiornano il registro, la checklist e il
 documento vivo che la descrive, nello stesso commit.

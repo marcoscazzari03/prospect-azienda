@@ -1,4 +1,4 @@
-import { BRAND, BRAND_KEY } from "@/lib/config";
+import { BRAND } from "@/lib/config";
 
 // Grafica delle email (app e modelli di accesso di Supabase in supabase/templates/).
 // HTML a tabelle con stili in linea: è quello che Gmail, Outlook e le app di posta leggono
@@ -14,10 +14,8 @@ export type EmailContent = {
   footer: string; // perché si riceve questa email
 };
 
-// Colori delle email: come globals.css, viola in versione Avvisto (23/10).
-const C = BRAND_KEY === "avvisto"
-  ? { paper: "#f6f6fb", card: "#ffffff", ink: "#16142e", ink2: "#3b3a55", muted: "#5d5b78", line: "#e2e1ef", ledger: "#4338ca" }
-  : { paper: "#f4f5f7", card: "#ffffff", ink: "#111827", ink2: "#374151", muted: "#6b7280", line: "#e3e6ea", ledger: "#148057" };
+// Colori delle email: gli stessi di globals.css (grafica della bozza, 23/10).
+const C = { paper: "#f8f6f5", card: "#ffffff", ink: "#12131c", ink2: "#474957", muted: "#666876", line: "#e7e5e3", ledger: "#362793" };
 const SANS = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 const SERIF = "Georgia, 'Times New Roman', serif";
 const SITE = `https://${BRAND.domain}`;
@@ -57,7 +55,7 @@ ${c.preheader ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0
 <a href="${SITE}" target="_blank" style="text-decoration:none;">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
 <td style="vertical-align:middle;"><img src="${SITE}${BRAND.emailLogo}" width="32" height="32" alt="" style="display:block;border:0;"></td>
-<td style="vertical-align:middle;padding-left:10px;font-family:${SERIF};font-size:20px;font-weight:bold;color:${C.ink};">${esc(BRAND.short)}${BRAND.suffix ? `<span style="color:${C.ledger};">${esc(BRAND.suffix)}</span>` : ""}</td>
+<td style="vertical-align:middle;padding-left:10px;font-family:${SANS};font-size:20px;font-weight:bold;letter-spacing:-0.02em;color:${C.ink};">${esc(BRAND.short)}${esc(BRAND.suffix)}</td>
 </tr></table>
 </a>
 </td></tr>
@@ -69,7 +67,7 @@ ${(c.after ?? []).map(small).join("\n")}
 </td></tr>
 <tr><td style="padding:20px 4px 0;">
 <p style="margin:0 0 6px;font-family:${SANS};font-size:12px;line-height:1.5;color:${C.muted};">${esc(c.footer)}</p>
-<p style="margin:0;font-family:${SANS};font-size:12px;line-height:1.5;color:${C.muted};">${esc(BRAND.name)} · un servizio di ${esc(BRAND.owner)} · <a href="${SITE}" target="_blank" style="color:${C.muted};">${esc(BRAND.domain)}</a> · <a href="mailto:${BRAND.supportEmail}" style="color:${C.muted};">${esc(BRAND.supportEmail)}</a></p>
+<p style="margin:0;font-family:${SANS};font-size:12px;line-height:1.5;color:${C.muted};">${esc(BRAND.name)} · <a href="${SITE}" target="_blank" style="color:${C.muted};">${esc(BRAND.domain)}</a> · <a href="mailto:${BRAND.supportEmail}" style="color:${C.muted};">${esc(BRAND.supportEmail)}</a></p>
 </td></tr>
 </table>
 </td></tr>

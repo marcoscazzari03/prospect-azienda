@@ -33,7 +33,7 @@ const aziende = node({
     maxTries: 3,
     waitBetweenTries: 5000,
     parameters: {
-      url: 'https://leads.weborastudio.it/api/engine/site-checks?limit=150',
+      url: 'https://avvisto.it/api/engine/site-checks?limit=150',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       options: { timeout: 30000 }
@@ -133,7 +133,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/site-checks',
+      url: 'https://avvisto.it/api/engine/site-checks',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,

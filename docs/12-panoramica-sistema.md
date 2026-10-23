@@ -1,4 +1,4 @@
-# Webora Leads: panoramica completa del sistema
+# Avvisto: panoramica completa del sistema
 
 Documento da incollare in una nuova conversazione per ragionare su miglioramenti.
 Aggiornato al 21/10/2026. Descrive come funziona oggi: prodotto, sito, app, database, workflow n8n, numeri.
@@ -22,7 +22,7 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
   IT, marketing, HR, commerciale, consulenti). Dal 21/10 il sito nomina esplicitamente anche i freelance.
   Beta gratuita su invito: prime 3 agenzie il 19/10 (Gopher, Mutart, Studio360), poi inviti a circa 50 agenzie,
   10–15 al giorno (13 al 21/10); decisione sulla seconda ondata il 30/10.
-- **Sito:** leads.weborastudio.it, un servizio di Webora Studio. Casella del servizio: leads@weborastudio.it.
+- **Sito:** avvisto.it. Casella del servizio: ciao@avvisto.it.
 
 ## 2. Tecnologia
 
@@ -30,10 +30,10 @@ Non contiene chiavi né dettagli di sicurezza sensibili (quelli restano fuori da
 |---|---|---|
 | Sito e app | Next.js 16 su Vercel | server a Francoforte (fra1) |
 | Database e accesso | Supabase (Postgres) | Francoforte; regole di accesso per riga (RLS); verifica in due passaggi per gli utenti |
-| Motore e lavori automatici | n8n Cloud | 7 workflow di Webora (sezione 7) |
+| Motore e lavori automatici | n8n Cloud | 7 workflow di Avvisto (sezione 7) |
 | Intelligenza artificiale | Anthropic Claude | Sonnet per la ricerca, Haiku per settore e siti (Haiku 5.5: 0,10 $ / 0,50 $ per milione di token, prezzi nel registro del 22/10); spazio di lavoro dedicato con limite di spesa |
 | Pagamenti | Stripe | in modalità di prova: finché la chiave non è live, acquisti e portale solo per gli admin; i crediti della beta li aggiunge l'admin |
-| Email del servizio | Resend | modelli con la grafica Webora |
+| Email del servizio | Resend | modelli con la grafica precedente |
 | Captcha | Cloudflare Turnstile | registrazione, accesso, recupero password |
 | Fonti di dati | OpenStreetMap (ODbL), Adzuna (annunci), siti ufficiali delle aziende | |
 
@@ -112,7 +112,7 @@ fino alla 060, con i loro test; a ogni push GitHub Actions esegue lint, tipi, te
 - **Account:** profilo, sicurezza (password, uscita da tutti i dispositivi, verifica in due passaggi),
   fatturazione, assistenza.
 - **Email automatiche:** ricerca pronta o non riuscita, ripetizione non avviata, avvisi di sicurezza. Hanno tutte
-  la grafica Webora.
+  la grafica precedente.
 
 ## 6. Segnali, servizi e punteggio
 
@@ -177,7 +177,7 @@ database non copre.
   cliente e mai indicando chi altro li ha ricevuti.
 - Lista di esclusione e lista delle grandi aziende, che vengono escluse.
 
-**Workflow n8n di Webora** (gli orari sono italiani):
+**Workflow n8n di Avvisto** (gli orari sono italiani):
 
 | Workflow | Quando | Cosa fa |
 |---|---|---|
@@ -267,7 +267,7 @@ Gli errori del server arrivano via email all'admin.
 - **Dati delle aziende:** solo pubblici, con fonte e data; niente persone e niente caselle gratuite. Riverifica
   o cancellazione entro 24 mesi.
 - **Riservatezza delle ricerche:** le ricerche del cliente (cosa cerca, filtri, esiti) non le vede nessun altro, e
-  Webora Studio non le usa per sé. I dati pubblici delle aziende consegnate restano nel database comune e possono
+  Avvisto non le usa per sé. I dati pubblici delle aziende consegnate restano nel database comune e possono
   andare anche ad altri clienti (come dicono i termini).
 - **Responsabilità del cliente:** l'uso dei contatti è a carico del cliente. Le email promozionali in Italia
   richiedono in genere il consenso (art. 130 del Codice Privacy): è scritto nei termini.

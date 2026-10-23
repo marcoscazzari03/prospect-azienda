@@ -17,7 +17,7 @@ describe("destinazione dopo login (audit V2)", () => {
       "javascript:alert(1)", "/app\\..\\..\\evil", " /app", "/applicazione", "/", "", "/api/export", "/../evil",
     ]) {
       expect(safeNextPath(bad), bad).not.toMatch(/evil|^\/api|^\/$|applicazione/);
-      expect(new URL(safeNextPath(bad), "https://leads.weborastudio.it").origin).toBe("https://leads.weborastudio.it");
+      expect(new URL(safeNextPath(bad), "https://avvisto.it").origin).toBe("https://avvisto.it");
     }
     expect(safeNextPath(undefined)).toBe("/app");
     expect(safeNextPath(42)).toBe("/app");

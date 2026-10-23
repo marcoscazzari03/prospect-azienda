@@ -46,7 +46,7 @@ parere, se lo consente.
       Adzuna, Hostinger/registrar del dominio, email personale usata per questi account
 - [ ] Repository GitHub **privato** (Settings → General → Danger zone → Change visibility).
       Vercel e questa sessione continuano a funzionare
-- [ ] **Chiave Anthropic dedicata** a Webora Leads con **limite di spesa mensile** (es. 50 $)
+- [ ] **Chiave Anthropic dedicata** a il nome vecchio con **limite di spesa mensile** (es. 50 $)
       e avviso via email; poi **Io** la collego a tutti i nodi Claude dei workflow n8n
 - [ ] **Insieme** – Rotazione del segreto del motore (la chiave del webhook compare nelle
       esecuzioni n8n): nuovo valore in Vercel (variabile d'ambiente) e nella credenziale n8n,
@@ -80,7 +80,7 @@ parere, se lo consente.
 - [x] «Email generiche incluse»: tetto dei referenti a 1,6 volte i lead + 2 (giri dalla riserva)
 - [x] Fonti citate: «© OpenStreetMap contributors (ODbL)» nella pagina fonti/informativa
 - [ ] Testi del sito coerenti con il parere legale (niente promesse di «email pronte per campagne»)
-- [x] **Tu** – Casella leads@weborastudio.it per ricevere risposte e richieste di assistenza (19/10)
+- [x] **Tu** – Casella la casella vecchia per ricevere risposte e richieste di assistenza (19/10)
 
 ## Fase 5 – Controllo e allarmi
 

@@ -15,7 +15,7 @@ controlli.
 1. **Elenco** (una volta per trimestre): file `…-domain-vertices.txt.gz` del grafo `cc-main-2026-aug-sep-oct` (circa 1 GB,
    letto in streaming fino alla fine dei .it). Solo i domini di secondo livello (`rossi.it`, non `comune.modena.mo.it` né
    `regione.abruzzo.it`), niente IDN. Ordine mescolato sempre uguale (hash del dominio): ogni lotto è un campione di tutta
-   l'Italia. File `/var/lib/webora-cc/domini-it.txt`; il grafo nuovo si sceglie con `CC_RELEASE`.
+   l'Italia. File `/var/lib/avvisto-cc/domini-it.txt`; il grafo nuovo si sceglie con `CC_RELEASE`.
 2. **Homepage**: `https://dominio`, poi `https://www.dominio`, poi `http://dominio`; vale solo se la pagina finale resta sullo
    stesso dominio (un rimando a un portale non è il sito dell'azienda). Stesso modulo di rete degli altri worker (niente
    indirizzi interni, al massimo 1,5 MB).
@@ -63,7 +63,7 @@ controlli.
   cioè circa 0,50 € al giorno al ritmo proposto e circa 30 € per tutto l'elenco.
 
 ## Comandi sul VPS (`scripts/vps/worker.sh`)
-`installa` (crea il servizio `webora-cc`, non lo avvia), `prova-cc` (scarica l'elenco la prima volta e prova 300 domini
+`installa` (crea il servizio `avvisto-cc`, non lo avvia), `prova-cc` (scarica l'elenco la prima volta e prova 300 domini
 senza salvare, con esempi e settori), `giro-cc` (un giro vero in sottofondo), `stato-cc`, `avvia-cc` (ogni 3 ore alle :25),
 `ferma` (spegne anche questo).
 

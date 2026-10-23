@@ -21,7 +21,7 @@ const avvisaBackend = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/error',
+      url: 'https://avvisto.it/api/engine/error',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,

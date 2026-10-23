@@ -126,7 +126,7 @@ export async function trovaContatti(regole, a, req = richiesta) {
 async function main() {
   const segreto = process.env.SITE_CHECKS_SECRET || '';
   if (segreto.length < 32) throw new Error('SITE_CHECKS_SECRET mancante o troppo corto');
-  const app = (process.env.APP_URL || 'https://leads.weborastudio.it').replace(/\/+$/, '');
+  const app = (process.env.APP_URL || 'https://avvisto.it').replace(/\/+$/, '');
   const limite = Math.min(Math.max(Number(process.env.LIMIT) || 150, 1), 300);
   const parallelo = Math.min(Math.max(Number(process.env.CONCURRENCY) || 8, 1), 32);
   const prova = ['1', 'true', 'si', 'sì', 'yes'].includes(String(process.env.DRY_RUN || '').toLowerCase());

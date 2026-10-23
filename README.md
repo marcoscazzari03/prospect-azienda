@@ -1,10 +1,10 @@
-# Webora Leads — lead generation B2B con la fonte
+# Avvisto — lead generation B2B con la fonte
 
 Piattaforma SaaS in cui agenzie e professionisti descrivono il cliente ideale e ricevono aziende in target
 («Solo azienda»: nessun dato di persone), con la fonte, l'email aziendale trovata sul sito (mai ipotizzata) o il modulo
 di contatto e, nelle ricerche opportunità, segnali verificati con prova e data. Si pagano solo i lead consegnati.
 
-Destinazione: **https://leads.weborastudio.it**
+Destinazione: **https://avvisto.it**
 
 ## Documenti
 

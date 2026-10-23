@@ -20,8 +20,8 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="border-b border-line bg-ink text-paper md:sticky md:top-0 md:h-screen md:w-64 md:border-b-0">
-        <div className="px-5 py-5 [&_span]:!text-paper">
-          <Logo href="/admin" />
+        <div className="px-5 py-5">
+          <Logo href="/admin" light />
           <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-stamp">Amministrazione</p>
         </div>
         <div className="px-3 pb-3 [&_a]:text-paper/80 [&_a:hover]:bg-white/10 [&_a[aria-current=page]]:bg-paper [&_a[aria-current=page]]:text-ink">

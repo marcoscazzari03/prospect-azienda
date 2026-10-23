@@ -33,12 +33,12 @@ export const scegliSito = (livello) => codice('04-scegli-sito.js', livello === 2
   : { __METODO__: 'web', __CANDIDATI__: 'Esito ricerca web', __ELENCO__: "$('Esito ricerca web').all().map(i => i.json)" });
 
 // Indirizzo dell'app e firma del bot: al cambio di nome si cambiano qui (e HOST_APP in n8n/engine/nodes/01-valida-richiesta.js).
-const APP = 'https://leads.weborastudio.it';
-const BOT = `WeboraLeads/1.0 (+${APP})`;
+const APP = 'https://avvisto.it';
+const BOT = `AvvistoBot/1.0 (+${APP})`;
 const ADZUNA = "{ id: '9uw7ry3Mp3ULA4fe', name: 'Adzuna API' }";
 const CALLBACK = "{ id: 'kaAuSs06rml1sMA9', name: 'Lead Engine - Callback verso backend' }";
 const ERRORI = 'LOw3fRo49WKvrF6z';
-const ANTHROPIC = "{ id: 'LyaIAvxLwaL5YMIO', name: 'Webora Leads - Anthropic' }";
+const ANTHROPIC = "{ id: 'LyaIAvxLwaL5YMIO', name: 'Avvisto - Anthropic' }";
 
 const sdk = `import { workflow, node, trigger, expr } from '@n8n/workflow-sdk';
 

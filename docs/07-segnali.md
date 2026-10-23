@@ -4,7 +4,7 @@ Fase 0 (13/10/2026). Il catalogo in forma di dati è in `src/lib/domain/signals.
 di prova con gli esiti attesi sono in `n8n/engine/test/fixtures/signals/` (`expected.json`).
 
 ## Obiettivo
-Il cliente scrive **cosa offre** (es. «sono un sistemista»). Webora trova le aziende con un
+Il cliente scrive **cosa offre** (es. «sono un sistemista»). Avvisto trova le aziende con un
 **segnale verificabile** di quel bisogno e su ogni lead mostra **perché** è in target, con la prova.
 
 Due famiglie di segnali:

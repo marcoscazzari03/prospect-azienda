@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # Backup notturno cifrato del database sul VPS (punto 90, 22/10), finché non c'è Supabase Pro con i suoi backup.
-# Lanciato da systemd (webora-backup.service, ogni notte alle 1:40 UTC). Due archivi per notte, entrambi cifrati con age
-# per la chiave pubblica in /usr/local/lib/webora/backup-pubblica.txt (la chiave privata NON sta sul server: la tiene l'utente):
+# Lanciato da systemd (avvisto-backup.service, ogni notte alle 1:40 UTC). Due archivi per notte, entrambi cifrati con age
+# per la chiave pubblica in /usr/local/lib/avvisto/backup-pubblica.txt (la chiave privata NON sta sul server: la tiene l'utente):
 #   db-AAAA-MM-GG.public.dump.age   tutto lo schema public (tabelle, funzioni, dati), formato di pg_restore
 #   db-AAAA-MM-GG.auth.dump.age     solo i dati degli utenti (auth.users, auth.identities), per ricrearli
 # Si tengono gli ultimi 7 giorni e le domeniche delle ultime 5 settimane. Connessione: variabili PGHOST, PGPORT, PGUSER,
-# PGPASSWORD, PGDATABASE in /etc/webora/backup.env (mai sulla riga di comando: si vedrebbero tra i processi).
+# PGPASSWORD, PGDATABASE in /etc/avvisto/backup.env (mai sulla riga di comando: si vedrebbero tra i processi).
 # Gira con un utente temporaneo di systemd (DynamicUser), non con «worker» che apre siti esterni; la password la legge
-# systemd da /etc/webora/backup.env (solo root). Lo script eseguito è la copia di root in /usr/local/lib/webora.
+# systemd da /etc/avvisto/backup.env (solo root). Lo script eseguito è la copia di root in /usr/local/lib/avvisto.
 # Ripristino (sul proprio computer, con la chiave privata): docs/04-pubblicazione.md, sezione 8.
 set -euo pipefail
-cd "${STATE_DIRECTORY:-/var/lib/webora-backup}"
-PUBBLICA=/usr/local/lib/webora/backup-pubblica.txt
+cd "${STATE_DIRECTORY:-/var/lib/avvisto-backup}"
+PUBBLICA=/usr/local/lib/avvisto/backup-pubblica.txt
 PGBIN=$(ls -d /usr/lib/postgresql/*/bin 2>/dev/null | sort -V | tail -1)
 [ -x "$PGBIN/pg_dump" ] || { echo "pg_dump mancante: bash worker.sh installa-backup"; exit 1; }
 [ -s "$PUBBLICA" ] || { echo "Chiave pubblica mancante: bash worker.sh installa-backup"; exit 1; }

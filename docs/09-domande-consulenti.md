@@ -12,7 +12,7 @@ all'incontro così com'è: la prima parte descrive il servizio, poi le domande.
 
 ## Il servizio in breve
 
-**Webora Leads** (leads.weborastudio.it) è una piattaforma B2B a crediti: un'azienda cliente
+**Avvisto** (avvisto.it) è una piattaforma B2B a crediti: un'azienda cliente
 (agenzia web, società IT, consulente) indica settore, zona, dimensione e ruolo cercato e riceve
 un elenco di aziende con un contatto email, da usare per proporre i propri servizi.
 

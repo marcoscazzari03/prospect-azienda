@@ -91,7 +91,7 @@ const salva = node({
     waitBetweenTries: 5000,
     parameters: {
       method: 'POST',
-      url: 'https://leads.weborastudio.it/api/engine/job-ads',
+      url: 'https://avvisto.it/api/engine/job-ads',
       authentication: 'genericCredentialType',
       genericAuthType: 'httpHeaderAuth',
       sendBody: true,
