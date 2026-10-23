@@ -151,6 +151,9 @@ ben coperti dal database (punto 96).
 85. ~~**Io** – Ricerche consigliate: Haiku propone fino a 3 ricerche, solo con almeno 10 lead nel database, wizard già
     compilato~~ (23/10: in produzione solo per l'admin, chiave su Vercel; interruttore in Admin → Servizi).
 85g. ~~**Io** – Grafica dalla bozza dell'utente, esempio del campo a rotazione tra 6 frasi~~ (23/10).
+85c. ~~**Io** – Ricerche consigliate vuote per «Studio commercialista» in tutta Italia~~ (23/10: settori del database, conteggio con
+    le aziende con contatto in testa (070), ricerca semplice quando quella con servizio ha pochi lead; verificato dall'admin:
+    ristoranti circa 500, abbigliamento 270, agenzie immobiliari 160). **Io, finite le prove:** togliere la diagnosi `db` dai tentativi.
 85a. **Insieme, 26–28/10** – Ripetere le prove con descrizioni diverse (fotografo, commercialista, parrucchiere, falegname)
     quando il controllo siti ha smaltito la coda.
 85b. **Io, con Avvisto** – Modulo anche nel profilo; poi interruttore su «Tutti».
