@@ -134,8 +134,9 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
 67a. ~~**Io** – Fase A, codice pronto senza effetti online: `BRAND` in due versioni (`NEXT_PUBLIC_BRAND`), logo e icona
     provvisori, logo delle email, modelli email Avvisto, motore che accetta avvisto.it, `bash worker.sh dominio`~~ (23/10: su
     main, rivisto; nodo «Valida richiesta» caricato su n8n). **Tu:** pubblicare «Lead Engine | Search (v1)» su n8n.
-66. **Tu, appena possibile** – Fase B: comprare avvisto.it su Hostinger (circa 16 €/anno) e aggiungerlo al Business Web
-    Hosting; creare e provare la casella ciao@avvisto.it; inoltro di leads@weborastudio.it verso ciao@avvisto.it.
+66. **Tu, appena possibile** – Fase B: comprare avvisto.it (Hostinger o Keliweb: serve un pannello DNS con record A, CNAME,
+    TXT e MX); creare e provare la casella ciao@avvisto.it, meglio presso lo stesso fornitore; inoltro di
+    leads@weborastudio.it verso ciao@avvisto.it.
 67. **Insieme, il giorno del passaggio (1–2 ore)** – Fase C: dominio su Vercel e DNS; dominio su Resend (SPF, DKIM, DMARC);
     variabili su Vercel (`APP_URL`, `EMAIL_FROM`, `NEXT_PUBLIC_BRAND=avvisto`); Supabase (Site URL, Redirect URLs, modelli,
     mittente); Turnstile; webhook di Stripe; n8n; `APP_URL` sul VPS; rinvio permanente da leads.weborastudio.it.
