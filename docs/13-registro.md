@@ -50,6 +50,17 @@ Come tornare indietro, in generale:
 
 ---
 
+## 23/10/2026 — ricerche consigliate: «Rimuovi», sezione nel profilo, lead ricontati ogni notte · in revisione
+- **Cosa:** pulsante «Rimuovi» (azione `clearBusinessProfile`: descrizione, zona e proposte cancellate, il riquadro torna alla
+  riga «Vuoi ricerche già pronte…»); sezione «La tua attività» in Account → Profilo (solo con l'interruttore acceso) con
+  «Modifica e aggiorna le proposte» (apre il modulo nella Panoramica, `/app?attivita=modifica#attivita`) e «Rimuovi»;
+  `recountSuggestions` nel cron notturno (`/api/cron/watchdog`, 3:00 UTC): ricontano i lead di tutte le proposte di Haiku già
+  salvate, senza chiamare Haiku, fino a 10 organizzazioni a notte; i tentativi salvano la proposta intera e `countedAt`.
+  Testo «I numeri si aggiornano ogni notte».
+- **Perché:** richiesta dell'utente («aggiorna tutti i giorni» e «cancella»): aggiornamento automatico invece di un
+  interruttore, perché costa zero (niente Haiku).
+- **Indietro:** revert del commit.
+
 ## 23/10/2026 — ricerche consigliate: «oltre 500 lead» · su main
 - **Cosa:** quando il conteggio arriva al tetto (501 aziende lette) e quasi tutte sono raggiungibili, la scheda dice «oltre 500
   lead» invece di «circa 500» (`leadsLabel` in `src/lib/domain/suggestions.ts`). Richiesta dell'utente.

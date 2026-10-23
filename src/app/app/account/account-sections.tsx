@@ -4,7 +4,7 @@ import { Badge, Button, ButtonLink, Card } from "@/components/ui";
 import { formatEur, formatNumber } from "@/lib/domain/pricing";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
 import { BRAND } from "@/lib/config";
-import { openPortal } from "../actions";
+import { clearBusinessProfile, openPortal } from "../actions";
 import { signOutEverywhere } from "./actions";
 import { MfaSettings, PasswordForm, ProfileForm, type MfaStatus } from "./account-forms";
 
@@ -46,6 +46,26 @@ export function ProfileSection({ account: a }: { account: AccountData }) {
   return (
     <Section id="profilo" title="Profilo" text="I tuoi dati e quelli della tua azienda.">
       <ProfileForm fullName={a.fullName} company={a.orgName} email={a.email} canEditCompany={a.owner} />
+    </Section>
+  );
+}
+
+// «La tua attività» (ricerche consigliate, punti 84–85): si modifica dalla Panoramica, dove ci sono le proposte.
+export function BusinessSection({ description, area }: { description: string; area: string }) {
+  return (
+    <Section id="attivita" title="La tua attività" text="Da qui partono le ricerche consigliate nella Panoramica.">
+      {description ? (
+        <div className="grid gap-3 text-sm">
+          <p><span className="text-muted">Cosa fai:</span> {description}</p>
+          <p><span className="text-muted">Dove cerchi clienti:</span> {area || "Tutta Italia"}</p>
+          <div className="flex flex-wrap gap-2">
+            <ButtonLink href="/app?attivita=modifica#attivita" variant="secondary">Modifica e aggiorna le proposte</ButtonLink>
+            <form action={clearBusinessProfile}><Button type="submit" variant="ghost">Rimuovi</Button></form>
+          </div>
+        </div>
+      ) : (
+        <ButtonLink href="/app?attivita=modifica#attivita" variant="secondary">Descrivi la tua attività</ButtonLink>
+      )}
     </Section>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 import { startTransition, useActionState, useState } from "react";
-import { saveBusinessProfile, skipBusinessProfile, type ActionState } from "@/app/app/actions";
+import { clearBusinessProfile, saveBusinessProfile, skipBusinessProfile, type ActionState } from "@/app/app/actions";
 import { Alert, Badge, Button, ButtonLink, Card, Input, Textarea } from "@/components/ui";
 import { BUSINESS_LIMITS, leadsLabel, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
 import { BRAND } from "@/lib/config";
@@ -9,8 +9,11 @@ import { BRAND } from "@/lib/config";
 // dashboard, saltabile. Testi rivisti dal sales-copywriter il 23/10.
 const CLIENTI = ["Imprese edili", "Studi professionali", "Negozi", "Ristoranti e hotel", "Aziende industriali", "Altro"];
 
-export function SuggestedSearches({ description, area, stored, skipped, example }: { description: string; area: string; stored: StoredSuggestions | null; skipped: boolean; example: string }) {
-  const [editing, setEditing] = useState(!description && !skipped);
+export function SuggestedSearches({ description, area, stored, skipped, example, startEditing = false }: {
+  description: string; area: string; stored: StoredSuggestions | null; skipped: boolean; example: string; startEditing?: boolean;
+}) {
+  // startEditing: arrivati dal profilo con «Modifica» (/app?attivita=modifica).
+  const [editing, setEditing] = useState(startEditing || (!description && !skipped));
   const [length, setLength] = useState(description.length);
   // Proposte arrivate: si chiude il modulo e si mostrano le schede.
   const [state, action, pending] = useActionState<ActionState, FormData>(async (prev, form) => {
@@ -29,7 +32,7 @@ export function SuggestedSearches({ description, area, stored, skipped, example 
   }
 
   return (
-    <Card className="mb-6 border-ledger/25 p-5">
+    <Card id="attivita" className="mb-6 scroll-mt-8 border-ledger/25 p-5">
       {editing || !description ? (
         <form action={action} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="grid gap-4">
@@ -104,7 +107,10 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
           <h2 className="font-display text-xl font-semibold">Ricerche consigliate per te</h2>
           <p className="mt-1 line-clamp-2 text-sm text-muted">{description} · {area || "Tutta Italia"}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onEdit}>Modifica</Button>
+        <div className="flex gap-1">
+          <Button variant="ghost" size="sm" onClick={onEdit}>Modifica</Button>
+          <form action={clearBusinessProfile}><Button type="submit" variant="ghost" size="sm">Rimuovi</Button></form>
+        </div>
       </div>
       {/* Calcolo nuovo fallito con proposte vecchie salvate: l'errore si mostra sopra (23/10: sembravano proposte nuove). */}
       {error && stored && <div className="mb-4"><Alert tone="stamp">{error} Qui sotto le proposte di prima.</Alert></div>}
@@ -184,7 +190,7 @@ function Results({ description, area, stored, onEdit, action, pending, error }: 
           </a>
         ))}
       </div>
-      <p className="mt-3 text-xs text-muted">Si apre la ricerca già compilata. La controlli e la avvii tu: paghi solo i lead consegnati.</p>
+      <p className="mt-3 text-xs text-muted">Si apre la ricerca già compilata. La controlli e la avvii tu: paghi solo i lead consegnati. I numeri si aggiornano ogni notte.</p>
     </>
   );
 }

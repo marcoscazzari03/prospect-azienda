@@ -51,6 +51,12 @@ proposte. Fino a 6 proposte da Haiku, se ne mostrano 3.
 Il conteggio leggeva 501 aziende a caso del settore: con «Ristorante» in tutta Italia erano quasi tutte senza email (3 lead).
 Dalla migrazione 070 entrano prima quelle con un contatto; vale anche per la stima del wizard.
 
+## Aggiornamento e rimozione (23/10 sera, richiesta dell'utente)
+- I lead delle proposte si ricontano ogni notte nel cron (`recountSuggestions`), senza Haiku: le proposte restano, cambiano i
+  numeri (e quali 3 si vedono).
+- «Rimuovi» nel riquadro e nel profilo cancella descrizione, zona e proposte.
+- Profilo: sezione «La tua attività», con il link al modulo nella Panoramica.
+
 ## Come è fatto (23/10)
 - **Dati:** migrazione `20261211000067_business_profile.sql`, colonne sull'organizzazione: `business_description` (≤500),
   `business_area` (≤120), `business_suggestions` (proposte già filtrate e contate), `business_suggested_at`,
@@ -69,5 +75,5 @@ Dalla migrazione 070 entrano prima quelle con un contatto; vale anche per la sti
 - **Test:** `tests/suggestions.test.ts` (pulizia della risposta, scelta delle proposte, link, arrotondamento).
 
 ## Da fare
-Prove con descrizioni diverse (falegname, fotografo, commercialista, parrucchiere), poi il modulo anche nel profilo e
-«Tutti» con Avvisto.
+Prove con descrizioni diverse (falegname, fotografo, parrucchiere); revisione dei testi (Sales Copywriter); poi «Tutti»
+con Avvisto.

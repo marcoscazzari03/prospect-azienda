@@ -331,6 +331,17 @@ export async function saveBusinessProfile(_: ActionState, form: FormData): Promi
   return suggestions ? {} : { error: "Non siamo riusciti a preparare le ricerche. Riprova, oppure crea una ricerca a mano." };
 }
 
+// «Rimuovi le proposte»: descrizione, zona e proposte cancellate; il riquadro torna alla riga «Vuoi ricerche già pronte…».
+export async function clearBusinessProfile() {
+  const viewer = await requireViewer();
+  await createAdminClient().from("organizations").update({
+    business_description: "", business_area: "", business_suggestions: null, business_suggested_at: null,
+    business_skipped_at: new Date().toISOString(),
+  }).eq("id", viewer.org.id);
+  revalidatePath("/app");
+  revalidatePath("/app/account");
+}
+
 export async function skipBusinessProfile() {
   const viewer = await requireViewer();
   await createAdminClient().from("organizations").update({ business_skipped_at: new Date().toISOString() }).eq("id", viewer.org.id);

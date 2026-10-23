@@ -91,6 +91,25 @@ async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: str
   return n("total") > LEADS_CAP && min >= LEADS_CAP ? LEADS_CAP + 1 : min;
 }
 
+// Due conteggi alla volta, non sei insieme: in tutta Italia ognuno impiega qualche secondo e sei in parallelo rischiano il
+// tempo massimo del database (23/10).
+async function countAll(orgId: string, list: Omit<Suggestion, "leads">[], area: string, offers: Awaited<ReturnType<typeof getEnabledOffers>>) {
+  const items: Suggestion[] = [];
+  for (let i = 0; i < list.length; i += 2) {
+    items.push(...await Promise.all(list.slice(i, i + 2).map(async (s) => {
+      const leads = await countLeads(orgId, s, area, offers);
+      // Con un servizio la ricerca chiede anche il segnale (per un commercialista: un annuncio per contabile), e le aziende
+      // sono poche: sotto la soglia si propone la ricerca semplice dello stesso settore (23/10: 0 proposte su 6).
+      if (s.offer && leads < BUSINESS_LIMITS.minLeads) {
+        const plain = { ...s, offer: null };
+        return { ...plain, leads: await countLeads(orgId, plain, area, offers) };
+      }
+      return { ...s, leads };
+    })));
+  }
+  return items;
+}
+
 export async function generateSuggestions(orgId: string, description: string, area: string, clients: string): Promise<StoredSuggestions> {
   const key = env.anthropicApiKey();
   if (!key) throw new Error("ANTHROPIC_API_KEY mancante");
@@ -113,21 +132,34 @@ export async function generateSuggestions(orgId: string, description: string, ar
   if (response.stop_reason === "refusal" || !response.parsed_output) throw new Error(`risposta non valida (${response.stop_reason})`);
   const answer = sanitizeAnswer(response.parsed_output, offers.map((o) => o.code));
   const toCount = answer.sells_to === "businesses" || answer.sells_to === "both" ? answer.suggestions : [];
-  // Due conteggi alla volta, non sei insieme: in tutta Italia ognuno impiega qualche secondo e sei in parallelo rischiano il
-  // tempo massimo del database (23/10).
-  const items: Suggestion[] = [];
-  for (let i = 0; i < toCount.length; i += 2) {
-    items.push(...await Promise.all(toCount.slice(i, i + 2).map(async (s) => {
-      const leads = await countLeads(orgId, s, area, offers);
-      // Con un servizio la ricerca chiede anche il segnale (per un commercialista: un annuncio per contabile), e le aziende
-      // sono poche: sotto la soglia si propone la ricerca semplice dello stesso settore (23/10: 0 proposte su 6).
-      if (s.offer && leads < BUSINESS_LIMITS.minLeads) {
-        const plain = { ...s, offer: null };
-        return { ...plain, leads: await countLeads(orgId, plain, area, offers) };
-      }
-      return { ...s, leads };
-    })));
-  }
+  const items = await countAll(orgId, toCount, area, offers);
   // Anche le proposte scartate (meno di 10 lead), per capire le risposte di Haiku nelle prove: non si mostrano.
-  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ title: s.title, industry: s.industry, keywords: s.keywords, offer: s.offer, leads: s.leads, db: debug.get(`${s.industry}|${s.offer ?? ""}`), at: new Date().toISOString() })) };
+  return { sellsTo: answer.sells_to, items: pickSuggestions(items), tried: items.map((s) => ({ ...s, db: debug.get(`${s.industry}|${s.offer ?? ""}`) })), countedAt: new Date().toISOString() };
+}
+
+// Ricalcolo notturno dei lead delle proposte già fatte (cron watchdog, 23/10): il database cresce ogni giorno, le proposte
+// di Haiku no. Solo conteggi, nessuna chiamata ad Haiku. Prima le organizzazioni contate da più tempo, fino a `limit` o
+// alla scadenza, per stare nel tempo del cron.
+export async function recountSuggestions(limit = 10, deadline = Date.now() + 150_000) {
+  const db = createAdminClient();
+  const { data } = await db.from("organizations").select("id, business_area, business_suggestions").not("business_suggestions", "is", null).limit(500);
+  const due = (data ?? [])
+    .map((o) => ({ ...o, stored: o.business_suggestions as unknown as StoredSuggestions }))
+    .filter((o) => o.stored && (o.stored.sellsTo === "businesses" || o.stored.sellsTo === "both"))
+    .sort((a, b) => (a.stored.countedAt ?? "").localeCompare(b.stored.countedAt ?? ""))
+    .slice(0, limit);
+  if (!due.length) return 0;
+  const offers = await getEnabledOffers();
+  let done = 0;
+  for (const o of due) {
+    if (Date.now() > deadline) break;
+    // Tutte le proposte di Haiku (dal 23/10 i tentativi hanno anche il motivo), altrimenti quelle mostrate.
+    const tried = (o.stored.tried ?? []).filter((t): t is Suggestion => typeof (t as Suggestion).why === "string");
+    const list = (tried.length ? tried : o.stored.items).map(({ title, why, industry, keywords, offer }) => ({ title, why, industry, keywords, offer: offer ?? null }));
+    const items = await countAll(o.id, list, o.business_area ?? "", offers);
+    const next: StoredSuggestions = { sellsTo: o.stored.sellsTo, items: pickSuggestions(items), tried: items, countedAt: new Date().toISOString() };
+    await db.from("organizations").update({ business_suggestions: next as unknown as Json }).eq("id", o.id);
+    done++;
+  }
+  return done;
 }

@@ -5,11 +5,12 @@ import { closeStaleRuns, runDueRepeats } from "@/lib/server/searches";
 import { runDueAlerts } from "@/lib/server/alerts";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { reportError } from "@/lib/server/monitoring";
+import { recountSuggestions } from "@/lib/server/suggestions";
 
 // Chiamato da Vercel Cron: chiude i giri senza notizie e restituisce i crediti,
 // registra le scadenze dei crediti maturate, avvia le ricerche ricorrenti, manda gli avvisi
-// settimanali (il lunedì) e
-// cancella dal magazzino i dati non riverificati da 24 mesi (GDPR, audit V6).
+// settimanali (il lunedì),
+// cancella dal magazzino i dati non riverificati da 24 mesi (GDPR, audit V6) e ricalcola i lead delle ricerche consigliate.
 export const maxDuration = 300;
 
 export async function GET(request: Request) {
@@ -27,5 +28,8 @@ export async function GET(request: Request) {
   if (purgeError) await reportError("cron", purgeError.message, "purge_stale_warehouse");
   // Il registro degli errori si tiene 90 giorni.
   await createAdminClient().from("error_events").delete().lt("at", new Date(Date.now() - 90 * 86_400_000).toISOString());
-  return NextResponse.json({ closed, expired: expired ?? 0, repeats, alerts, purged: purged ?? null });
+  // Ricerche consigliate: lead ricontati ogni notte (per ultimo: se manca tempo, il resto è già fatto).
+  let suggestions = 0;
+  try { suggestions = await recountSuggestions(); } catch (e) { await reportError("cron", e, "recount_suggestions"); }
+  return NextResponse.json({ closed, expired: expired ?? 0, repeats, alerts, purged: purged ?? null, suggestions });
 }

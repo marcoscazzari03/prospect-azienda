@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Panoramica" };
 
 export default async function DashboardPage({ searchParams }: PageProps<"/app">) {
   const viewer = await requireViewer();
-  const { periodo } = await searchParams;
+  const { periodo, attivita } = await searchParams;
   const period = (PERIODS.find((p) => String(p) === periodo) ?? 30) as Period;
   await closeStaleRuns(viewer.org.id);
   const since = await activitySince(viewer.user.id);
@@ -52,6 +52,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
           skipped={Boolean(business.business_skipped_at)}
           // Scelto qui sul server, così browser e server mostrano la stessa frase.
           example={randomBusinessExample()}
+          startEditing={attivita === "modifica"}
         />
       )}
 
