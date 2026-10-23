@@ -4,10 +4,10 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { env } from "@/lib/env";
 import { BRAND } from "@/lib/config";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { searchInputSchema, splitZones, toTarget } from "@/lib/domain/search-input";
+import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
 import { offerChoice } from "@/lib/domain/signals";
 import { getEnabledOffers } from "@/lib/server/offer-rules";
-import { haikuAnswerSchema, pickSuggestions, sanitizeAnswer, type StoredSuggestions, type Suggestion } from "@/lib/domain/suggestions";
+import { haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, type StoredSuggestions, type Suggestion } from "@/lib/domain/suggestions";
 import type { Json } from "@/lib/supabase/database.types";
 import type { Viewer } from "@/lib/server/dal";
 import { expectedLeads } from "@/lib/domain/pricing";
@@ -61,17 +61,11 @@ function prompt(offers: { code: string; label: string; description: string }[]) 
 // perché quasi tutte le aziende nuove di OSM aspettano ancora il controllo siti.)
 async function countLeads(orgId: string, s: Omit<Suggestion, "leads">, area: string, offers: Awaited<ReturnType<typeof getEnabledOffers>>) {
   const signals = s.offer ? offerChoice(s.offer, offers) : null;
-  const parsed = searchInputSchema.safeParse({
-    industry: s.industry,
-    industryKeywords: s.keywords,
-    countries: ["IT"],
-    regions: splitZones(area, ["IT"]),
-    emailMode: "company_only",
-    contact: "email_or_form",
-    quantity: 10,
-    signals: signals ?? { codes: [], match: "any", jobFamilies: [] },
-  });
-  if (!parsed.success) return 0;
+  const parsed = searchInputSchema.safeParse(suggestionSearchInput(s, area, signals));
+  if (!parsed.success) {
+    console.error("suggestions input", parsed.error.issues[0]?.message);
+    return 0;
+  }
   const { data, error } = await createAdminClient().rpc("availability_contacts", {
     p_org: orgId,
     p_target: toTarget(parsed.data) as Json,

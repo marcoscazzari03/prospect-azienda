@@ -201,6 +201,10 @@ Come tornare indietro, in generale:
 - **Prima prova (23/10):** «Falegnameria · Modena» senza proposte: si contavano solo le aziende con contatto già noto (8% del
   database, le nuove di OSM aspettano il controllo siti). Ora la stessa stima del wizard (valore basso di `expectedLeads`) e le
   proposte scartate salvate in `business_suggestions.tried` per le prove.
+- **Seconda prova (23/10):** Haiku risponde bene (hotel, studi di architettura, imprese edili, negozi di arredamento per una
+  falegnameria a Modena) ma tutte a 0 lead: ai dati della ricerca mancavano `roles`, `keywords` ed `excludeKeywords` vuoti,
+  il controllo li rifiutava e il conteggio dava 0 in silenzio. Ora `suggestionSearchInput` (stessi campi del wizard), un
+  test che li fa passare dal controllo vero e un messaggio nel log se il controllo rifiuta.
 - **Indietro:** Admin → Servizi → «Spente» (il riquadro sparisce); drop delle colonne della 067.
 
 ## 23/10/2026 — worker del controllo siti fermo dopo l'import OSM · correzione pronta; da fare: revisione, main, `installa` sul VPS (stasera)

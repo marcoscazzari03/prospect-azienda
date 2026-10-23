@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { aboutLeads, haikuAnswerSchema, pickSuggestions, sanitizeAnswer, wizardHref, type Suggestion } from "@/lib/domain/suggestions";
+import { aboutLeads, haikuAnswerSchema, pickSuggestions, sanitizeAnswer, suggestionSearchInput, wizardHref, type Suggestion } from "@/lib/domain/suggestions";
+import { searchInputSchema, toTarget } from "@/lib/domain/search-input";
+import { offerChoice } from "@/lib/domain/signals";
 
 const s = (title: string, leads: number, extra: Partial<Suggestion> = {}): Suggestion => ({ title, why: "perché", industry: "Hotel", keywords: [], offer: null, leads, ...extra });
 
@@ -36,5 +38,13 @@ describe("ricerche consigliate (punti 84-85)", () => {
 
   it("«circa X»: esatto sotto 10, poi arrotondato per difetto", () => {
     expect([aboutLeads(7), aboutLeads(47), aboutLeads(123)]).toEqual([7, 45, 120]);
+  });
+
+  it("i dati di una proposta passano il controllo della ricerca, con e senza servizio (23/10: davano 0 lead a tutto)", () => {
+    const semplice = searchInputSchema.safeParse(suggestionSearchInput({ industry: "Hotel", keywords: ["hotel", "albergo"] }, "Modena", null));
+    expect(semplice.success).toBe(true);
+    if (semplice.success) expect(toTarget(semplice.data).regions).toEqual(["Modena"]);
+    const servizio = searchInputSchema.safeParse(suggestionSearchInput({ industry: "Hotel", keywords: [] }, "", offerChoice("web_redesign")));
+    expect(servizio.success).toBe(true);
   });
 });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { splitZones } from "@/lib/domain/search-input";
 
 // Ricerche consigliate (punti 84–85): risposta di Haiku, controlli e link al wizard. Logica pura, senza chiamate.
 
@@ -67,4 +68,22 @@ export function aboutLeads(n: number) {
   if (n < 10) return n;
   if (n < 100) return Math.floor(n / 5) * 5;
   return Math.floor(n / 10) * 10;
+}
+
+// I dati della ricerca di una proposta, come li manda il wizard (stessi campi, anche quelli vuoti: senza, il controllo
+// della ricerca li rifiutava e il conteggio dava 0 a tutto, 23/10).
+export function suggestionSearchInput(s: Pick<Suggestion, "industry" | "keywords">, area: string, signals: unknown) {
+  return {
+    industry: s.industry,
+    industryKeywords: s.keywords,
+    countries: ["IT"],
+    regions: splitZones(area, ["IT"]),
+    roles: [],
+    keywords: [],
+    excludeKeywords: [],
+    emailMode: "company_only",
+    contact: "email_or_form",
+    quantity: 10,
+    signals: signals ?? { codes: [], match: "any", jobFamilies: [] },
+  };
 }
