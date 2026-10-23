@@ -137,7 +137,9 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
 67b. **Io, dal 23/10** – Grafica Avvisto dalla bozza dell'utente (viola, logo della bozza, «Non sai da dove iniziare?», «Lasciati
     ispirare», scelte rapide, statistiche con grafico): proposta dell'UI/UX Designer, poi tema, logo, menu e barra, Panoramica;
     solo con `NEXT_PUBLIC_BRAND=avvisto`. ~~Passi 1–2: colori e logo~~ (23/10). ~~Menu e barra su telefono, statistiche con
-    variazione e grafico, «Lasciati ispirare», scelte rapide, «Non sai da dove iniziare?»~~ (23/10, in revisione).
+    variazione e grafico, «Lasciati ispirare», scelte rapide, «Non sai da dove iniziare?»~~ (23/10). ~~Grafica definitiva per tutto
+    il sito, identica alla bozza anche negli spazi (colori, menu, intestazione, riquadro, statistiche, avatar con menu)~~ (23/10,
+    richiesta dell'utente; i colori valgono anche con il nome Webora).
 66. **Tu, in corso (23/10)** – Fase B: ~~dominio comprato~~ (23/10); casella ciao@avvisto.it creata, in propagazione; comprare avvisto.it su Hostinger (solo il dominio, 5,99 €; deciso il 23/10); creare
     e provare ciao@avvisto.it con la casella gratuita; inoltro di leads@weborastudio.it verso ciao@avvisto.it. Il piano email
     di weborastudio.it (rinnovo 19/02/2027) resta finché serve leads@.

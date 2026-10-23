@@ -1,30 +1,36 @@
 @import "tailwindcss";
 
-/* Identità: bianco e grigi freddi, verde smeraldo, ambra per gli stati in corso. */
+/* Identità (dal 23/10, grafica della bozza dell'utente, docs/design/avvisto/, per tutti e due i nomi): sfondo caldo, menu
+   e schede bianche, viola/indaco per azioni e selezioni, verde per i successi, ambra per gli stati in corso. Colori presi
+   dalla bozza. Contrasti AA: ink 18:1, ink-2 8,5:1, muted 5:1 su paper, bianco su ledger 11:1; ledger-bright solo per grafici
+   e barre. */
 @theme {
-  --color-paper: #f4f5f7;
-  --color-paper-2: #eceef1;
+  --color-paper: #f8f6f5;
+  --color-paper-2: #f1efee;
   --color-card: #ffffff;
-  --color-ink: #111827;
-  --color-ink-2: #374151;
-  --color-muted: #5b6370; /* 21/10: era #6b7280, sotto 4,5:1 su paper */
-  --color-line: #e3e6ea;
-  --color-ledger: #148057;
-  --color-ledger-2: #0f6845;
-  --color-ledger-soft: #e8f6ee;
-  --color-ledger-bright: #22a06b;
+  --color-ink: #12131c;
+  --color-ink-2: #474957;
+  --color-muted: #666876;
+  --color-line: #e7e5e3;
+  --color-ledger: #362793;
+  --color-ledger-2: #2c1f80;
+  --color-ledger-soft: #f2f0fe;
+  --color-ledger-bright: #6d5ce8;
   --color-stamp: #e0a526;
   --color-stamp-ink: #7a5508;
   --color-stamp-soft: #fdf4dc;
   --color-brick: #b4472c;
   --color-brick-soft: #f9e5df;
-  /* Successo (completata, verificata, conferme): in Webora coincide con ledger, in Avvisto resta verde (23/10). */
+  /* Successo (completata, verificata, conferme, variazioni in crescita). */
   --color-ok: #148057;
   --color-ok-2: #0f6845;
-  --color-ok-soft: #e8f6ee;
+  --color-ok-soft: #ddf3e7;
   --color-ok-bright: #22a06b;
   --color-sky: #1d4ed8;
-  --color-sky-soft: #e3ecff;
+  --color-sky-soft: #e2ebfc;
+  /* Arancio delle statistiche «in corso» (bozza). */
+  --color-orange: #dd7417;
+  --color-orange-soft: #feecde;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-fraunces), Georgia, serif;
@@ -35,22 +41,6 @@
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: none; }
   }
-}
-
-/* Avvisto (docs/17-avvisto.md, proposta dell'UI/UX Designer del 23/10): viola/indaco al posto del verde, solo con
-   NEXT_PUBLIC_BRAND=avvisto (data-brand su <html>). Contrasti AA: ink 16:1, ink-2 9:1, muted 5,6:1, bianco su ledger 8,6:1;
-   ledger-bright solo per grafici e barre. */
-html[data-brand="avvisto"] {
-  --color-paper: #f6f6fb;
-  --color-paper-2: #ececf6;
-  --color-line: #e2e1ef;
-  --color-ink: #16142e;
-  --color-ink-2: #3b3a55;
-  --color-muted: #5d5b78;
-  --color-ledger: #4338ca;
-  --color-ledger-2: #3730a3;
-  --color-ledger-soft: #eeefff;
-  --color-ledger-bright: #7c6cf0;
 }
 
 html { background: var(--color-paper); }

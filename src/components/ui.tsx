@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { safeHttpUrl } from "@/lib/domain/safe-url";
+import { HeaderAccount } from "./header-account";
 
 export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(" ");
@@ -14,7 +15,9 @@ const BUTTON = {
   stamp: "bg-stamp text-ink hover:brightness-95",
 } as const;
 type Variant = keyof typeof BUTTON;
-const btn = (variant: Variant, size: "sm" | "md" | "lg") =>
+// size="none": misure solo da className (bottoni con le misure della bozza; cx non risolve i conflitti tra classi).
+type Size = "sm" | "md" | "lg" | "none";
+const btn = (variant: Variant, size: Size) =>
   cx(
     "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap",
     size === "sm" && "h-8 px-3 text-sm",
@@ -23,11 +26,11 @@ const btn = (variant: Variant, size: "sm" | "md" | "lg") =>
     BUTTON[variant],
   );
 
-export function Button({ variant = "primary", size = "md", className, ...props }: ComponentProps<"button"> & { variant?: Variant; size?: "sm" | "md" | "lg" }) {
+export function Button({ variant = "primary", size = "md", className, ...props }: ComponentProps<"button"> & { variant?: Variant; size?: Size }) {
   return <button className={cx(btn(variant, size), className)} {...props} />;
 }
 
-export function ButtonLink({ variant = "primary", size = "md", className, ...props }: ComponentProps<typeof Link> & { variant?: Variant; size?: "sm" | "md" | "lg" }) {
+export function ButtonLink({ variant = "primary", size = "md", className, ...props }: ComponentProps<typeof Link> & { variant?: Variant; size?: Size }) {
   return <Link className={cx(btn(variant, size), className)} {...props} />;
 }
 
@@ -35,15 +38,20 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
   return <div className={cx("rounded-xl border border-line bg-card", className)} {...props} />;
 }
 
+// Intestazione delle pagine (bozza del 23/10): occhiello spaziato, titolo con grazie da 46 px, bottoni e avatar allineati al
+// centro del titolo.
 export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?: string; title: ReactNode; description?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        {eyebrow && <p className="mb-1 font-mono text-xs uppercase tracking-[0.18em] text-muted">{eyebrow}</p>}
-        <h1 className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
-        {description && <p className="mt-2 max-w-2xl text-ink-2">{description}</p>}
+    <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="min-w-0">
+        {eyebrow && <p className="mb-1.5 text-[11.5px] font-semibold uppercase leading-none tracking-[0.2em] text-muted">{eyebrow}</p>}
+        <h1 className="font-display text-4xl font-semibold leading-[1.15] tracking-tight sm:text-[46px]">{title}</h1>
+        {description && <p className="mt-1 max-w-3xl text-[17px] text-ink-2">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      <div className="flex flex-wrap items-center gap-[15px] lg:shrink-0 lg:flex-nowrap">
+        {actions}
+        <HeaderAccount />
+      </div>
     </div>
   );
 }

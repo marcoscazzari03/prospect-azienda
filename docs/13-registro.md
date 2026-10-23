@@ -81,6 +81,24 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli di Webora: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. In Webora nulla cambia (stessi colori, `ok` = `ledger`).
 
+## 23/10/2026 — Grafica definitiva della bozza per tutto il sito (colori, menu, Panoramica) · sul branch, in revisione
+- **Cosa:** richiesta dell'utente: grafica «ESATTAMENTE così, anche negli spazi» (`docs/design/avvisto/bozza-panoramica.webp`).
+  Colori della bozza come predefiniti in `src/app/globals.css` (sfondo #f8f6f5, viola #362793, verde, arancio e blu delle
+  statistiche), non più solo con `NEXT_PUBLIC_BRAND=avvisto`; logo in grassetto senza grazie (Webora: quadrato viola con la W).
+  Menu (`app-nav.tsx`, `app/app/layout.tsx`): largo 312 px, voci da 45 px con le icone della bozza (Panoramica, Nuova ricerca,
+  Ricerche, Aziende e lead, Crediti e piano, Impostazioni → account; separatore; Guida e supporto → assistenza, Torna al sito);
+  in fondo il riquadro del piano (`PlanCard`). Avatar con menu in alto a destra (`header-account.tsx`: account, crediti, Esci),
+  mostrato da `PageHeader` dentro l'app; «Esci» anche nella pagina dell'account da computer. `PageHeader`: occhiello spaziato,
+  titolo da 46 px. Panoramica: «Benvenuto su …», sottotitolo e bottoni della bozza; riquadro dell'attività con campo a una riga
+  e icona separata, bottoni da 54 px, scelte rapide, colonna «Non sai da dove iniziare?» con illustrazione nuova; statistiche con
+  numeri senza grazie, freccia della variazione e curva morbida (media su 5 giorni). `Button`/`ButtonLink` con `size="none"`
+  per le misure della bozza.
+- **Verifica:** screenshot alla larghezza della bozza (2000 px) confrontati con la bozza, poi a 1440 px e telefono (402 px,
+  nessuno scorrimento orizzontale); sotto i 1700 px colonna del riquadro a 300 px, sotto i 1500 px statistiche su due colonne,
+  grafico piccolo solo se la scheda è larga almeno 340 px. Typecheck, lint, 121 test.
+- **Effetto online:** dopo il push su main il sito attuale (nome Webora) diventa viola.
+- **Indietro:** `git revert` del commit.
+
 ## 23/10/2026 — Avvisto: dominio verificato su Resend (C2) · verificato alle 16:41 (Resend «Verified», regione eu-west-1)
 - **Cosa:** dominio avvisto.it aggiunto su Resend; record su Hostinger con «Go to Hostinger»: TXT `resend._domainkey` (DKIM),
   CNAME `send` → send.forge.rmta.net (SPF e MX di ritorno), CNAME `rsend` → rsend-euw1.forge.rmta.net; DMARC `p=none` già

@@ -15,7 +15,7 @@ export function LogoMark({ className = "h-7 w-7", size }: { className?: string; 
         </>
       ) : (
         <>
-          <rect x="1" y="1" width="30" height="30" rx="8" fill="#22a06b" />
+          <rect x="1" y="1" width="30" height="30" rx="8" fill="#362793" />
           <path d="M7.5 10.5l3.6 11 4.9-8.6 4.9 8.6 3.6-11" fill="none" stroke="#ffffff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
         </>
       )}
@@ -23,13 +23,14 @@ export function LogoMark({ className = "h-7 w-7", size }: { className?: string; 
   );
 }
 
-export function Logo({ href = "/" }: { href?: string }) {
+// Scritta come nella bozza (23/10): senza grazie, in grassetto, tutta in nero («Avvisto.it»); size="lg" nel menu dell'app.
+export function Logo({ href = "/", size = "md" }: { href?: string; size?: "md" | "lg" }) {
   return (
-    <Link href={href} className="flex items-center gap-2" aria-label={BRAND.name}>
-      <LogoMark />
-      <span className="whitespace-nowrap font-display text-lg font-semibold tracking-tight">
+    <Link href={href} className={size === "lg" ? "flex items-center gap-2 md:-ml-1.5 md:gap-3" : "flex items-center gap-2"} aria-label={BRAND.name}>
+      <LogoMark className={size === "lg" ? "h-9 w-9 md:h-12 md:w-12" : "h-7 w-7"} />
+      <span className={`whitespace-nowrap font-bold tracking-tight text-ink ${size === "lg" ? "text-2xl leading-none md:text-[30px]" : "text-xl"}`}>
         {BRAND.short}
-        {BRAND.suffix && <span className="text-ledger">{BRAND.suffix}</span>}
+        {BRAND.suffix}
       </span>
     </Link>
   );

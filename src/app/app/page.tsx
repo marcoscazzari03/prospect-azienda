@@ -7,6 +7,7 @@ import { closeStaleRuns } from "@/lib/server/searches";
 import { activitySince, activitySummary } from "@/lib/server/activity";
 import { dashboardData, PERIODS, type Period } from "@/lib/server/dashboard";
 import { formatNumber } from "@/lib/domain/pricing";
+import { BRAND } from "@/lib/config";
 import { SuggestedSearches } from "@/components/suggested-searches";
 import { suggestionsVisible } from "@/lib/server/suggestions";
 import { getEnabledOffers } from "@/lib/server/offer-rules";
@@ -37,14 +38,18 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
   return (
     <>
       <PageHeader
-        eyebrow={viewer.org.name}
+        eyebrow={`Benvenuto su ${BRAND.short}${BRAND.suffix}`}
         title={firstName ? `Ciao ${firstName} 👋` : "Panoramica"}
-        description="Le tue ricerche, i lead consegnati e i crediti a disposizione."
+        description="Trova aziende con reali opportunità per far crescere il tuo business."
         actions={
           <>
-            <ButtonLink href="/app/ricerche/nuova?tipo=opportunita" variant="secondary">Trova aziende con opportunità</ButtonLink>
-            <ButtonLink href="/app/ricerche/nuova">
-              <span className="text-lg leading-none">+</span> Nuova ricerca
+            <ButtonLink href="/app/ricerche/nuova?tipo=opportunita" variant="secondary" size="none" className="h-[42px] rounded-[10px] px-4 text-[13px]">
+              <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden><path d="M9 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM17 17l-3.5-3.5" /></svg>
+              Trova aziende con opportunità
+            </ButtonLink>
+            <ButtonLink href="/app/ricerche/nuova" size="none" className="h-[46px] px-5 text-[17px] font-semibold">
+              <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M10 4v12M4 10h12" /></svg>
+              Nuova ricerca
             </ButtonLink>
           </>
         }
@@ -63,26 +68,27 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
         />
       )}
 
-      {/* Statistiche (grafica Avvisto, 23/10): variazione sugli stessi giorni del mese scorso e grafico degli ultimi 30 giorni. */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon="coins" tone="ok" label="Crediti usati nel mese" value={formatNumber(d.monthCredits)} delta={d.stats.credits.delta} series={d.stats.credits.series} hint={`${formatNumber(viewer.credits)} ancora disponibili`} href="/app/crediti" />
-        <StatCard icon="users" tone="ledger" label="Lead consegnati" value={formatNumber(d.totalLeads)} delta={d.stats.leads.delta} series={d.stats.leads.series} hint={d.monthLeads ? `+${formatNumber(d.monthLeads)} questo mese` : "Nessuno questo mese"} href="/app/lead" />
+      {/* Statistiche (bozza del 23/10): variazione sugli stessi giorni del mese scorso e grafico degli ultimi 30 giorni. */}
+      <div className="grid gap-5 sm:grid-cols-2 min-[1500px]:grid-cols-4">
+        <StatCard icon="coins" tone="ok" label="Crediti usati nel mese" value={formatNumber(d.monthCredits)} delta={d.stats.credits.delta} series={d.stats.credits.series} hint={d.stats.credits.delta ? "rispetto al mese scorso" : `${formatNumber(viewer.credits)} ancora disponibili`} href="/app/crediti" />
+        <StatCard icon="users" tone="ledger" label="Lead consegnati" value={formatNumber(d.totalLeads)} delta={d.stats.leads.delta} series={d.stats.leads.series} hint={`di cui ${formatNumber(d.signalLeads)} con opportunità`} href="/app/lead" />
         <StatCard
           icon="clock"
-          tone="stamp"
+          tone="orange"
           label="Ricerche in corso"
           value={d.activeSearches}
           hint={d.activeSearches ? `${formatNumber(d.reserved)} crediti riservati` : "Nessuna ricerca attiva"}
+          href="/app/ricerche"
         />
-        <StatCard icon="target" tone="sky" label="Con opportunità" value={quota === null ? "—" : `${quota}%`} delta={d.stats.signals.delta} hint={`${formatNumber(d.signalLeads)} lead con un segnale verificato`} />
+        <StatCard icon="target" tone="sky" label="Con opportunità" value={quota === null ? "—" : `${quota}%`} delta={d.stats.signals.delta} hint="dei lead consegnati" />
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
         <LeadsChart days={d.days} period={period} />
         <ActivityCard since={since} summary={activity.summary} items={activity.items} />
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-2">
         <PipelineCard pipeline={d.pipeline} />
         <ToolsCard />
       </div>

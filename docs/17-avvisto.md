@@ -11,6 +11,13 @@ Colore principale viola/indaco e logo della bozza (`docs/design/avvisto/`: Panor
 Designer, poi tema (colori), logo, menu e barra in alto, Panoramica. Il logo provvisorio con la «A» verde resta solo fino al
 logo nuovo.
 
+**Dal 23/10 sera (richiesta dell'utente: «cambia definitivamente tutte le grafiche, ESATTAMENTE così, anche negli spazi»):** colori
+e struttura della bozza valgono per tutto il sito e con tutti e due i nomi; con `NEXT_PUBLIC_BRAND` cambiano solo nome, logo,
+dominio ed email. Misure prese dalla bozza a 2000 px (menu 312 px, voci da 45 px, titolo 46 px, riquadro con modulo e colonna da
+370 px, statistiche da 106 px); sotto i 1700 px la colonna scende a 300 px, sotto i 1500 px le statistiche vanno su due colonne.
+Tolto dalla bozza quello che l'app non ha (campanella delle notifiche). Testi presi dalla bozza; «Dove cerchi clienti?» resta
+(decisione del 22/10).
+
 ## Come si fa senza fermare il servizio
 1. **Prima (codice pronto, nome vecchio online):** tutto il codice sa già essere «Avvisto», ma lo diventa solo con
    `NEXT_PUBLIC_BRAND=avvisto` su Vercel. Fino ad allora il sito resta «Webora Leads».

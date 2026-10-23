@@ -30,64 +30,86 @@ export function Icon({ name, className = "h-5 w-5" }: { name: keyof typeof ICON;
   );
 }
 
-// Colore dell'icona e del grafico piccolo di ogni statistica (grafica Avvisto, 23/10: verde, viola, ambra, blu).
+// Colore dell'icona e del grafico piccolo di ogni statistica (bozza del 23/10: verde, viola, arancio, blu).
 const STAT_TONE = {
-  ok: { tile: "bg-ok-soft text-ok-2", line: "var(--color-ok-bright)" },
-  ledger: { tile: "bg-ledger-soft text-ledger-2", line: "var(--color-ledger-bright)" },
-  stamp: { tile: "bg-stamp-soft text-stamp-ink", line: "var(--color-stamp)" },
-  sky: { tile: "bg-sky-soft text-sky", line: "var(--color-sky)" },
+  ok: { tile: "bg-ok-soft text-ok", line: "#3fa16f" },
+  ledger: { tile: "bg-[#ece9ff] text-ledger", line: "var(--color-ledger-bright)" },
+  orange: { tile: "bg-orange-soft text-orange", line: "#f0973f" },
+  sky: { tile: "bg-sky-soft text-[#2563eb]", line: "#3b82f6" },
 } as const;
 
-// Variazione rispetto agli stessi giorni del mese prima: «+12%», «−5%», «+3 pt» o «nuovo».
+// Variazione rispetto agli stessi giorni del mese prima: «↑ +12%», «↓ −5%», «↑ +3 pt» o «nuovo».
 function DeltaBadge({ delta }: { delta: Delta }) {
   if (!delta) return null;
   const up = delta.kind === "new" || delta.value >= 0;
   const text = delta.kind === "new" ? "nuovo" : `${delta.value >= 0 ? "+" : "−"}${Math.abs(delta.value)}${delta.kind === "pct" ? "%" : " pt"}`;
   return (
-    <span className={cx("inline-flex items-center gap-0.5 font-mono text-xs font-semibold", up ? "text-ok" : "text-brick")} title={delta.kind === "pp" ? "quota di questo mese rispetto agli stessi giorni del mese scorso" : "rispetto agli stessi giorni del mese scorso"}>
-      {delta.kind !== "new" && <span aria-hidden>{up ? "↑" : "↓"}</span>}
+    <span className={cx("inline-flex items-center gap-1 text-sm font-semibold", up ? "text-ok" : "text-brick")} title={delta.kind === "pp" ? "quota di questo mese rispetto agli stessi giorni del mese scorso" : "rispetto agli stessi giorni del mese scorso"}>
+      {delta.kind !== "new" && (
+        <svg viewBox="0 0 12 12" className={cx("h-3 w-3", !up && "rotate-180")} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M6 10.5v-9M2.5 5 6 1.5 9.5 5" />
+        </svg>
+      )}
       {text}
     </span>
   );
 }
 
-// Grafico piccolo degli ultimi 30 giorni: una linea con un'ombra leggera, senza assi.
-function Sparkline({ values, color }: { values: number[]; color: string }) {
+// Grafico piccolo degli ultimi 30 giorni: curva morbida con sfumatura sotto, senza assi. I punti sono medie su 5 giorni,
+// così la curva segue l'andamento e non i singoli giorni.
+function Sparkline({ values, color, id }: { values: number[]; color: string; id: string }) {
   if (!values.length || values.every((v) => v === 0)) return null;
-  const max = Math.max(...values);
-  const pts = values.map((v, i) => [(i / (values.length - 1)) * 80, 30 - (v / max) * 26]);
-  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+  const smooth = values.map((_, i) => {
+    const w = values.slice(Math.max(0, i - 2), i + 3);
+    return w.reduce((a, b) => a + b, 0) / w.length;
+  });
+  const max = Math.max(...smooth);
+  const pts = smooth.map((v, i) => [(i / (smooth.length - 1)) * 88, 40 - (v / max) * 34]);
+  // Curva di Catmull-Rom convertita in segmenti di Bézier.
+  let line = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [p0, p1, p2, p3] = [pts[i - 1] ?? pts[i], pts[i], pts[i + 1], pts[i + 2] ?? pts[i + 1]];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    line += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
   return (
-    <svg viewBox="0 0 80 32" className="hidden h-7 w-16 shrink-0 min-[400px]:block" aria-hidden>
-      <path d={`${line} L80 32 L0 32 Z`} fill={color} opacity="0.12" />
-      <path d={line} fill="none" stroke={color} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
+    <svg viewBox="0 0 88 44" className="hidden h-11 w-[88px] shrink-0 @[340px]:block" aria-hidden>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={color} stopOpacity="0.22" />
+          <stop offset="1" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${line} L88 44 L0 44 Z`} fill={`url(#${id})`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 }
 
+// Scheda della bozza del 23/10. Il grafico piccolo e lo spazio largo solo se la scheda è larga almeno 340 px (container query).
 export function StatCard({ icon, label, value, hint, href, tone = "ledger", delta = null, series }: {
   icon: keyof typeof ICON; label: string; value: ReactNode; hint?: ReactNode; href?: string;
   tone?: keyof typeof STAT_TONE; delta?: Delta; series?: number[];
 }) {
   const t = STAT_TONE[tone];
   const body = (
-    <Card className={cx("flex h-full items-start gap-4 p-5", href && "transition-colors hover:border-ink-2/30")}>
-      <span className={cx("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", t.tile)}>
-        <Icon name={icon} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center justify-between gap-2 text-sm text-muted">
-          {label}
-          {href && <Icon name="arrow" className="h-4 w-4 text-ink-2" />}
+    <Card className={cx("@container h-full rounded-2xl", href && "transition-colors hover:border-ink-2/30")}>
+      <span className="flex h-full items-center gap-5 px-[18px] py-3 @[340px]:gap-7">
+        <span className={cx("flex h-14 w-14 shrink-0 items-center justify-center rounded-[14px]", t.tile)}>
+          <Icon name={icon} className="h-7 w-7" />
         </span>
-        <span className="mt-1 flex items-center justify-between gap-2">
-          <span className="flex min-w-0 flex-wrap items-baseline gap-x-2">
-            <span className="font-mono text-3xl font-semibold tabular-nums">{value}</span>
-            <DeltaBadge delta={delta} />
+        <span className="flex min-w-0 flex-1 items-center gap-2">
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm text-muted">{label}</span>
+            <span className="mt-0.5 flex flex-wrap items-center gap-x-3">
+              <span className="text-[30px] font-bold leading-tight tabular-nums">{value}</span>
+              <DeltaBadge delta={delta} />
+            </span>
+            {hint && <span className="mt-0.5 block truncate text-[13px] text-muted">{hint}</span>}
           </span>
-          {series && <Sparkline values={series} color={t.line} />}
+          {series && <Sparkline values={series} color={t.line} id={`spark-${tone}`} />}
         </span>
-        {hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
       </span>
     </Card>
   );

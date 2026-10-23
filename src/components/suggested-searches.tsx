@@ -1,7 +1,8 @@
 "use client";
+import Link from "next/link";
 import { startTransition, useActionState, useState } from "react";
 import { clearBusinessProfile, saveBusinessProfile, skipBusinessProfile, type ActionState } from "@/app/app/actions";
-import { Alert, Badge, Button, ButtonLink, Card, Input, Textarea } from "@/components/ui";
+import { Alert, Badge, Button, ButtonLink, Card } from "@/components/ui";
 import { BUSINESS_EXAMPLES, BUSINESS_LIMITS, leadsLabel, wizardHref, type StoredSuggestions } from "@/lib/domain/suggestions";
 
 // Ricerche consigliate (punti 84–85, proposta del designer in docs/15-ricerche-consigliate.md): riquadro in cima alla
@@ -32,7 +33,7 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
 
   if (!description && skipped && !editing) {
     return (
-      <Card className="mb-6 flex flex-wrap items-center justify-between gap-3 border-ledger/25 px-4 py-3 text-sm">
+      <Card className="mb-5 flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
         <span>Vuoi ricerche già pronte per la tua attività?</span>
         <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>Descrivi la tua attività</Button>
       </Card>
@@ -40,76 +41,75 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
   }
 
   return (
-    <Card id="attivita" className="mb-6 scroll-mt-8 border-ledger/25 p-5">
+    <Card id="attivita" className="mb-5 scroll-mt-8 rounded-2xl border-line/70 p-5 sm:p-6 lg:pb-5 lg:pr-5">
       {editing || !description ? (
-        <form action={action} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <div className="grid gap-4">
-            <div className="flex items-start gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-ledger-soft text-ledger-2"><Glyph name="sparkle" className="h-6 w-6" /></span>
-              <div>
-                <h2 className="font-display text-xl font-semibold">Di cosa si occupa la tua attività?</h2>
-                <p className="mt-1 text-sm text-muted">Ti proponiamo ricerche già pronte. Non parte niente da solo: le controlli e le avvii tu.</p>
+        // Struttura e misure della bozza del 23/10 (docs/design/avvisto/bozza-panoramica.webp).
+        <form action={action} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,300px)] xl:gap-[30px] min-[1700px]:grid-cols-[minmax(0,1fr)_minmax(0,370px)]">
+          <div className="min-w-0">
+            <div className="flex items-start gap-4 sm:gap-[27px]">
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px] bg-[#ebe8fd] text-ledger sm:h-16 sm:w-16"><Glyph name="sparkle" className="h-7 w-7 sm:h-8 sm:w-8" /></span>
+              <div className="min-w-0 pt-1">
+                <h2 className="font-display text-2xl font-semibold leading-tight sm:text-[26px]">Di cosa si occupa la tua attività?</h2>
+                <p className="mt-0.5 text-base text-muted sm:text-[17px]">Dicci cosa fai e ti suggeriamo ricerche di aziende già pronte, oppure avviale direttamente.</p>
               </div>
             </div>
-            <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="business-description" className="text-sm font-medium">Cosa offri alle aziende?</label>
-                <div className="relative">
-                  <Glyph name="building" className="pointer-events-none absolute left-3 top-3 h-5 w-5 text-muted" />
-                  <Textarea id="business-description" name="description" required minLength={10} maxLength={BUSINESS_LIMITS.description} value={text}
-                    onChange={(e) => setText(e.target.value)} placeholder={`Es. ${example}`} className="min-h-24 pl-10" />
+            <div className="mt-[18px] grid gap-5 md:grid-cols-[minmax(0,700fr)_minmax(0,420fr)] md:gap-[25px] xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] min-[1700px]:grid-cols-[minmax(0,700fr)_minmax(0,420fr)]">
+              <div className="min-w-0">
+                <label htmlFor="business-description" className="mb-2 block text-base font-semibold">Cosa fai?</label>
+                <div className="flex h-[52px] overflow-hidden rounded-[10px] border border-line bg-white focus-within:border-ledger focus-within:ring-2 focus-within:ring-ledger/15">
+                  <span className="grid w-14 shrink-0 place-items-center border-r border-line text-ink-2"><Glyph name="briefcase" className="h-[22px] w-[22px]" /></span>
+                  <input id="business-description" name="description" required minLength={10} maxLength={BUSINESS_LIMITS.description} value={text}
+                    onChange={(e) => setText(e.target.value)} placeholder={`Es. ${example}`}
+                    className="min-w-0 flex-1 bg-transparent px-3 text-base placeholder:text-muted/80 focus:outline-none" />
                 </div>
-                <div className="flex items-center justify-between gap-2 text-xs text-muted">
-                  <span className="flex items-center gap-1"><Glyph name="bulb" className="h-4 w-4 text-stamp" />Una o due frasi: cosa offri e a quali aziende.</span>
-                  <span className="font-mono">{text.length}/{BUSINESS_LIMITS.description}</span>
-                </div>
+                <p className="mt-3 text-sm text-muted">Una o due frasi: cosa offri e a quali aziende.</p>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="business-area" className="text-sm font-medium">Dove cerchi clienti?</label>
+              <div className="min-w-0">
+                <label htmlFor="business-area" className="mb-2 block text-base font-semibold">Dove cerchi clienti?</label>
                 <div className="relative">
-                  <Glyph name="pin" className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
-                  <Input id="business-area" name="area" maxLength={BUSINESS_LIMITS.area} defaultValue={area} placeholder="Es. Milano e Monza" className="h-11 pl-10" />
+                  <Glyph name="pin" className="pointer-events-none absolute left-4 top-1/2 h-[22px] w-[22px] -translate-y-1/2 text-ink-2" />
+                  <input id="business-area" name="area" maxLength={BUSINESS_LIMITS.area} defaultValue={area} placeholder="Es. Modena"
+                    className="h-[52px] w-full rounded-[10px] border border-line bg-white pl-[54px] pr-3 text-base placeholder:text-muted/80 focus:border-ledger focus:outline-none focus:ring-2 focus:ring-ledger/15" />
                 </div>
-                <p className="text-xs text-muted">Province o regioni, anche più di una. Se lasci vuoto, cerchiamo in tutta Italia.</p>
+                <p className="mt-3 text-sm text-muted">Provincia o regione. Se lasci vuoto, tutta Italia.</p>
               </div>
             </div>
-            {state.error && <Alert tone="stamp">{state.error}</Alert>}
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-              <Button type="submit" disabled={pending} className="h-12 w-full sm:h-11 sm:w-auto">
-                <Glyph name="search" className="h-4 w-4" />{pending ? "Stiamo preparando le ricerche…" : "Mostra le ricerche"}
+            {state.error && <div className="mt-4"><Alert tone="stamp">{state.error}</Alert></div>}
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+              <Button type="submit" size="none" disabled={pending} className="h-[54px] w-full rounded-[10px] px-9 text-[17px] sm:w-auto sm:min-w-[274px]">
+                <Glyph name="search" className="h-5 w-5" />{pending ? "Stiamo preparando le ricerche…" : "Mostra le ricerche"}
               </Button>
-              <Button type="button" variant="secondary" className="h-12 w-full sm:h-11 sm:w-auto" disabled={pending} onClick={inspire}>
-                <Glyph name="sparkle" className="h-4 w-4 text-ledger-2" />Lasciati ispirare
+              <Button type="button" variant="secondary" size="none" className="h-[54px] w-full rounded-[10px] px-9 text-[17px] sm:w-auto" disabled={pending} onClick={inspire}>
+                <Glyph name="sparkle" className="h-5 w-5 text-ledger" />Lasciati ispirare
               </Button>
               {description ? (
                 <Button type="button" variant="ghost" className="h-11" onClick={() => setEditing(false)}>Annulla</Button>
               ) : (
-                <Button type="button" variant="ghost" className="h-11" disabled={pending}
+                <Button type="button" variant="ghost" className="h-11 text-muted" disabled={pending}
                   onClick={() => startTransition(async () => { await skipBusinessProfile(); setEditing(false); })}>Salta per ora</Button>
               )}
             </div>
-            {pending && <Skeletons />}
+            {pending && <div className="mt-4"><Skeletons /></div>}
             {/* Scelte rapide: i servizi del catalogo, aprono la ricerca di opportunità già impostata sul servizio. */}
             {services.length > 0 && !pending && (
-              <div>
-                <p className="mb-2 text-sm text-muted">Oppure parti da un servizio:</p>
-                <div className="flex flex-wrap gap-2">
-                  {services.map((s) => (
-                    <a key={s.code} href={`/app/ricerche/nuova?tipo=opportunita&servizio=${encodeURIComponent(s.code)}`}
-                      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-ledger/20 bg-ledger-soft/60 px-4 text-sm text-ledger-2 hover:border-ledger/50">
-                      <Glyph name="trend" className="h-4 w-4" />{s.label}
-                    </a>
-                  ))}
-                </div>
+              <div className="mt-3.5 flex flex-wrap gap-3">
+                {services.map((s) => (
+                  <a key={s.code} href={`/app/ricerche/nuova?tipo=opportunita&servizio=${encodeURIComponent(s.code)}`}
+                    className="inline-flex min-h-9 items-center gap-3 rounded-full border border-[#e4e1f5] bg-[#f9f8ff] pl-5 pr-[22px] text-sm text-ink-2 transition-colors hover:border-ledger/50 hover:text-ink">
+                    <Glyph name="trend" className="h-4 w-4 text-ledger" />{s.label}
+                  </a>
+                ))}
               </div>
             )}
           </div>
-          {/* «Non sai da dove iniziare?» (bozza dell'utente): porta alla scelta del servizio; su telefono senza illustrazione. */}
-          <aside className="flex flex-col gap-3 self-stretch rounded-xl bg-ledger-soft/60 p-5 lg:justify-center">
+          {/* «Non sai da dove iniziare?» (bozza dell'utente): porta alla ricerca di opportunità; su telefono senza illustrazione. */}
+          <aside className="flex flex-col rounded-2xl bg-[#f7f5ff] px-6 py-6 sm:px-8 xl:justify-end xl:pb-[17px] xl:pt-5">
             <Illustration />
-            <p className="font-display text-lg font-semibold">Non sai da dove iniziare?</p>
-            <p className="text-sm text-ink-2">Scegli il servizio che vendi: ti mostriamo le aziende con un&apos;opportunità già verificata.</p>
-            <ButtonLink href="/app/ricerche/nuova?tipo=opportunita" variant="secondary" className="h-11 self-start">Vedi i suggerimenti →</ButtonLink>
+            <p className="text-[19px] font-bold xl:mt-4">Non sai da dove iniziare?</p>
+            <p className="mt-2 max-w-[262px] text-base leading-[23px] text-muted">Ti suggeriamo ricerche già pronte per il tuo settore, con filtri e impostazioni ottimizzate.</p>
+            <Link href="/app/ricerche/nuova?tipo=opportunita" className="mt-3.5 inline-flex h-11 items-center gap-3 self-start rounded-[10px] border border-[#cdc6f2] px-[22px] text-[15px] font-semibold text-ledger transition-colors hover:border-ledger hover:bg-white">
+              Vedi i suggerimenti<Glyph name="arrow" className="h-4 w-4" />
+            </Link>
           </aside>
         </form>
       ) : (
@@ -238,6 +238,8 @@ const GLYPH: Record<string, string> = {
   sparkle: "M10 2l1.6 4.4L16 8l-4.4 1.6L10 14l-1.6-4.4L4 8l4.4-1.6zM16 13l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z",
   check: "M4 10.5l4 4 8-9",
   trend: "M3 14l5-5 3 3 6-6M12 6h5v5",
+  briefcase: "M3 7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM7 6V4.5A1.5 1.5 0 0 1 8.5 3h3A1.5 1.5 0 0 1 13 4.5V6M3 11h14",
+  arrow: "M4 10h12M11 5l5 5-5 5",
 };
 function Glyph({ name, className }: { name: keyof typeof GLYPH; className?: string }) {
   return (
@@ -247,16 +249,31 @@ function Glyph({ name, className }: { name: keyof typeof GLYPH; className?: stri
   );
 }
 
-// Illustrazione del riquadro «Non sai da dove iniziare?»: una scheda con l'edificio e la freccia, solo da lg.
+// Illustrazione del riquadro «Non sai da dove iniziare?» (bozza): schede sovrapposte con l'edificio, cerchio viola con la
+// freccia e cerchi decorativi; solo da xl (sotto, il riquadro sta sotto il modulo, senza illustrazione).
 function Illustration() {
   return (
-    <svg viewBox="0 0 160 84" className="mx-auto hidden h-20 w-40 lg:block" aria-hidden>
-      <rect x="22" y="14" width="96" height="62" rx="10" fill="#ffffff" stroke="var(--color-line)" transform="rotate(-6 70 45)" />
-      <rect x="38" y="44" width="56" height="5" rx="2.5" fill="var(--color-line)" transform="rotate(-6 70 45)" />
-      <rect x="38" y="55" width="40" height="5" rx="2.5" fill="var(--color-line)" transform="rotate(-6 70 45)" />
-      <path d="M44 24h14v14H44zM48 28h2M54 28h2M48 32h2M54 32h2" fill="none" stroke="var(--color-ledger-2)" strokeWidth="1.6" transform="rotate(-6 70 45)" />
-      <circle cx="122" cy="20" r="14" fill="var(--color-ledger)" />
-      <path d="M122 27V13M116 19l6-6 6 6" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="20 0 272 140" className="mx-auto hidden h-[116px] w-[226px] xl:block" aria-hidden>
+      <defs>
+        <filter id="ill-shadow" x="-20%" y="-20%" width="140%" height="160%">
+          <feDropShadow dx="0" dy="8" stdDeviation="8" floodColor="#362793" floodOpacity="0.12" />
+        </filter>
+      </defs>
+      <circle cx="40" cy="86" r="16" fill="none" stroke="#e4e0f6" />
+      <circle cx="266" cy="72" r="13" fill="none" stroke="#e4e0f6" />
+      <circle cx="236" cy="24" r="22" fill="none" stroke="#ebe8fa" />
+      <g transform="rotate(-8 112 82)">
+        <rect x="58" y="44" width="120" height="84" rx="12" fill="#efedfb" />
+        <path d="M72 96h10v-8h4v8h10" fill="none" stroke="#d8d3f3" strokeWidth="1.6" />
+      </g>
+      <g transform="rotate(5 160 74)" filter="url(#ill-shadow)">
+        <rect x="96" y="18" width="136" height="104" rx="14" fill="#ffffff" />
+        <path d="M118 62V38h14v24M132 46h8v16M114 62h30M122 43h2M127 43h2M122 49h2M127 49h2M122 55h2M127 55h2" fill="none" stroke="var(--color-ledger)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="116" y="80" width="96" height="6" rx="3" fill="#e9e7f3" />
+        <rect x="116" y="94" width="66" height="6" rx="3" fill="#e9e7f3" />
+      </g>
+      <circle cx="236" cy="24" r="21" fill="var(--color-ledger-bright)" />
+      <path d="M236 33V15M228 22l8-8 8 8" fill="none" stroke="#ffffff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
