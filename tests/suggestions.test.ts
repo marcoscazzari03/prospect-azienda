@@ -10,16 +10,17 @@ const s = (title: string, leads: number, extra: Partial<Suggestion> = {}): Sugge
 
 describe("ricerche consigliate (punti 84-85)", () => {
   it("risposta di Haiku: testi tagliati, solo settori del database con le loro parole chiave, servizio solo se attivo", () => {
-    const raw = haikuAnswerSchema.parse({
-      sells_to: "both",
+    expect(haikuAnswerSchema.safeParse({ sells_to: "both", suggestions: [{ title: "PMI", why: "x", industry: "PMI", offer: null }] }).success).toBe(false);
+    const raw = {
+      sells_to: "both" as const,
       suggestions: [
-        { title: "  Studi   di architettura ", why: "x".repeat(400), industry: "studio di architettura", keywords: ["interior design"], offer: "web_redesign" },
-        { title: "Hotel", why: "Arredi", industry: "Hotel", keywords: [], offer: "inventato" },
-        { title: "Piccole imprese", why: "Contabilità", industry: "PMI", keywords: ["pmi"], offer: null },
-        { title: "Hotel di nuovo", why: "Doppione", industry: "Hotel", keywords: [], offer: null },
-        { title: "", why: "", industry: "", keywords: [], offer: null },
+        { title: "  Studi   di architettura ", why: "x".repeat(400), industry: "studio di architettura", offer: "web_redesign" },
+        { title: "Hotel", why: "Arredi", industry: "Hotel", offer: "inventato" },
+        { title: "Piccole imprese", why: "Contabilità", industry: "PMI", offer: null },
+        { title: "Hotel di nuovo", why: "Doppione", industry: "Hotel", offer: null },
+        { title: "", why: "", industry: "", offer: null },
       ],
-    });
+    };
     const a = sanitizeAnswer(raw, ["web_redesign"]);
     expect(a.suggestions.map((s) => s.industry)).toEqual(["Studio di architettura", "Hotel"]);
     expect(a.suggestions[0]).toMatchObject({ title: "Studi di architettura", keywords: ["architetti", "architetto", "architettura", "progettazione"], offer: "web_redesign" });

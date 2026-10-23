@@ -50,12 +50,15 @@ Come tornare indietro, in generale:
 
 ---
 
-## 23/10/2026 — ricerche consigliate solo sui settori del database · in revisione
+## 23/10/2026 — ricerche consigliate solo sui settori del database · su main (Code Reviewer «pronto con riserve», corrette)
 - **Cosa:** Haiku riceve l'elenco dei 144 settori del database (`src/lib/domain/db-sectors.ts`, uguale a `SETTORI` di
   `n8n/annunci/nodes/lib-osm.js`, controllato da un test) e deve sceglierne uno per proposta; `sanitizeAnswer` tiene solo
   le proposte con un settore dell'elenco, usa le parole chiave del settore (non quelle di Haiku), toglie i doppioni e ne
   tiene fino a 6 (se ne mostrano 3). Per i servizi utili a tutte le aziende il prompt chiede settori concreti con molte
   piccole attività. Senza zona, il messaggio «nessuna proposta» parla della descrizione, non della zona.
+- **Revisione:** il settore è un `z.enum` nello schema della risposta (Haiku non può scriverlo diverso), niente parole
+  chiave chieste a Haiku (non servivano), settori diversi e non quasi uguali in ogni proposta. Limite noto: i settori di
+  più parole («Trasporti e logistica») contano solo le aziende che hanno tutte le radici del nome.
 - **Perché:** «Studio commercialista» in tutta Italia dava 0 proposte: settori generici («PMI», «artigiani») e parole chiave
   che le aziende non hanno restringevano il conteggio a meno di 10.
 - **Indietro:** revert del commit.

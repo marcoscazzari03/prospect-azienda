@@ -19,13 +19,14 @@ export const BUSINESS_EXAMPLES = [
 ] as const;
 export const randomBusinessExample = () => BUSINESS_EXAMPLES[Math.floor(Math.random() * BUSINESS_EXAMPLES.length)];
 
+// Il settore è un elenco chiuso (i settori del database): l'output strutturato obbliga Haiku a sceglierne uno scritto uguale
+// (Code Reviewer, 23/10: «Studi di architettura» invece di «Studio di architettura» veniva scartata in silenzio).
 export const haikuAnswerSchema = z.object({
   sells_to: z.enum(["businesses", "consumers", "both", "unclear"]),
   suggestions: z.array(z.object({
     title: z.string(),
     why: z.string(),
-    industry: z.string(),
-    keywords: z.array(z.string()),
+    industry: z.enum(DB_SECTORS.map(([name]) => name) as [string, ...string[]]),
     offer: z.string().nullable(),
   })),
 });
@@ -45,12 +46,12 @@ const SECTORS = new Map(DB_SECTORS.map(([name, keywords]) => [name.toLowerCase()
 // Testi entro limiti sicuri, servizio solo se è tra quelli attivi. Il settore deve essere uno di quelli del database
 // (DB_SECTORS), con le sue parole chiave: un settore inventato («PMI», «Artigiani») o parole chiave che le aziende non
 // hanno davano 0 lead (23/10). Le proposte con un settore sconosciuto si scartano.
-export function sanitizeAnswer(a: HaikuAnswer, offerCodes: readonly string[]): HaikuAnswer {
+export function sanitizeAnswer(a: HaikuAnswer, offerCodes: readonly string[]): { sells_to: HaikuAnswer["sells_to"]; suggestions: Omit<Suggestion, "leads">[] } {
   return {
     sells_to: a.sells_to,
     suggestions: a.suggestions
       .map((s) => {
-        const sector = SECTORS.get(clean(s.industry, 80).toLowerCase());
+        const sector = SECTORS.get(clean(s.industry, 80).replace(/’/g, "'").toLowerCase());
         return {
           title: clean(s.title, 90),
           why: clean(s.why, 160),
