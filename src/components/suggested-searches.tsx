@@ -41,10 +41,10 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
   }
 
   return (
-    <Card id="attivita" className="mb-5 scroll-mt-8 rounded-2xl border-line/70 p-5 sm:p-6 lg:pb-5 lg:pr-5">
+    <Card id="attivita" className="mb-5 scroll-mt-8 rounded-2xl border-line/70 p-5 sm:p-6 lg:pb-5 lg:pr-5 lg:pt-5">
       {editing || !description ? (
         // Struttura e misure della bozza del 23/10 (docs/design/avvisto/bozza-panoramica.webp).
-        <form action={action} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,300px)] xl:gap-[30px] min-[1700px]:grid-cols-[minmax(0,1fr)_minmax(0,370px)]">
+        <form action={action} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,300px)] xl:gap-[30px] min-[106.25rem]:grid-cols-[minmax(0,1fr)_minmax(0,370px)]">
           <div className="min-w-0">
             <div className="flex items-start gap-4 sm:gap-[27px]">
               <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px] bg-[#ebe8fd] text-ledger sm:h-16 sm:w-16"><Glyph name="sparkle" className="h-7 w-7 sm:h-8 sm:w-8" /></span>
@@ -53,7 +53,7 @@ export function SuggestedSearches({ description, area, stored, skipped, example,
                 <p className="mt-0.5 text-base text-muted sm:text-[17px]">Dicci cosa fai e ti suggeriamo ricerche di aziende già pronte, oppure avviale direttamente.</p>
               </div>
             </div>
-            <div className="mt-[18px] grid gap-5 md:grid-cols-[minmax(0,700fr)_minmax(0,420fr)] md:gap-[25px] xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] min-[1700px]:grid-cols-[minmax(0,700fr)_minmax(0,420fr)]">
+            <div className="mt-[18px] grid gap-5 md:grid-cols-[minmax(0,700fr)_minmax(0,420fr)] md:gap-[25px] xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] min-[106.25rem]:grid-cols-[minmax(0,700fr)_minmax(0,420fr)]">
               <div className="min-w-0">
                 <label htmlFor="business-description" className="mb-2 block text-base font-semibold">Cosa fai?</label>
                 <div className="flex h-[52px] overflow-hidden rounded-[10px] border border-line bg-white focus-within:border-ledger focus-within:ring-2 focus-within:ring-ledger/15">

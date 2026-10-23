@@ -30,24 +30,24 @@ export function HeaderAccount() {
   if (!a) return null;
   const item = "flex min-h-11 items-center rounded-lg px-3 text-sm text-ink-2 hover:bg-paper-2 hover:text-ink";
   return (
-    <div ref={ref} className="relative hidden md:ml-6 md:block min-[1800px]:ml-[146px]">
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="menu" aria-label="Il mio account" className="flex items-center gap-2 rounded-full">
+    <div ref={ref} className="relative hidden lg:ml-2 lg:block min-[112.5rem]:ml-[131px]">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Il mio account" className="flex items-center gap-2 rounded-full">
         <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e3dff7] text-lg font-semibold text-ledger-2">{a.initials}</span>
         <svg viewBox="0 0 20 20" className={`h-4 w-4 text-ink-2 transition-transform ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           <path d="M5 8l5 5 5-5" />
         </svg>
       </button>
       {open && (
-        <div role="menu" className="absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-line bg-card p-2 shadow-[0_12px_32px_rgba(18,19,28,0.12)]">
+        <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-xl border border-line bg-card p-2 shadow-[0_12px_32px_rgba(18,19,28,0.12)]">
           <div className="border-b border-line px-3 pb-2 pt-1">
             <p className="truncate text-sm font-semibold">{a.name}</p>
             <p className="truncate text-xs text-muted">{a.email}</p>
           </div>
           <div className="pt-1">
-            <Link role="menuitem" href="/app/account" className={item} onClick={() => setOpen(false)}>Il mio account</Link>
-            <Link role="menuitem" href="/app/crediti" className={item} onClick={() => setOpen(false)}>Crediti e piano</Link>
+            <Link href="/app/account" className={item} onClick={() => setOpen(false)}>Il mio account</Link>
+            <Link href="/app/crediti" className={item} onClick={() => setOpen(false)}>Crediti e piano</Link>
             <form action="/auth/esci" method="post">
-              <button role="menuitem" className={`${item} w-full`}>Esci</button>
+              <button className={`${item} w-full`}>Esci</button>
             </form>
           </div>
         </div>

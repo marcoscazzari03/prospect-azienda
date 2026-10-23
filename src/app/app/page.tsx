@@ -69,7 +69,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/app">)
       )}
 
       {/* Statistiche (bozza del 23/10): variazione sugli stessi giorni del mese scorso e grafico degli ultimi 30 giorni. */}
-      <div className="grid gap-5 sm:grid-cols-2 min-[1500px]:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 min-[93.75rem]:grid-cols-4">
         <StatCard icon="coins" tone="ok" label="Crediti usati nel mese" value={formatNumber(d.monthCredits)} delta={d.stats.credits.delta} series={d.stats.credits.series} hint={d.stats.credits.delta ? "rispetto al mese scorso" : `${formatNumber(viewer.credits)} ancora disponibili`} href="/app/crediti" />
         <StatCard icon="users" tone="ledger" label="Lead consegnati" value={formatNumber(d.totalLeads)} delta={d.stats.leads.delta} series={d.stats.leads.series} hint={`di cui ${formatNumber(d.signalLeads)} con opportunità`} href="/app/lead" />
         <StatCard

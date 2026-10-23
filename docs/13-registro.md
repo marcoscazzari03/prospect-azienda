@@ -19,6 +19,7 @@ Come tornare indietro, in generale:
 
 | Data | Decisione | Motivo |
 |---|---|---|
+| 23/10 sera | **Grafica definitiva per tutto il sito:** colori e struttura della bozza (`docs/design/avvisto/bozza-panoramica.webp`) identici anche negli spazi, **per tutti e due i nomi** (supera «solo in versione Avvisto» della riga sotto); `NEXT_PUBLIC_BRAND` cambia solo nome, logo, dominio ed email. Il logo delle email di Webora resta verde (email a cura dell'utente) | richiesta dell'utente |
 | 23/10 | **Avvisto, grafica:** colore principale viola/indaco e logo della bozza dell'utente (`docs/design/avvisto/`), al posto del verde e del logo provvisorio; dalla bozza: riquadro «Non sai da dove iniziare?», «Lasciati ispirare», scelte rapide, statistiche con variazione e grafico piccolo. Tutto solo in versione Avvisto (`NEXT_PUBLIC_BRAND`); prima la proposta dell'UI/UX Designer | decisione dell'utente |
 | 23/10 | **Avvisto:** sito e app su avvisto.it (www rimanda lì), email di mittente e assistenza ciao@avvisto.it, logo provvisorio di Claude, titolare Webora Studio; passaggio anticipato rispetto al 25/10 (piano in `17-avvisto.md`) | decisione dell'utente: iniziare subito il rebranding |
 | 22/10 | **Ricerche consigliate (punti 84–85):** domanda «Di cosa si occupa la tua attività?» alla prima apertura dell'app, non nella registrazione; Haiku propone 3 ricerche solo verso aziende e solo se il database ha i lead; chi vende solo a privati riceve un messaggio onesto, non ricerche forzate. Interruttore nell'Admin: prima solo admin, per tutti con Avvisto dopo il 25/10 | utile ai mestieri che oggi non trovano il loro servizio nel wizard, senza vendere crediti a chi non può usarli e senza sporcare i numeri della beta |
@@ -81,7 +82,7 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli di Webora: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. In Webora nulla cambia (stessi colori, `ok` = `ledger`).
 
-## 23/10/2026 — Grafica definitiva della bozza per tutto il sito (colori, menu, Panoramica) · sul branch, in revisione
+## 23/10/2026 — Grafica definitiva della bozza per tutto il sito (colori, menu, Panoramica) · su main dal 23/10
 - **Cosa:** richiesta dell'utente: grafica «ESATTAMENTE così, anche negli spazi» (`docs/design/avvisto/bozza-panoramica.webp`).
   Colori della bozza come predefiniti in `src/app/globals.css` (sfondo #f8f6f5, viola #362793, verde, arancio e blu delle
   statistiche), non più solo con `NEXT_PUBLIC_BRAND=avvisto`; logo in grassetto senza grazie (Webora: quadrato viola con la W).
@@ -96,7 +97,13 @@ Come tornare indietro, in generale:
 - **Verifica:** screenshot alla larghezza della bozza (2000 px) confrontati con la bozza, poi a 1440 px e telefono (402 px,
   nessuno scorrimento orizzontale); sotto i 1700 px colonna del riquadro a 300 px, sotto i 1500 px statistiche su due colonne,
   grafico piccolo solo se la scheda è larga almeno 340 px. Typecheck, lint, 121 test.
-- **Effetto online:** dopo il push su main il sito attuale (nome Webora) diventa viola.
+- **Effetto online:** dopo il push su main il sito attuale (nome Webora) diventa viola, favicon compresa; il logo delle email di
+  Webora resta verde.
+- **Revisione:** Code Reviewer «pronto con riserve», corrette: decisione nella tabella in alto, contenitore dei bottoni vuoto
+  sotto il titolo (16 px in più su telefono e nelle pagine senza bottoni), id dei gradienti con `useId`, menu dell'avatar senza
+  ruoli ARIA da menu (link semplici). Avatar da 1024 px in su. Trovato in verifica: in Tailwind 4 le soglie scritte in px
+  (`min-[1500px]`) finiscono prima di `sm`/`lg`/`xl` e perdono: scritte in rem (`min-[93.75rem]`, `min-[106.25rem]`,
+  `min-[112.5rem]`).
 - **Indietro:** `git revert` del commit.
 
 ## 23/10/2026 — Avvisto: dominio verificato su Resend (C2) · verificato alle 16:41 (Resend «Verified», regione eu-west-1)

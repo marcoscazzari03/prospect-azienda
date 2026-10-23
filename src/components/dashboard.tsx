@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { Card, cx } from "./ui";
 import type { ActivityItem } from "@/lib/server/activity";
 import { LEAD_STAGES, LEAD_STAGE_LABEL, type LeadStage } from "@/lib/domain/leads";
@@ -57,7 +57,8 @@ function DeltaBadge({ delta }: { delta: Delta }) {
 
 // Grafico piccolo degli ultimi 30 giorni: curva morbida con sfumatura sotto, senza assi. I punti sono medie su 5 giorni,
 // così la curva segue l'andamento e non i singoli giorni.
-function Sparkline({ values, color, id }: { values: number[]; color: string; id: string }) {
+function Sparkline({ values, color }: { values: number[]; color: string }) {
+  const id = useId();
   if (!values.length || values.every((v) => v === 0)) return null;
   const smooth = values.map((_, i) => {
     const w = values.slice(Math.max(0, i - 2), i + 3);
@@ -108,7 +109,7 @@ export function StatCard({ icon, label, value, hint, href, tone = "ledger", delt
             </span>
             {hint && <span className="mt-0.5 block truncate text-[13px] text-muted">{hint}</span>}
           </span>
-          {series && <Sparkline values={series} color={t.line} id={`spark-${tone}`} />}
+          {series && <Sparkline values={series} color={t.line} />}
         </span>
       </span>
     </Card>

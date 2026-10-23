@@ -42,16 +42,14 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
 // centro del titolo.
 export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?: string; title: ReactNode; description?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div className="min-w-0">
+    <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="min-w-0 flex-1">
         {eyebrow && <p className="mb-1.5 text-[11.5px] font-semibold uppercase leading-none tracking-[0.2em] text-muted">{eyebrow}</p>}
         <h1 className="font-display text-4xl font-semibold leading-[1.15] tracking-tight sm:text-[46px]">{title}</h1>
         {description && <p className="mt-1 max-w-3xl text-[17px] text-ink-2">{description}</p>}
       </div>
-      <div className="flex flex-wrap items-center gap-[15px] lg:shrink-0 lg:flex-nowrap">
-        {actions}
-        <HeaderAccount />
-      </div>
+      {actions && <div className="flex flex-wrap items-center gap-[15px] lg:shrink-0 lg:flex-nowrap">{actions}</div>}
+      <HeaderAccount />
     </div>
   );
 }
