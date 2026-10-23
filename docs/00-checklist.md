@@ -13,8 +13,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
    accende i segnali del punto 91.
 2. **Domani 24/10:** 95 (spegnere «Aziende | Controllo siti» su n8n se il worker fa circa 600 siti all'ora, Tu), 89b chiamate
    Adzuna (Io), 56b registrazioni (Tu).
-3. **Verso il 25/10:** 66 dominio avvisto.it (Tu) e 67 passaggio ad Avvisto (Insieme), con 16 repository privato e 83
-   posizionamento; 85b ricerche consigliate per tutti.
+3. **Avvisto (dal 23/10, `17-avvisto.md`):** 67a codice pronto (Io, ora); 66 dominio e casella ciao@ (Tu, appena possibile);
+   67 giorno del passaggio e 67d verifica (Insieme); poi 67e, con 16, 83 e 85b.
 4. **26–28/10:** 96 copertura del database (Tu), 85a prove delle ricerche consigliate (Insieme), 91b Data Quality sui segnali
    del VPS e fase 2 (Io), 92 Common Crawl se la coda del controllo siti è smaltita (Io), 60 e 62 da decidere (Insieme).
 5. **Il 30/10 (o il 6/11):** 9 decisione della beta, poi 5g ed eventuale seconda ondata.
@@ -128,17 +128,27 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 40. ~~**Io** – Wizard: stima realistica dei lead e costo in euro (migrazione 063)~~ (22/10: in produzione).
 63. ~~**Io** – Radici calcolate una volta per le ricerche in target (migrazione 059)~~ (21/10: da 1,5 a 5 volte più veloce).
 
-## 🟣 Nome nuovo «Avvisto» e costi di Hostinger (deciso il 21/10)
+## 🟣 Passaggio ad Avvisto (iniziato il 23/10, piano in `17-avvisto.md`)
+Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, logo provvisorio (Io), titolare Webora Studio.
 65. ~~**Insieme** – Scegliere il nome: **Avvisto**, marchio verificato libero (UIBM, EUIPO), avvisto.it libero~~ (21/10).
-66. **Tu, verso il 25/10** – Comprare avvisto.it su Hostinger (circa 16 €/anno) e aggiungerlo al Business Web Hosting: niente
-    server nuovo. L'app resta su Vercel.
-67. **Insieme, dal 25/10 circa** – Passaggio al nome nuovo se le agenzie invitate non rispondono. **Tu:** record DNS verso
-    Vercel, casella email sul dominio nuovo, leads@weborastudio.it attiva o inoltrata. **Io:** dominio su Vercel, rinvio
-    permanente da leads.weborastudio.it, dominio su Resend, indirizzi in Supabase, Stripe, Turnstile e callback di n8n, logo,
-    firma, testi, email e documenti (`04-pubblicazione.md`, sezione 7).
+67a. **Io, 23–24/10** – Fase A, codice pronto senza effetti online: `BRAND` in due versioni scelte da `NEXT_PUBLIC_BRAND`;
+    logo provvisorio, icona e logo delle email; testi con il nome (revisione del Sales Copywriter); modelli email di Supabase
+    in versione Avvisto; motore n8n che accetta già i callback verso avvisto.it; `APP_URL` del VPS nel file di configurazione;
+    Code Reviewer.
+66. **Tu, appena possibile** – Fase B: comprare avvisto.it su Hostinger (circa 16 €/anno) e aggiungerlo al Business Web
+    Hosting; creare e provare la casella ciao@avvisto.it; inoltro di leads@weborastudio.it verso ciao@avvisto.it.
+67. **Insieme, il giorno del passaggio (1–2 ore)** – Fase C: dominio su Vercel e DNS; dominio su Resend (SPF, DKIM, DMARC);
+    variabili su Vercel (`APP_URL`, `EMAIL_FROM`, `NEXT_PUBLIC_BRAND=avvisto`); Supabase (Site URL, Redirect URLs, modelli,
+    mittente); Turnstile; webhook di Stripe; n8n; `APP_URL` sul VPS; rinvio permanente da leads.weborastudio.it.
+67d. **Insieme, subito dopo** – Fase D: registrazione, ricerca di prova, email, vecchi link, worker e workflow; QA Tester e
+    UI/UX Designer.
+67e. **Insieme, dopo** – Fase E: email alle agenzie della beta e firma; posizionamento (83) e ricerche consigliate per tutti
+    (85b); social e Google Search Console; repository privato (16); tra 2–4 settimane togliere il vecchio dominio da Supabase
+    e dal motore; logo definitivo.
 68. **Tu, prima dei rinnovi** – Costi Hostinger: circa 234 €/anno (circa 250 con il dominio nuovo). Dominio weborastudio.it
-    15,99 € (rinnovo 20/01/2027); Business Web Hosting 203,88 € (rinnovo 02/02/2027, controllare il prezzo vero del rinnovo);
-    Starter Business Email 14,16 € (rinnovo 19/02/2027: se leads@ sta sulle caselle dell'hosting, togliere il rinnovo).
+    15,99 € (rinnovo 20/01/2027: tenerlo, serve al rinvio); Business Web Hosting 203,88 € (rinnovo 02/02/2027, controllare il
+    prezzo vero); Starter Business Email 14,16 € (rinnovo 19/02/2027: se leads@ sta sulle caselle dell'hosting, togliere il
+    rinnovo).
 33. ~~**Tu** – Prezzo del rinnovo della casella Hostinger~~ (21/10: assorbito dal punto 68).
 
 ## 🟢 Per tutti i mestieri che vendono alle aziende (idea del 22/10)

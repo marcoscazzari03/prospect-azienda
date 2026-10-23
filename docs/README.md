@@ -15,6 +15,7 @@ documento vivo che la descrive, nello stesso commit.
 | [10-beta.md](10-beta.md) | Piano della beta, criteri della decisione del 30/10, testi degli inviti, promemoria e benvenuto |
 | [04-pubblicazione.md](04-pubblicazione.md) | Guida per rimettere in piedi tutto da zero: Supabase, Vercel, n8n, Stripe, dominio |
 | [09-domande-consulenti.md](09-domande-consulenti.md) | Domande aperte per il legale e il commercialista |
+| [17-avvisto.md](17-avvisto.md) | Passaggio al nome Avvisto e al dominio avvisto.it: decisioni, fasi, chi fa cosa |
 | [16-common-crawl.md](16-common-crawl.md) | Aziende dai domini .it di Common Crawl (punto 92): come funziona, misure del campione, ritmo, cosa manca |
 | [15-ricerche-consigliate.md](15-ricerche-consigliate.md) | «Di cosa si occupa la tua attività?» e ricerche consigliate: decisioni, progetto del designer, cosa manca |
 
