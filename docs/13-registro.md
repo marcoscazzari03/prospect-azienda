@@ -188,6 +188,18 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
+## 23/10/2026 — segnali nuovi dal VPS: certificato in scadenza e sito lento (punto 91, fase 1) · codice pronto; da fare: revisione, migrazione 068, main, `installa` sul VPS
+- **Cosa:** il worker del controllo siti misura il certificato HTTPS (scadenza ed emittente, dal controllo HTTPS con il
+  certificato verificato) e il tempo della prima risposta della homepage (`worker/http.mjs` restituisce `ms` e `cert`;
+  `segnaliVps` in `worker/site-checks.mjs`). `cert_expiring`: entro 14 giorni (non 30: Let's Encrypt si rinnova a 30);
+  `slow_site`: 4 s o più, entro 1,5 s «fail», in mezzo non determinabile. Migrazione 068: i due codici in
+  `site_check_codes()`, quindi salvati come gli altri controlli. Regole in `docs/07-segnali.md`.
+- **Fase 1:** solo dati, niente catalogo né motore: nessuna ricerca li chiede. **Fase 2** dopo il controllo di Data Quality
+  su un campione: catalogo, servizi «Sicurezza del sito» e «Rifacimento del sito», ricerche solo dal database.
+- **Prove:** `worker/test.mjs` (soglie, casi dubbi, certificato già scaduto, tempo passato al segnale), test SQL 39 (salvati
+  come prove, codice sconosciuto fuori, prova tolta quando il sito torna veloce); 420 controlli SQL.
+- **Indietro:** ripristinare `site_check_codes()` della 051; versione precedente del worker.
+
 ## 23/10/2026 — pagine dell'app troppo larghe su telefono · in produzione dal 23/10
 - **Cosa:** su iPhone Panoramica, Crediti e Lead occupavano metà schermo (pagina larga circa il triplo, poi rimpicciolita).
   Causa: griglie senza colonne fisse su telefono, che si allargano quanto la riga di testo più lunga anche se tagliata con

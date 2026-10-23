@@ -247,3 +247,22 @@ manifatturiere in Lombardia con annunci per ruoli IT negli ultimi 60 giorni»).
   bisogno di un servizio o sia interessata a un'offerta.»
 - **Privacy:** i segnali riguardano aziende, non persone; gli annunci vengono conservati solo come
   link, titolo e data (niente dati di candidati o referenti dell'annuncio).
+
+## Segnali misurati dal VPS (punto 91, fase 1 dal 23/10: si salvano, non si vendono)
+Il worker del controllo siti sul VPS (`worker/site-checks.mjs`, `segnaliVps`) misura due cose che i workflow n8n non vedono.
+Si salvano in `company_checks` e `company_signals` (migrazione 068) ma **non sono nel catalogo dell'app né nel motore**:
+nessuna ricerca li chiede finché Data Quality non li ha controllati su un campione vero (fase 2, da decidere).
+
+### Certificato HTTPS in scadenza (`cert_expiring`) · in prova
+- **Vale se:** la connessione HTTPS al sito riesce con il certificato verificato e il certificato scade **entro 14 giorni**.
+  Non 30: Let's Encrypt si rinnova da solo quando mancano 30 giorni, quindi sotto i 14 il rinnovo è fallito da più di due
+  settimane. Un certificato già scaduto è il segnale «Senza HTTPS», non questo.
+- **Non vale (fail):** scadenza oltre 14 giorni. **Non determinabile:** HTTPS in errore o certificato non letto.
+- **Prova:** data di scadenza, emittente, giorni mancanti, data del controllo.
+
+### Sito lento (`slow_site`) · in prova
+- **Vale se:** la homepage (letta, non una pagina d'errore) dà la prima risposta in **4 secondi o più**, redirect compresi,
+  misurata dal VPS in Germania.
+- **Non vale (fail):** entro 1,5 secondi. **Non determinabile:** tra 1,5 e 4 secondi, o pagina non letta: una misura sola
+  non basta per un caso dubbio.
+- **Prova:** secondi misurati e data del controllo.

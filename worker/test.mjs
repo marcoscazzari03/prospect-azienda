@@ -6,7 +6,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { codice } from '../n8n/annunci/build.mjs';
-import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo } from './site-checks.mjs';
+import { caricaRegole, valuta, controlloHttps, apriSito, inParallelo, segnaliVps } from './site-checks.mjs';
 import { richiesta, privato } from './http.mjs';
 import { pagineDaAprire, haModulo, trovaContatti } from './contacts.mjs';
 import { caricaRegoleSiti, luogoSullaPagina, cercaSito, daProvare, dominioDaScartare } from './siti-osm.mjs';
@@ -257,5 +257,26 @@ const provateSiti = new Map([['n/13', Date.parse('2026-10-01')], ['n/10', Date.p
 assert.deepEqual(daProvare(elencoSiti, provateSiti, 10, Date.parse('2026-10-22')).map(a => a.chiave), ['n/12', 'n/11', 'n/10'],
   'uffici e manifattura prima, nomi comuni esclusi, riprova dopo 180 giorni');
 console.log('ok  siti delle attività OSM: domini dal nome, verifica, luogo, priorità');
+
+// 9. Segnali misurati solo dal VPS (punto 91): certificato in scadenza e sito lento.
+const adesso = Date.parse('2026-10-23T12:00:00Z');
+const cert = (giorni) => ({ eseguito: true, cert: { scade: new Date(adesso + giorni * 86_400_000).toISOString(), emittente: "Let's Encrypt" } });
+const stato = (h, ms, letto = true) => segnaliVps({ https: h, ms, letto, adesso }).map(c => c.status);
+assert.deepEqual(stato(cert(10), 5000), ['pass', 'pass'], 'scade fra 10 giorni, homepage in 5 s');
+assert.deepEqual(stato(cert(14.5), 4000), ['pass', 'pass'], 'soglie comprese: 14 giorni e 4 s');
+assert.deepEqual(stato(cert(45), 800), ['fail', 'fail'], 'certificato lontano, homepage veloce');
+assert.deepEqual(stato(cert(25), 2500), ['fail', 'undetermined'], 'Let\'s Encrypt nella finestra di rinnovo: niente segnale; 2,5 s: dubbio');
+assert.deepEqual(stato(cert(-2), 5000, false), ['undetermined', 'undetermined'], 'già scaduto (è «senza HTTPS») e pagina non letta');
+assert.deepEqual(stato({ eseguito: true, error: { message: 'x' }, cert: cert(5).cert }, undefined), ['undetermined', 'undetermined'], 'HTTPS in errore, tempo mancante');
+const [cScad, cLento] = segnaliVps({ https: cert(6), ms: 6200, letto: true, adesso });
+assert.match(cScad.evidence.detail, /scade il .* \(fra 6 giorni\)/);
+assert.equal(cScad.evidence.issuer, "Let's Encrypt");
+assert.equal(cLento.evidence.detail, 'La homepage ha risposto in 6,2 secondi');
+const misura = {};
+await apriSito({ domain: 'a.it', website: 'https://a.it' }, async () => ({ status: 200, body: '<html/>', ms: 1234 }), misura);
+assert.equal(misura.ms, 1234, 'tempo di risposta passato al segnale');
+assert.deepEqual(await controlloHttps({ domain: 'a.it', website: 'https://a.it' }, async () => ({ status: 200, body: '', cert: { scade: '2026-11-01T00:00:00.000Z', emittente: 'R11' } })),
+  { eseguito: true, cert: { scade: '2026-11-01T00:00:00.000Z', emittente: 'R11' } }, 'certificato dal controllo HTTPS');
+console.log('ok  segnali del VPS: certificato in scadenza (14 giorni), sito lento (4 s), casi dubbi non determinabili');
 
 console.log('\nTest del worker superati.');

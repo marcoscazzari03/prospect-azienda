@@ -34,21 +34,49 @@ const www = (a) => (String(a.website || '').toLowerCase().includes('://www.') ? 
 // Una risposta qualsiasi (anche 4xx) vuol dire HTTPS funzionante; l'errore va a controlliSito così com'è.
 export async function controlloHttps(a, req = richiesta) {
   try {
-    await req(`https://${www(a)}${a.domain}/`, { method: 'HEAD', redirect: 3, timeout: 8_000 });
-    return { eseguito: true };
+    const r = await req(`https://${www(a)}${a.domain}/`, { method: 'HEAD', redirect: 3, timeout: 8_000 });
+    return { eseguito: true, ...(r?.cert ? { cert: r.cert } : {}) };
   } catch (e) {
     return { eseguito: true, ...comeErroreN8n(e) };
   }
 }
 
 // Come «Apri sito» di n8n: il protocollo del sito salvato, certificato non verificato, 5 redirect, 10 secondi.
-export async function apriSito(a, req = richiesta) {
+// `misura` riceve il tempo di risposta (ms) per il segnale «sito lento» del VPS.
+export async function apriSito(a, req = richiesta, misura = {}) {
   const protocollo = String(a.website || '').toLowerCase().startsWith('http://') ? 'http://' : 'https://';
   try {
-    return (await req(`${protocollo}${www(a)}${a.domain}/`, { insicuro: true, redirect: 5, timeout: 10_000 })).body;
+    const r = await req(`${protocollo}${www(a)}${a.domain}/`, { insicuro: true, redirect: 5, timeout: 10_000 });
+    misura.ms = r.ms;
+    return r.body;
   } catch {
     return '';
   }
+}
+
+// Segnali misurati solo dal VPS (punto 91, fase 1: si salvano ma non si vendono finché Data Quality non li ha controllati).
+//   cert_expiring: certificato HTTPS valido che scade entro 14 giorni (Let's Encrypt si rinnova a 30: sotto 14 il rinnovo è
+//                  fallito da più di due settimane); oltre 14 giorni «fail»; senza certificato letto «non determinabile».
+//   slow_site:     homepage letta, prima risposta in 4 s o più «pass», entro 1,5 s «fail», in mezzo «non determinabile»
+//                  (una misura sola: niente prova su un caso dubbio).
+export const SOGLIE_VPS = { certGiorni: 14, lentoMs: 4_000, veloceMs: 1_500 };
+export function segnaliVps({ https, ms, letto, adesso = Date.now() }) {
+  const giorni = https?.cert && !https.error ? Math.floor((Date.parse(https.cert.scade) - adesso) / 86_400_000) : NaN;
+  const data = Number.isFinite(giorni) ? new Date(https.cert.scade).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' }) : '';
+  const cert = !Number.isFinite(giorni) || giorni < 0
+    ? { code: 'cert_expiring', status: 'undetermined', evidence: { detail: '' } }
+    : giorni <= SOGLIE_VPS.certGiorni
+      ? { code: 'cert_expiring', status: 'pass', evidence: { detail: `Il certificato HTTPS scade il ${data} (fra ${giorni} giorni)`, expires_at: https.cert.scade, issuer: https.cert.emittente || '', days_left: giorni } }
+      : { code: 'cert_expiring', status: 'fail', evidence: { detail: `Certificato valido fino al ${data}`, expires_at: https.cert.scade } };
+  const secondi = Math.round((ms || 0) / 100) / 10;
+  const lento = !letto || !Number.isFinite(ms)
+    ? { code: 'slow_site', status: 'undetermined', evidence: { detail: '' } }
+    : ms >= SOGLIE_VPS.lentoMs
+      ? { code: 'slow_site', status: 'pass', evidence: { detail: `La homepage ha risposto in ${String(secondi).replace('.', ',')} secondi`, seconds: secondi } }
+      : ms <= SOGLIE_VPS.veloceMs
+        ? { code: 'slow_site', status: 'fail', evidence: { detail: `La homepage ha risposto in ${String(secondi).replace('.', ',')} secondi`, seconds: secondi } }
+        : { code: 'slow_site', status: 'undetermined', evidence: { detail: `Risposta in ${String(secondi).replace('.', ',')} secondi: né lenta né veloce`, seconds: secondi } };
+  return [cert, lento];
 }
 
 // Come «Valuta siti» di n8n (09-valuta-siti.js), per una sola azienda.
@@ -96,8 +124,9 @@ async function main() {
   const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
   const controlla = async (a) => {
     // Al massimo 30 s per azienda (le richieste hanno già un tempo massimo; questo copre qualsiasi altro intoppo).
+    const misura = {};
     const [https, html] = await Promise.race([
-      Promise.all([controlloHttps(a), apriSito(a)]),
+      Promise.all([controlloHttps(a), apriSito(a, richiesta, misura)]),
       new Promise((r) => setTimeout(() => r([{}, '']), 30_000).unref()),
     ]);
     try {
@@ -106,12 +135,13 @@ async function main() {
       const t0 = Date.now();
       const pagina = html.length > 500_000 ? html.slice(0, 400_000) + html.slice(-100_000) : html;
       const esito = valuta(regole, a, pagina, https, oggi);
+      esito.checks.push(...segnaliVps({ https, ms: misura.ms, letto: esito.letto }));
       if (Date.now() - t0 > 3_000) console.error(`valutazione lenta per ${a.domain}: ${Date.now() - t0} ms, ${html.length} caratteri`);
       return esito;
     } catch (e) {
       // Un sito strano non ferma il giro: tutto «non determinabile», si riprova al prossimo controllo.
       console.error(`valutazione non riuscita per ${a.domain}: ${e?.message || e}`);
-      return { company: { domain: a.domain, name: a.name, website: a.website }, checks: CODICI.map(code => ({ code, status: 'undetermined', evidence: { detail: '' } })), letto: false };
+      return { company: { domain: a.domain, name: a.name, website: a.website }, checks: [...CODICI, 'cert_expiring', 'slow_site'].map(code => ({ code, status: 'undetermined', evidence: { detail: '' } })), letto: false };
     }
   };
   // Nome e sito entro i 300 caratteri dello schema della route: un valore troppo lungo farebbe rifiutare tutto il lotto (QA).

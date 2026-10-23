@@ -70,6 +70,7 @@ export function richiesta(url, { method = 'GET', insicuro = false, redirect = 5,
       fn(valore);
     };
     const orologio = setTimeout(() => fine(reject, errore('timeout', 'ETIMEDOUT')), timeout);
+    const partenza = Date.now();
     const vai = (indirizzo, rimasti) => {
       if (chiuso) return;
       let u;
@@ -102,11 +103,19 @@ export function richiesta(url, { method = 'GET', insicuro = false, redirect = 5,
               try { prossimo = new URL(dove, u).toString(); } catch { return fine(reject, errore('redirect non valido', 'EBADURL')); }
               return vai(prossimo, rimasti - 1);
             }
-            if (method === 'HEAD') { res.resume(); return fine(resolve, { status: res.statusCode, body: '', url: u.toString() }); }
+            // Tempo fino alle intestazioni della risposta finale (redirect compresi) e certificato del sito, per i segnali
+            // misurati solo dal VPS (punto 91): sito lento e certificato in scadenza.
+            const ms = Date.now() - partenza;
+            let cert;
+            try {
+              const c = u.protocol === 'https:' && typeof res.socket?.getPeerCertificate === 'function' ? res.socket.getPeerCertificate() : null;
+              if (c?.valid_to) cert = { scade: new Date(c.valid_to).toISOString(), emittente: String(c.issuer?.O || c.issuer?.CN || '').slice(0, 80) };
+            } catch { cert = undefined; }
+            if (method === 'HEAD') { res.resume(); return fine(resolve, { status: res.statusCode, body: '', url: u.toString(), ms, cert }); }
             const pezzi = [];
             let letti = 0;
             const flusso = decomprimi(res);
-            const leggi = () => fine(resolve, { status: res.statusCode, body: Buffer.concat(pezzi).toString('utf8'), url: u.toString() });
+            const leggi = () => fine(resolve, { status: res.statusCode, body: Buffer.concat(pezzi).toString('utf8'), url: u.toString(), ms, cert });
             flusso.on('data', (c) => {
               if (chiuso) return;
               const spazio = maxBytes - letti;
