@@ -188,7 +188,7 @@ Come tornare indietro, in generale:
 - **Effetto atteso:** notti più lunghe (fino a circa 55 richieste invece di 40), meno province perse.
 - **Indietro:** versione precedente del workflow «Aziende | Popolamento OSM» nella cronologia di n8n; `git revert`.
 
-## 23/10/2026 — segnali nuovi dal VPS: certificato in scadenza e sito lento (punto 91, fase 1) · codice pronto; da fare: revisione, migrazione 068, main, `installa` sul VPS
+## 23/10/2026 — segnali nuovi dal VPS: certificato in scadenza e sito lento (punto 91, fase 1) · rivisto, migrazione 068 eseguita, su main; da fare: `installa` sul VPS (23/10 sera), poi Data Quality su un campione
 - **Cosa:** il worker del controllo siti misura il certificato HTTPS (scadenza ed emittente, dal controllo HTTPS con il
   certificato verificato) e il tempo della prima risposta della homepage (`worker/http.mjs` restituisce `ms` e `cert`;
   `segnaliVps` in `worker/site-checks.mjs`). `cert_expiring`: entro 14 giorni (non 30: Let's Encrypt si rinnova a 30);

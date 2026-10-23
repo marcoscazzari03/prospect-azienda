@@ -177,7 +177,7 @@ Si va in produzione solo con il database coperto anche per manifattura, uffici e
     Haiku solo per i casi difficili, con un tetto di spesa giornaliero.
 89. **Io** – ~~Annunci di lavoro anche per la manifattura~~ (fatto il 22/10: figure operai, manutentori, magazzino e servizio «Selezione di operai e tecnici»; chiamate Adzuna da guardare dopo 2–3 giri): operai specializzati, tecnici, magazzinieri, amministrativi.
 90. **Insieme** – (22/10: codice pronto e rivisto, non installato: si passa direttamente ai backup di Supabase Pro, punto 15; se servisse prima, `bash worker.sh installa-backup`) Backup notturno cifrato del database sul VPS.
-91. **Io** – (23/10: fase 1 pronta, in revisione: il VPS misura e salva, nessuna ricerca li usa; fase 2 dopo Data Quality) Segnali nuovi dal VPS: certificato in scadenza (entro 14 giorni, non 30), velocità del sito.
+91. **Io** – (23/10: fase 1 su main e migrazione 068 eseguita, attiva dopo `installa` sul VPS: il VPS misura e salva, nessuna ricerca li usa; fase 2 dopo Data Quality) Segnali nuovi dal VPS: certificato in scadenza (entro 14 giorni, non 30), velocità del sito.
 92. **Più avanti** – Siti italiani da Common Crawl (archivio pubblico) per le aziende che non sono in nessun elenco.
 93. **Tu, con il legale** – Albi professionali (commercialisti, avvocati): si possono usare? Contengono dati di persone.
 
