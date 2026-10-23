@@ -101,7 +101,13 @@ async function main() {
       new Promise((r) => setTimeout(() => r([{}, '']), 30_000).unref()),
     ]);
     try {
-      return valuta(regole, a, html, https, oggi);
+      // Pagina ridotta a 500 KB (inizio e fine) prima delle regole: una pagina enorme con un'espressione regolare che va in
+      // backtracking bloccherebbe Node e con lui il tempo massimo per azienda e quello del giro (Code Reviewer, 23/10).
+      const t0 = Date.now();
+      const pagina = html.length > 500_000 ? html.slice(0, 400_000) + html.slice(-100_000) : html;
+      const esito = valuta(regole, a, pagina, https, oggi);
+      if (Date.now() - t0 > 3_000) console.error(`valutazione lenta per ${a.domain}: ${Date.now() - t0} ms, ${html.length} caratteri`);
+      return esito;
     } catch (e) {
       // Un sito strano non ferma il giro: tutto «non determinabile», si riprova al prossimo controllo.
       console.error(`valutazione non riuscita per ${a.domain}: ${e?.message || e}`);
@@ -111,10 +117,10 @@ async function main() {
   // Nome e sito entro i 300 caratteri dello schema della route: un valore troppo lungo farebbe rifiutare tutto il lotto (QA).
   const corto = (v) => String(v ?? '').slice(0, 300);
 
-  // A blocchi da 100, ognuno salvato subito, e niente blocchi nuovi dopo 14 minuti: con le aziende nuove di OSM (molti
-  // siti morti o lentissimi) un giro intero arrivava ai 20 minuti di systemd e veniva interrotto prima di salvare
+  // A blocchi da 100, ognuno salvato subito, e niente blocchi nuovi dopo 12 minuti: con le aziende nuove di OSM (molti
+  // siti morti o lentissimi) un giro intero poteva arrivare ai 20 minuti di systemd ed essere interrotto prima di salvare
   // (23/10: worker fermo dalle 15:35 UTC del 22/10, mentre n8n con 150 aziende andava).
-  const scadenza = inizio + 14 * 60_000;
+  const scadenza = inizio + 12 * 60_000;
   const stats = { aziende: 0, salvate: 0, illeggibili: 0, email: 0, segnali: {}, blocchi_saltati: 0 };
   for (let k = 0; k < aziende.length; k += 100) {
     if (Date.now() > scadenza) { stats.blocchi_saltati++; continue; }

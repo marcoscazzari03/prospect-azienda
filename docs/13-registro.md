@@ -196,7 +196,9 @@ Come tornare indietro, in generale:
   aziende nuove di OSM (molti siti morti o lentissimi) il giro di 300 arrivava ai 20 minuti di systemd ed era interrotto
   prima dell'unico salvataggio finale, ogni volta.
 - **Correzione:** `worker/site-checks.mjs` lavora a blocchi da 100, ognuno salvato subito, e non apre blocchi nuovi dopo
-  14 minuti; in caso di errore scrive anche il testo della risposta. `worker.sh`: `UV_THREADPOOL_SIZE=16` per controllo
+  12 minuti; pagina ridotta a 500 KB prima delle regole e avviso nel log per le valutazioni oltre 3 s (Code Reviewer: con
+  i tempi massimi delle richieste un giro non arriva a 20 minuti, quindi la causa potrebbe essere un'espressione regolare
+  bloccata su una pagina enorme, che ferma Node e con lui ogni tempo massimo; i log di stasera lo diranno); in caso di errore scrive anche il testo della risposta. `worker.sh`: `UV_THREADPOOL_SIZE=16` per controllo
   siti e contatti (risoluzioni DNS). Si spegne «Aziende | Controllo siti» su n8n solo dopo un giorno di worker regolare.
 - **Indietro:** versione precedente di `worker/site-checks.mjs`, poi `bash worker.sh aggiorna`.
 
