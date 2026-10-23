@@ -34,19 +34,22 @@ describe("email", () => {
   it("i modelli Avvisto nel repository sono aggiornati", async () => {
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_BRAND", "avvisto");
-    const { renderEmail: render } = await import("@/lib/email/layout");
-    const { SUPABASE_TEMPLATES: templates } = await import("@/lib/email/supabase-templates");
-    const dir = `${DIR}/avvisto`;
-    if (process.env.WRITE_TEMPLATES) mkdirSync(dir, { recursive: true });
-    for (const t of templates) {
-      const { html } = render(t.content);
-      expect(html).toContain("https://avvisto.it/email/logo-avvisto.png");
-      expect(html).not.toMatch(/webora leads|leads\.weborastudio/i);
-      if (process.env.WRITE_TEMPLATES) writeFileSync(`${dir}/${t.file}`, html);
-      expect(readFileSync(`${dir}/${t.file}`, "utf8")).toBe(html);
+    try {
+      const { renderEmail: render } = await import("@/lib/email/layout");
+      const { SUPABASE_TEMPLATES: templates } = await import("@/lib/email/supabase-templates");
+      const dir = `${DIR}/avvisto`;
+      if (process.env.WRITE_TEMPLATES) mkdirSync(dir, { recursive: true });
+      for (const t of templates) {
+        const { html } = render(t.content);
+        expect(html).toContain("https://avvisto.it/email/logo-avvisto.png");
+        expect(html).not.toMatch(/webora leads|leads\.weborastudio/i);
+        if (process.env.WRITE_TEMPLATES) writeFileSync(`${dir}/${t.file}`, html);
+        expect(readFileSync(`${dir}/${t.file}`, "utf8")).toBe(html);
+      }
+    } finally {
+      vi.unstubAllEnvs();
+      vi.resetModules();
     }
-    vi.unstubAllEnvs();
-    vi.resetModules();
   });
 
   it("i link di accesso usano token_hash verso /auth/conferma", () => {

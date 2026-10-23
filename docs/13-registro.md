@@ -51,7 +51,7 @@ Come tornare indietro, in generale:
 
 ---
 
-## 23/10/2026 — Avvisto, fase A: codice pronto senza effetti online · in revisione
+## 23/10/2026 — Avvisto, fase A: codice pronto senza effetti online · su main (Code Reviewer «pronto con riserve», corrette: `dominio` accetta solo i due indirizzi esatti)
 - **Cosa:** `BRAND` in due versioni (`src/lib/config.ts`), scelta con `NEXT_PUBLIC_BRAND=avvisto` (assente = Webora, com'è
   oggi); logo provvisorio Avvisto in `src/components/logo.tsx` (una «A» con il punto ambra) e icona del browser generata dallo
   stesso simbolo (`src/app/icon.tsx`, al posto di `icon.svg`); `public/email/logo-avvisto.png` e logo delle email da

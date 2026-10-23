@@ -231,8 +231,10 @@ UNIT
   aggiorna) git -C "$APP" pull --ff-only && git -C "$APP" log --oneline -1 ;;
   dominio)
     # APP_URL nel file letto da tutti i servizi (docs/17-avvisto.md, fase C8): vale dal giro successivo.
-    case "${2:-}" in https://*) ;; *) echo "Uso: bash $0 dominio https://avvisto.it"; exit 1 ;; esac
-    U="${2%/}"
+    # Solo i due indirizzi dell'app: i worker mandano SITE_CHECKS_SECRET ad APP_URL, un errore di battitura lo manderebbe a
+    # un sito di altri (Code Reviewer).
+    case "${2:-}" in https://avvisto.it|https://leads.weborastudio.it) ;; *) echo "Uso: bash $0 dominio https://avvisto.it (oppure https://leads.weborastudio.it)"; exit 1 ;; esac
+    U="$2"
     sudo sed -i '/^APP_URL=/d' "$ENVF"
     printf 'APP_URL=%s\n' "$U" | sudo tee -a "$ENVF" >/dev/null
     echo "Indirizzo dell'app per i worker: $U (dal prossimo giro)." ;;
