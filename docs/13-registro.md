@@ -109,7 +109,9 @@ Come tornare indietro, in generale:
   `is_non_target_company` la comprende (import, coda del controllo siti con l'indice ricostruito, disponibilità, avvisi). Le
   aziende già presenti restano inutilizzate e si cancellano dopo aver guardato l'elenco (`professionisti_esclusi.sql`). Code
   Reviewer «pronto con riserve» (falsi positivi delle sigle, domini scartati da ricordare nel giro): corretti; i domini
-  scartati dal callback entrano in `checked_domains`. Nel callback del motore `dropProfessionals`
+  scartati dal callback entrano in `checked_domains`. QA: falsi positivi con il titolo dentro un marchio («Farmacia Dott. Rossi», «Dottor
+  Gelato», «Bar Il Notaio»): con una parola di settore nel nome l'attività resta. Restano fuori apposta le sigle senza punto
+  («Avv Rossi») e «Dr.ssa»; le consegne rimborsate contano nel tetto (l'azienda è stata comunque consegnata). Nel callback del motore `dropProfessionals`
   (`src/lib/domain/engine.ts`) scarta gli stessi lead. Privacy aggiornata. Test SQL 43 e vitest.
 - **Indietro:** `is_non_target_company` dalla 035 e `reindex index companies_check_queue_idx`; togliere `dropProfessionals`.
 

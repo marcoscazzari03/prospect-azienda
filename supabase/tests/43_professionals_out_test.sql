@@ -14,7 +14,8 @@ select pg_temp.check(not is_professional_name('Studio Ing. Rossi & C. S.r.l.') a
                      and not is_professional_name('Studio Rossi') and not is_professional_name('Marketing Ingenium')
                      and not is_professional_name('Drago Srl') and not is_professional_name('Centro Medico San Luca')
                      and not is_professional_name('Farmacia Dr. Max') and not is_professional_name('Ing Direct') and not is_professional_name('Hotel Arch')
-                     and not is_professional_name('Rag Doll Bar') and not is_professional_name('Perito Moreno Viaggi') and not is_professional_name('Il Tuo Dentista'),
+                     and not is_professional_name('Rag Doll Bar') and not is_professional_name('Perito Moreno Viaggi') and not is_professional_name('Il Tuo Dentista')
+                     and not is_professional_name('Farmacia Dott. Rossi') and not is_professional_name('Dottor Gelato') and not is_professional_name('Bar Il Notaio'),
                      'società, studi senza titolo e nomi comuni restano');
 select pg_temp.check(is_non_target_company('Avv. Mario Rossi') and is_non_target_company('ASD Calcio') and not is_non_target_company('Rossi Srl'),
                      'fuori target: professionisti e regole di prima');

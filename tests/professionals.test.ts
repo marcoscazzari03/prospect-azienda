@@ -8,7 +8,7 @@ describe("professionisti con titolo", () => {
       expect(isProfessionalName(n), n).toBe(true);
   });
   it("non tocca società, studi senza titolo e nomi comuni", () => {
-    for (const n of ["Studio Ing. Rossi & C. S.r.l.", "Architetti Associati STP", "Studio Rossi", "Pizzeria da Mario", "Marketing Ingenium", "Drago Srl", "Ristorante Arco", "Centro Medico San Luca", "Farmacia Dr. Max", "Dr. Schär", "Ing Direct", "Hotel Arch", "Rag Doll Bar", "Perito Moreno Viaggi", "Il Tuo Dentista", "Dr Car Autofficina"])
+    for (const n of ["Studio Ing. Rossi & C. S.r.l.", "Architetti Associati STP", "Studio Rossi", "Pizzeria da Mario", "Marketing Ingenium", "Drago Srl", "Ristorante Arco", "Centro Medico San Luca", "Farmacia Dr. Max", "Dr. Schär", "Ing Direct", "Hotel Arch", "Rag Doll Bar", "Perito Moreno Viaggi", "Il Tuo Dentista", "Dr Car Autofficina", "Farmacia Dott. Rossi", "Ottica Dott. Ghezzi", "Impresa Edile Geom. Bianchi", "Autofficina Ing. Verdi", "Clinica Veterinaria Dott. Bianchi", "Ristorante Dal Dottore", "Bar Il Notaio", "Dottor Gelato", "Dottor Bike", "Avvocato Express", "Geometra Facile", "Hotel Notaio", "Ing. Car Service", "Il Commercialista Digitale"])
       expect(isProfessionalName(n), n).toBe(false);
   });
   it("toglie i lead dei professionisti", () => {

@@ -208,9 +208,12 @@ export function urlOnDomain(raw: unknown, domain: unknown) {
 // («Ing Direct», «Hotel Arch»); «Dr» non vale mai («Farmacia Dr. Max», «Dr. Schär»), né «dentista» e «perito» (Code Reviewer).
 const TITOLO = /(^|[^a-z0-9])((dott|dott\.ssa|avv|arch|ing|geom|rag)\.|(dottor|dottore|dottoressa|avvocato|avvocata|architetto|ingegnere|geometra|ragioniere|notaio|commercialista|psicologo|psicologa|fisioterapista|osteopata|agronomo)([^a-z0-9]|$))/;
 const SOCIETA = / (s ?r ?l ?s?|s ?p ?a|s ?n ?c|s ?a ?s|soc|societa|coop|cooperativa|scarl|consorzio|fondazione|associazione|onlus|ltd|gmbh|group|gruppo|holding|stp) /;
+// Parole di settore: il titolo fa parte del marchio di un'attività («Farmacia Dott. Rossi», «Dottor Gelato», «Bar Il Notaio»), QA 24/10.
+const SETTORE = / (farmacia|parafarmacia|ottica|ottico|ristorante|trattoria|osteria|pizzeria|bar|caffe|gelato|gelateria|pasticceria|hotel|albergo|b b|impresa|edile|edilizia|costruzioni|officina|autofficina|carrozzeria|clinica|ambulatorio|veterinaria|veterinario|poliambulatorio|laboratorio|centro|negozio|shop|store|market|bike|car|cars|auto|service|services|express|digitale|digital|facile|online|web|academy|scuola|agenzia|immobiliare|assicurazioni|viaggi|tour) /;
 export function isProfessionalName(name: string | undefined | null) {
   const n = String(name ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  return TITOLO.test(n) && !SOCIETA.test(` ${n.replace(/[^a-z0-9]+/g, " ")} `);
+  const parole = ` ${n.replace(/[^a-z0-9]+/g, " ")} `;
+  return TITOLO.test(n) && !SOCIETA.test(parole) && !SETTORE.test(parole);
 }
 
 export function dropProfessionals(leads: unknown[] | undefined) {
