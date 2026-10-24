@@ -20,7 +20,7 @@ Ultimo aggiornamento: 24/10/2026 sera (analisi privacy: 13 domani, 98 prima del 
 
 ## 📅 Domani, domenica 25/10
 - 13. ~~**Tu** – Sollecito ad Adzuna con richiesta di licenza~~ (24/10 sera: mandato); in attesa della risposta;
-  **Insieme:** decidere se spegnere la raccolta e il segnale da Adzuna fino all'accordo.
+  ~~**Insieme:** decidere se spegnere la raccolta~~ (24/10: resta accesa durante la beta gratuita).
 - 67d. **Tu** – Ricerca di prova che passi dal motore (opportunità con un segnale raro o zona poco coperta), per provare il
   giro completo con il callback su avvisto.it.
 - 66. **Tu** – Inoltro della casella vecchia verso ciao@avvisto.it.

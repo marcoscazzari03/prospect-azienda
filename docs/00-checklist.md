@@ -100,8 +100,8 @@ sono in `00b-checklist-calendario.md`.
     listino (5f) si fissa dopo la risposta sull'art. 130.
 13. **Tu, subito** – Conferma scritta di Adzuna sull'uso commerciale degli annunci (mail del 18/10, in attesa). Dal 24/10 è
     verificato: i termini dell'API dicono che «sales prospecting or lead generation requires our written agreement». Sollecitare
-    chiedendo una licenza (~~sollecito mandato il 24/10 sera da ciao@, con il nome Avvisto e la descrizione esatta dei dati~~). **Insieme, da decidere:** fino all'accordo, spegnere la raccolta Adzuna e non consegnare il segnale
-    «annuncio di lavoro» preso da Adzuna.
+    chiedendo una licenza (~~sollecito mandato il 24/10 sera da ciao@, con il nome Avvisto e la descrizione esatta dei dati~~). ~~**Insieme, da decidere:** spegnere la raccolta fino all'accordo~~ (24/10: decisione dell'utente,
+    resta accesa durante la beta gratuita; scritto anche dal modulo di adzuna.it). Prima dei pagamenti: accordo o segnale tolto.
 98. **Io, poi Tu** – Interventi dell'analisi privacy del 24/10 (documento «Avvisto – analisi privacy» su Claude, fuori dal
     repository): avviso sull'art. 130 in wizard, risultati, export e termini; testi senza promesse di campagne email; ditte
     individuali e studi riconosciuti e trattati a parte; opposizione comunicata a chi ha già ricevuto il dato (art. 19);

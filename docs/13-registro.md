@@ -19,6 +19,7 @@ Come tornare indietro, in generale:
 
 | Data | Decisione | Motivo |
 |---|---|---|
+| 24/10 sera | **Adzuna resta acceso** in attesa della risposta alla richiesta di licenza (uso dichiarato ad Adzuna, beta gratuita); niente pagamenti con il segnale da Adzuna senza accordo | decisione dell'utente |
 | 24/10 | **Due checklist aggiornate insieme:** `00-checklist.md` per argomento e priorità, `00b-checklist-calendario.md` per date, stessi numeri, nello stesso commit | richiesta dell'utente |
 | 23/10 sera | **Solo Avvisto:** nessuna traccia del nome vecchio (codice, email, n8n, VPS, documenti; il registro e l'archivio usano formule neutre); logo «C · Due toni»; titolare «Avvisto» nelle pagine legali fino alla partita IVA; vecchio indirizzo staccato senza rinvio | decisione dell'utente |
 | 23/10 sera | **Grafica definitiva per tutto il sito:** colori e struttura della bozza (`docs/design/avvisto/bozza-panoramica.webp`) identici anche negli spazi, **per tutto il sito** (supera «solo in versione Avvisto» della riga sotto); `NEXT_PUBLIC_BRAND` cambia solo nome, logo, dominio ed email. Il logo delle email del nome vecchio resta verde (email a cura dell'utente) | richiesta dell'utente |
@@ -96,7 +97,9 @@ Come tornare indietro, in generale:
   provvedimento Lusha citati da ChatGPT.
 - **Adzuna (24/10 sera):** mandato il sollecito con il nome Avvisto, la descrizione esatta dei dati salvati (anche i primi
   600 caratteri della descrizione, che la mail del 18/10 non diceva) e la richiesta di una licenza per la lead generation.
-- **Decisione aperta:** spegnere o no la raccolta e il segnale da Adzuna fino all'accordo.
+- **Decisione dell'utente (24/10 sera):** la raccolta Adzuna e il segnale restano accesi in attesa della risposta (beta
+  gratuita, uso dichiarato ad Adzuna). Scritto anche dal modulo contatti di adzuna.it. Da rivedere alla risposta o prima dei
+  pagamenti.
 
 ## 24/10/2026 — Documento per l'avvocato aggiornato (punto 12) · documento su Claude, fuori dal repository
 - **Cosa:** nel documento «Avvisto – richiesta di parere legale» aggiunta la domanda principale (si possono vendere elenchi di
