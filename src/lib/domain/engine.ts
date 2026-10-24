@@ -204,8 +204,9 @@ export function urlOnDomain(raw: unknown, domain: unknown) {
 
 // Professionisti con titolo nel nome («Avv. Mario Rossi», «Studio Arch. Bianchi») senza forma societaria: il nome
 // dell'attività è quello di una persona, si escludono (decisione dell'utente del 24/10, analisi privacy). Stessa regola
-// di is_professional_name (migrazione 074).
-const TITOLO = /(^|[^a-z0-9])(dott|dottssa|dottoressa|dr|avv|avvocato|avvocata|arch|architetto|ing|ingegnere|geom|geometra|rag|ragioniere|notaio|commercialista|psicologo|psicologa|dentista|fisioterapista|osteopata|perito|agronomo)([^a-z0-9]|$)/;
+// di is_professional_name (migrazione 074). Le sigle valgono solo con il punto («Ing.», «Arch.»): senza, sono marchi
+// («Ing Direct», «Hotel Arch»); «Dr» non vale mai («Farmacia Dr. Max», «Dr. Schär»), né «dentista» e «perito» (Code Reviewer).
+const TITOLO = /(^|[^a-z0-9])((dott|dott\.ssa|avv|arch|ing|geom|rag)\.|(dottor|dottore|dottoressa|avvocato|avvocata|architetto|ingegnere|geometra|ragioniere|notaio|commercialista|psicologo|psicologa|fisioterapista|osteopata|agronomo)([^a-z0-9]|$))/;
 const SOCIETA = / (s ?r ?l ?s?|s ?p ?a|s ?n ?c|s ?a ?s|soc|societa|coop|cooperativa|scarl|consorzio|fondazione|associazione|onlus|ltd|gmbh|group|gruppo|holding|stp) /;
 export function isProfessionalName(name: string | undefined | null) {
   const n = String(name ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");

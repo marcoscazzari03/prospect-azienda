@@ -133,7 +133,16 @@ export async function POST(request: Request) {
     if (noEmailError) console.error("email_missed_at", noEmailError.message);
   }
 
-  payload.leads = dropProfessionals(dropForeignContactForms(payload.leads));
+  // Professionisti con titolo scartati: contano come aziende già controllate, i giri successivi non le ripropongono
+  // (Code Reviewer, 24/10: senza, l'AI poteva riproporle e farle ripagare).
+  const prima = dropForeignContactForms(payload.leads);
+  payload.leads = dropProfessionals(prima);
+  if (payload.leads.length < prima.length) {
+    const scartati = prima.filter((l) => !payload.leads!.includes(l))
+      .map((l) => String((l as { company?: { domain?: string } })?.company?.domain ?? "").trim().toLowerCase()).filter(Boolean);
+    const gia = Array.isArray(payload.stats?.checked_domains) ? (payload.stats.checked_domains as string[]) : [];
+    payload.stats = { ...payload.stats, checked_domains: [...new Set([...gia, ...scartati])].slice(0, 500) };
+  }
   const { data, error } = await db.rpc("apply_engine_results", {
     p_run: evt.run_id,
     p_token_hash: tokenHash,

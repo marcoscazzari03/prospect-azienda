@@ -85,14 +85,28 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Tetto di clienti per azienda: 5 ogni 90 giorni (migrazione 075, checklist 98) · su branch; migrazione da eseguire
+- **Perché:** decisione dell'utente del 24/10. Garanzia per il bilanciamento del legittimo interesse (una piccola attività
+  non riceve proposte da troppi nostri clienti, differenza netta con Lusha) e argomento commerciale.
+- **Cosa:** trigger `deliveries_company_cap` BEFORE INSERT su `deliveries` (unico punto in cui nascono le consegne,
+  `deliver_leads`): un'azienda già consegnata a 5 altri clienti negli ultimi 90 giorni non si inserisce; `deliver_leads` la
+  conta come doppione, non la addebita. Numeri in `company_client_cap()`. Indice `deliveries_company_recent_idx`. Privacy,
+  termini e panoramica aggiornati. Test SQL 44.
+- **Limite noto:** riserve e stima del wizard non lo considerano: con molti clienti nella stessa zona e settore una ricerca
+  può consegnare meno del previsto. Da rivedere con i volumi.
+- **Indietro:** `drop trigger deliveries_company_cap on public.deliveries`.
+
 ## 24/10/2026 — Professionisti con titolo esclusi (migrazione 074, checklist 98) · su branch; migrazione da eseguire
 - **Perché:** query `ditte_individuali.sql` del 24/10 sulle aziende con contatto: 12.448 «altro» (88,2%: ditte individuali o
   forma non scritta, non separabili dal nome), 1.314 società o enti (9,3%), 214 studi senza forma (1,5%), 132 professionisti
   con titolo (0,9%). Escludere le ditte individuali non è praticabile: restano con il legittimo interesse e le garanzie. Decisione
   dell'utente: escludere i professionisti con titolo («Avv.», «Arch.», «Dott.»…), i casi in cui il nome è quello di una persona.
-- **Cosa:** `is_professional_name` (titolo nel nome, nessuna forma societaria; «medico» e «veterinario» non contano: «Centro
-  medico», «Ambulatorio veterinario»); `is_non_target_company` la comprende (import, coda del controllo siti con l'indice
-  ricostruito, disponibilità, avvisi); le aziende già presenti si cancellano. Nel callback del motore `dropProfessionals`
+- **Cosa:** `is_professional_name` (titolo nel nome, nessuna forma societaria; sigle solo con il punto, «Dr» mai, niente
+  «medico», «veterinario», «dentista», «perito»: marchi come «Farmacia Dr. Max», «Ing Direct», «Hotel Arch», «Centro medico»);
+  `is_non_target_company` la comprende (import, coda del controllo siti con l'indice ricostruito, disponibilità, avvisi). Le
+  aziende già presenti restano inutilizzate e si cancellano dopo aver guardato l'elenco (`professionisti_esclusi.sql`). Code
+  Reviewer «pronto con riserve» (falsi positivi delle sigle, domini scartati da ricordare nel giro): corretti; i domini
+  scartati dal callback entrano in `checked_domains`. Nel callback del motore `dropProfessionals`
   (`src/lib/domain/engine.ts`) scarta gli stessi lead. Privacy aggiornata. Test SQL 43 e vitest.
 - **Indietro:** `is_non_target_company` dalla 035 e `reindex index companies_check_queue_idx`; togliere `dropProfessionals`.
 

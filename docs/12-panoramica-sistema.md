@@ -270,6 +270,8 @@ Analisi fatta in proprio il 24/10 (documento «Avvisto – analisi privacy» su 
   o cancellazione entro 24 mesi. I dati delle società sono fuori dal GDPR (considerando 14); ditte individuali e
   studi sono dati personali, trattati con il legittimo interesse e le garanzie della valutazione scritta (LIA). I professionisti con titolo nel nome
   («Avv.», «Arch.», «Dott.») sono esclusi (migrazione 074 e callback del motore).
+- **Tetto di clienti per azienda:** la stessa azienda va al massimo a 5 clienti diversi ogni 90 giorni (migrazione 075,
+  trigger su `deliveries`; numeri in `company_client_cap()`). Riserve e stima del wizard non ne tengono ancora conto.
 - **Minimizzazione:** degli annunci di lavoro non si salva la descrizione (dal 24/10, migrazione 072).
 - **robots.txt:** i worker del VPS (controllo siti, contatti, siti OSM, Common Crawl, `worker/robots.mjs`) non aprono
   le pagine escluse; il motore su n8n non lo legge ancora.
