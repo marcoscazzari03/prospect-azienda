@@ -2,7 +2,7 @@
 import { Fragment, useActionState, useState, useTransition } from "react";
 import { reportLead, type ActionState } from "@/app/app/actions";
 import { archiveLeads, deleteLeads, saveLeadNotes, setLeadStage, setListMembership, type LeadActionState } from "@/app/app/lead/actions";
-import { LEAD_STAGES, LEAD_STAGE_LABEL, ROLE_MATCH_LABEL, type DeliveryRow, type LeadStage } from "@/lib/domain/leads";
+import { LEAD_STAGES, LEAD_STAGE_LABEL, ROLE_MATCH_LABEL, withoutContact, type DeliveryRow, type LeadStage } from "@/lib/domain/leads";
 import { OPPORTUNITY_RULES, opportunityScore, signalByCode, signalPhrase } from "@/lib/domain/signals";
 import { openingLine } from "@/lib/domain/opening-line";
 import { MAILBOX_LABEL, type MailboxCheck } from "@/lib/domain/mailbox";
@@ -177,7 +177,9 @@ function ListChips({ id, memberOf, lists }: { id: string; memberOf: string[]; li
 
 // `offers`: servizio scelto in ogni ricerca (search_id -> codice), per il punteggio dell'opportunità.
 // `archived`: si stanno guardando i lead archiviati (le azioni diventano «Ripristina»).
-export function LeadsTable({ rows, lists, offers = {}, archived = false }: { rows: DeliveryRow[]; lists?: LeadList[]; offers?: Record<string, string | undefined>; archived?: boolean }) {
+export function LeadsTable({ rows: righe, lists, offers = {}, archived = false }: { rows: DeliveryRow[]; lists?: LeadList[]; offers?: Record<string, string | undefined>; archived?: boolean }) {
+  // Aziende che si sono opposte dopo la consegna: contatti nascosti (migrazione 073).
+  const rows = righe.map(withoutContact);
   const [open, setOpen] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const manage = Boolean(lists);
@@ -253,7 +255,12 @@ export function LeadsTable({ rows, lists, offers = {}, archived = false }: { row
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    {r.email_type === "form" ? (
+                    {r.opted_out_at ? (
+                      <>
+                        <Badge tone="brick">Si è opposta: non contattare</Badge>
+                        <p className="mt-1 text-xs text-ink-2">Dal {new Date(r.opted_out_at).toLocaleDateString("it-IT")}. Cancella i suoi dati anche dai tuoi elenchi.</p>
+                      </>
+                    ) : r.email_type === "form" ? (
                       <>
                         <a href={safeHttpUrl(d.company?.contact_form)} target="_blank" rel="noopener noreferrer nofollow" className="font-medium text-ledger underline">Modulo di contatto →</a>
                         <p className="mt-1 text-xs text-ink-2">Nessuna email pubblica sul sito</p>

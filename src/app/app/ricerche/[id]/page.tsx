@@ -28,7 +28,7 @@ export default async function SearchDetailPage({ params, searchParams }: PagePro
   const [{ data: search }, { data: events }, { data: leads }, { data: lists }, { data: alert }] = await Promise.all([
     supabase.from("searches").select("*").eq("id", id).maybeSingle(),
     supabase.from("search_events").select("id, stage, message, created_at").eq("search_id", id).order("created_at", { ascending: false }).limit(30),
-    supabase.from("deliveries").select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, archived_at, lead_list_items(list_id)").eq("search_id", id).is("deleted_at", null).order("quality_score", { ascending: false }),
+    supabase.from("deliveries").select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, archived_at, opted_out_at, lead_list_items(list_id)").eq("search_id", id).is("deleted_at", null).order("quality_score", { ascending: false }),
     supabase.from("lead_lists").select("id, name").order("name"),
     supabase.from("search_alerts").select("next_run_at, user_id").eq("search_id", id).maybeSingle(),
   ]);

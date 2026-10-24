@@ -36,7 +36,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
     : null;
   let query = supabase
     .from("deliveries")
-    .select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, archived_at, lead_list_items(list_id)", { count: "exact" })
+    .select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, archived_at, opted_out_at, lead_list_items(list_id)", { count: "exact" })
     .is("deleted_at", null)
     .order("delivered_at", { ascending: false })
     .range((page - 1) * PAGE, page * PAGE - 1);

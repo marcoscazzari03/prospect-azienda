@@ -47,7 +47,7 @@ export async function GET(request: Request) {
   for (let from = 0; from < 50000; from += 1000) {
     let q = supabase
       .from("deliveries")
-      .select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes")
+      .select("id, search_id, data, email_address, email_type, email_status, credits, quality_score, delivered_at, stage, notes, opted_out_at")
       .eq("org_id", viewer.org.id)
       .order("delivered_at", { ascending: false })
       .range(from, from + 999);

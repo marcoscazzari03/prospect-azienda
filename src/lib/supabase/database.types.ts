@@ -151,14 +151,14 @@ isOneToOne: false
                   ]
                 },"deliveries": {
                   Row: {
-                    "archived_at": string | null,"deleted_at": string | null,"company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at": string,"email_address": string,"email_id": string | null,"email_status": string,"email_type": string,"id": string,"notes": string,"org_id": string,"person_id": string | null,"person_key": string,"quality_score": number,"run_id": string | null,"search_id": string,"source": string,"stage": string,"stage_changed_at": string | null
+                    "archived_at": string | null,"deleted_at": string | null,"company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at": string,"email_address": string,"email_id": string | null,"email_status": string,"email_type": string,"id": string,"notes": string,"opted_out_at": string | null,"org_id": string,"person_id": string | null,"person_key": string,"quality_score": number,"run_id": string | null,"search_id": string,"source": string,"stage": string,"stage_changed_at": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "archived_at"?: string | null,"deleted_at"?: string | null,"company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at"?: string,"email_address": string,"email_id"?: string | null,"email_status": string,"email_type": string,"id"?: string,"notes"?: string,"org_id": string,"person_id"?: string | null,"person_key": string,"quality_score"?: number,"run_id"?: string | null,"search_id": string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
+                    "archived_at"?: string | null,"deleted_at"?: string | null,"company_domain": string,"credits": number,"data": NonNullable<Json>,"delivered_at"?: string,"email_address": string,"email_id"?: string | null,"email_status": string,"email_type": string,"id"?: string,"notes"?: string,"opted_out_at"?: string | null,"org_id": string,"person_id"?: string | null,"person_key": string,"quality_score"?: number,"run_id"?: string | null,"search_id": string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
                   }
                   Update: {
-                    "archived_at"?: string | null,"deleted_at"?: string | null,"company_domain"?: string,"credits"?: number,"data"?: NonNullable<Json>,"delivered_at"?: string,"email_address"?: string,"email_id"?: string | null,"email_status"?: string,"email_type"?: string,"id"?: string,"notes"?: string,"org_id"?: string,"person_id"?: string | null,"person_key"?: string,"quality_score"?: number,"run_id"?: string | null,"search_id"?: string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
+                    "archived_at"?: string | null,"deleted_at"?: string | null,"company_domain"?: string,"credits"?: number,"data"?: NonNullable<Json>,"delivered_at"?: string,"email_address"?: string,"email_id"?: string | null,"email_status"?: string,"email_type"?: string,"id"?: string,"notes"?: string,"opted_out_at"?: string | null,"org_id"?: string,"person_id"?: string | null,"person_key"?: string,"quality_score"?: number,"run_id"?: string | null,"search_id"?: string,"source"?: string,"stage"?: string,"stage_changed_at"?: string | null
                   }
                   Relationships: [
                     {

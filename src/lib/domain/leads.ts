@@ -34,6 +34,8 @@ export type DeliveryRow = {
   stage?: LeadStage;
   notes?: string;
   archived_at?: string | null;
+  // Azienda che si è opposta dopo la consegna (migrazione 073): contatto nascosto, da non contattare.
+  opted_out_at?: string | null;
   lead_list_items?: { list_id: string }[];
 };
 
@@ -69,9 +71,21 @@ export const ROLE_MATCH_LABEL: Record<string, string> = {
 };
 
 // `offers`: servizio scelto in ogni ricerca (search_id -> codice), per l'attinenza del punteggio.
+// Lead di un'azienda che si è opposta dopo la consegna (migrazione 073): senza email, modulo ed email ipotizzate.
+export function withoutContact(r: DeliveryRow): DeliveryRow {
+  if (!r.opted_out_at) return r;
+  const d = r.data ?? {};
+  return {
+    ...r,
+    email_address: "",
+    data: { ...d, company: d.company ? { ...d.company, contact_form: undefined } : d.company, email: undefined, email_patterns: undefined },
+  };
+}
+
 export function flattenDelivery(d: DeliveryRow, offers: Record<string, string | undefined> = {}) {
   const x = d.data ?? {};
   const opp = opportunityScore(x.signals, offers[d.search_id]);
+  const no = Boolean(d.opted_out_at);
   return {
     azienda: x.company?.name ?? "",
     sito: x.company?.website ?? "",
@@ -85,13 +99,14 @@ export function flattenDelivery(d: DeliveryRow, offers: Record<string, string | 
     cognome: x.person?.last_name ?? "",
     ruolo: x.person?.job_title ?? "",
     linkedin: x.person?.linkedin_url ?? "",
-    email: d.email_address,
+    email: no ? "" : d.email_address,
     tipo_email: EMAIL_TYPE_LABEL[d.email_type] ?? d.email_type,
     stato_email: d.email_type === "form" ? "" : EMAIL_STATUS_LABEL[d.email_status] ?? d.email_status,
-    fonte_email: x.email?.source === "enrichment" ? "Verifica tecnica (arricchimento)" : x.email?.source_url ?? "",
-    modulo_contatto: x.company?.contact_form ?? "",
+    fonte_email: no ? "" : x.email?.source === "enrichment" ? "Verifica tecnica (arricchimento)" : x.email?.source_url ?? "",
+    modulo_contatto: no ? "" : x.company?.contact_form ?? "",
+    opposizione: no ? `Si è opposta il ${String(d.opted_out_at).slice(0, 10)}: non contattarla e cancella i suoi dati` : "",
     fonte_contatto: x.sources?.discovery_url ?? "",
-    email_ipotizzate: (x.email_patterns ?? []).map((p) => p.address).join(", "),
+    email_ipotizzate: no ? "" : (x.email_patterns ?? []).map((p) => p.address).join(", "),
     segnali: (x.signals ?? []).map((sg) => `${signalByCode(sg.code)?.label ?? sg.code}: ${signalPhrase(sg)}`).join(" | "),
     prove_segnali: (x.signals ?? []).map((sg) => sg.evidence?.url ?? "").filter(Boolean).join(" "),
     spunto: openingLine(x.signals, offers[d.search_id]),
@@ -120,6 +135,7 @@ export const EXPORT_COLUMNS: { key: keyof ReturnType<typeof flattenDelivery>; la
   { key: "stato_email", label: "Stato email" },
   { key: "fonte_email", label: "Fonte email" },
   { key: "modulo_contatto", label: "Pagina modulo di contatto" },
+  { key: "opposizione", label: "Opposizione" },
   { key: "fonte_contatto", label: "Fonte azienda" },
   { key: "linkedin", label: "LinkedIn" },
   { key: "email_ipotizzate", label: "Email ipotizzate (non verificate)" },
@@ -140,7 +156,8 @@ const OPPORTUNITY_COLUMNS = new Set(["punteggio_opportunita", "livello_opportuni
 export function exportColumns(rows: ReturnType<typeof flattenDelivery>[]) {
   const people = rows.some((r) => r.nome);
   const opportunities = rows.some((r) => r.punteggio_opportunita !== "");
-  return EXPORT_COLUMNS.filter((c) => (people || !PERSON_COLUMNS.has(c.key)) && (opportunities || !OPPORTUNITY_COLUMNS.has(c.key)));
+  const optouts = rows.some((r) => r.opposizione);
+  return EXPORT_COLUMNS.filter((c) => (people || !PERSON_COLUMNS.has(c.key)) && (opportunities || !OPPORTUNITY_COLUMNS.has(c.key)) && (optouts || c.key !== "opposizione"));
 }
 
 // Avviso sull'uso dei contatti (pagine dei lead ed export Excel). Pubblicare un indirizzo sul
