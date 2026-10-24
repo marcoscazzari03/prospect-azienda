@@ -91,7 +91,10 @@ Come tornare indietro, in generale:
   il testo della risposta in caso di errore. In prova legge un blocco solo. Code Reviewer «pronto con riserve»: statistiche
   stampate anche se una lettura fallisce a metà giro (corretto); un'azienda scartata dal salvataggio può essere riletta fino a 3
   volte per giro (costo piccolo, lasciato).
-- **Da fare più avanti:** rendere `pending_site_checks` più veloce (oggi materializza tutte le aziende da controllare prima di
+- **24/10, dopo `rinomina`:** anche la lettura da 100 falliva al primo colpo: il calcolo dura circa 8 s qualunque sia il numero
+  (prepara tutta la coda prima del limite). n8n ci riesce solo grazie ai suoi tentativi: il worker ora riprova fino a 4 volte
+  con 5 s di pausa sugli errori 500.
+- **Da fare più avanti (checklist 97):** rendere `pending_site_checks` più veloce (oggi materializza tutte le aziende da controllare prima di
   ordinarle): con il database che cresce anche la lettura da 150 di n8n e quella da 100 rischiano il limite.
 - **Indietro:** versione precedente del file, poi `bash ~/worker.sh aggiorna`.
 

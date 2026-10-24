@@ -124,10 +124,16 @@ async function main() {
   const intestazioni = { 'x-engine-secret': segreto, 'Content-Type': 'application/json' };
   const inizio = Date.now();
 
+  // Il calcolo della coda dura circa 8 s, al limite del database, e a volte fallisce (HTTP 500): come n8n, che ci riesce
+  // grazie ai tentativi, fino a 4 tentativi con 5 s di pausa (24/10).
   const leggiCoda = async (n) => {
-    const r = await fetch(`${app}/api/engine/site-checks?limit=${n}`, { headers: intestazioni, signal: AbortSignal.timeout(30_000) });
-    if (!r.ok) throw new Error(`lettura della coda: HTTP ${r.status} ${(await r.text().catch(() => '')).slice(0, 200)}`);
-    return (await r.json()).companies || [];
+    for (let tentativo = 1; ; tentativo++) {
+      const r = await fetch(`${app}/api/engine/site-checks?limit=${n}`, { headers: intestazioni, signal: AbortSignal.timeout(30_000) });
+      if (r.ok) return (await r.json()).companies || [];
+      const testo = (await r.text().catch(() => '')).slice(0, 200);
+      if (r.status !== 500 || tentativo >= 4) throw new Error(`lettura della coda: HTTP ${r.status} ${testo} (tentativi: ${tentativo})`);
+      await new Promise((ok) => setTimeout(ok, 5_000));
+    }
   };
 
   const regole = caricaRegole();
