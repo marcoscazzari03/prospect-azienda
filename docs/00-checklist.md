@@ -5,7 +5,7 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `archivio/05-da-fare.md`).
 
-Ultimo aggiornamento: 24/10/2026 sera (analisi privacy: 13 urgente, nuovo 98; 89b fatto; riepilogo delle priorità aggiornato; nuova vista per date in
+Ultimo aggiornamento: 24/10/2026 notte (GDPR: 98 quasi chiuso, prossimi passi al 98b; analisi privacy: 13 urgente; 89b fatto; riepilogo delle priorità aggiornato; nuova vista per date in
 `00b-checklist-calendario.md`, da aggiornare insieme a questa).
 
 ## 🧭 Ordine di priorità delle cose aperte (24/10)
@@ -102,6 +102,9 @@ sono in `00b-checklist-calendario.md`.
     verificato: i termini dell'API dicono che «sales prospecting or lead generation requires our written agreement». Sollecitare
     chiedendo una licenza (~~sollecito mandato il 24/10 sera da ciao@, con il nome Avvisto e la descrizione esatta dei dati~~). ~~**Insieme, da decidere:** spegnere la raccolta fino all'accordo~~ (24/10: decisione dell'utente,
     resta accesa durante la beta gratuita; scritto anche dal modulo di adzuna.it). Prima dei pagamenti: accordo o segnale tolto.
+98b. **Alla ripresa (in ordine)** – 1) **Insieme:** `bash ~/worker.sh installa` sul VPS (robots.txt); 2) **Tu:** user-agent
+    «Chrome» o «AvvistoBot»; 3) **Io:** robots.txt nel motore n8n; 4) **Io:** registro dei trattamenti definitivo; 5) **Io:**
+    analisi privacy aggiornata e punti per il controllo limitato del legale (poi **Tu**, punto 12).
 98. **Io, poi Tu** – ~~Testi del sito, minimizzazione degli annunci (072), robots.txt nei worker, opposizione sui lead
     consegnati (073)~~ (24/10, su branch). **Tu:** eseguire le migrazioni 072 e 073, poi pubblicazione. ~~migrazioni 072 e 073~~ (24/10, pubblicato su main). ~~Ditte individuali~~ (24/10:
     88% non separabili dal nome, restano con le garanzie; esclusi i 132 professionisti con titolo, migrazioni 074 e 076 eseguite, elenco controllato; ~~cancellati dal database~~ 24/10). ~~Tetto di clienti~~
