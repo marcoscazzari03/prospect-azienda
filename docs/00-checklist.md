@@ -104,8 +104,8 @@ sono in `00b-checklist-calendario.md`.
     resta accesa durante la beta gratuita; scritto anche dal modulo di adzuna.it). Prima dei pagamenti: accordo o segnale tolto.
 98. **Io, poi Tu** – ~~Testi del sito, minimizzazione degli annunci (072), robots.txt nei worker, opposizione sui lead
     consegnati (073)~~ (24/10, su branch). **Tu:** eseguire le migrazioni 072 e 073, poi pubblicazione. ~~migrazioni 072 e 073~~ (24/10, pubblicato su main). ~~Ditte individuali~~ (24/10:
-    88% non separabili dal nome, restano con le garanzie; esclusi i 132 professionisti con titolo, migrazione 074 da eseguire, poi `professionisti_esclusi.sql`). ~~Tetto di clienti~~
-    (24/10: 5 ogni 90 giorni, migrazione 075 da eseguire). **Insieme, da decidere:** user-agent «AvvistoBot». **Io, dopo:**
+    88% non separabili dal nome, restano con le garanzie; esclusi i 132 professionisti con titolo, migrazioni 074 e 076 eseguite, elenco controllato; **Tu:** la cancellazione in fondo a `professionisti_esclusi.sql`). ~~Tetto di clienti~~
+    (24/10: 5 ogni 90 giorni, migrazione 075 eseguita, pubblicato). **Insieme, da decidere:** user-agent «AvvistoBot». **Io, dopo:**
     robots.txt nel motore n8n, registro dei trattamenti nel repository.
     Testo originale: Interventi dell'analisi privacy del 24/10 (documento «Avvisto – analisi privacy» su Claude, fuori dal
     repository): avviso sull'art. 130 in wizard, risultati, export e termini; testi senza promesse di campagne email; ditte

@@ -85,16 +85,17 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
-## 24/10/2026 — Professionisti: attività con il titolo nel marchio salvate (migrazione 076) · su branch; da eseguire
+## 24/10/2026 — Professionisti: attività con il titolo nel marchio salvate (migrazione 076) · in produzione dal 24/10
 - **Perché:** elenco di `professionisti_esclusi.sql` guardato dall'utente (circa 300 nomi dopo la 074, eseguita il 24/10):
   una ventina sono attività vere («Apoteca Dottor Puce», «Autoscuola Geom.», «Cantine del Notaio», «Dottor Materasso»,
   «Ediltoscana di Geom.», «Bio Erboristeria Dott.ssa», «Azienda agricola… dott.», «Ing. Polin & C.»).
 - **Cosa:** `is_professional_name` con altre parole di settore (anche come inizio di parola: edil…, agricol…, immobiliar…) e
   «& C.» come società; stessa regola in `isProfessionalName`. Indice della coda ricostruito. Test SQL 43 e vitest.
-- **Poi:** l'utente rilancia l'elenco e, se va bene, la cancellazione in fondo allo stesso file.
+- **Poi:** elenco rilanciato dall'utente dopo la 076: circa 280 nomi, tutti professionisti (avvocati, notai, architetti,
+  geometri, medici, psicologi, fisioterapisti, commercialisti). Cancellazione con la riga in fondo al file.
 - **Indietro:** `is_professional_name` dalla 074 e `reindex index companies_check_queue_idx`.
 
-## 24/10/2026 — Tetto di clienti per azienda: 5 ogni 90 giorni (migrazione 075, checklist 98) · su branch; migrazione da eseguire
+## 24/10/2026 — Tetto di clienti per azienda: 5 ogni 90 giorni (migrazione 075, checklist 98) · in produzione dal 24/10
 - **Perché:** decisione dell'utente del 24/10. Garanzia per il bilanciamento del legittimo interesse (una piccola attività
   non riceve proposte da troppi nostri clienti, differenza netta con Lusha) e argomento commerciale.
 - **Cosa:** trigger `deliveries_company_cap` BEFORE INSERT su `deliveries` (unico punto in cui nascono le consegne,
@@ -108,7 +109,7 @@ Come tornare indietro, in generale:
   del consegnato. Da rivedere con i volumi. Le consegne di ricerche o account cancellati non contano più nel tetto.
 - **Indietro:** `drop trigger deliveries_company_cap on public.deliveries`.
 
-## 24/10/2026 — Professionisti con titolo esclusi (migrazione 074, checklist 98) · su branch; migrazione da eseguire
+## 24/10/2026 — Professionisti con titolo esclusi (migrazione 074, checklist 98) · in produzione dal 24/10
 - **Perché:** query `ditte_individuali.sql` del 24/10 sulle aziende con contatto: 12.448 «altro» (88,2%: ditte individuali o
   forma non scritta, non separabili dal nome), 1.314 società o enti (9,3%), 214 studi senza forma (1,5%), 132 professionisti
   con titolo (0,9%). Escludere le ditte individuali non è praticabile: restano con il legittimo interesse e le garanzie. Decisione
