@@ -85,6 +85,13 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Worker del VPS con il nome AvvistoBot (checklist 98b) · su main; attivo dopo `installa` sul VPS
+- **Perché:** decisione dell'utente: farsi riconoscere dai siti vale più di qualche sito letto in meno.
+- **Cosa:** user-agent dei worker `Mozilla/5.0 (compatible; AvvistoBot/1.0; +https://avvisto.it/privacy)` (`worker/http.mjs`,
+  prima quello di Chrome); i siti possono escluderci con «User-agent: AvvistoBot» (`worker/robots.mjs`). Effetto atteso: qualche
+  sito con protezioni anti-bot in più dà «non determinabile». Il 24/10 sera `installa` sul VPS con il robots.txt (riuscito).
+- **Indietro:** rimettere lo user-agent di Chrome in `worker/http.mjs` e `installa`.
+
 ## 24/10/2026 — Professionisti: attività con il titolo nel marchio salvate (migrazione 076) · in produzione dal 24/10
 - **Perché:** elenco di `professionisti_esclusi.sql` guardato dall'utente (circa 300 nomi dopo la 074, eseguita il 24/10):
   una ventina sono attività vere («Apoteca Dottor Puce», «Autoscuola Geom.», «Cantine del Notaio», «Dottor Materasso»,

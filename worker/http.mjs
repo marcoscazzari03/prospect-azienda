@@ -9,7 +9,9 @@ import net from 'node:net';
 import zlib from 'node:zlib';
 
 export const MAX_BYTES = 3_000_000;
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36';
+// Ci presentiamo con il nostro nome (decisione dell'utente del 24/10, analisi privacy): i siti possono riconoscerci ed
+// escluderci nel robots.txt con «User-agent: AvvistoBot» (worker/robots.mjs). Prima: lo user-agent di Chrome.
+const UA = 'Mozilla/5.0 (compatible; AvvistoBot/1.0; +https://avvisto.it/privacy)';
 
 // Indirizzi che un sito pubblico non può avere: si rifiutano prima di connettersi. IPv6 che incapsulano un IPv4 (NAT64,
 // 6to4, Teredo) bloccati per intero (Code Reviewer, 22/10).

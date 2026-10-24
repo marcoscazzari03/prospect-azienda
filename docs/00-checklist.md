@@ -102,8 +102,7 @@ sono in `00b-checklist-calendario.md`.
     verificato: i termini dell'API dicono che «sales prospecting or lead generation requires our written agreement». Sollecitare
     chiedendo una licenza (~~sollecito mandato il 24/10 sera da ciao@, con il nome Avvisto e la descrizione esatta dei dati~~). ~~**Insieme, da decidere:** spegnere la raccolta fino all'accordo~~ (24/10: decisione dell'utente,
     resta accesa durante la beta gratuita; scritto anche dal modulo di adzuna.it). Prima dei pagamenti: accordo o segnale tolto.
-98b. **Alla ripresa (in ordine)** – 1) **Insieme:** `bash ~/worker.sh installa` sul VPS (robots.txt); 2) **Tu:** user-agent
-    «Chrome» o «AvvistoBot»; 3) **Io:** robots.txt nel motore n8n; 4) **Io:** registro dei trattamenti definitivo; 5) **Io:**
+98b. **Alla ripresa (in ordine)** – ~~1) `installa` sul VPS (robots.txt); 2) user-agent: AvvistoBot~~ (24/10 sera); 3) **Io:** robots.txt nel motore n8n; 4) **Io:** registro dei trattamenti definitivo; 5) **Io:**
     analisi privacy aggiornata e punti per il controllo limitato del legale (poi **Tu**, punto 12).
 98. **Io, poi Tu** – ~~Testi del sito, minimizzazione degli annunci (072), robots.txt nei worker, opposizione sui lead
     consegnati (073)~~ (24/10, su branch). **Tu:** eseguire le migrazioni 072 e 073, poi pubblicazione. ~~migrazioni 072 e 073~~ (24/10, pubblicato su main). ~~Ditte individuali~~ (24/10:

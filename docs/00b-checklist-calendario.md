@@ -19,9 +19,9 @@ Ultimo aggiornamento: 24/10/2026 notte (prossimi passi GDPR in «Alla ripresa»;
   magazzino~~ (24/10); manca una ricerca che passi dal motore (vedi domani).
 
 ## ▶️ Alla ripresa (GDPR, in ordine; decisione dell'utente del 24/10 sera)
-1. 98. **Insieme, VPS** – Aggiornare i worker perché il robots.txt entri in funzione:
+1. ~~98. **Insieme, VPS**~~ (24/10 sera, poi di nuovo per AvvistoBot) – Aggiornare i worker perché il robots.txt entri in funzione:
    `curl -fsSL https://raw.githubusercontent.com/marcoscazzari03/prospect-azienda/main/scripts/vps/worker.sh -o ~/worker.sh && bash ~/worker.sh installa`.
-2. 98. **Tu, da decidere** – User-agent dei worker: «Chrome» come oggi o «AvvistoBot» (più trasparente, qualche blocco in più).
+2. ~~98. **Tu** – User-agent dei worker~~ (24/10: AvvistoBot).
 3. 98. **Io** – robots.txt anche nel motore su n8n (nodi che aprono i siti), con revisione prima di caricarlo.
 4. 98. **Io** – Registro dei trattamenti in forma definitiva (dalla bozza dell'analisi privacy).
 5. 98, 12. **Io** – Analisi privacy aggiornata con quanto fatto il 24/10 (testi, 072–076, robots, tetto) e i punti per il
