@@ -4,7 +4,7 @@ Le stesse voci di `00-checklist.md`, ordinate per **quando** vanno fatte invece 
 (**Tu**, **Io**, **Insieme**); le cose fatte restano barrate con la data. Le due checklist si aggiornano insieme, nello stesso
 commit (regola del 24/10): il dettaglio di ogni voce è in `00-checklist.md`, qui c'è solo il quando.
 
-Ultimo aggiornamento: 24/10/2026 sera (89b fatto; avvocati da contattare il 26/10).
+Ultimo aggiornamento: 24/10/2026 sera (analisi privacy: 13 domani, 98 prima del lancio; avvocati il 26/10).
 
 ## 📅 Oggi, sabato 24/10
 - 94. ~~**Insieme** – VPS: `rinomina`, giro di prova, `prova-cc`~~ (24/10 mattina).
@@ -19,6 +19,8 @@ Ultimo aggiornamento: 24/10/2026 sera (89b fatto; avvocati da contattare il 26/1
   magazzino~~ (24/10); manca una ricerca che passi dal motore (vedi domani).
 
 ## 📅 Domani, domenica 25/10
+- 13. **Tu** – Sollecito ad Adzuna con richiesta di licenza (i termini vietano la lead generation senza accordo scritto);
+  **Insieme:** decidere se spegnere la raccolta e il segnale da Adzuna fino all'accordo.
 - 67d. **Tu** – Ricerca di prova che passi dal motore (opportunità con un segnale raro o zona poco coperta), per provare il
   giro completo con il callback su avvisto.it.
 - 66. **Tu** – Inoltro della casella vecchia verso ciao@avvisto.it.
@@ -55,12 +57,13 @@ Ultimo aggiornamento: 24/10/2026 sera (89b fatto; avvocati da contattare il 26/1
 ## ⏳ Quando succede qualcosa
 - 20. **Insieme** – Alla prima agenzia che accetta: ricerca di prova nella sua zona e nel suo servizio.
 - 24. **Insieme** – MillionVerifier solo se i rimbalzi superano 2–3 ogni 100 lead.
-- 13. **Tu** – Conferma scritta di Adzuna sull'uso commerciale (in attesa dal 18/10).
 - 12, 29, 93. **Tu** – Quando risponde il legale (documento pronto): parere, DPA, albi professionali.
 - 11. **Tu, poi Io** – Quando apri la partita IVA: dati veri del titolare in privacy, termini e firma delle email.
 - 21, 25. **Insieme, durante la beta** – Campione delle aziende col solo modulo; «senza il nome del referente, lo pagherebbero?».
 
 ## 🔴 Prima del lancio a pagamento (novembre, dopo la beta)
+- 98. **Io, poi Tu** – Interventi dell'analisi privacy (avviso art. 130, testi, ditte individuali, opposizione, robots.txt,
+  attribuzione OSM, privacy e termini, registro dei trattamenti), poi controllo limitato del legale (punto 12).
 - 14. **Insieme** – Stripe con pagamenti reali e un acquisto vero di prova.
 - 15. **Tu, poi Insieme** – Supabase Pro e prova di ripristino.
 - 18, 73. **Tu** – Avvisi di spesa (Anthropic, Vercel, Supabase), Deployment Protection, conservazione breve su n8n.

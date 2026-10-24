@@ -84,6 +84,18 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Analisi privacy fatta in proprio (punti 12, 13, 98) · documento su Claude, fuori dal repository
+- **Cosa:** documento «Avvisto – analisi privacy» con le 14 domande, le fonti ufficiali lette (art. 121 e 130 del Codice
+  privacy, linee guida spam del Garante 2013, provv. 52/2018, GDPR considerando 14 e 47, art. 14 e 30, ODbL, termini
+  dell'API Adzuna), gli interventi (punto 98), la bozza del registro dei trattamenti e 5 punti per un controllo limitato
+  del legale.
+- **Esiti principali:** i dati delle società sono fuori dal GDPR (considerando 14); le email promozionali senza consenso sono
+  vietate anche verso le società (art. 130 e 121); ditte individuali e studi sono dati personali; i termini di Adzuna
+  richiedono un accordo scritto per la lead generation (verificato sul sito il 24/10); il robots.txt dei siti oggi non viene
+  letto. Non usati perché non verificati: provvedimenti del Garante del 23/10/2025 e del 14/05/2026 e la sospensione del
+  provvedimento Lusha citati da ChatGPT.
+- **Decisione aperta:** spegnere o no la raccolta e il segnale da Adzuna fino all'accordo.
+
 ## 24/10/2026 — Documento per l'avvocato aggiornato (punto 12) · documento su Claude, fuori dal repository
 - **Cosa:** nel documento «Avvisto – richiesta di parere legale» aggiunta la domanda principale (si possono vendere elenchi di
   aziende con email generiche, modulo e segnali, se il cliente deve avere una propria base giuridica per contattarle?);

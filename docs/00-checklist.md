@@ -5,7 +5,7 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `archivio/05-da-fare.md`).
 
-Ultimo aggiornamento: 24/10/2026 pomeriggio (89b fatto; riepilogo delle priorità aggiornato; nuova vista per date in
+Ultimo aggiornamento: 24/10/2026 sera (analisi privacy: 13 urgente, nuovo 98; 89b fatto; riepilogo delle priorità aggiornato; nuova vista per date in
 `00b-checklist-calendario.md`, da aggiornare insieme a questa).
 
 ## 🧭 Ordine di priorità delle cose aperte (24/10)
@@ -98,7 +98,15 @@ sono in `00b-checklist-calendario.md`.
     **Tu, dal 26/10:** documento aggiornato il 24/10 (domanda principale, clausole tra titolari autonomi al posto del DPA per i
     clienti); chiedere un preventivo fisso a due studi scelti dall'utente (Polimeni.Legal e l'avv. Anna Maria Lorito di DGRS). Il
     listino (5f) si fissa dopo la risposta sull'art. 130.
-13. **Tu** – Conferma scritta di Adzuna sull'uso commerciale degli annunci (mail del 18/10, in attesa).
+13. **Tu, subito** – Conferma scritta di Adzuna sull'uso commerciale degli annunci (mail del 18/10, in attesa). Dal 24/10 è
+    verificato: i termini dell'API dicono che «sales prospecting or lead generation requires our written agreement». Sollecitare
+    chiedendo una licenza. **Insieme, da decidere:** fino all'accordo, spegnere la raccolta Adzuna e non consegnare il segnale
+    «annuncio di lavoro» preso da Adzuna.
+98. **Io, poi Tu** – Interventi dell'analisi privacy del 24/10 (documento «Avvisto – analisi privacy» su Claude, fuori dal
+    repository): avviso sull'art. 130 in wizard, risultati, export e termini; testi senza promesse di campagne email; ditte
+    individuali e studi riconosciuti e trattati a parte; opposizione comunicata a chi ha già ricevuto il dato (art. 19);
+    testo del segnale privacy; robots.txt e attribuzione OSM; privacy e termini; registro dei trattamenti. Poi controllo
+    limitato del legale su 5 punti (punto 12).
 14. **Insieme** – Stripe con pagamenti reali e un acquisto vero di prova; poi togliere il blocco «acquisti solo admin».
 15. **Tu, poi Insieme, alla messa in produzione definitiva** – Supabase Pro (backup giornalieri, sostituisce il punto 90) e
     prova di ripristino.
