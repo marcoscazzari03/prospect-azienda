@@ -52,7 +52,7 @@ export default function SecurityPage() {
         <li>Raccogliamo solo informazioni pubbliche sulle aziende (sito, settore, zona, email aziendale generica o modulo di contatto, segnali), sempre con la fonte e la data del controllo.</li>
         <li>Non raccogliamo né consegniamo nomi, ruoli o email di persone, né caselle di posta gratuite.</li>
         <li>Chi non vuole comparire nei risultati può chiederlo dalla pagina <Link className="text-ledger underline" href="/opposizione">Rimuovi i tuoi dati</Link>: l&apos;indirizzo entra in una lista di esclusione permanente, salvata in forma non leggibile.</li>
-        <li>I dati vengono riverificati o cancellati entro 24 mesi dalla raccolta. Chi si oppone viene cancellato subito dal database.</li>
+        <li>I dati vengono riverificati o cancellati entro 24 mesi dalla raccolta. Chi si oppone perde subito i dati di contatto dal database, anche nei lead già consegnati.</li>
       </ul>
 
       <h2>Dove sono i dati e chi ci aiuta</h2>
@@ -61,7 +61,7 @@ export default function SecurityPage() {
         <li><strong>Vercel</strong> (applicazione) e <strong>Supabase</strong> (database e accesso): server a Francoforte, Unione Europea.</li>
         <li><strong>n8n</strong>: il motore che cerca e controlla le aziende.</li>
         <li><strong>Hetzner</strong>: il server che controlla i siti delle aziende.</li>
-        <li><strong>Anthropic</strong> (Claude): l&apos;intelligenza artificiale che trova le aziende e ne riconosce il settore. Riceve i criteri della ricerca e testi pubblici dei siti, non il tuo nome o la tua email. Per contratto non usa questi dati per addestrare i propri modelli.</li>
+        <li><strong>Anthropic</strong> (Claude): l&apos;intelligenza artificiale che trova le aziende e ne riconosce il settore. Riceve i criteri della ricerca, la descrizione dei servizi che vendi e testi pubblici dei siti, non il tuo nome o la tua email. Per contratto non usa questi dati per addestrare i propri modelli.</li>
         <li><strong>Stripe</strong>: i pagamenti. I dati delle carte non passano mai dai nostri server.</li>
         <li><strong>Resend</strong>: l&apos;invio delle email del servizio.</li>
       </ul>

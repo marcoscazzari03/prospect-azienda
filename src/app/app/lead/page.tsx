@@ -7,7 +7,7 @@ import { LeadsTable } from "@/components/leads-table";
 import { Badge, Button, ButtonLink, EmptyState, Input, PageHeader, Select, cx } from "@/components/ui";
 import { requireViewer } from "@/lib/server/dal";
 import { createClient } from "@/lib/supabase/server";
-import { LEAD_STAGES, LEAD_STAGE_LABEL, offersBySearch, type DeliveryRow } from "@/lib/domain/leads";
+import { LEAD_STAGES, LEAD_STAGE_LABEL, offersBySearch, type DeliveryRow, withoutContact } from "@/lib/domain/leads";
 import { deleteList } from "./actions";
 import { NewListForm } from "./new-list-form";
 
@@ -125,7 +125,7 @@ export default async function LeadsPage({ searchParams }: PageProps<"/app/lead">
       {data?.length ? (
         <>
           <ContactNotice />
-          <LeadsTable rows={data as DeliveryRow[]} lists={lists ?? []} offers={offersBySearch(searches)} archived={Boolean(archivio)} />
+          <LeadsTable rows={(data as DeliveryRow[]).map(withoutContact)} lists={lists ?? []} offers={offersBySearch(searches)} archived={Boolean(archivio)} />
           {pages > 1 && (
             <nav className="mt-6 flex items-center justify-between text-sm">
               {page > 1 ? <Link className="text-ledger underline" href={`?${qs({ pagina: String(page - 1) })}`}>← Precedenti</Link> : <span />}

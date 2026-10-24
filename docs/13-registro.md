@@ -85,6 +85,34 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — GDPR: testi del sito, minimizzazione, robots.txt, opposizione sui lead consegnati (checklist 98) · su branch; migrazioni 072 e 073 da eseguire, poi main
+- **Perché:** interventi dell'analisi privacy del 24/10 (documento «Avvisto – analisi privacy» su Claude), per ridurre il
+  controllo dell'avvocato ai punti incerti. Decisione dell'utente: nei prossimi giorni solo GDPR e possibilità di utilizzo.
+- **Testi:** informativa privacy riscritta (società fuori dal GDPR, considerando 14; informativa art. 14 per ditte
+  individuali e studi; fornitori e trasferimenti extra UE, Anthropic compreso con criteri e servizi dei clienti; cookie solo
+  tecnici; chiusura account entro 30 giorni); termini «Ruoli e uso lecito dei dati» (cliente titolare autonomo, art. 130
+  anche verso le aziende, Registro delle opposizioni per le telefonate, informativa ai professionisti, ODbL); sicurezza
+  (Hetzner, niente promessa di DPA); pagina di opposizione; avviso art. 130 nel wizard; `CONTACT_NOTICE` con Registro,
+  ditte individuali e ODbL; segnale `no_privacy` ora «Informativa privacy non trovata nella homepage»; homepage senza
+  «campagna».
+- **Minimizzazione (migrazione 072):** `/api/engine/job-ads` non salva più la descrizione degli annunci; la 072 svuota quelle
+  salvate (non si recuperano).
+- **robots.txt (`worker/robots.mjs`):** controllo siti, contatti, siti OSM e Common Crawl non aprono le pagine escluse
+  (gruppo del nostro token o «*», regola più lunga, «*» e «$»; 4xx tutto consentito, 5xx tutto escluso, errori di rete come
+  prima; confronto senza espressioni regolari). Un sito escluso viene salvato «non determinabile». Il motore su n8n non lo
+  legge ancora; le richieste partono ancora con lo user-agent di Chrome (decisione aperta).
+- **Opposizione sui lead consegnati (migrazione 073, art. 19):** `deliveries.opted_out_at`; alla conferma di un'opposizione
+  i lead con quell'email o dominio vengono segnati e svuotati di email, referente, email ipotizzate e modulo (chiave con il
+  nome resa impronta); l'email della homepage (`companies.site_email`) viene tolta anche con l'opposizione per sola email e
+  un trigger impedisce di risalvarla. App ed export: «Si è opposta: non contattare», niente spunto, colonna «Opposizione».
+- **Revisione:** Code Reviewer «NON PRONTO» (testi che promettevano una cancellazione che il codice non faceva; Anthropic
+  descritto male; contatti inviati al browser) e QA «funziona con problemi» (spunto sui lead opposti, `site_email` rimasta,
+  robots.txt: 5xx, Crawl-delay, regole oltre le 300, accenti): tutto corretto, test SQL `42_optout_deliveries_test.sql`,
+  test del worker e vitest. Seconda revisione delle correzioni prima di main.
+- **Query:** `supabase/queries/ditte_individuali.sql` (quante aziende con contatto sono probabilmente ditte o professionisti).
+- **Indietro:** testi con `git revert`; 072 non reversibile; 073: togliere colonna e trigger `companies_suppressed_email`,
+  rieseguire `suppression_purge_trigger` dalla 014; robots: togliere `conRobots`/`creaRobots` dai worker.
+
 ## 24/10/2026 — Analisi privacy fatta in proprio (punti 12, 13, 98) · documento su Claude, fuori dal repository
 - **Cosa:** documento «Avvisto – analisi privacy» con le 14 domande, le fonti ufficiali lette (art. 121 e 130 del Codice
   privacy, linee guida spam del Garante 2013, provv. 52/2018, GDPR considerando 14 e 47, art. 14 e 30, ODbL, termini

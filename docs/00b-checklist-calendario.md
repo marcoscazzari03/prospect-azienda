@@ -19,6 +19,8 @@ Ultimo aggiornamento: 24/10/2026 sera (analisi privacy: 13 domani, 98 prima del 
   magazzino~~ (24/10); manca una ricerca che passi dal motore (vedi domani).
 
 ## 📅 Domani, domenica 25/10
+- 98. **Tu** – Eseguire le migrazioni 072 e 073 (GDPR: annunci senza descrizione, opposizione sui lead consegnati), poi la
+  query `ditte_individuali.sql`; **Insieme:** decidere ditte individuali, tetto di clienti per azienda, user-agent.
 - 13. ~~**Tu** – Sollecito ad Adzuna con richiesta di licenza~~ (24/10 sera: mandato); in attesa della risposta;
   ~~**Insieme:** decidere se spegnere la raccolta~~ (24/10: resta accesa durante la beta gratuita).
 - 67d. **Tu** – Ricerca di prova che passi dal motore (opportunità con un segnale raro o zona poco coperta), per provare il
@@ -62,8 +64,8 @@ Ultimo aggiornamento: 24/10/2026 sera (analisi privacy: 13 domani, 98 prima del 
 - 21, 25. **Insieme, durante la beta** – Campione delle aziende col solo modulo; «senza il nome del referente, lo pagherebbero?».
 
 ## 🔴 Prima del lancio a pagamento (novembre, dopo la beta)
-- 98. **Io, poi Tu** – Interventi dell'analisi privacy (avviso art. 130, testi, ditte individuali, opposizione, robots.txt,
-  attribuzione OSM, privacy e termini, registro dei trattamenti), poi controllo limitato del legale (punto 12).
+- 98. **Io** – Resto dell'analisi privacy: robots.txt nel motore n8n, registro dei trattamenti; poi controllo limitato del
+  legale (punto 12). ~~Testi, minimizzazione, robots.txt nei worker, opposizione sui lead consegnati~~ (24/10).
 - 14. **Insieme** – Stripe con pagamenti reali e un acquisto vero di prova.
 - 15. **Tu, poi Insieme** – Supabase Pro e prova di ripristino.
 - 18, 73. **Tu** – Avvisi di spesa (Anthropic, Vercel, Supabase), Deployment Protection, conservazione breve su n8n.

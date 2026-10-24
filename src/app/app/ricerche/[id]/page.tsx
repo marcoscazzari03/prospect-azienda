@@ -9,7 +9,7 @@ import { requireViewer } from "@/lib/server/dal";
 import { createClient } from "@/lib/supabase/server";
 import { closeStaleRuns } from "@/lib/server/searches";
 import { MODE_INFO, type EmailMode } from "@/lib/domain/catalog";
-import type { DeliveryRow } from "@/lib/domain/leads";
+import { withoutContact, type DeliveryRow } from "@/lib/domain/leads";
 import { REPEAT_LABEL, withoutSynonyms, type Repeat, type SearchTarget } from "@/lib/domain/search-input";
 import { describeOffer, describeOpportunity, offerByCode, signalByCode } from "@/lib/domain/signals";
 import { archiveSearch, deleteSearch, stopRepeat, toggleAlert } from "../../actions";
@@ -230,7 +230,7 @@ export default async function SearchDetailPage({ params, searchParams }: PagePro
       {leads?.length ? (
         <>
           <ContactNotice />
-          <LeadsTable rows={leads as DeliveryRow[]} lists={lists ?? []} offers={{ [search.id]: t.signals?.offer }} archived={Boolean(search.archived_at)} />
+          <LeadsTable rows={(leads as DeliveryRow[]).map(withoutContact)} lists={lists ?? []} offers={{ [search.id]: t.signals?.offer }} archived={Boolean(search.archived_at)} />
         </>
       ) : (
         <EmptyState title={running ? "Stiamo cercando…" : "Nessun lead in questa ricerca"}>

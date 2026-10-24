@@ -1,8 +1,9 @@
 // robots.txt dei siti (24/10, analisi privacy, checklist 98): i worker del VPS non aprono le pagine che un sito esclude
 // per i robot. Regole come RFC 9309: gruppi per user-agent (il nostro token o «*»), vince la regola più lunga, a parità
 // «Allow»; «*» e «$» nei percorsi. Il robots.txt si legge una volta per sito e per giro.
-// Se non si legge (4xx, errore, timeout) si procede come prima: per i 4xx è la regola dell'RFC; per gli errori il sito
-// è quasi sempre irraggiungibile anche per la homepage, e il controllo lo tratta già come tale.
+// robots.txt assente (4xx): tutto consentito, come dice l'RFC. Risposta 5xx: tutto escluso, come dice l'RFC (Code Reviewer,
+// 24/10). Errore di rete o timeout: si procede come prima, perché il sito è quasi sempre irraggiungibile anche per la
+// homepage e il controllo lo tratta già come tale.
 import { richiesta } from './http.mjs';
 
 export const AGENTE = 'avvistobot';
@@ -26,11 +27,10 @@ export function regoleRobots(testo, agente = AGENTE) {
       ultimaAgente = true;
     } else if ((chiave === 'allow' || chiave === 'disallow') && attuale) {
       ultimaAgente = false;
-      // «Disallow:» vuoto non esclude niente.
-      if (valore) attuale.regole.push({ allow: chiave === 'allow', percorso: valore });
-    } else {
-      ultimaAgente = false;
+      // «Disallow:» vuoto non esclude niente. Caratteri non ASCII codificati come nel percorso dell'URL.
+      if (valore) attuale.regole.push({ allow: chiave === 'allow', percorso: valore.replace(/[^\x00-\x7F]/g, (c) => encodeURIComponent(c)) });
     }
+    // Altre righe (Crawl-delay, Sitemap…) ignorate: non chiudono il gruppo degli user-agent.
   }
   const nostri = gruppi.filter((g) => g.agenti.includes(agente));
   const scelti = nostri.length ? nostri : gruppi.filter((g) => g.agenti.includes('*'));
@@ -39,7 +39,7 @@ export function regoleRobots(testo, agente = AGENTE) {
 
 // Percorso di regola («/privato*», «/*.pdf$») contro un percorso: «*» qualsiasi sequenza, «$» in fondo = fine del
 // percorso; senza «$» basta l'inizio. Programmazione dinamica, niente espressioni regolari: un robots.txt con molti «*»
-// non può bloccare il worker (tempo proporzionale a regola × percorso; al massimo 300 regole, percorsi tagliati a 500 caratteri).
+// non può bloccare il worker (tempo proporzionale a regola × percorso; percorsi tagliati a 500 caratteri).
 export function corrisponde(regola, percorso) {
   const fine = regola.endsWith('$');
   const r = fine ? regola.slice(0, -1) : regola;
@@ -59,11 +59,16 @@ export function corrisponde(regola, percorso) {
   return fine ? ok[percorso.length] : ok.some(Boolean);
 }
 
-// true se il percorso (con la query) è consentito dalle regole.
+// true se il percorso (con la query) è consentito dalle regole. Prima del confronto completo, la parte fissa iniziale
+// della regola (fino al primo «*») deve essere l'inizio del percorso: quasi tutte le regole si scartano subito.
 export function consentito(regole, percorso) {
   let migliore = null;
   const p = String(percorso).slice(0, 500);
-  for (const r of regole.slice(0, 300)) {
+  for (const r of regole.slice(0, 5_000)) {
+    // Regole con più di 10 «*» ignorate: servono solo a rallentare (QA, 24/10).
+    if (r.percorso.split('*').length > 11) continue;
+    const fisso = r.percorso.split('*')[0].replace(/\$$/, '');
+    if (!p.startsWith(fisso)) continue;
     if (!corrisponde(r.percorso.slice(0, 500), p)) continue;
     const lunghezza = r.percorso.length;
     if (!migliore || lunghezza > migliore.lunghezza || (lunghezza === migliore.lunghezza && r.allow)) migliore = { lunghezza, allow: r.allow };
@@ -78,7 +83,7 @@ export function creaRobots(req = richiesta) {
     if (!cache.has(origine)) {
       if (cache.size >= MAX_SITI) cache.clear();
       cache.set(origine, req(`${origine}/robots.txt`, { insicuro: true, redirect: 5, timeout: 5_000, maxBytes: 500_000 })
-        .then((r) => (r.status >= 200 && r.status < 300 ? regoleRobots(r.body) : []))
+        .then((r) => (r.status >= 500 ? [{ allow: false, percorso: '/' }] : r.status >= 200 && r.status < 300 ? regoleRobots(r.body) : []))
         .catch(() => []));
     }
     return cache.get(origine);

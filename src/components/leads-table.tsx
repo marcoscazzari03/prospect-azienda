@@ -314,7 +314,7 @@ export function LeadsTable({ rows: righe, lists, offers = {}, archived = false }
                               {opp.parts.length > 1 ? ` · +${OPPORTUNITY_RULES.extraSignalBonus} per ogni segnale in più` : ""}.
                             </p>
                           )}
-                          {openingLine(d.signals, offers[r.search_id]) && (
+                          {!r.opted_out_at && openingLine(d.signals, offers[r.search_id]) && (
                             <div className="mt-3 rounded-md border border-line bg-card px-3 py-2">
                               <div className="flex items-center justify-between gap-2">
                                 <p className="font-medium uppercase tracking-wider text-muted">Spunto per il primo messaggio</p>

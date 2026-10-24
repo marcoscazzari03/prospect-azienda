@@ -34,6 +34,7 @@ describe("lead di un'azienda che si è opposta", () => {
     expect(f.modulo_contatto).toBe("");
     expect(f.fonte_email).toBe("");
     expect(f.opposizione).toContain("2026-10-24");
+    expect(f.spunto).toBe("");
     expect(exportColumns([f]).some((c) => c.key === "opposizione")).toBe(true);
   });
 });

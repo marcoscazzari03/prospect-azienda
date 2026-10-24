@@ -39,7 +39,7 @@ export default function PrivacyPage() {
         <li><strong>Finalità e base giuridica:</strong> permettere ai nostri clienti, imprese e professionisti, di individuare attività a cui proporre i propri servizi. La base è il legittimo interesse (art. 6.1.f GDPR) nostro e dei clienti allo sviluppo di rapporti commerciali tra imprese, bilanciato con i tuoi diritti: usiamo solo dati che l&apos;attività pubblica per farsi contattare, senza dati di persone diverse dal titolare.</li>
         <li><strong>Destinatari:</strong> i clienti della piattaforma che li ricevono, come titolari autonomi del trattamento; gli stessi dati possono essere forniti a più clienti interessati allo stesso settore e zona. I fornitori tecnici elencati sotto.</li>
         <li><strong>Conservazione:</strong> riverifichiamo i dati periodicamente; quelli non riverificati vengono cancellati entro 24 mesi. Per una consegna valgono solo i contatti controllati negli ultimi 180 giorni.</li>
-        <li><strong>Opposizione:</strong> puoi opporti in qualsiasi momento, senza motivazione, dalla pagina <Link className="text-ledger underline" href="/opposizione">Rimuovi i tuoi dati</Link>: cancelliamo subito i tuoi dati dal nostro database e non li consegniamo più a nessuno.</li>
+        <li><strong>Opposizione:</strong> puoi opporti in qualsiasi momento, senza motivazione, dalla pagina <Link className="text-ledger underline" href="/opposizione">Rimuovi i tuoi dati</Link>: cancelliamo subito i tuoi dati di contatto dal nostro database, anche dai lead già consegnati (a quei clienti segnaliamo l&apos;opposizione), e non li consegniamo più a nessuno.</li>
       </ul>
 
       <h3>Annunci di lavoro e controlli dei siti</h3>
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
       <ul>
         <li>Supabase (database e accesso) e Vercel (applicazione), con server nell&apos;Unione Europea.</li>
         <li>n8n (automazioni) e Hetzner (server per i controlli dei siti).</li>
-        <li>Anthropic (intelligenza artificiale, Stati Uniti): legge testi pubblici dei siti per riconoscere il settore; non riceve dati dei clienti.</li>
+        <li>Anthropic (intelligenza artificiale, Stati Uniti): legge testi pubblici dei siti per riconoscere il settore e riceve i criteri delle ricerche e la descrizione dei servizi inseriti dai clienti (non nome né email dell&apos;account).</li>
         <li>Stripe (pagamenti), Resend (email del servizio), Cloudflare (protezione anti-bot).</li>
       </ul>
       <p>Per i fornitori con sede fuori dall&apos;Unione Europea il trasferimento avviene sulla base del Data Privacy Framework UE–USA o delle clausole contrattuali tipo approvate dalla Commissione europea.</p>

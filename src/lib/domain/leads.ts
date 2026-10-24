@@ -109,7 +109,7 @@ export function flattenDelivery(d: DeliveryRow, offers: Record<string, string | 
     email_ipotizzate: no ? "" : (x.email_patterns ?? []).map((p) => p.address).join(", "),
     segnali: (x.signals ?? []).map((sg) => `${signalByCode(sg.code)?.label ?? sg.code}: ${signalPhrase(sg)}`).join(" | "),
     prove_segnali: (x.signals ?? []).map((sg) => sg.evidence?.url ?? "").filter(Boolean).join(" "),
-    spunto: openingLine(x.signals, offers[d.search_id]),
+    spunto: no ? "" : openingLine(x.signals, offers[d.search_id]),
     punteggio_opportunita: opp ? opp.score : "",
     livello_opportunita: opp ? `Opportunità ${opp.level}` : "",
     qualita: d.quality_score,
