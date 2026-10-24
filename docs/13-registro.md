@@ -84,6 +84,16 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Documento per l'avvocato aggiornato (punto 12) · documento su Claude, fuori dal repository
+- **Cosa:** nel documento «Avvisto – richiesta di parere legale» aggiunta la domanda principale (si possono vendere elenchi di
+  aziende con email generiche, modulo e segnali, se il cliente deve avere una propria base giuridica per contattarle?);
+  domanda 4 con le clausole tra titolari autonomi; domanda 5 su modulo e telefono al posto dell'email; domanda 9 con lo
+  stato del ricorso Lusha; opposizione descritta per intero (cancellazione dal magazzino e niente nuove consegne). Al posto
+  del DPA per i clienti si chiedono le clausole tra titolari autonomi e l'elenco dei DPA con i fornitori.
+- **Perché:** rilettura esterna del documento; il cliente che decide da solo come usare i lead è titolare autonomo, non
+  responsabile del trattamento (art. 28). La risposta sull'art. 130 decide la promessa commerciale e la pagina prezzi.
+- **Indietro:** cronologia delle versioni del documento (versione 9 = prima delle correzioni).
+
 ## 24/10/2026 — Adzuna: al massimo 3 pagine per ricerca (punto 89b) · in produzione dal 24/10 (nodo pubblicato su n8n)
 - **Perché:** il giro del 23/10, il primo con la manifattura, ha fatto **157 chiamate** (88 ricerche + pagine in più; 15
   ricerche con 4–5 pagine: magazziniere, carrellista, mulettista, addetto magazzino, operaio e addetto produzione,
