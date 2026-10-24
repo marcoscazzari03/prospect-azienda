@@ -148,6 +148,8 @@ Disallow: /solo-noi`;
   assert.equal(consentito(regoleRobots('User-agent: *\nDisallow: /città'), '/citt%C3%A0/milano'), false, 'regole con accenti codificate');
   const tante = 'User-agent: *\n' + Array.from({ length: 2000 }, (_, i) => `Disallow: /p${i}`).join('\n');
   assert.equal(consentito(regoleRobots(tante), '/p1999/x'), false, 'anche le regole dopo le prime centinaia');
+  assert.doesNotThrow(() => regoleRobots('User-agent: *\nDisallow: /😀'), 'emoji nelle regole');
+  assert.equal(consentito(regoleRobots('User-agent: *\nDisallow: /x' + '*a'.repeat(12)), '/x/qualcosa'), false, 'regola con troppi «*»: esclusa per prefisso');
   assert.equal(corrisponde('/a*b*c', '/axxbyyc/z'), true);
   assert.equal(corrisponde('/a*b$', '/axxbz'), false);
   const t0 = performance.now();

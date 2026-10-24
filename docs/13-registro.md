@@ -108,7 +108,8 @@ Come tornare indietro, in generale:
 - **Revisione:** Code Reviewer «NON PRONTO» (testi che promettevano una cancellazione che il codice non faceva; Anthropic
   descritto male; contatti inviati al browser) e QA «funziona con problemi» (spunto sui lead opposti, `site_email` rimasta,
   robots.txt: 5xx, Crawl-delay, regole oltre le 300, accenti): tutto corretto, test SQL `42_optout_deliveries_test.sql`,
-  test del worker e vitest. Seconda revisione delle correzioni prima di main.
+  test del worker e vitest. Seconda revisione: «pronto con riserve» (emoji nelle regole del robots.txt, regole con troppi «*» da
+  trattare come escluse, `sources.contact_page` da svuotare): corrette.
 - **Query:** `supabase/queries/ditte_individuali.sql` (quante aziende con contatto sono probabilmente ditte o professionisti).
 - **Indietro:** testi con `git revert`; 072 non reversibile; 073: togliere colonna e trigger `companies_suppressed_email`,
   rieseguire `suppression_purge_trigger` dalla 014; robots: togliere `conRobots`/`creaRobots` dai worker.

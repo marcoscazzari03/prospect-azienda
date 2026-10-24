@@ -18,7 +18,7 @@ begin
          -- Chiave con il nome del referente (modalità con referente, fino al 18/10): resta solo un'impronta, come in
          -- forget_deliveries (046). Le chiavi «|dominio» dei lead solo azienda non hanno dati di persone e restano.
          person_key = case when left(d.person_key, 1) = '|' then d.person_key else 'opp:' || sha256_hex(d.person_key) end,
-         data = ((d.data - 'email' - 'email_patterns' - 'person') #- '{company,contact_form}')
+         data = ((d.data - 'email' - 'email_patterns' - 'person') #- '{company,contact_form}' #- '{sources,contact_page}')
    where d.opted_out_at is null
      and ((p_email_hash is not null and d.email_address <> '' and sha256_hex(lower(d.email_address)) = p_email_hash)
        or (p_domain_hash is not null and (sha256_hex(lower(d.company_domain)) = p_domain_hash

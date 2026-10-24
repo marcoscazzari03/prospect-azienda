@@ -28,7 +28,7 @@ export function regoleRobots(testo, agente = AGENTE) {
     } else if ((chiave === 'allow' || chiave === 'disallow') && attuale) {
       ultimaAgente = false;
       // «Disallow:» vuoto non esclude niente. Caratteri non ASCII codificati come nel percorso dell'URL.
-      if (valore) attuale.regole.push({ allow: chiave === 'allow', percorso: valore.replace(/[^\x00-\x7F]/g, (c) => encodeURIComponent(c)) });
+      if (valore) attuale.regole.push({ allow: chiave === 'allow', percorso: valore.replace(/[^\x00-\x7F]/gu, (c) => encodeURIComponent(c)) });
     }
     // Altre righe (Crawl-delay, Sitemap…) ignorate: non chiudono il gruppo degli user-agent.
   }
@@ -65,11 +65,11 @@ export function consentito(regole, percorso) {
   let migliore = null;
   const p = String(percorso).slice(0, 500);
   for (const r of regole.slice(0, 5_000)) {
-    // Regole con più di 10 «*» ignorate: servono solo a rallentare (QA, 24/10).
-    if (r.percorso.split('*').length > 11) continue;
     const fisso = r.percorso.split('*')[0].replace(/\$$/, '');
     if (!p.startsWith(fisso)) continue;
-    if (!corrisponde(r.percorso.slice(0, 500), p)) continue;
+    // Regole con più di 10 «*» (servono solo a rallentare, QA 24/10): valgono per tutto ciò che inizia con la parte fissa,
+    // senza il confronto completo; un Disallow così esclude di più, mai di meno (Code Reviewer).
+    if (r.percorso.split('*').length <= 11 && !corrisponde(r.percorso.slice(0, 500), p)) continue;
     const lunghezza = r.percorso.length;
     if (!migliore || lunghezza > migliore.lunghezza || (lunghezza === migliore.lunghezza && r.allow)) migliore = { lunghezza, allow: r.allow };
   }
