@@ -83,6 +83,18 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Coda del controllo siti veloce (migrazione 071, checklist 97) · sul branch, in revisione; poi migrazione all'utente
+- **Perché:** `pending_site_checks` (064) valutava ogni azienda da controllare contro le ricerche recenti prima di tenerne poche:
+  8-9 s in produzione, oltre il tempo massimo delle richieste al database (worker del VPS in errore, n8n solo con i tentativi).
+- **Cosa:** `supabase/migrations/20261215000071_site_checks_fast.sql`. Tre gruppi piccoli presi con gli indici (domanda delle
+  ricerche recenti per zona e settore, prime aziende da controllare in assoluto, ricontrollo della 054), 4 volte il limite
+  ciascuno; esclusioni e ordine finale come la 064. Indici nuovi `companies_check_queue_idx` (mai controllate, poi le più
+  vecchie) e `companies_places_idx` (GIN su `company_places(places, city)`, funzione nuova). `jit = off` nella funzione.
+- **Misure sul banco (250.000 aziende, 175.000 da controllare, 9 combinazioni di domanda):** 064 da 10 a 15 s; 071 0,2-0,4 s
+  (prima di spegnere il JIT 2 s, di cui 1,8 s di compilazione). Stesse aziende nello stesso ordine della 064 con 300, 100 e 20,
+  con e senza domanda, con solo ricontrolli. Tutti i test SQL superati.
+- **Indietro:** rieseguire la funzione della 064; gli indici possono restare.
+
 ## 24/10/2026 — Nuova password con la verifica in due passaggi · su main dal 24/10
 - **Cosa si è visto (utente):** recupero della password dell'account principale, link valido, ma al salvataggio «Link scaduto»;
   tornando indietro e inserendo il codice dell'app di autenticazione andava. Con la verifica in due passaggi attiva Supabase non
