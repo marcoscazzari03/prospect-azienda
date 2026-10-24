@@ -83,6 +83,16 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — worker del controllo siti: coda letta a blocchi da 100 · su main, rivisto; sul VPS con `rinomina` del 24/10
+- **Causa vera del fermo dal 22/10 (log del VPS del 24/10):** «lettura della coda: HTTP 500» a ogni giro dopo circa 10 s. La
+  lettura di 300 aziende da `pending_site_checks` supera il tempo massimo delle richieste al database (circa 8 s; misurata a 9 s il
+  23/10, cresce con le aziende di OSM e Common Crawl); n8n ne legge 150 e passa. Non era il tempo del giro.
+- **Cosa:** `worker/site-checks.mjs` legge, controlla e salva 100 aziende alla volta fino a 300 o a 12 minuti; nel log anche
+  il testo della risposta in caso di errore. In prova legge un blocco solo.
+- **Da fare più avanti:** rendere `pending_site_checks` più veloce (oggi materializza tutte le aziende da controllare prima di
+  ordinarle): con il database che cresce anche la lettura da 150 di n8n e quella da 100 rischiano il limite.
+- **Indietro:** versione precedente del file, poi `bash ~/worker.sh aggiorna`.
+
 ## 23/10/2026 — Ricerche consigliate per tutti i clienti · in produzione dal 23/10 sera
 - **Cosa:** l'utente ha messo «Ricerche consigliate» su «Tutti» (Amministrazione → Servizi opportunità): il riquadro «Di cosa si
   occupa la tua attività?» compare anche agli account cliente (massimo 10 proposte al giorno per organizzazione). Rinominate anche

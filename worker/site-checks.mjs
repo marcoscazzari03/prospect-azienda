@@ -115,16 +115,20 @@ async function main() {
   const segreto = process.env.SITE_CHECKS_SECRET || '';
   if (segreto.length < 32) throw new Error('SITE_CHECKS_SECRET mancante o troppo corto');
   const app = (process.env.APP_URL || 'https://avvisto.it').replace(/\/+$/, '');
+  // Aziende per giro (al massimo 300), lette dalla coda a blocchi da 100: una lettura da 300 superava gli 8 s concessi alle
+  // richieste del database dopo le aziende nuove di OSM e Common Crawl (24/10: «lettura della coda: HTTP 500» a ogni giro dal
+  // 22/10; n8n con 150 andava).
   const limite = Math.min(Math.max(Number(process.env.LIMIT) || 300, 1), 300);
   const parallelo = Math.min(Math.max(Number(process.env.CONCURRENCY) || 8, 1), 32);
   const prova = ['1', 'true', 'si', 'sì', 'yes'].includes(String(process.env.DRY_RUN || '').toLowerCase());
   const intestazioni = { 'x-engine-secret': segreto, 'Content-Type': 'application/json' };
   const inizio = Date.now();
 
-  const r = await fetch(`${app}/api/engine/site-checks?limit=${limite}`, { headers: intestazioni, signal: AbortSignal.timeout(30_000) });
-  if (!r.ok) throw new Error(`lettura della coda: HTTP ${r.status}`);
-  const aziende = (await r.json()).companies || [];
-  if (!aziende.length) { console.log('Coda vuota.'); return; }
+  const leggiCoda = async (n) => {
+    const r = await fetch(`${app}/api/engine/site-checks?limit=${n}`, { headers: intestazioni, signal: AbortSignal.timeout(30_000) });
+    if (!r.ok) throw new Error(`lettura della coda: HTTP ${r.status} ${(await r.text().catch(() => '')).slice(0, 200)}`);
+    return (await r.json()).companies || [];
+  };
 
   const regole = caricaRegole();
   const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
@@ -153,19 +157,21 @@ async function main() {
   // Nome e sito entro i 300 caratteri dello schema della route: un valore troppo lungo farebbe rifiutare tutto il lotto (QA).
   const corto = (v) => String(v ?? '').slice(0, 300);
 
-  // A blocchi da 100, ognuno salvato subito, e niente blocchi nuovi dopo 12 minuti: con le aziende nuove di OSM (molti
-  // siti morti o lentissimi) un giro intero poteva arrivare ai 20 minuti di systemd ed essere interrotto prima di salvare
-  // (23/10: worker fermo dalle 15:35 UTC del 22/10, mentre n8n con 150 aziende andava).
+  // A blocchi da 100 (letti, controllati e salvati uno alla volta: le aziende salvate escono dalla coda) e niente blocchi
+  // nuovi dopo 12 minuti: con le aziende nuove di OSM (molti siti morti o lentissimi) un giro intero poteva arrivare ai
+  // 20 minuti di systemd ed essere interrotto prima di salvare. In prova si legge un blocco solo (niente esce dalla coda).
   const scadenza = inizio + 12 * 60_000;
   const stats = { aziende: 0, salvate: 0, illeggibili: 0, email: 0, segnali: {}, blocchi_saltati: 0 };
-  for (let k = 0; k < aziende.length; k += 100) {
+  for (let k = 0; k < limite; k += 100) {
     if (Date.now() > scadenza) { stats.blocchi_saltati++; continue; }
-    const items = await inParallelo(aziende.slice(k, k + 100), parallelo, controlla);
+    const blocco = await leggiCoda(Math.min(100, limite - k));
+    if (!blocco.length) { if (!k) console.log('Coda vuota.'); break; }
+    const items = await inParallelo(blocco, parallelo, controlla);
     stats.aziende += items.length;
     stats.illeggibili += items.filter(i => !i.letto).length;
     stats.email += items.filter(i => i.company.email).length;
     for (const i of items) for (const c of i.checks) if (c.status === 'pass') stats.segnali[c.code] = (stats.segnali[c.code] || 0) + 1;
-    if (prova) continue;
+    if (prova) break;
     const corpo = items.map((i) => ({ company: { ...i.company, name: corto(i.company.name), website: corto(i.company.website) }, checks: i.checks }));
     const s = await fetch(`${app}/api/engine/site-checks`, { method: 'POST', headers: intestazioni, body: JSON.stringify({ items: corpo }), signal: AbortSignal.timeout(60_000) });
     if (!s.ok) throw new Error(`salvataggio del blocco ${k / 100 + 1}: HTTP ${s.status} ${(await s.text().catch(() => '')).slice(0, 200)} (salvate prima: ${stats.salvate})`);
