@@ -83,6 +83,12 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Passaggio ad Avvisto concluso: vecchio indirizzo staccato · in produzione dal 24/10
+- **Cosa (utente):** vecchio indirizzo tolto dai domini del progetto su Vercel (risponde 404, controllato), dalle Redirect URLs di
+  Supabase (resta `https://avvisto.it/auth/conferma`) e dagli hostname di Turnstile (resta avvisto.it). Nessuna ricerca in corso
+  (l'ultima del 22/10). Da qui: solo avvisto.it.
+- **Indietro:** riaggiungere il dominio su Vercel, la Redirect URL e l'hostname (il motore accetta comunque solo avvisto.it).
+
 ## 24/10/2026 — VPS col nome nuovo, controllo siti ripartito, settore di Common Crawl corretto · in produzione dal 24/10
 - **VPS:** `bash ~/worker.sh rinomina` riuscito (cartelle `/opt/avvisto`, `/etc/avvisto`, `/var/lib/avvisto-*`, servizi `avvisto-*`,
   `APP_URL=https://avvisto.it`; riaccesi controllo siti, contatti, OSM e siti). Giro del controllo siti: 300 aziende salvate in

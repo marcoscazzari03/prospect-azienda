@@ -43,8 +43,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
     `worker.sh` da main; leggere il log del worker del controllo siti fermo dal 22/10 alle 15:35 UTC (servizio ancora col nome
     vecchio); `bash ~/worker.sh rinomina` (rilancia installa; NON lanciare prima `installa`); `bash ~/worker.sh giro` e controllo
     dell'esito; `bash ~/worker.sh prova-cc` (senza accendere `avvia-cc`).
-94b. **Insieme, subito dopo** – Fine del passaggio ad Avvisto: nessuna ricerca in corso; **Tu:** staccare il vecchio indirizzo da
-    Vercel (Domains), togliere la vecchia Redirect URL su Supabase e il vecchio hostname su Turnstile.
+94b. ~~**Insieme, subito dopo** – Fine del passaggio ad Avvisto: nessuna ricerca in corso; **Tu:** staccare il vecchio indirizzo da
+    Vercel (Domains), togliere la vecchia Redirect URL su Supabase e il vecchio hostname su Turnstile~~ (24/10).
 94c. ~~**Io, poi Tu** – Ricerche consigliate per tutti: tolta la diagnosi `db` dai tentativi, poi «Ricerche consigliate» su
     «Tutti» in Amministrazione → Servizi opportunità~~ (23/10). ~~Organizzazione dell'amministratore rinominata, credenziale
     Anthropic su n8n rinominata in «Avvisto - Anthropic»~~ (23/10, Tu).
@@ -153,8 +153,8 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
 67. **Insieme, il 23/10 sera** – Fase C: ~~dominio su Vercel e DNS~~ (23/10); ~~dominio su Resend (SPF, DKIM, DMARC)~~ (23/10);
     ~~codice solo Avvisto, logo C, nessuna traccia del nome vecchio~~ (23/10, Io); variabili su Vercel (`APP_URL`, `EMAIL_FROM`;
     `NEXT_PUBLIC_BRAND` non serve più); Supabase (Site URL, Redirect URLs, modelli, mittente); Turnstile; webhook di Stripe;
-    n8n (nodi caricati e pubblicati); VPS (`rinomina`, `dominio`); **ultimo:** staccare il vecchio indirizzo da Vercel (decisione
-    dell'utente: nessun rinvio). Fatto il 23/10: credenziale Anthropic e organizzazione dell'amministratore
+    n8n (nodi caricati e pubblicati); VPS (`rinomina`, `dominio`); ~~**ultimo:** staccare il vecchio indirizzo da Vercel (decisione
+    dell'utente: nessun rinvio)~~ (24/10). **Fase C conclusa il 24/10.** Fatto il 23/10: credenziale Anthropic e organizzazione dell'amministratore
     rinominate.
 67d. **Insieme, subito dopo** – Fase D: registrazione, ricerca di prova, email, vecchi link, worker e workflow; QA Tester e
     UI/UX Designer.

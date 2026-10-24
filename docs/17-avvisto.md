@@ -97,3 +97,5 @@ Ogni passo con la guida passo passo in chat.
   Supabase con avvisto.it → Vercel (variabili e pubblicazione) → Supabase (Site URL, modelli, mittente) → Turnstile → webhook di
   Stripe → nodi n8n → VPS (`rinomina` dalla copia nella home) → nessuna ricerca in corso → staccare il vecchio indirizzo per ultimo.
   Le email di conferma inviate prima del cambio diventano link morti.
+- 24/10: **fase C conclusa.** VPS rinominato (`rinomina`), controllo siti ripartito, vecchio indirizzo staccato da Vercel e tolto da
+  Supabase e Turnstile. Restano la fase D (verifiche, una ricerca di prova su avvisto.it) e la fase E.
