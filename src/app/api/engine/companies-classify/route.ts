@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     const client = new Anthropic({ apiKey: key, timeout: 45_000, maxRetries: 1 });
     const response = await client.messages.parse({
       model: MODEL,
-      max_tokens: 4000,
+      max_tokens: 8000, // 20 aziende con 10 parole chiave ciascuna stanno strette in 4.000 (24/10)
       system: INDUSTRY_SYSTEM,
       messages: [{ role: "user", content: industryPrompt(companies) }],
       output_config: { effort: "low", format: zodOutputFormat(industryAnswerSchema) },
@@ -42,7 +42,10 @@ export async function POST(request: Request) {
       usage: { input_tokens: response.usage.input_tokens, output_tokens: response.usage.output_tokens },
     });
   } catch (e) {
-    console.error("companies-classify", e instanceof Error ? e.message : e);
-    return NextResponse.json({ error: "settore non riuscito" }, { status: 502 });
+    // Il motivo anche nella risposta (la route è solo per i worker, con il segreto): sul VPS si legge nel log (24/10: 502 su
+    // ogni lotto da 20 della prova di Common Crawl, una sola azienda invece andava).
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("companies-classify", msg);
+    return NextResponse.json({ error: `settore non riuscito: ${msg.slice(0, 160)}` }, { status: 502 });
   }
 }
