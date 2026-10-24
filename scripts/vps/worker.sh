@@ -18,7 +18,7 @@
 #   bash worker.sh installa-backup  backup notturno del database (punto 90): chiede la stringa di connessione di Supabase
 #                                   e crea la chiave di cifratura, da copiare e conservare fuori dal server
 #   bash worker.sh backup           un backup adesso;  bash worker.sh stato-backup  archivi e ultimi giri
-#   bash worker.sh avvia            giri automatici: controllo siti alle :05 e :35, contatti alle :15 e :45, siti alle :50,
+#   bash worker.sh avvia            giri automatici: controllo siti ogni 10 minuti (:05, :15, …), contatti alle :15 e :45, siti alle :50,
 #                                   OSM il lunedì
 #   bash worker.sh ferma            ferma i giri automatici
 #   bash worker.sh stato            ultimi giri e prossimi
@@ -99,7 +99,8 @@ case "${1:-}" in
     # osmium legge il file di OpenStreetMap (popolamento OSM, punto 87).
     command -v osmium >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq osmium-tool; }
     # Più thread per le risoluzioni DNS: con molti siti morti le 4 predefinite fanno da collo di bottiglia (23/10).
-    unita "$NOME" "controllo siti" "/usr/bin/node worker/site-checks.mjs" "*-*-* *:05,35:00" 20min 1G "Environment=UV_THREADPOOL_SIZE=16" ""
+    # Ogni 10 minuti (24/10: un giro da 300 dura circa 80 s; 1.800 aziende l'ora invece di 600 per smaltire l'arretrato).
+    unita "$NOME" "controllo siti" "/usr/bin/node worker/site-checks.mjs" "*-*-* *:05/10:00" 20min 1G "Environment=UV_THREADPOOL_SIZE=16" ""
     unita "$CONT" "contatti" "/usr/bin/node worker/contacts.mjs" "*-*-* *:15,45:00" 20min 1G "Environment=UV_THREADPOOL_SIZE=16" ""
     # Il file dell'Italia (circa 2 GB) e i suoi derivati restano in /var/lib/avvisto-osm, l'unica cartella scrivibile.
     unita "$OSM" "popolamento OSM" "/bin/bash $APP/scripts/vps/osm.sh" "Mon *-*-* 02:20:00" 3h 2500M "StateDirectory=avvisto-osm

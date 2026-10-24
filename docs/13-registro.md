@@ -83,6 +83,14 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Controllo siti solo sul VPS, ogni 10 minuti; «Aziende | Controllo siti» su n8n spento · n8n spento dal 24/10; orario nuovo dopo `installa` sul VPS
+- **Misure (query `supabase/queries/controllo_siti_orario.sql`):** dalle 11 del 24/10 750 aziende l'ora (600 dal VPS, 150 da n8n),
+  prima 150; arretrato 53.306 aziende mai controllate, nessuna scaduta.
+- **Cosa:** decisione dell'utente: n8n «Aziende | Controllo siti» (bMlXndGWBTMp66Fa) spento (circa 720 esecuzioni al mese in
+  meno). `scripts/vps/worker.sh`: controllo siti ogni 10 minuti (`*:05/10`) invece che alle :05 e :35 (un giro da 300 dura
+  circa 80 s): circa 1.800 aziende l'ora, arretrato smaltito in poco più di un giorno; poi Common Crawl (`avvia-cc`).
+- **Indietro:** ripubblicare il workflow su n8n; orario `*:05,35` nello script e `installa`.
+
 ## 24/10/2026 — Coda del controllo siti veloce (migrazione 071, checklist 97) · in produzione dal 24/10 (eseguita dall'utente)
 - **Perché:** `pending_site_checks` (064) valutava ogni azienda da controllare contro le ricerche recenti prima di tenerne poche:
   8-9 s in produzione, oltre il tempo massimo delle richieste al database (worker del VPS in errore, n8n solo con i tentativi).

@@ -48,8 +48,9 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 94c. ~~**Io, poi Tu** – Ricerche consigliate per tutti: tolta la diagnosi `db` dai tentativi, poi «Ricerche consigliate» su
     «Tutti» in Amministrazione → Servizi opportunità~~ (23/10). ~~Organizzazione dell'amministratore rinominata, credenziale
     Anthropic su n8n rinominata in «Avvisto - Anthropic»~~ (23/10, Tu).
-95. **Tu, 24/10** – Query oraria di `site_checked_at`: se il worker fa circa 600 siti all'ora, spegnere «Aziende | Controllo
-    siti» su n8n (libera circa 720 esecuzioni al mese). Finché il worker non lo fa, n8n resta acceso.
+95. ~~**Tu, 24/10** – Query oraria di `site_checked_at`: se il worker fa circa 600 siti all'ora, spegnere «Aziende | Controllo
+    siti» su n8n (libera circa 720 esecuzioni al mese). Finché il worker non lo fa, n8n resta acceso.~~ (24/10: 750 l'ora,
+    n8n spento, worker ogni 10 minuti; poi `avvia-cc` quando l'arretrato di 53.000 aziende è smaltito)
 89b. **Io, 24/10** – Controllare le chiamate Adzuna dopo 2–3 giri con le figure della manifattura (limite 2.500 al mese).
 49. ~~**Io** – Controllo siti su un worker fuori da n8n, sul VPS Hetzner~~ (22/10: VPS reinstallato con Ubuntu 24.04, accesso
     solo con chiave, firewall e fail2ban; worker in produzione, 300 aziende in 79 s; giri alle :05 e alle :35 UTC).
