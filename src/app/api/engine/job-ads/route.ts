@@ -36,9 +36,12 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "annunci non validi" }, { status: 400 });
 
+  // Minimizzazione (analisi privacy del 24/10, checklist 98): la descrizione dell'annuncio può contenere nomi e contatti
+  // di persone e non serve a niente dopo i filtri del workflow: non si salva.
+  const ads = parsed.data.ads.map((a) => ({ ...a, description: "" }));
   const { data, error } = await createAdminClient().rpc("store_job_ads", {
     p_source: parsed.data.source,
-    p_ads: parsed.data.ads as Json,
+    p_ads: ads as Json,
   });
   if (error) {
     console.error("store_job_ads", error);
