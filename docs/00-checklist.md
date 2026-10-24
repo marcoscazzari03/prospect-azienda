@@ -95,6 +95,9 @@ sono in `00b-checklist-calendario.md`.
 12. **Tu** – Parere del legale (`09-domande-consulenti.md`): caso Lusha, art. 130 (vale anche per le caselle aziendali?),
     LIA/DPIA, ODbL, Adzuna, DPA, informativa, termini, pagina «Sicurezza e privacy», chiusura dell'account, riga «rispondete
     no» e firma delle email. Niente promesse di «contatto senza consenso» finché non risponde per iscritto.
+    **Tu, dal 26/10:** documento aggiornato il 24/10 (domanda principale, clausole tra titolari autonomi al posto del DPA per i
+    clienti); chiedere un preventivo fisso a due studi scelti dall'utente (Polimeni.Legal e l'avv. Anna Maria Lorito di DGRS). Il
+    listino (5f) si fissa dopo la risposta sull'art. 130.
 13. **Tu** – Conferma scritta di Adzuna sull'uso commerciale degli annunci (mail del 18/10, in attesa).
 14. **Insieme** – Stripe con pagamenti reali e un acquisto vero di prova; poi togliere il blocco «acquisti solo admin».
 15. **Tu, poi Insieme, alla messa in produzione definitiva** – Supabase Pro (backup giornalieri, sostituisce il punto 90) e

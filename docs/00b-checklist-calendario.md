@@ -4,7 +4,7 @@ Le stesse voci di `00-checklist.md`, ordinate per **quando** vanno fatte invece 
 (**Tu**, **Io**, **Insieme**); le cose fatte restano barrate con la data. Le due checklist si aggiornano insieme, nello stesso
 commit (regola del 24/10): il dettaglio di ogni voce è in `00-checklist.md`, qui c'è solo il quando.
 
-Ultimo aggiornamento: 24/10/2026 pomeriggio (89b fatto).
+Ultimo aggiornamento: 24/10/2026 sera (89b fatto; avvocati da contattare il 26/10).
 
 ## 📅 Oggi, sabato 24/10
 - 94. ~~**Insieme** – VPS: `rinomina`, giro di prova, `prova-cc`~~ (24/10 mattina).
@@ -25,6 +25,8 @@ Ultimo aggiornamento: 24/10/2026 pomeriggio (89b fatto).
 - 30. **Tu** – Logo accanto al mittente: account Google con la casella del mittente e logo come foto profilo.
 
 ## 📅 Lunedì 26 – mercoledì 28/10
+- 12. **Tu, lunedì 26/10** – Email agli avvocati scelti (Polimeni.Legal, avv. Lorito di DGRS) con il documento in PDF e
+  richiesta di preventivo fisso; prima chiamata con chi risponde. Il listino (5f) aspetta la risposta sull'art. 130.
 - 96. **Tu** – `copertura_settori.sql` e `resa_giornaliera.sql`: quanto manca alla soglia di copertura.
 - 85a. **Insieme** – Prove delle ricerche consigliate con descrizioni diverse (fotografo, commercialista, parrucchiere,
   falegname).

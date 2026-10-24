@@ -93,6 +93,8 @@ Come tornare indietro, in generale:
 - **Perché:** rilettura esterna del documento; il cliente che decide da solo come usare i lead è titolare autonomo, non
   responsabile del trattamento (art. 28). La risposta sull'art. 130 decide la promessa commerciale e la pagina prezzi.
 - **Indietro:** cronologia delle versioni del documento (versione 9 = prima delle correzioni).
+- **Decisione dell'utente (24/10):** prima del listino si chiede il parere; studi scelti: Polimeni.Legal e l'avv. Anna Maria
+  Lorito (DGRS). Il listino (5f) si fissa dopo la risposta sull'art. 130.
 
 ## 24/10/2026 — Adzuna: al massimo 3 pagine per ricerca (punto 89b) · in produzione dal 24/10 (nodo pubblicato su n8n)
 - **Perché:** il giro del 23/10, il primo con la manifattura, ha fatto **157 chiamate** (88 ricerche + pagine in più; 15
