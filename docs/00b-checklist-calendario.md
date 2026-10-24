@@ -4,7 +4,7 @@ Le stesse voci di `00-checklist.md`, ordinate per **quando** vanno fatte invece 
 (**Tu**, **Io**, **Insieme**); le cose fatte restano barrate con la data. Le due checklist si aggiornano insieme, nello stesso
 commit (regola del 24/10): il dettaglio di ogni voce è in `00-checklist.md`, qui c'è solo il quando.
 
-Ultimo aggiornamento: 24/10/2026 sera (analisi privacy: 13 domani, 98 prima del lancio; avvocati il 26/10).
+Ultimo aggiornamento: 24/10/2026 notte (prossimi passi GDPR in «Alla ripresa»; 13 Adzuna in attesa; avvocati il 26/10).
 
 ## 📅 Oggi, sabato 24/10
 - 94. ~~**Insieme** – VPS: `rinomina`, giro di prova, `prova-cc`~~ (24/10 mattina).
