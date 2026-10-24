@@ -206,7 +206,7 @@ export async function updatePassword(_: AuthState, form: FormData): Promise<Auth
     // «Link scaduto» lo nascondeva).
     if (error.code === "insufficient_aal") redirect("/accedi/verifica?next=/nuova-password");
     if (error.code === "same_password") return { error: "La nuova password deve essere diversa da quella di prima." };
-    if (error.code === "weak_password") return { error: "Password troppo debole o già comparsa in furti di dati: scegline un'altra." };
+    if (error.code === "weak_password") return { error: "Password troppo debole: usa lettere, numeri e simboli, oppure scegline un'altra." };
     console.error("updatePassword", error.code, error.message);
     if (error.code === "session_not_found" || error.name === "AuthSessionMissingError") {
       return { error: "Link scaduto: richiedi un nuovo reset della password." };
