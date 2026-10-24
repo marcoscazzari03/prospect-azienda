@@ -38,7 +38,8 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 80. ~~**Io** – Controllare che «Aziende | Controllo siti» sia ripartito dopo la migrazione 061~~ (21/10: giro delle 18:25 riuscito).
 
 ## 🖥️ VPS e worker: stasera e domani
-94. **Insieme, 23/10 a mezzanotte** (spostato dalle 20, promemoria impostato) – Sul VPS, un passo alla volta: riscaricare
+94. ~~**Insieme, 23/10 a mezzanotte**~~ (fatto il 24/10 mattina: `rinomina`, giro da 300 in 82 s, prova di Common Crawl con
+    settore corretto) – Sul VPS, un passo alla volta: riscaricare
     `worker.sh` da main; leggere il log del worker del controllo siti fermo dal 22/10 alle 15:35 UTC (servizio ancora col nome
     vecchio); `bash ~/worker.sh rinomina` (rilancia installa; NON lanciare prima `installa`); `bash ~/worker.sh giro` e controllo
     dell'esito; `bash ~/worker.sh prova-cc` (senza accendere `avvia-cc`).

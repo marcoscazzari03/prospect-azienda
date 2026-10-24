@@ -83,6 +83,15 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — VPS col nome nuovo, controllo siti ripartito, settore di Common Crawl corretto · in produzione dal 24/10
+- **VPS:** `bash ~/worker.sh rinomina` riuscito (cartelle `/opt/avvisto`, `/etc/avvisto`, `/var/lib/avvisto-*`, servizi `avvisto-*`,
+  `APP_URL=https://avvisto.it`; riaccesi controllo siti, contatti, OSM e siti). Giro del controllo siti: 300 aziende salvate in
+  82 s (115 email, 60 illeggibili).
+- **Common Crawl, prova:** 300 domini, 192 aperti, 62 aziende con partita IVA, 41 con città. Il settore falliva su ogni lotto da
+  20 (HTTP 502 da `/api/engine/companies-classify`): risposta di Haiku troncata a 4.000 token. Con `max_tokens` 8.000: 20 su 20.
+  La route ora restituisce il motivo dell'errore e il worker lo scrive nel log. `avvia-cc` ancora spento.
+- **Indietro:** `max_tokens` a 4.000 (non serve); sul VPS le cartelle si rinominano a mano al contrario.
+
 ## 24/10/2026 — worker del controllo siti: coda letta a blocchi da 100 · su main, rivisto; sul VPS con `rinomina` del 24/10
 - **Causa vera del fermo dal 22/10 (log del VPS del 24/10):** «lettura della coda: HTTP 500» a ogni giro dopo circa 10 s. La
   lettura di 300 aziende da `pending_site_checks` supera il tempo massimo delle richieste al database (circa 8 s; misurata a 9 s il
