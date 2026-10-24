@@ -98,7 +98,10 @@ Come tornare indietro, in generale:
   escluse in testa, con molti ricontrolli). Tutti i test SQL superati.
 - **Revisione:** Code Reviewer e QA Tester sulla prima versione «pronto con riserve» / «NON PRONTO»: esclusioni tolte dopo il
   taglio (con molte escluse in testa la coda poteva restare vuota) e priorità della domanda persa tra i ricontrolli; corretti
-  con i tentativi a K crescente e il gruppo CD. Seconda revisione sulla versione corretta.
+  con i tentativi a K crescente e il gruppo CD. Seconda revisione del Code Reviewer «pronto con riserve», corrette: indice
+  dell'ordine parziale senza le aziende non in target (non si controllano mai e restavano in testa, facendo ripetere i
+  tentativi a ogni chiamata: con 3.000 in testa 0,5-0,7 s), pareggi del gruppo C anche per `first_seen_at`, tetto vero a
+  50.000. Nota: `companies_places_idx` dipende da `term_stems`: se `term_stems` cambia, l'indice va ricostruito (`reindex`).
 - **Indietro:** rieseguire la funzione della 064; gli indici possono restare.
 
 ## 24/10/2026 — Nuova password con la verifica in due passaggi · su main dal 24/10

@@ -11,7 +11,10 @@ returns text[] language sql immutable parallel safe set search_path = public as 
   select coalesce(p_places, '{}') || term_stems(p_city)
 $$;
 
-create index if not exists companies_check_queue_idx on public.companies (site_checked_at nulls first, first_seen_at);
+-- Solo aziende in target: quelle non in target non si controllano mai e resterebbero per sempre in testa alla coda (Code
+-- Reviewer); con l'indice parziale la coda non le vede nemmeno.
+create index if not exists companies_check_queue_idx on public.companies (site_checked_at nulls first, first_seen_at)
+  where not public.is_non_target_company(name);
 create index if not exists companies_places_idx on public.companies using gin (public.company_places(places, city));
 
 create or replace function public.pending_site_checks(p_limit integer)
@@ -113,7 +116,8 @@ begin
     ),
     gruppo_b as materialized (
       select c.id from companies c
-       where c.site_checked_at is null or c.site_checked_at < now() - interval '25 days'
+       where (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days')
+         and not is_non_target_company(c.name)
        order by c.site_checked_at nulls first, c.first_seen_at
        limit $3
     ),
@@ -123,7 +127,8 @@ begin
          and c.site_checked_at < timestamptz '2026-10-20 12:25:00+00'
          and coalesce(c.site_email, '') = ''
          and exists (select 1 from company_checks cc where cc.company_id = c.id and cc.status in ('pass', 'fail'))
-       order by c.site_checked_at
+         and not is_non_target_company(c.name)
+       order by c.site_checked_at, c.first_seen_at
        limit $3
     ),
     -- Come A, tra le aziende del gruppo C: la priorità della domanda vale anche lì (QA).
@@ -191,7 +196,8 @@ begin
        and ((select count(*) from gruppo_c) < $3 or (select count(*) from gruppo_c where id not in (select id from escluse)) >= $1)
        and ((select count(*) from gruppo_cd) < $3 or (select count(*) from gruppo_cd where id not in (select id from escluse)) >= $1)
     $q$ into v_ids, v_completo using v_limit, v_domanda, v_k;
-    exit when v_completo or v_k >= 50000;
+    -- Tetto: oltre 50.000 per gruppo si tiene quello che c'è (aziende valide, ordine quasi esatto) invece di rallentare.
+    exit when v_completo or v_k * 4 > 50000;
     v_k := v_k * 4;
   end loop;
 
