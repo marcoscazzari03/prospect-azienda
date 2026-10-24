@@ -86,13 +86,19 @@ Come tornare indietro, in generale:
 ## 24/10/2026 — Coda del controllo siti veloce (migrazione 071, checklist 97) · sul branch, in revisione; poi migrazione all'utente
 - **Perché:** `pending_site_checks` (064) valutava ogni azienda da controllare contro le ricerche recenti prima di tenerne poche:
   8-9 s in produzione, oltre il tempo massimo delle richieste al database (worker del VPS in errore, n8n solo con i tentativi).
-- **Cosa:** `supabase/migrations/20261215000071_site_checks_fast.sql`. Tre gruppi piccoli presi con gli indici (domanda delle
-  ricerche recenti per zona e settore, prime aziende da controllare in assoluto, ricontrollo della 054), 4 volte il limite
-  ciascuno; esclusioni e ordine finale come la 064. Indici nuovi `companies_check_queue_idx` (mai controllate, poi le più
-  vecchie) e `companies_places_idx` (GIN su `company_places(places, city)`, funzione nuova). `jit = off` nella funzione.
-- **Misure sul banco (250.000 aziende, 175.000 da controllare, 9 combinazioni di domanda):** 064 da 10 a 15 s; 071 0,2-0,4 s
-  (prima di spegnere il JIT 2 s, di cui 1,8 s di compilazione). Stesse aziende nello stesso ordine della 064 con 300, 100 e 20,
-  con e senza domanda, con solo ricontrolli. Tutti i test SQL superati.
+- **Cosa:** `supabase/migrations/20261215000071_site_checks_fast.sql`. Quattro gruppi piccoli presi con gli indici: aziende da
+  controllare nella zona e nel settore di una ricerca recente (A), prime da controllare in assoluto (B), ricontrollo della 054
+  (C) e ricontrollo nella zona e nel settore delle ricerche (CD). Ogni gruppo prende K aziende senza le esclusioni (non in
+  target, opposizioni, chiuse), tolte dopo; se un gruppo troncato ha meno aziende valide del limite si riprova con K quattro
+  volte più grande (K iniziale: 4 volte il limite, almeno 1.000; al massimo 50.000). Indici nuovi `companies_check_queue_idx`
+  (mai controllate, poi le più vecchie) e `companies_places_idx` (GIN su `company_places(places, city)`, funzione nuova).
+  `jit = off` nella funzione.
+- **Misure sul banco (250.000 aziende):** 064 da 5 a 15 s secondo i dati; 071 0,2-0,5 s, 1,2-1,9 s con 2.000 aziende escluse in
+  testa alla coda. Stesse aziende nello stesso ordine della 064 (limiti 300, 100, 80, 20, 1; con e senza domanda, con e senza
+  escluse in testa, con molti ricontrolli). Tutti i test SQL superati.
+- **Revisione:** Code Reviewer e QA Tester sulla prima versione «pronto con riserve» / «NON PRONTO»: esclusioni tolte dopo il
+  taglio (con molte escluse in testa la coda poteva restare vuota) e priorità della domanda persa tra i ricontrolli; corretti
+  con i tentativi a K crescente e il gruppo CD. Seconda revisione sulla versione corretta.
 - **Indietro:** rieseguire la funzione della 064; gli indici possono restare.
 
 ## 24/10/2026 — Nuova password con la verifica in due passaggi · su main dal 24/10

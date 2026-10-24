@@ -21,6 +21,9 @@ language plpgsql stable security definer set search_path = public set jit = off 
 declare
   v_limit integer := least(greatest(coalesce(p_limit, 80), 1), 300);
   v_domanda jsonb;
+  v_k integer := greatest(least(greatest(coalesce(p_limit, 80), 1), 300) * 4, 1000); -- aziende per gruppo prima delle esclusioni
+  v_ids uuid[];
+  v_completo boolean;
 begin
   -- Zone e settori cercati: una riga per zona e per settore (o parola chiave del settore, che è un'alternativa).
   -- Zona vuota = tutto il paese, settore vuoto = tutti i settori; una ricerca senza zona e senza settore non conta.
@@ -68,80 +71,135 @@ begin
 
   -- Tre gruppi piccoli, presi con gli indici, invece di valutare ogni azienda da controllare (24/10: 9-15 s con circa
   -- 150.000 aziende in coda, oltre il tempo massimo delle richieste al database):
-  --   A. le aziende da controllare (mai o da più di 25 giorni) nella zona e nel settore di una ricerca recente, le prime N
-  --      per combinazione e poi le prime N in tutto;
-  --   B. le prime N aziende da controllare in assoluto (mai controllate, poi le più vecchie);
-  --   C. le prime N del ricontrollo della 054 (controllate prima dell'email dal sito, il 20/10, senza email).
-  -- N = 4 volte il limite: le esclusioni (non in target, opposizioni, aziende chiuse) si applicano solo a questi, e ne tolgono
-  -- molte meno. L'ordine finale è quello della 064: prima le scadute, tra queste prima quelle della domanda, poi mai
-  -- controllate e più vecchie.
-  return query execute $q$
-  with domanda as materialized (
-    select array(select jsonb_array_elements_text(e -> 'z')) as zona,
-           array(select jsonb_array_elements_text(e -> 's')) as settore
-      from jsonb_array_elements($2) e
-  ),
-  gruppo_a as materialized (
-    select x.id from domanda d
+  --   A. le aziende da controllare (mai o da più di 25 giorni) nella zona e nel settore di una ricerca recente;
+  --   B. le prime aziende da controllare in assoluto (mai controllate, poi le più vecchie);
+  --   C. il ricontrollo della 054 (controllate prima dell'email dal sito, il 20/10, senza email), le più vecchie, e (CD) quelle
+  --      del ricontrollo nella zona e nel settore di una ricerca recente.
+  -- Ogni gruppo prende le prime K senza le esclusioni (non in target, opposizioni, aziende chiuse), che costano: le esclusioni
+  -- si tolgono dopo, solo da queste. Le escluse non si ricontrollano mai e restano in testa all'indice (Code Reviewer): se in un
+  -- gruppo troncato ne restano meno del limite, si riprova con K quattro volte più grande. Così il risultato è esattamente
+  -- quello della 064 (stesse aziende, stesso ordine: prima le scadute, poi le altre; in ognuna prima quelle della
+  -- domanda, poi mai controllate e più vecchie).
+  loop
+    execute $q$
+    with domanda as materialized (
+      select array(select jsonb_array_elements_text(e -> 'z')) as zona,
+             array(select jsonb_array_elements_text(e -> 's')) as settore
+        from jsonb_array_elements($2) e
+    ),
     -- Tre rami senza «oppure», perché Postgres usi gli indici: zona e settore, solo settore, solo zona.
-    cross join lateral (
-      (select c.id, c.site_checked_at, c.first_seen_at
-         from companies c
-        where cardinality(d.settore) > 0 and cardinality(d.zona) > 0 and c.tags @> d.settore
-          and public.company_places(c.places, c.city) @> d.zona
-          and (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days')
-        order by c.site_checked_at nulls first, c.first_seen_at
-        limit $1 * 4)
-      union all
-      (select c.id, c.site_checked_at, c.first_seen_at
-         from companies c
-        where cardinality(d.settore) > 0 and cardinality(d.zona) = 0 and c.tags @> d.settore
-          and (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days')
-        order by c.site_checked_at nulls first, c.first_seen_at
-        limit $1 * 4)
-      union all
-      (select c.id, c.site_checked_at, c.first_seen_at
-         from companies c
-        where cardinality(d.settore) = 0 and cardinality(d.zona) > 0 and public.company_places(c.places, c.city) @> d.zona
-          and (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days')
-        order by c.site_checked_at nulls first, c.first_seen_at
-        limit $1 * 4)
-    ) x
-    group by x.id, x.site_checked_at, x.first_seen_at
-    order by x.site_checked_at nulls first, x.first_seen_at
-    limit $1 * 4
-  ),
-  gruppo_b as materialized (
-    select c.id from companies c
-     where c.site_checked_at is null or c.site_checked_at < now() - interval '25 days'
-     order by c.site_checked_at nulls first, c.first_seen_at
-     limit $1 * 4
-  ),
-  gruppo_c as materialized (
-    select c.id from companies c
-     where c.site_checked_at >= now() - interval '25 days'
-       and c.site_checked_at < timestamptz '2026-10-20 12:25:00+00'
-       and coalesce(c.site_email, '') = ''
-       and exists (select 1 from company_checks cc where cc.company_id = c.id and cc.status in ('pass', 'fail'))
-     order by c.site_checked_at
-     limit $1 * 4
-  ),
-  candidati as (
-    select id from gruppo_a union select id from gruppo_b union select id from gruppo_c
-  )
-  select c.id, c.domain, c.name, c.website
-    from candidati k
-    join companies c on c.id = k.id
-   where not is_non_target_company(c.name)
-     and not exists (select 1 from suppression_list sl where sl.domain_hash = sha256_hex(c.domain))
-     and not exists (
-       select 1 from lead_reports r join deliveries x on x.id = r.delivery_id
-        where r.status = 'refunded' and r.reason = 'company_closed' and x.company_domain = c.domain)
-   order by (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days') desc,
-            exists (select 1 from gruppo_a a where a.id = c.id) desc,
-            c.site_checked_at nulls first, c.first_seen_at
-   limit $1
-  $q$ using v_limit, v_domanda;
+    gruppo_a as materialized (
+      select x.id, x.site_checked_at, x.first_seen_at from domanda d
+      cross join lateral (
+        (select c.id, c.site_checked_at, c.first_seen_at from companies c
+          where cardinality(d.settore) > 0 and cardinality(d.zona) > 0 and c.tags @> d.settore
+            and public.company_places(c.places, c.city) @> d.zona
+            and (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days')
+          order by c.site_checked_at nulls first, c.first_seen_at limit $3)
+        union all
+        (select c.id, c.site_checked_at, c.first_seen_at from companies c
+          where cardinality(d.settore) > 0 and cardinality(d.zona) = 0 and c.tags @> d.settore
+            and (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days')
+          order by c.site_checked_at nulls first, c.first_seen_at limit $3)
+        union all
+        (select c.id, c.site_checked_at, c.first_seen_at from companies c
+          where cardinality(d.settore) = 0 and cardinality(d.zona) > 0 and public.company_places(c.places, c.city) @> d.zona
+            and (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days')
+          order by c.site_checked_at nulls first, c.first_seen_at limit $3)
+      ) x
+      group by x.id, x.site_checked_at, x.first_seen_at
+      order by x.site_checked_at nulls first, x.first_seen_at
+      limit $3
+    ),
+    gruppo_b as materialized (
+      select c.id from companies c
+       where c.site_checked_at is null or c.site_checked_at < now() - interval '25 days'
+       order by c.site_checked_at nulls first, c.first_seen_at
+       limit $3
+    ),
+    gruppo_c as materialized (
+      select c.id from companies c
+       where c.site_checked_at >= now() - interval '25 days'
+         and c.site_checked_at < timestamptz '2026-10-20 12:25:00+00'
+         and coalesce(c.site_email, '') = ''
+         and exists (select 1 from company_checks cc where cc.company_id = c.id and cc.status in ('pass', 'fail'))
+       order by c.site_checked_at
+       limit $3
+    ),
+    -- Come A, tra le aziende del gruppo C: la priorità della domanda vale anche lì (QA).
+    gruppo_cd as materialized (
+      select x.id, x.site_checked_at from domanda d
+      cross join lateral (
+        (select c.id, c.site_checked_at, c.first_seen_at from companies c
+          where cardinality(d.settore) > 0 and cardinality(d.zona) > 0 and c.tags @> d.settore
+            and public.company_places(c.places, c.city) @> d.zona
+            and c.site_checked_at >= now() - interval '25 days'
+            and c.site_checked_at < timestamptz '2026-10-20 12:25:00+00'
+            and coalesce(c.site_email, '') = ''
+            and exists (select 1 from company_checks cc where cc.company_id = c.id and cc.status in ('pass', 'fail'))
+          order by c.site_checked_at nulls first, c.first_seen_at limit $3)
+        union all
+        (select c.id, c.site_checked_at, c.first_seen_at from companies c
+          where cardinality(d.settore) > 0 and cardinality(d.zona) = 0 and c.tags @> d.settore
+            and c.site_checked_at >= now() - interval '25 days'
+            and c.site_checked_at < timestamptz '2026-10-20 12:25:00+00'
+            and coalesce(c.site_email, '') = ''
+            and exists (select 1 from company_checks cc where cc.company_id = c.id and cc.status in ('pass', 'fail'))
+          order by c.site_checked_at nulls first, c.first_seen_at limit $3)
+        union all
+        (select c.id, c.site_checked_at, c.first_seen_at from companies c
+          where cardinality(d.settore) = 0 and cardinality(d.zona) > 0 and public.company_places(c.places, c.city) @> d.zona
+            and c.site_checked_at >= now() - interval '25 days'
+            and c.site_checked_at < timestamptz '2026-10-20 12:25:00+00'
+            and coalesce(c.site_email, '') = ''
+            and exists (select 1 from company_checks cc where cc.company_id = c.id and cc.status in ('pass', 'fail'))
+          order by c.site_checked_at nulls first, c.first_seen_at limit $3)
+      ) x
+      group by x.id, x.site_checked_at, x.first_seen_at
+      order by x.site_checked_at nulls first, x.first_seen_at
+      limit $3
+    ),
+    candidati as materialized (
+      select id from gruppo_a union select id from gruppo_b union select id from gruppo_c union select id from gruppo_cd
+    ),
+    -- Le aziende della domanda (A e CD) in un elenco solo: «in» si risolve con una tabella hash, «exists» con «union» no.
+    abbinate as materialized (
+      select id from gruppo_a union select id from gruppo_cd
+    ),
+    escluse as materialized (
+      select c.id from candidati k join companies c on c.id = k.id
+       where is_non_target_company(c.name)
+          or exists (select 1 from suppression_list sl where sl.domain_hash = sha256_hex(c.domain))
+          or exists (
+            select 1 from lead_reports r join deliveries x on x.id = r.delivery_id
+             where r.status = 'refunded' and r.reason = 'company_closed' and x.company_domain = c.domain)
+    ),
+    scelte as (
+      select c.id
+        from candidati k
+        join companies c on c.id = k.id
+       where k.id not in (select id from escluse)
+       order by (c.site_checked_at is null or c.site_checked_at < now() - interval '25 days') desc,
+                (c.id in (select id from abbinate)) desc,
+                c.site_checked_at nulls first, c.first_seen_at
+       limit $1
+    )
+    select coalesce((select array_agg(id) from scelte), '{}'),
+           -- Ogni gruppo è completo (meno di K righe) o ha almeno il limite di aziende valide.
+           ((select count(*) from gruppo_a) < $3 or (select count(*) from gruppo_a where id not in (select id from escluse)) >= $1)
+       and ((select count(*) from gruppo_b) < $3 or (select count(*) from gruppo_b where id not in (select id from escluse)) >= $1)
+       and ((select count(*) from gruppo_c) < $3 or (select count(*) from gruppo_c where id not in (select id from escluse)) >= $1)
+       and ((select count(*) from gruppo_cd) < $3 or (select count(*) from gruppo_cd where id not in (select id from escluse)) >= $1)
+    $q$ into v_ids, v_completo using v_limit, v_domanda, v_k;
+    exit when v_completo or v_k >= 50000;
+    v_k := v_k * 4;
+  end loop;
+
+  return query
+    select c.id, c.domain, c.name, c.website
+      from unnest(v_ids) with ordinality u(id, n)
+      join companies c on c.id = u.id
+     order by u.n;
 end;
 $f$;
 revoke all on function public.pending_site_checks(integer) from public, anon, authenticated;
