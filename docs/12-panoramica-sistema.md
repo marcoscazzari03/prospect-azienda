@@ -128,7 +128,7 @@ fino alla 060, con i loro test; a ogni push GitHub Actions esegue lint, tipi, te
 | Sito in una sola lingua | nessuna versione in altre lingue | 50 |
 | Nessun sistema di prenotazione | per gli hotel: nessun motore di prenotazione riconosciuto | 45 |
 | Sito fermo da tempo | copyright fermo da 3 anni o più | 40 (solo indicativo) |
-| Sito senza informativa privacy o cookie | nessuna traccia di privacy o cookie né gestore dei consensi in homepage | 40 (solo indicativo) |
+| Informativa privacy non trovata nella homepage (fino al 24/10 «Sito senza informativa privacy o cookie») | nessuna traccia di privacy o cookie né gestore dei consensi in homepage | 40 (solo indicativo) |
 
 Pagine che non sono il sito (blocchi anti-bot, dominio in vendita, pagine del server, traslochi, pagine provvisorie):
 segnali della homepage non determinabili e vecchie prove tolte (migrazione 055; regole in `07-segnali.md`).

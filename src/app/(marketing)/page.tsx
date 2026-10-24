@@ -251,7 +251,7 @@ export default async function HomePage() {
             <Title>Ti basta un elenco mirato? C&apos;è la ricerca in target.</Title>
             <Lead>
               Descrivi le aziende che cerchi, di qualunque settore, con zona e dimensione: ti consegniamo quelle che corrispondono, con sito controllato e contatto aziendale.
-              Utile per coprire un mercato o preparare una campagna, quando il momento giusto lo scegli tu.
+              Utile per conoscere un mercato e scegliere tu a chi proporti, quando il momento giusto lo decidi tu.
             </Lead>
           </div>
           <div className="overflow-hidden rounded-2xl border border-line bg-card">

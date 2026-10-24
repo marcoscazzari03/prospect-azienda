@@ -145,11 +145,15 @@ export function exportColumns(rows: ReturnType<typeof flattenDelivery>[]) {
 
 // Avviso sull'uso dei contatti (pagine dei lead ed export Excel). Pubblicare un indirizzo sul
 // sito non equivale a consentire comunicazioni promozionali (Garante, 2026).
+// Testi rivisti il 24/10 (analisi privacy, checklist punto 98): art. 130, Registro delle opposizioni, ditte individuali, ODbL.
 export const CONTACT_NOTICE = [
   "Un'email pubblicata sul sito di un'azienda non è un consenso a ricevere pubblicità.",
-  "In Italia l'invio di email promozionali richiede in genere il consenso, anche verso caselle aziendali (art. 130 del Codice Privacy).",
+  "In Italia email, SMS e chiamate automatiche a scopo promozionale richiedono il consenso del destinatario, anche quando è un'azienda (art. 130 del Codice Privacy).",
+  "Per le telefonate con un operatore controlla prima i numeri nel Registro pubblico delle opposizioni.",
   "Usa questi dati per contatti mirati e personali, uno per azienda, non per invii di massa; il modulo di contatto si compila a mano.",
+  "Se l'azienda è una ditta individuale o un professionista, al primo contatto di' chi sei e dove hai trovato i suoi dati.",
   "Rispetta sempre chi ti chiede di non essere più contattato. Se hai dubbi sul tuo caso, chiedi a un consulente.",
+  "Parte dei dati proviene da OpenStreetMap (© OpenStreetMap contributors, licenza ODbL): se pubblichi gli elenchi, cita la fonte.",
 ];
 
 // Servizio scelto in ogni ricerca opportunità (search_id -> codice del servizio).

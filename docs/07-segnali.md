@@ -156,7 +156,7 @@ Il controllo siti apre l'indirizzo con il protocollo e il www del sito salvato (
 - **Vale (indicativo) se:** nessuno di questi e la prenotazione avviene solo via email/telefono.
   È indicativo perché il booking può stare in un'altra pagina.
 
-### Sito senza informativa privacy o cookie (`no_privacy`) · indicativo (dal 20/10)
+### Informativa privacy non trovata nella homepage (`no_privacy`) · indicativo (dal 20/10; nome cambiato il 24/10)
 - **Vale (indicativo) se:** nella homepage leggibile non c'è nessuna traccia di informativa privacy o cookie: né le parole
   (privacy, cookie, informativa, GDPR, dati personali, consenso…) né un gestore dei consensi noto (iubenda, Cookiebot,
   CookieYes, Complianz, OneTrust, Usercentrics…).

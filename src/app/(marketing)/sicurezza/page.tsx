@@ -52,7 +52,7 @@ export default function SecurityPage() {
         <li>Raccogliamo solo informazioni pubbliche sulle aziende (sito, settore, zona, email aziendale generica o modulo di contatto, segnali), sempre con la fonte e la data del controllo.</li>
         <li>Non raccogliamo né consegniamo nomi, ruoli o email di persone, né caselle di posta gratuite.</li>
         <li>Chi non vuole comparire nei risultati può chiederlo dalla pagina <Link className="text-ledger underline" href="/opposizione">Rimuovi i tuoi dati</Link>: l&apos;indirizzo entra in una lista di esclusione permanente, salvata in forma non leggibile.</li>
-        <li>I dati vengono riverificati o cancellati entro 24 mesi dalla raccolta.</li>
+        <li>I dati vengono riverificati o cancellati entro 24 mesi dalla raccolta. Chi si oppone viene cancellato subito dal database.</li>
       </ul>
 
       <h2>Dove sono i dati e chi ci aiuta</h2>
@@ -60,6 +60,7 @@ export default function SecurityPage() {
       <ul>
         <li><strong>Vercel</strong> (applicazione) e <strong>Supabase</strong> (database e accesso): server a Francoforte, Unione Europea.</li>
         <li><strong>n8n</strong>: il motore che cerca e controlla le aziende.</li>
+        <li><strong>Hetzner</strong>: il server che controlla i siti delle aziende.</li>
         <li><strong>Anthropic</strong> (Claude): l&apos;intelligenza artificiale che trova le aziende e ne riconosce il settore. Riceve i criteri della ricerca e testi pubblici dei siti, non il tuo nome o la tua email. Per contratto non usa questi dati per addestrare i propri modelli.</li>
         <li><strong>Stripe</strong>: i pagamenti. I dati delle carte non passano mai dai nostri server.</li>
         <li><strong>Resend</strong>: l&apos;invio delle email del servizio.</li>
@@ -69,7 +70,7 @@ export default function SecurityPage() {
       <p>Le chiavi dei servizi stanno solo negli ambienti protetti dei fornitori, mai nel codice. Gli account di gestione (hosting, database, pagamenti, motore) sono protetti dalla verifica in due passaggi. Il motore comunica con l&apos;applicazione solo con un segreto condiviso e solo verso indirizzi autorizzati.</p>
 
       <h2>I tuoi diritti e i contatti</h2>
-      <p>Puoi chiedere in qualsiasi momento una copia dei tuoi dati, la correzione o la cancellazione, anche dell&apos;intero account, scrivendo a <a className="text-ledger underline" href={`mailto:${BRAND.supportEmail}`}>{BRAND.supportEmail}</a>. Se la tua azienda ha bisogno di un accordo sul trattamento dei dati (DPA), scrivici: lo stiamo preparando con il nostro consulente. Se noti un problema di sicurezza, segnalalo allo stesso indirizzo: rispondiamo e lo correggiamo il prima possibile. Tutti i dettagli sono nell&apos;<Link className="text-ledger underline" href="/privacy">informativa privacy</Link>.</p>
+      <p>Puoi chiedere in qualsiasi momento una copia dei tuoi dati, la correzione o la cancellazione, anche dell&apos;intero account, scrivendo a <a className="text-ledger underline" href={`mailto:${BRAND.supportEmail}`}>{BRAND.supportEmail}</a>. I lead che ricevi sono tuoi come titolare autonomo del trattamento: le regole per usarli sono nei termini di servizio. Se noti un problema di sicurezza, segnalalo allo stesso indirizzo: rispondiamo e lo correggiamo il prima possibile. Tutti i dettagli sono nell&apos;<Link className="text-ledger underline" href="/privacy">informativa privacy</Link>.</p>
     </article>
   );
 }

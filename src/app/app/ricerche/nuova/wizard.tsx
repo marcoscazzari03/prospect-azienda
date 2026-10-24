@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Button, Card, Field, Input, Select, Textarea, cx } from "@/components/ui";
 import { COMPANY_SIZES, COUNTRIES, EMAIL_MODES, MODE_INFO, ROLE_PRESETS, type EmailMode } from "@/lib/domain/catalog";
@@ -876,6 +877,11 @@ export function SearchWizard({
             Paghi solo i lead consegnati: i crediti non usati tornano disponibili.
           </p>
           <p className="text-xs text-muted">Puoi chiudere la pagina: ti avvisiamo via email quando i lead sono pronti.</p>
+          {/* Analisi privacy del 24/10 (punto 98): l'avviso sull'art. 130 anche prima della ricerca, non solo sui lead. */}
+          <p className="text-xs text-muted">
+            Ricevi dati aziendali pubblici, non un permesso di inviare pubblicità: per email e SMS promozionali serve il consenso del destinatario, anche se è un&apos;azienda (art. 130 del Codice Privacy).{" "}
+            <Link href="/termini" target="_blank" className="underline">Come usarli</Link>
+          </p>
         </Card>
       </aside>
     </form>

@@ -105,9 +105,10 @@ export const SIGNALS: SignalDef[] = [
     code: "no_privacy",
     source: "website",
     level: "indicative",
-    label: "Sito senza informativa privacy o cookie",
-    description: "Nella homepage nessun link all'informativa privacy e nessun banner dei cookie.",
-    evidence: "Nessun link all'informativa privacy né banner dei cookie nella homepage (controllata il {date})",
+    // Testo del 24/10 (analisi privacy): «non trovata» dal controllo automatico, mai «non conforme».
+    label: "Informativa privacy non trovata nella homepage",
+    description: "Nella homepage il controllo automatico non ha trovato un link all'informativa privacy né un banner dei cookie. Può non vedere elementi caricati in altro modo: non è una verifica di conformità.",
+    evidence: "Link all'informativa privacy e banner dei cookie non trovati nella homepage (controllo automatico del {date})",
     freshDays: SIGNAL_RULES.websiteFreshDays,
   },
 ];
