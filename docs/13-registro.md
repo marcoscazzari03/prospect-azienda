@@ -111,7 +111,10 @@ Come tornare indietro, in generale:
   Reviewer «pronto con riserve» (falsi positivi delle sigle, domini scartati da ricordare nel giro): corretti; i domini
   scartati dal callback entrano in `checked_domains`. QA: falsi positivi con il titolo dentro un marchio («Farmacia Dott. Rossi», «Dottor
   Gelato», «Bar Il Notaio»): con una parola di settore nel nome l'attività resta. Restano fuori apposta le sigle senza punto
-  («Avv Rossi») e «Dr.ssa»; le consegne rimborsate contano nel tetto (l'azienda è stata comunque consegnata). Nel callback del motore `dropProfessionals`
+  («Avv Rossi») e «Dr.ssa»; le consegne rimborsate contano nel tetto (l'azienda è stata comunque consegnata). Scelta voluta: con «ambulatorio», «clinica»,
+  «centro», «laboratorio» o «farmacia» nel nome l'attività resta anche se segue il nome di una persona (è un'attività
+  aperta al pubblico). Seconda revisione: «pronto»; nota: un raro stallo tra due consegne con il blocco per dominio fa
+  ritentare il motore e salta un giro dal magazzino, accettato. Nel callback del motore `dropProfessionals`
   (`src/lib/domain/engine.ts`) scarta gli stessi lead. Privacy aggiornata. Test SQL 43 e vitest.
 - **Indietro:** `is_non_target_company` dalla 035 e `reindex index companies_check_queue_idx`; togliere `dropProfessionals`.
 
