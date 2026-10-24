@@ -83,6 +83,13 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Aggiornamento di sicurezza: Next.js 16.4.2, zod 4.6.7 · in produzione dal 24/10
+- **Perché:** Next.js 16.4.0 aveva vulnerabilità gravi (GHSA-2464-fhr4-w9xw e altre), corrette nella 16.4.2; zod sotto la 4.6.6
+  poteva esaurire la memoria validando elenchi enormi (GHSA-mrhx-c7xc-m3w5).
+- **Cosa:** `next` ed `eslint-config-next` 16.4.2 (versione esatta), zod 4.6.7 nel `package-lock.json`. `npm audit`: 0
+  vulnerabilità. Typecheck, lint, 120 test, test del motore e build di produzione superati.
+- **Indietro:** versioni precedenti in `package.json` e `package-lock.json` (`git revert`).
+
 ## 24/10/2026 — Controllo siti solo sul VPS, ogni 10 minuti; «Aziende | Controllo siti» su n8n spento · n8n spento dal 24/10; orario nuovo dopo `installa` sul VPS
 - **Misure (query `supabase/queries/controllo_siti_orario.sql`):** dalle 11 del 24/10 750 aziende l'ora (600 dal VPS, 150 da n8n),
   prima 150; arretrato 53.306 aziende mai controllate, nessuna scaduta.
