@@ -8,6 +8,7 @@
 // Configurazione come worker/site-checks.mjs: SITE_CHECKS_SECRET, APP_URL, LIMIT (predefinito 150), CONCURRENCY, DRY_RUN.
 import { fileURLToPath } from 'node:url';
 import { richiesta } from './http.mjs';
+import { conRobots } from './robots.mjs';
 import { caricaRegole, inParallelo } from './site-checks.mjs';
 
 // Categorie e pesi delle pagine come nel motore (05-estrai-email.template.js, funzione «categoria»).
@@ -139,6 +140,8 @@ async function main() {
   if (!aziende.length) { console.log('Coda vuota.'); return; }
 
   const regole = caricaRegole();
+  // Pagine escluse dal robots.txt dei siti: non si aprono (24/10, analisi privacy).
+  const req = conRobots(richiesta);
   // Oltre 15 minuti non si parte con altre aziende e si salva quanto trovato, dentro i 20 minuti di systemd (Code Reviewer).
   const scadenza = inizio + 15 * 60_000;
   const trovati = await inParallelo(aziende, parallelo, async (a) => {
@@ -146,7 +149,7 @@ async function main() {
     try {
       // Al massimo 60 s per azienda (4 pagine da 10 s più margine); oltre, nessuna pagina letta.
       return await Promise.race([
-        trovaContatti(regole, a),
+        trovaContatti(regole, a, req),
         new Promise((r) => setTimeout(() => r({ domain: a.domain, pages_read: 0 }), 60_000).unref()),
       ]);
     } catch (e) {

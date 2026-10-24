@@ -13,6 +13,7 @@ import { caricaRegoleSiti, luogoSullaPagina, cercaSito, daProvare, dominioDaScar
 import { pivaDaPagina, testoDi } from './piva.mjs';
 import { dominioDaRiga, pivaValida, trovaPiva, trovaLuogo, trovaNome, analizzaPagina, schedaDi, daProvare as daProvareCc, classifica, apriHomepage } from './cc.mjs';
 import { caricaOsm, filtri, caricaProvince, dentro, puntoDi, leggiAttivita, normalizza, semplifica } from './osm.mjs';
+import { regoleRobots, consentito, corrisponde, creaRobots, conRobots } from './robots.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const fx = join(root, 'n8n', 'engine', 'test', 'fixtures', 'signals');
@@ -117,6 +118,58 @@ let insieme = 0, massimo = 0;
 const esiti = await inParallelo([1, 2, 3, 4, 5, 6, 7], 3, async (x) => { insieme++; massimo = Math.max(massimo, insieme); await new Promise(r => setTimeout(r, 5)); insieme--; return x * 2; });
 assert.deepEqual(esiti, [2, 4, 6, 8, 10, 12, 14]); assert.ok(massimo <= 3);
 console.log('ok  parallelo');
+
+// robots.txt (24/10, analisi privacy): gruppi, regola più lunga, «*» e «$», casi d'errore, worker che non apre le pagine escluse.
+{
+  const testo = `# commento
+User-agent: *
+Disallow: /privato
+Allow: /privato/pubblico
+Disallow: /*.pdf$
+
+User-agent: GoogleBot
+Disallow: /
+
+User-agent: AvvistoBot
+User-agent: altro
+Disallow: /solo-noi`;
+  const nostre = regoleRobots(testo);
+  assert.deepEqual(nostre, [{ allow: false, percorso: '/solo-noi' }], 'il gruppo col nostro token vince su «*»');
+  const tutti = regoleRobots(testo, 'qualcuno');
+  assert.equal(consentito(tutti, '/'), true);
+  assert.equal(consentito(tutti, '/privato/x'), false);
+  assert.equal(consentito(tutti, '/privato/pubblico/y'), true, 'la regola più lunga vince');
+  assert.equal(consentito(tutti, '/doc/a.pdf'), false);
+  assert.equal(consentito(tutti, '/doc/a.pdf?x=1'), true, '«$» vuol dire fine del percorso');
+  assert.equal(consentito(regoleRobots('User-agent: *\nDisallow:'), '/'), true, 'Disallow vuoto non esclude');
+  assert.equal(consentito(regoleRobots('User-agent: *\nDisallow: /'), '/contatti'), false);
+  assert.equal(consentito(regoleRobots('User-agent: *\nDisallow: /\nAllow: /$'), '/'), true, 'a parità di lunghezza vince Allow');
+  assert.equal(corrisponde('/a*b*c', '/axxbyyc/z'), true);
+  assert.equal(corrisponde('/a*b$', '/axxbz'), false);
+  const t0 = performance.now();
+  assert.equal(corrisponde('/' + 'a*'.repeat(200) + 'b', '/' + 'a'.repeat(499)), false);
+  assert.ok(performance.now() - t0 < 1_000, 'molti «*»: niente blocchi');
+
+  const lette = [];
+  const finta = async (url) => {
+    lette.push(url);
+    if (url === 'https://chiuso.it/robots.txt') return { status: 200, body: 'User-agent: *\nDisallow: /', url };
+    if (url === 'https://errore.it/robots.txt') throw Object.assign(new Error('timeout'), { code: 'ETIMEDOUT' });
+    if (url === 'https://manca.it/robots.txt') return { status: 404, body: 'non trovato', url };
+    return { status: 200, body: '<html>pagina</html>', url };
+  };
+  const permesso = creaRobots(finta);
+  assert.equal(await permesso('https://chiuso.it/'), false);
+  assert.equal(await permesso('https://chiuso.it/contatti'), false);
+  assert.equal(lette.filter((u) => u === 'https://chiuso.it/robots.txt').length, 1, 'robots.txt letto una volta per sito');
+  assert.equal(await permesso('https://errore.it/'), true, 'robots.txt illeggibile: si procede');
+  assert.equal(await permesso('https://manca.it/'), true, 'robots.txt assente (404): tutto consentito');
+  const req = conRobots(finta, permesso);
+  await assert.rejects(req('https://chiuso.it/chi-siamo'), { code: 'EROBOTS' });
+  assert.equal((await req('https://manca.it/chi-siamo')).status, 200);
+  assert.ok(!lette.includes('https://chiuso.it/chi-siamo'), 'pagina esclusa mai aperta');
+}
+console.log('ok  robots.txt: gruppi, regola più lunga, «*» e «$», errori, pagine escluse mai aperte');
 // 6. Contatti: pagine scelte come il motore, modulo, email del dominio, pagine lette.
 const casa = `<html><body>${'<p>Testo della homepage di prova con un po di contenuto. </p>'.repeat(20)}
   <a href="/contatti">Contatti</a><a href="https://www.ditta.it/privacy-policy">Privacy</a><a href="/chi-siamo">Chi siamo</a>

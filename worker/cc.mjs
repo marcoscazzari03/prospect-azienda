@@ -17,6 +17,7 @@ import { Readable } from 'node:stream';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { richiesta } from './http.mjs';
+import { conRobots } from './robots.mjs';
 import { inParallelo } from './site-checks.mjs';
 import { PROVINCE } from './osm.mjs';
 import { pivaValida, testoDi, togliBlocchi, trovaPiva } from './piva.mjs';
@@ -258,10 +259,12 @@ async function main() {
   const provati = leggiProvati(fileProvati);
   const scelti = await daProvare(createInterface({ input: createReadStream(fileElenco), crlfDelay: Infinity }), provati, limite);
 
+  // Pagine escluse dal robots.txt dei siti: non si aprono (24/10, analisi privacy).
+  const req = conRobots(richiesta);
   const esiti = await inParallelo(scelti, parallelo, async (dominio) => {
     if (Date.now() > scadenza) return null;
     const pagina = await Promise.race([
-      apriHomepage(dominio).catch(() => null),
+      apriHomepage(dominio, req).catch(() => null),
       new Promise((r) => setTimeout(() => r(null), 40_000).unref()),
     ]);
     let dati = null;

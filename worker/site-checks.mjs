@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { richiesta, comeErroreN8n } from './http.mjs';
 import { pivaDaPagina } from './piva.mjs';
+import { creaRobots } from './robots.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -138,7 +139,15 @@ async function main() {
 
   const regole = caricaRegole();
   const oggi = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+  const permesso = creaRobots();
+  const tuttoIndeterminato = (a) => ({ company: { domain: a.domain, name: a.name, website: a.website }, checks: [...CODICI, 'cert_expiring', 'slow_site'].map(code => ({ code, status: 'undetermined', evidence: { detail: '' } })), letto: false });
   const controlla = async (a) => {
+    // Homepage esclusa dal robots.txt del sito (24/10, analisi privacy): non si apre, tutto «non determinabile».
+    const homepage = `${String(a.website || '').toLowerCase().startsWith('http://') ? 'http://' : 'https://'}${www(a)}${a.domain}/`;
+    if (!(await Promise.race([permesso(homepage), new Promise((r) => setTimeout(() => r(true), 8_000).unref())]))) {
+      stats.robots++;
+      return tuttoIndeterminato(a);
+    }
     // Al massimo 30 s per azienda (le richieste hanno già un tempo massimo; questo copre qualsiasi altro intoppo).
     const misura = {};
     const [https, html] = await Promise.race([
@@ -157,7 +166,7 @@ async function main() {
     } catch (e) {
       // Un sito strano non ferma il giro: tutto «non determinabile», si riprova al prossimo controllo.
       console.error(`valutazione non riuscita per ${a.domain}: ${e?.message || e}`);
-      return { company: { domain: a.domain, name: a.name, website: a.website }, checks: [...CODICI, 'cert_expiring', 'slow_site'].map(code => ({ code, status: 'undetermined', evidence: { detail: '' } })), letto: false };
+      return tuttoIndeterminato(a);
     }
   };
   // Nome e sito entro i 300 caratteri dello schema della route: un valore troppo lungo farebbe rifiutare tutto il lotto (QA).
@@ -167,7 +176,7 @@ async function main() {
   // nuovi dopo 12 minuti: con le aziende nuove di OSM (molti siti morti o lentissimi) un giro intero poteva arrivare ai
   // 20 minuti di systemd ed essere interrotto prima di salvare. In prova si legge un blocco solo (niente esce dalla coda).
   const scadenza = inizio + 12 * 60_000;
-  const stats = { aziende: 0, salvate: 0, illeggibili: 0, email: 0, segnali: {}, blocchi_saltati: 0 };
+  const stats = { aziende: 0, salvate: 0, illeggibili: 0, robots: 0, email: 0, segnali: {}, blocchi_saltati: 0 };
   for (let k = 0; k < limite; k += 100) {
     if (Date.now() > scadenza) { stats.blocchi_saltati++; continue; }
     // Lettura fallita a metà giro: prima del fermo, quanto è già stato salvato (Code Reviewer).

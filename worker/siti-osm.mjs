@@ -11,6 +11,7 @@ import { createInterface } from 'node:readline';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { richiesta } from './http.mjs';
+import { conRobots } from './robots.mjs';
 import { inParallelo } from './site-checks.mjs';
 import { caricaOsm, caricaProvince, leggiAttivita, PROVINCE } from './osm.mjs';
 
@@ -139,11 +140,13 @@ async function main() {
   const regole = caricaRegoleSiti();
   const nomi = new Map(PROVINCE.map(([sigla, provincia, regione]) => [sigla, { provincia, regione }]));
 
+  // Pagine escluse dal robots.txt dei siti: non si aprono (24/10, analisi privacy).
+  const req = conRobots(richiesta);
   const esiti = await inParallelo(scelte, parallelo, async (a) => {
     if (Date.now() > scadenza) return null;
     const { provincia } = nomi.get(a.sigla) || {};
     const dominio = await Promise.race([
-      cercaSito(regole, a, provincia).catch(() => ''),
+      cercaSito(regole, a, provincia, req).catch(() => ''),
       new Promise((r) => setTimeout(() => r(''), 60_000).unref()),
     ]);
     return { a, dominio };
