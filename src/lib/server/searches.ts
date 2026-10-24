@@ -56,6 +56,11 @@ async function loadExclusions(orgId: string, contactsPerCompany: number) {
     }
     if (data.length < 1000) break;
   }
+  // Aziende già consegnate ad altri 5 clienti negli ultimi 90 giorni (tetto della migrazione 075): escluse anche qui,
+  // così riserve e motore non le ripropongono (il database le scarterebbe comunque alla consegna).
+  const { data: capped, error } = await db.rpc("capped_domains", { p_org: orgId });
+  if (error) console.error("capped_domains", error.message);
+  for (const d of (capped as string[] | null) ?? []) domains.add(d);
   return { personKeys, domains: [...domains] };
 }
 

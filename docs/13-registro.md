@@ -92,8 +92,11 @@ Come tornare indietro, in generale:
   `deliver_leads`): un'azienda già consegnata a 5 altri clienti negli ultimi 90 giorni non si inserisce; `deliver_leads` la
   conta come doppione, non la addebita. Numeri in `company_client_cap()`. Indice `deliveries_company_recent_idx`. Privacy,
   termini e panoramica aggiornati. Test SQL 44.
-- **Limite noto:** riserve e stima del wizard non lo considerano: con molti clienti nella stessa zona e settore una ricerca
-  può consegnare meno del previsto. Da rivedere con i volumi.
+- **Revisione:** Code Reviewer «pronto con riserve»: aziende al tetto riproposte a ogni giro (costi del motore) e consegne
+  simultanee oltre il tetto. Corretti: `capped_domains(org)` entra nelle esclusioni della ricerca (`loadExclusions`), blocco
+  per dominio (`pg_advisory_xact_lock`) nel trigger.
+- **Limite noto:** la stima del wizard non lo considera: con molti clienti nella stessa zona e settore può essere più alta
+  del consegnato. Da rivedere con i volumi. Le consegne di ricerche o account cancellati non contano più nel tetto.
 - **Indietro:** `drop trigger deliveries_company_cap on public.deliveries`.
 
 ## 24/10/2026 — Professionisti con titolo esclusi (migrazione 074, checklist 98) · su branch; migrazione da eseguire

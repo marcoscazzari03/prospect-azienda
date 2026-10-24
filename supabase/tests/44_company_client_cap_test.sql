@@ -32,3 +32,7 @@ select pg_temp.check(pg_temp.consegna(1, 'altra44.it') = 1, 'un''altra azienda: 
 select pg_temp.check((select sum(pg_temp.consegna(i, 'vecchia44.it', now() - interval '100 days')) from generate_series(1, 5) i) = 5
                      and pg_temp.consegna(6, 'vecchia44.it') = 1, 'consegne oltre 90 giorni non contano');
 select pg_temp.check((select clients = 5 and days = 90 from company_client_cap()), 'numeri in un punto solo');
+select pg_temp.check('cap44.it' = any (capped_domains((select org from o44 where i = 6))) and not ('altra44.it' = any (capped_domains((select org from o44 where i = 6)))),
+                     'capped_domains: l''azienda al tetto è tra le esclusioni del sesto cliente');
+select pg_temp.check(not ('cap44.it' = any (capped_domains((select org from o44 where i = 1)))), 'per chi l''ha già avuta conta come gli altri 4: non al tetto');
+select pg_temp.check(not has_function_privilege('authenticated', 'public.capped_domains(uuid)', 'execute'), 'capped_domains non chiamabile dal browser');

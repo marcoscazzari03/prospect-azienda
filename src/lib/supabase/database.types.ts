@@ -1010,7 +1010,10 @@ isOneToOne: false
 "store_imported_companies":
 { Args: { "p_items": Json,"p_source": string }; Returns: Json
                            },
-"store_job_ads":
+"capped_domains": {
+                  Args: { p_org: string }
+                  Returns: string[]
+                },"store_job_ads":
 { Args: { "p_ads": Json,"p_source": string }; Returns: Json
                            },
 "tag_company":
