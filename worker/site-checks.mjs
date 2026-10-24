@@ -164,7 +164,8 @@ async function main() {
   const stats = { aziende: 0, salvate: 0, illeggibili: 0, email: 0, segnali: {}, blocchi_saltati: 0 };
   for (let k = 0; k < limite; k += 100) {
     if (Date.now() > scadenza) { stats.blocchi_saltati++; continue; }
-    const blocco = await leggiCoda(Math.min(100, limite - k));
+    // Lettura fallita a metà giro: prima del fermo, quanto è già stato salvato (Code Reviewer).
+    const blocco = await leggiCoda(Math.min(100, limite - k)).catch((e) => { console.log(JSON.stringify({ fermo: true, ...stats })); throw e; });
     if (!blocco.length) { if (!k) console.log('Coda vuota.'); break; }
     const items = await inParallelo(blocco, parallelo, controlla);
     stats.aziende += items.length;

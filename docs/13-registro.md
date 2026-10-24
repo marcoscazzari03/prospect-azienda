@@ -88,7 +88,9 @@ Come tornare indietro, in generale:
   lettura di 300 aziende da `pending_site_checks` supera il tempo massimo delle richieste al database (circa 8 s; misurata a 9 s il
   23/10, cresce con le aziende di OSM e Common Crawl); n8n ne legge 150 e passa. Non era il tempo del giro.
 - **Cosa:** `worker/site-checks.mjs` legge, controlla e salva 100 aziende alla volta fino a 300 o a 12 minuti; nel log anche
-  il testo della risposta in caso di errore. In prova legge un blocco solo.
+  il testo della risposta in caso di errore. In prova legge un blocco solo. Code Reviewer «pronto con riserve»: statistiche
+  stampate anche se una lettura fallisce a metà giro (corretto); un'azienda scartata dal salvataggio può essere riletta fino a 3
+  volte per giro (costo piccolo, lasciato).
 - **Da fare più avanti:** rendere `pending_site_checks` più veloce (oggi materializza tutte le aziende da controllare prima di
   ordinarle): con il database che cresce anche la lettura da 150 di n8n e quella da 100 rischiano il limite.
 - **Indietro:** versione precedente del file, poi `bash ~/worker.sh aggiorna`.
