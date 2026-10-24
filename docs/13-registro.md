@@ -90,6 +90,8 @@ Come tornare indietro, in generale:
 - **Cosa:** user-agent dei worker `Mozilla/5.0 (compatible; AvvistoBot/1.0; +https://avvisto.it/privacy)` (`worker/http.mjs`,
   prima quello di Chrome); i siti possono escluderci con «User-agent: AvvistoBot» (`worker/robots.mjs`). Effetto atteso: qualche
   sito con protezioni anti-bot in più dà «non determinabile». Il 24/10 sera `installa` sul VPS con il robots.txt (riuscito).
+  Prova dopo la seconda `installa` (AvvistoBot): 20 aziende in 8 s, 1 esclusa dal robots.txt, 8 illeggibili, 4 email, segnali
+  regolari. Da confrontare la quota di illeggibili con i giri dei prossimi giorni (prima del cambio non misurata su 20).
 - **Indietro:** rimettere lo user-agent di Chrome in `worker/http.mjs` e `installa`.
 
 ## 24/10/2026 — Professionisti: attività con il titolo nel marchio salvate (migrazione 076) · in produzione dal 24/10
