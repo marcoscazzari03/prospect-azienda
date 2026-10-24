@@ -8,6 +8,7 @@ documento vivo che la descrive, nello stesso commit.
 | Documento | A cosa serve |
 |---|---|
 | [00-checklist.md](00-checklist.md) | Cosa c'è da fare e chi lo fa (**Tu** / **Io** / **Insieme**), con le cose fatte barrate e datate |
+| [00b-checklist-calendario.md](00b-checklist-calendario.md) | Le stesse voci della checklist ordinate per date (oggi, domani, settimana, 30/10, lancio, scadenze); si aggiorna insieme a quella |
 | [13-registro.md](13-registro.md) | Storia di ogni modifica e decisione (cosa, perché, dove, come tornare indietro); in alto le decisioni in vigore |
 | [12-panoramica-sistema.md](12-panoramica-sistema.md) | Come funziona il sistema oggi: app, database, motore, workflow, segnali, crediti |
 | [03-contratto-motore.md](03-contratto-motore.md) | Contratto tra l'app e il motore n8n (chiamate, callback, workflow degli annunci e delle aziende) |

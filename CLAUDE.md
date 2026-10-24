@@ -4,6 +4,9 @@
 - Checklist del progetto: `docs/00-checklist.md`. Quando l'utente chiede «riscrivimi la checklist», riscriverla tutta
   in quel formato (sezioni con colore e titolo, ruolo **Tu** / **Io** / **Insieme**, numeri), comprese le cose già
   fatte, barrate con la data. Aggiornare il file a ogni cambiamento.
+- **Checklist per date, regola dal 24/10:** `docs/00b-checklist-calendario.md` ha le stesse voci ordinate per quando vanno
+  fatte (oggi, domani, giorni, 30/10, prima del lancio, dopo la beta, scadenze). Si aggiorna insieme a `00-checklist.md`,
+  nello stesso commit; se l'utente chiede «riscrivimi la checklist» si riscrivono tutte e due.
 - **Registro (`docs/13-registro.md`), regola dal 20/10:** ogni modifica (codice, migrazione, workflow n8n, dati) e ogni
   decisione o cosa da ricordare va scritta lì, nello stesso commit: cosa, perché, dove, come tornare indietro, stato
   (in produzione / in attesa di migrazione o pubblicazione). Le decisioni in vigore stanno nella tabella in alto.

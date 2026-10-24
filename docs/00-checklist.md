@@ -5,21 +5,20 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `archivio/05-da-fare.md`).
 
-Ultimo aggiornamento: 23/10/2026 pomeriggio (riscritta tutta: punti 84–91 fatti o in corso, VPS stasera, punto 92 approfondito).
+Ultimo aggiornamento: 24/10/2026 pomeriggio (riepilogo delle priorità aggiornato; nuova vista per date in
+`00b-checklist-calendario.md`, da aggiornare insieme a questa).
 
-## 🧭 Ordine di priorità delle cose aperte (23/10)
-Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione qui sotto.
-1. **Stasera alle 20 (Insieme, VPS):** 94 (log del worker fermo, `installa`, `giro`): rimette in moto il controllo siti e
-   accende i segnali del punto 91.
-2. **Domani 24/10:** 95 (spegnere «Aziende | Controllo siti» su n8n se il worker fa circa 600 siti all'ora, Tu), 89b chiamate
-   Adzuna (Io), 56b registrazioni (Tu).
-3. **Avvisto (dal 23/10, `17-avvisto.md`):** 67a codice pronto (Io, ora); 66 dominio e casella ciao@ (Tu, appena possibile);
-   67 giorno del passaggio e 67d verifica (Insieme); poi 67e, con 16, 83 e 85b.
-4. **26–28/10:** 96 copertura del database (Tu), 85a prove delle ricerche consigliate (Insieme), 91b Data Quality sui segnali
-   del VPS e fase 2 (Io), 92 Common Crawl se la coda del controllo siti è smaltita (Io), 60 e 62 da decidere (Insieme).
-5. **Il 30/10 (o il 6/11):** 9 decisione della beta, poi 5g ed eventuale seconda ondata.
-6. **Prima del lancio a pagamento:** 11, 12, 13, 14, 15, 18, 29, 73, 5f e 35.
-7. **Dopo la beta:** 26b, 36b, 34, 37, 38, 41, 43, 44, 45, 46, 47, 50, 51; 68 rinnovi Hostinger (gennaio–febbraio 2027).
+## 🧭 Ordine di priorità delle cose aperte (24/10)
+Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione qui sotto. Le stesse voci ordinate per date
+sono in `00b-checklist-calendario.md`.
+1. **Oggi e domani 24–25/10:** 89b chiamate Adzuna (Io); 67d ricerca di prova che passi dal motore (Tu); 66 inoltro della
+   casella vecchia e 30 logo del mittente (Tu); 56b registrazioni (Tu, ogni giorno).
+2. **26–28/10:** 96 copertura del database (Tu), 85a prove delle ricerche consigliate (Insieme), 91b Data Quality sui segnali
+   del VPS e fase 2 (Io), 92 `avvia-cc` quando l'arretrato del controllo siti è smaltito (circa il 27/10), 60 e 62 da decidere
+   (Insieme), 67e con 83, 85b e 16 (repository privato).
+3. **Il 30/10 (o il 6/11):** 9 decisione della beta e `agenzie_beta.sql`, poi 5g ed eventuale seconda ondata.
+4. **Prima del lancio a pagamento:** 11, 12, 13, 14, 15, 18, 29, 73, 5f e 35.
+5. **Dopo la beta:** 26b, 36b, 34, 37, 38, 41, 43, 44, 45, 46, 47, 50, 51; 68 rinnovi Hostinger (gennaio–febbraio 2027).
 
 ## 🔴 Beta in corso
 5g. **In pausa dal 21/10 sera** (decisione dell'utente: 3–4 giorni per vedere se rispondono le 13 agenzie invitate; se nessuno
@@ -37,7 +36,7 @@ Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione 
 79. ~~**Io** – Pubblicare su Vercel la versione di main bloccata dal limite di 100 pubblicazioni al giorno~~ (21/10, 23:30).
 80. ~~**Io** – Controllare che «Aziende | Controllo siti» sia ripartito dopo la migrazione 061~~ (21/10: giro delle 18:25 riuscito).
 
-## 🖥️ VPS e worker: stasera e domani
+## 🖥️ VPS e worker
 94. ~~**Insieme, 23/10 a mezzanotte**~~ (fatto il 24/10 mattina: `rinomina`, giro da 300 in 82 s, prova di Common Crawl con
     settore corretto) – Sul VPS, un passo alla volta: riscaricare
     `worker.sh` da main; leggere il log del worker del controllo siti fermo dal 22/10 alle 15:35 UTC (servizio ancora col nome
@@ -148,20 +147,20 @@ Decisioni del 23/10: sito e app su **avvisto.it**, email **ciao@avvisto.it**, lo
     variazione e grafico, «Lasciati ispirare», scelte rapide, «Non sai da dove iniziare?»~~ (23/10). ~~Grafica definitiva per tutto
     il sito, identica alla bozza anche negli spazi (colori, menu, intestazione, riquadro, statistiche, avatar con menu)~~ (23/10,
     richiesta dell'utente).
-66. **Tu, in corso (23/10)** – Fase B: ~~dominio comprato~~ (23/10); casella ciao@avvisto.it creata, in propagazione; comprare avvisto.it su Hostinger (solo il dominio, 5,99 €; deciso il 23/10); creare
+66. **Tu, quasi fatto** – Fase B (resta l'inoltro della casella vecchia): ~~dominio comprato~~ (23/10); casella ciao@avvisto.it creata, in propagazione; comprare avvisto.it su Hostinger (solo il dominio, 5,99 €; deciso il 23/10); creare
     e provare ciao@avvisto.it con la casella gratuita; inoltro della casella vecchia verso ciao@avvisto.it. Il piano email
     del vecchio dominio (rinnovo 19/02/2027) resta finché serve la casella vecchia.
-67. **Insieme, il 23/10 sera** – Fase C: ~~dominio su Vercel e DNS~~ (23/10); ~~dominio su Resend (SPF, DKIM, DMARC)~~ (23/10);
+67. ~~**Insieme, il 23/10 sera** – Fase C~~ (24/10): ~~dominio su Vercel e DNS~~ (23/10); ~~dominio su Resend (SPF, DKIM, DMARC)~~ (23/10);
     ~~codice solo Avvisto, logo C, nessuna traccia del nome vecchio~~ (23/10, Io); variabili su Vercel (`APP_URL`, `EMAIL_FROM`;
     `NEXT_PUBLIC_BRAND` non serve più); Supabase (Site URL, Redirect URLs, modelli, mittente); Turnstile; webhook di Stripe;
     n8n (nodi caricati e pubblicati); VPS (`rinomina`, `dominio`); ~~**ultimo:** staccare il vecchio indirizzo da Vercel (decisione
     dell'utente: nessun rinvio)~~ (24/10). **Fase C conclusa il 24/10.** Fatto il 23/10: credenziale Anthropic e organizzazione dell'amministratore
     rinominate.
-67d. **Insieme, subito dopo** – Fase D: registrazione, ricerca di prova, email, vecchi link, worker e workflow; QA Tester e
-    UI/UX Designer.
+67d. **Insieme, subito dopo** – Fase D: ~~registrazione, email, ricerca di prova dal magazzino, worker~~ (24/10); manca una
+    ricerca che passi dal motore (**Tu**, 25/10); QA Tester e UI/UX Designer.
 67e. **Insieme, dopo** – Fase E: email alle agenzie della beta e firma; posizionamento (83) e ricerche consigliate per tutti
-    (85b); social e Google Search Console; repository privato (16); tra 2–4 settimane togliere il vecchio dominio da Supabase
-    e dal motore; logo definitivo.
+    (85b); social e Google Search Console; repository privato (16); ~~togliere il vecchio dominio da Supabase
+    e dal motore~~ (24/10); logo definitivo.
 68. **Tu, prima dei rinnovi** – Costi Hostinger: circa 234 €/anno (circa 250 con il dominio nuovo). Dominio vecchio dello studio
     15,99 € (rinnovo 20/01/2027: decidere se tenerlo, il sottodominio dell'app è staccato dal 23/10); Business Web Hosting 203,88 € (rinnovo 02/02/2027, controllare il
     prezzo vero); Starter Business Email del vecchio dominio 14,16 € (rinnovo 19/02/2027: decidere quando la casella vecchia non
@@ -205,8 +204,9 @@ Il lavoro gira sul VPS (gratis), senza Google Maps, PagineGialle o Registro Impr
     dell'app (`cert_expiring` solo con scadenza futura).
 92. **Io** – Aziende da Common Crawl per quelle che non sono in nessun elenco (`docs/16-common-crawl.md`): ~~worker con
     partita IVA valida, nome, città e settore da Haiku tramite l'app~~ (23/10: codice pronto, campione di 600 domini con il
-    21% di attività e il 70% con città; in revisione). **Insieme, dopo la revisione:** `installa`, `prova-cc`, `giro-cc` sul
-    VPS; `avvia-cc` quando il controllo siti non ha più arretrato. ~~Salvare la partita IVA~~ (23/10: migrazione 069
+    21% di attività e il 70% con città). ~~**Insieme:** `installa` e `prova-cc` sul VPS~~ (24/10: 300 domini, 62 aziende con
+    partita IVA, settore 20 su 20). **Insieme, verso il 27/10:** `avvia-cc` quando il controllo siti non ha più arretrato
+    (53.306 aziende al 24/10, circa 750 l'ora; controllo con `controllo_siti_orario.sql`). ~~Salvare la partita IVA~~ (23/10: migrazione 069
     pronta, anche dal controllo siti per tutte le aziende). **Tu, dopo la seconda revisione:** eseguire la migrazione 069.
 93. **Tu, con il legale** – Albi professionali (commercialisti, avvocati): si possono usare? Contengono dati di persone.
 97. ~~**Tu – eseguire la migrazione 071**~~ (24/10) – Coda del controllo siti più veloce (`pending_site_checks`, oggi circa 8 s perché prepara tutte le aziende da

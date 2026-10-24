@@ -19,6 +19,7 @@ Come tornare indietro, in generale:
 
 | Data | Decisione | Motivo |
 |---|---|---|
+| 24/10 | **Due checklist aggiornate insieme:** `00-checklist.md` per argomento e priorità, `00b-checklist-calendario.md` per date, stessi numeri, nello stesso commit | richiesta dell'utente |
 | 23/10 sera | **Solo Avvisto:** nessuna traccia del nome vecchio (codice, email, n8n, VPS, documenti; il registro e l'archivio usano formule neutre); logo «C · Due toni»; titolare «Avvisto» nelle pagine legali fino alla partita IVA; vecchio indirizzo staccato senza rinvio | decisione dell'utente |
 | 23/10 sera | **Grafica definitiva per tutto il sito:** colori e struttura della bozza (`docs/design/avvisto/bozza-panoramica.webp`) identici anche negli spazi, **per tutto il sito** (supera «solo in versione Avvisto» della riga sotto); `NEXT_PUBLIC_BRAND` cambia solo nome, logo, dominio ed email. Il logo delle email del nome vecchio resta verde (email a cura dell'utente) | richiesta dell'utente |
 | 23/10 | *(superata dalle righe del 23/10 sera)* **Avvisto, grafica:** colore principale viola/indaco e logo della bozza dell'utente (`docs/design/avvisto/`), al posto del verde e del logo provvisorio; dalla bozza: riquadro «Non sai da dove iniziare?», «Lasciati ispirare», scelte rapide, statistiche con variazione e grafico piccolo. Tutto solo in versione Avvisto (`NEXT_PUBLIC_BRAND`); prima la proposta dell'UI/UX Designer | decisione dell'utente |
@@ -82,6 +83,14 @@ Come tornare indietro, in generale:
 - **Attenzione:** i modelli si rigenerano con `WRITE_TEMPLATES=1 npx vitest run tests/email-templates.test.ts` senza
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
+
+## 24/10/2026 — Checklist per date (`docs/00b-checklist-calendario.md`) · documenti
+- **Cosa:** nuova vista della checklist ordinata per tempistiche (oggi, domani, 26–28/10, 30/10, ogni giorno, quando succede
+  qualcosa, prima del lancio, dopo la beta, scadenze 2027), con gli stessi numeri e ruoli. Nella checklist principale:
+  riepilogo delle priorità al 24/10; 66, 67, 67d, 67e e 92 allineati a quanto fatto il 24/10. Regola in `CLAUDE.md`, indice in
+  `docs/README.md`.
+- **Perché:** richiesta dell'utente, per vedere a colpo d'occhio cosa tocca e quando.
+- **Indietro:** togliere il file, la riga dell'indice e la regola in `CLAUDE.md`.
 
 ## 24/10/2026 — Aggiornamento di sicurezza: Next.js 16.4.2, zod 4.6.7 · in produzione dal 24/10
 - **Perché:** Next.js 16.4.0 aveva vulnerabilità gravi (GHSA-2464-fhr4-w9xw e altre), corrette nella 16.4.2; zod sotto la 4.6.6
