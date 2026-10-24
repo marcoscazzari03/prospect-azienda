@@ -104,6 +104,7 @@ Come tornare indietro, in generale:
   50.000. Seconda prova del QA Tester (versione prima dell'indice parziale) «pronto con riserve»: identica alla 064
   in tutti gli scenari (anche 900 e 1.500 enti in testa, priorità con poche scadute, limite 1 e 500), più lenta solo con
   decine di migliaia di escluse in testa, caso tolto dall'indice parziale. Nota: `companies_places_idx` dipende da `term_stems`: se `term_stems` cambia, l'indice va ricostruito (`reindex`).
+- **In produzione (24/10):** `pending_site_checks(300)` in 0,63 s (prima 8-9 s), 300 aziende.
 - **Indietro:** rieseguire la funzione della 064; gli indici possono restare.
 
 ## 24/10/2026 — Nuova password con la verifica in due passaggi · su main dal 24/10
