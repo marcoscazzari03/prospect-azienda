@@ -83,7 +83,7 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
-## 24/10/2026 — Coda del controllo siti veloce (migrazione 071, checklist 97) · sul branch, in revisione; poi migrazione all'utente
+## 24/10/2026 — Coda del controllo siti veloce (migrazione 071, checklist 97) · rivista, su main; **in attesa di migrazione** (utente)
 - **Perché:** `pending_site_checks` (064) valutava ogni azienda da controllare contro le ricerche recenti prima di tenerne poche:
   8-9 s in produzione, oltre il tempo massimo delle richieste al database (worker del VPS in errore, n8n solo con i tentativi).
 - **Cosa:** `supabase/migrations/20261215000071_site_checks_fast.sql`. Quattro gruppi piccoli presi con gli indici: aziende da
@@ -101,7 +101,9 @@ Come tornare indietro, in generale:
   con i tentativi a K crescente e il gruppo CD. Seconda revisione del Code Reviewer «pronto con riserve», corrette: indice
   dell'ordine parziale senza le aziende non in target (non si controllano mai e restavano in testa, facendo ripetere i
   tentativi a ogni chiamata: con 3.000 in testa 0,5-0,7 s), pareggi del gruppo C anche per `first_seen_at`, tetto vero a
-  50.000. Nota: `companies_places_idx` dipende da `term_stems`: se `term_stems` cambia, l'indice va ricostruito (`reindex`).
+  50.000. Seconda prova del QA Tester (versione prima dell'indice parziale) «pronto con riserve»: identica alla 064
+  in tutti gli scenari (anche 900 e 1.500 enti in testa, priorità con poche scadute, limite 1 e 500), più lenta solo con
+  decine di migliaia di escluse in testa, caso tolto dall'indice parziale. Nota: `companies_places_idx` dipende da `term_stems`: se `term_stems` cambia, l'indice va ricostruito (`reindex`).
 - **Indietro:** rieseguire la funzione della 064; gli indici possono restare.
 
 ## 24/10/2026 — Nuova password con la verifica in due passaggi · su main dal 24/10
