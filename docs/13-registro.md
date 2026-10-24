@@ -92,7 +92,7 @@ Come tornare indietro, in generale:
 - **Cosa:** `is_professional_name` con altre parole di settore (anche come inizio di parola: edil…, agricol…, immobiliar…) e
   «& C.» come società; stessa regola in `isProfessionalName`. Indice della coda ricostruito. Test SQL 43 e vitest.
 - **Poi:** elenco rilanciato dall'utente dopo la 076: circa 280 nomi, tutti professionisti (avvocati, notai, architetti,
-  geometri, medici, psicologi, fisioterapisti, commercialisti). Cancellazione con la riga in fondo al file.
+  geometri, medici, psicologi, fisioterapisti, commercialisti). Cancellati dall'utente il 24/10 con la riga in fondo al file.
 - **Indietro:** `is_professional_name` dalla 074 e `reindex index companies_check_queue_idx`.
 
 ## 24/10/2026 — Tetto di clienti per azienda: 5 ogni 90 giorni (migrazione 075, checklist 98) · in produzione dal 24/10
