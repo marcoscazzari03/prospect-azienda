@@ -201,6 +201,17 @@ export async function updatePassword(_: AuthState, form: FormData): Promise<Auth
   if (password.length < 10) return { error: "La password deve avere almeno 10 caratteri." };
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return { error: "Link scaduto: richiedi un nuovo reset della password." };
+  if (error) {
+    // Il motivo vero (24/10: con la verifica in due passaggi attiva Supabase vuole prima il codice, e il messaggio unico
+    // «Link scaduto» lo nascondeva).
+    if (error.code === "insufficient_aal") redirect("/accedi/verifica?next=/nuova-password");
+    if (error.code === "same_password") return { error: "La nuova password deve essere diversa da quella di prima." };
+    if (error.code === "weak_password") return { error: "Password troppo debole o già comparsa in furti di dati: scegline un'altra." };
+    console.error("updatePassword", error.code, error.message);
+    if (error.code === "session_not_found" || error.name === "AuthSessionMissingError") {
+      return { error: "Link scaduto: richiedi un nuovo reset della password." };
+    }
+    return { error: "Non siamo riusciti a salvare la password. Riprova, o richiedi un nuovo link." };
+  }
   redirect("/app");
 }

@@ -83,6 +83,14 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Nuova password con la verifica in due passaggi · sul branch, in revisione
+- **Cosa si è visto (utente):** recupero della password dell'account principale, link valido, ma al salvataggio «Link scaduto»;
+  tornando indietro e inserendo il codice dell'app di autenticazione andava. Con la verifica in due passaggi attiva Supabase non
+  cambia la password a una sessione senza codice (`insufficient_aal`), e l'app mostrava «Link scaduto» per qualsiasi errore.
+- **Cosa:** `/nuova-password` manda prima a `/accedi/verifica?next=/nuova-password` se il codice serve e manca;
+  `updatePassword` distingue codice mancante (alla verifica), stessa password, password debole, sessione scaduta e altri errori.
+- **Indietro:** `git revert`.
+
 ## 24/10/2026 — Passaggio ad Avvisto concluso: vecchio indirizzo staccato · in produzione dal 24/10
 - **Cosa (utente):** vecchio indirizzo tolto dai domini del progetto su Vercel (risponde 404, controllato), dalle Redirect URLs di
   Supabase (resta `https://avvisto.it/auth/conferma`) e dagli hostname di Turnstile (resta avvisto.it). Nessuna ricerca in corso
