@@ -94,6 +94,8 @@ Come tornare indietro, in generale:
   richiedono un accordo scritto per la lead generation (verificato sul sito il 24/10); il robots.txt dei siti oggi non viene
   letto. Non usati perché non verificati: provvedimenti del Garante del 23/10/2025 e del 14/05/2026 e la sospensione del
   provvedimento Lusha citati da ChatGPT.
+- **Adzuna (24/10 sera):** mandato il sollecito con il nome Avvisto, la descrizione esatta dei dati salvati (anche i primi
+  600 caratteri della descrizione, che la mail del 18/10 non diceva) e la richiesta di una licenza per la lead generation.
 - **Decisione aperta:** spegnere o no la raccolta e il segnale da Adzuna fino all'accordo.
 
 ## 24/10/2026 — Documento per l'avvocato aggiornato (punto 12) · documento su Claude, fuori dal repository

@@ -19,7 +19,7 @@ Ultimo aggiornamento: 24/10/2026 sera (analisi privacy: 13 domani, 98 prima del 
   magazzino~~ (24/10); manca una ricerca che passi dal motore (vedi domani).
 
 ## 📅 Domani, domenica 25/10
-- 13. **Tu** – Sollecito ad Adzuna con richiesta di licenza (i termini vietano la lead generation senza accordo scritto);
+- 13. ~~**Tu** – Sollecito ad Adzuna con richiesta di licenza~~ (24/10 sera: mandato); in attesa della risposta;
   **Insieme:** decidere se spegnere la raccolta e il segnale da Adzuna fino all'accordo.
 - 67d. **Tu** – Ricerca di prova che passi dal motore (opportunità con un segnale raro o zona poco coperta), per provare il
   giro completo con il callback su avvisto.it.
