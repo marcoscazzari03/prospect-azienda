@@ -226,13 +226,14 @@ export async function classifica(trovate, app, segreto, post = fetch, scadenza =
         body: JSON.stringify({ companies: lotto.map(t => ({ name: t.nome.slice(0, 200), card: t.scheda || t.nome })) }),
         signal: AbortSignal.timeout(60_000),
       });
-      if (!r.ok) return;
+      // Il motivo nel log (24/10: in prova 0 settori su 20, senza sapere perché).
+      if (!r.ok) { console.error(`settore non riuscito per un lotto: HTTP ${r.status} ${(await r.text().catch(() => '')).slice(0, 200)}`); return; }
       const { results } = await r.json();
       lotto.forEach((t, i) => {
         const e = Array.isArray(results) ? results[i] : null;
         if (e?.industry) { t.settore = String(e.industry).slice(0, 120); t.parole = (e.keywords || []).slice(0, 10).map(w => String(w).slice(0, 80)); classificate++; }
       });
-    } catch { /* lotto senza settore: si va avanti */ }
+    } catch (e) { console.error(`settore non riuscito per un lotto: ${e?.message || e}`); /* si va avanti */ }
   });
   return classificate;
 }
