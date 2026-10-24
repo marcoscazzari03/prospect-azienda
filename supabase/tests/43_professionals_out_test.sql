@@ -18,7 +18,7 @@ select pg_temp.check(not is_professional_name('Studio Ing. Rossi & C. S.r.l.') a
                      and not is_professional_name('Farmacia Dott. Rossi') and not is_professional_name('Dottor Gelato') and not is_professional_name('Bar Il Notaio')
                      and not is_professional_name('Apoteca Dottor Puce') and not is_professional_name('Ediltoscana di Geom. Luca Panichi')
                      and not is_professional_name('Ing. Polin & C.') and not is_professional_name('Dottor Materasso') and not is_professional_name('Cantine del Notaio')
-                     and is_professional_name('Barbara Lenzi Architetto - BLA') and is_professional_name('Dott. Carbone Tiziano'),
+                     and is_professional_name('Barbara Lenzi Architetto - BLA') and is_professional_name('Dott. Carbone Tiziano') and is_professional_name('Notaio Vinici') and is_professional_name('Dott. Vinicio Rossi'),
                      'società, studi senza titolo e nomi comuni restano');
 select pg_temp.check(is_non_target_company('Avv. Mario Rossi') and is_non_target_company('ASD Calcio') and not is_non_target_company('Rossi Srl'),
                      'fuori target: professionisti e regole di prima');

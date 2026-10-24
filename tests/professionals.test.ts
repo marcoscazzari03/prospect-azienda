@@ -4,7 +4,7 @@ import { dropProfessionals, isProfessionalName } from "@/lib/domain/engine";
 // Professionisti con titolo esclusi (24/10, analisi privacy; stessa regola della migrazione 074).
 describe("professionisti con titolo", () => {
   it("riconosce titoli e professioni senza forma societaria", () => {
-    for (const n of ["Avv. Mario Rossi", "Studio Arch. Bianchi", "Dott.ssa Laura Verdi", "Geom. Neri", "Ing. Paolo Blu", "Commercialista Gialli", "Dottor Rossi", "Studio Legale Associato Avv. Neri", "Barbara Lenzi Architetto - BLA", "Dott. Carbone Tiziano", "Notaio Andrea Milano", "Studio Dentistico Dott. Alessandro Gentili"])
+    for (const n of ["Avv. Mario Rossi", "Studio Arch. Bianchi", "Dott.ssa Laura Verdi", "Geom. Neri", "Ing. Paolo Blu", "Commercialista Gialli", "Dottor Rossi", "Studio Legale Associato Avv. Neri", "Barbara Lenzi Architetto - BLA", "Dott. Carbone Tiziano", "Notaio Vinici", "Dott. Vinicio Rossi", "Notaio Andrea Milano", "Studio Dentistico Dott. Alessandro Gentili"])
       expect(isProfessionalName(n), n).toBe(true);
   });
   it("non tocca società, studi senza titolo e nomi comuni", () => {
