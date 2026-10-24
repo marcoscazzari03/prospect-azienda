@@ -264,15 +264,25 @@ Gli errori del server arrivano via email all'admin.
 
 ## 11. Privacy e regole
 
+Analisi fatta in proprio il 24/10 (documento «Avvisto – analisi privacy» su Claude, fuori dal repository; checklist 98).
+
 - **Dati delle aziende:** solo pubblici, con fonte e data; niente persone e niente caselle gratuite. Riverifica
-  o cancellazione entro 24 mesi.
+  o cancellazione entro 24 mesi. I dati delle società sono fuori dal GDPR (considerando 14); ditte individuali e
+  studi sono dati personali, trattati con il legittimo interesse e le garanzie della valutazione scritta (LIA).
+- **Minimizzazione:** degli annunci di lavoro non si salva la descrizione (dal 24/10, migrazione 072).
+- **robots.txt:** i worker del VPS (controllo siti, contatti, siti OSM, Common Crawl, `worker/robots.mjs`) non aprono
+  le pagine escluse; il motore su n8n non lo legge ancora.
+- **Opposizione:** cancella subito dal database (migrazione 014) e segna i lead già consegnati con quell'email o
+  dominio (`deliveries.opted_out_at`, migrazione 073, art. 19): in app ed export «Si è opposta: non contattare»,
+  senza email né modulo.
 - **Riservatezza delle ricerche:** le ricerche del cliente (cosa cerca, filtri, esiti) non le vede nessun altro, e
   Avvisto non le usa per sé. I dati pubblici delle aziende consegnate restano nel database comune e possono
   andare anche ad altri clienti (come dicono i termini).
-- **Responsabilità del cliente:** l'uso dei contatti è a carico del cliente. Le email promozionali in Italia
-  richiedono in genere il consenso (art. 130 del Codice Privacy): è scritto nei termini.
-- **Da chiudere con legale e commercialista:** parere del legale, contratto sul trattamento dei dati (DPA),
-  partita IVA, Stripe con pagamenti reali, backup giornalieri (Supabase Pro), repository privato.
+- **Ruolo e responsabilità del cliente:** titolare autonomo. Email, SMS e chiamate automatiche promozionali
+  richiedono il consenso anche verso le aziende (art. 130); telefonate con operatore solo dopo il Registro delle
+  opposizioni: è scritto nei termini, nel wizard, sopra i lead e nell'export Excel.
+- **Da chiudere:** controllo limitato del legale su 5 punti, licenza Adzuna, partita IVA e dati del titolare,
+  Stripe con pagamenti reali, backup giornalieri (Supabase Pro), repository privato.
 
 ## 12. Limiti noti e cose aperte
 
