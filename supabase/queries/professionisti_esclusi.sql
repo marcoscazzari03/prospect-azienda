@@ -1,5 +1,5 @@
 -- Professionisti con titolo esclusi dalla migrazione 074: elenco da guardare prima di cancellarli. Sola lettura.
--- Da eseguire DOPO la migrazione 074. Se nell'elenco c'è un marchio o un'azienda vera, dimmelo prima di cancellare.
+-- Da eseguire DOPO le migrazioni 074 e 076 (la 076 salva le attività con il titolo nel marchio, elenco del 24/10). Se nell'elenco c'è un marchio o un'azienda vera, dimmelo prima di cancellare.
 select name, domain, city, site_email <> '' as con_email
   from companies
  where is_professional_name(name)

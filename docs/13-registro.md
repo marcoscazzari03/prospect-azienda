@@ -85,6 +85,15 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Professionisti: attività con il titolo nel marchio salvate (migrazione 076) · su branch; da eseguire
+- **Perché:** elenco di `professionisti_esclusi.sql` guardato dall'utente (circa 300 nomi dopo la 074, eseguita il 24/10):
+  una ventina sono attività vere («Apoteca Dottor Puce», «Autoscuola Geom.», «Cantine del Notaio», «Dottor Materasso»,
+  «Ediltoscana di Geom.», «Bio Erboristeria Dott.ssa», «Azienda agricola… dott.», «Ing. Polin & C.»).
+- **Cosa:** `is_professional_name` con altre parole di settore (anche come inizio di parola: edil…, agricol…, immobiliar…) e
+  «& C.» come società; stessa regola in `isProfessionalName`. Indice della coda ricostruito. Test SQL 43 e vitest.
+- **Poi:** l'utente rilancia l'elenco e, se va bene, la cancellazione in fondo allo stesso file.
+- **Indietro:** `is_professional_name` dalla 074 e `reindex index companies_check_queue_idx`.
+
 ## 24/10/2026 — Tetto di clienti per azienda: 5 ogni 90 giorni (migrazione 075, checklist 98) · su branch; migrazione da eseguire
 - **Perché:** decisione dell'utente del 24/10. Garanzia per il bilanciamento del legittimo interesse (una piccola attività
   non riceve proposte da troppi nostri clienti, differenza netta con Lusha) e argomento commerciale.
