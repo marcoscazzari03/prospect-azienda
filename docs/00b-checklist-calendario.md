@@ -4,7 +4,7 @@ Le stesse voci di `00-checklist.md`, ordinate per **quando** vanno fatte invece 
 (**Tu**, **Io**, **Insieme**); le cose fatte restano barrate con la data. Le due checklist si aggiornano insieme, nello stesso
 commit (regola del 24/10): il dettaglio di ogni voce è in `00-checklist.md`, qui c'è solo il quando.
 
-Ultimo aggiornamento: 24/10/2026 pomeriggio (prima versione).
+Ultimo aggiornamento: 24/10/2026 pomeriggio (89b fatto).
 
 ## 📅 Oggi, sabato 24/10
 - 94. ~~**Insieme** – VPS: `rinomina`, giro di prova, `prova-cc`~~ (24/10 mattina).
@@ -13,7 +13,8 @@ Ultimo aggiornamento: 24/10/2026 pomeriggio (prima versione).
 - 95. ~~**Tu** – «Aziende | Controllo siti» su n8n spento, worker del VPS ogni 10 minuti~~ (24/10: 750 aziende l'ora).
 - ~~**Io** – Recupero della password con la verifica in due passaggi~~ (24/10).
 - ~~**Io** – Aggiornamento di sicurezza di Next.js (16.4.2) e zod~~ (24/10).
-- 89b. **Io** – Chiamate Adzuna dopo 2–3 giri con la manifattura (limite 2.500 al mese).
+- 89b. ~~**Io** – Chiamate Adzuna con la manifattura~~ (24/10: 157 a giro, al tetto di 2.500 al mese; ora al massimo 3
+  pagine per ricerca, circa 2.000 al mese).
 - 67d. **Insieme** – Fase D del passaggio ad Avvisto: ~~registrazione ed email~~ (24/10), ~~ricerca di prova servita dal
   magazzino~~ (24/10); manca una ricerca che passi dal motore (vedi domani).
 
@@ -30,7 +31,8 @@ Ultimo aggiornamento: 24/10/2026 pomeriggio (prima versione).
 - 91b. **Io** – Data Quality su `cert_expiring` e `slow_site`, poi fase 2 (segnali nell'app).
 - 92. **Insieme, verso il 27/10** – `avvia-cc` sul VPS quando l'arretrato del controllo siti è smaltito (53.306 aziende al
   24/10, a 750 l'ora circa 3 giorni). Controllo con `controllo_siti_orario.sql` (**Tu**).
-- 60. **Insieme** – Decidere: magazzino con gli annunci di `job_ads` (dopo il punto 89b).
+- 60. **Insieme** – Decidere: magazzino con gli annunci di `job_ads`.
+- 89b. **Io, 25–27/10** – Controllare i primi giri con 3 pagine (circa 131 chiamate ciascuno).
 - 62. **Insieme** – Decidere: «CMS vecchio» sulle pagine provvisorie (proposta: lasciarlo così).
 - 67e. **Insieme** – Fase E: email alle agenzie della beta col nome nuovo, posizionamento (83), modulo nel profilo (85b),
   social e Google Search Console, logo definitivo.

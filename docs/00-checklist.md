@@ -5,13 +5,13 @@ progressivi. Le cose fatte restano nella lista, barrate (~~così~~), con la data
 la checklist» si riscrive tutto da qui, fatti compresi. Lo storico delle modifiche e delle decisioni è in
 `13-registro.md` (prima del 19/10 in `archivio/05-da-fare.md`).
 
-Ultimo aggiornamento: 24/10/2026 pomeriggio (riepilogo delle priorità aggiornato; nuova vista per date in
+Ultimo aggiornamento: 24/10/2026 pomeriggio (89b fatto; riepilogo delle priorità aggiornato; nuova vista per date in
 `00b-checklist-calendario.md`, da aggiornare insieme a questa).
 
 ## 🧭 Ordine di priorità delle cose aperte (24/10)
 Riepilogo per ordine di urgenza; il dettaglio di ogni voce è nella sua sezione qui sotto. Le stesse voci ordinate per date
 sono in `00b-checklist-calendario.md`.
-1. **Oggi e domani 24–25/10:** 89b chiamate Adzuna (Io); 67d ricerca di prova che passi dal motore (Tu); 66 inoltro della
+1. **Oggi e domani 24–25/10:** ~~89b chiamate Adzuna~~ (24/10); 67d ricerca di prova che passi dal motore (Tu); 66 inoltro della
    casella vecchia e 30 logo del mittente (Tu); 56b registrazioni (Tu, ogni giorno).
 2. **26–28/10:** 96 copertura del database (Tu), 85a prove delle ricerche consigliate (Insieme), 91b Data Quality sui segnali
    del VPS e fase 2 (Io), 92 `avvia-cc` quando l'arretrato del controllo siti è smaltito (circa il 27/10), 60 e 62 da decidere
@@ -50,7 +50,8 @@ sono in `00b-checklist-calendario.md`.
 95. ~~**Tu, 24/10** – Query oraria di `site_checked_at`: se il worker fa circa 600 siti all'ora, spegnere «Aziende | Controllo
     siti» su n8n (libera circa 720 esecuzioni al mese). Finché il worker non lo fa, n8n resta acceso.~~ (24/10: 750 l'ora,
     n8n spento, worker ogni 10 minuti; poi `avvia-cc` quando l'arretrato di 53.000 aziende è smaltito)
-89b. **Io, 24/10** – Controllare le chiamate Adzuna dopo 2–3 giri con le figure della manifattura (limite 2.500 al mese).
+89b. ~~**Io, 24/10** – Controllare le chiamate Adzuna dopo i giri con le figure della manifattura (limite 2.500 al mese)~~
+    (24/10: 157 chiamate a giro, circa 2.400 al mese; al massimo 3 pagine per ricerca, circa 2.000 al mese, pubblicato su n8n).
 49. ~~**Io** – Controllo siti su un worker fuori da n8n, sul VPS Hetzner~~ (22/10: VPS reinstallato con Ubuntu 24.04, accesso
     solo con chiave, firewall e fail2ban; worker in produzione, 300 aziende in 79 s; giri alle :05 e alle :35 UTC).
     ~~**Tu:** `SITE_CHECKS_SECRET` su Vercel~~ (22/10). ~~**Insieme:** installazione sul server~~ (22/10).

@@ -84,6 +84,22 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Adzuna: al massimo 3 pagine per ricerca (punto 89b) · in produzione dal 24/10 (nodo pubblicato su n8n)
+- **Perché:** il giro del 23/10, il primo con la manifattura, ha fatto **157 chiamate** (88 ricerche + pagine in più; 15
+  ricerche con 4–5 pagine: magazziniere, carrellista, mulettista, addetto magazzino, operaio e addetto produzione,
+  saldatore, manutentore, elettromeccanico, commerciale, venditore, contabile, impiegato amministrativo). Ogni 2 giorni fa
+  circa 2.400 chiamate al mese contro il tetto di 2.500 della chiave Adzuna (la stima del 22/10 era circa 1.800). Su 4.983
+  annunci scaricati ne sono stati tenuti 1.097 (1.862 di agenzie).
+- **Cosa:** «Adzuna - Annunci», paginazione `maxRequests` da 5 a 3 (la prima pagina compresa): circa 131 chiamate a giro,
+  circa 2.000 al mese. Si perdono le pagine più vecchie delle ricerche affollate (`sort_by=date`), in gran parte agenzie.
+  Dove: `n8n/annunci/build.mjs`, `workflow.sdk.ts`, commento in `nodes/01-prepara-richieste.js`. Su n8n è cambiato solo il
+  parametro (il commento del nodo «Prepara richieste» si allinea al prossimo caricamento dei nodi).
+- **Da sapere:** il primo riempimento a mano (30 giorni) può fare fino a 88 × 3 = 264 chiamate, sopra il limite di 250 al
+  giorno: se si rilancia, dividerlo. Caso peggiore a giro: 264 chiamate (circa 3.960 al mese) se gli annunci crescono molto;
+  si guarda nel riquadro delle chiamate Adzuna.
+- **Revisione:** Code Reviewer «pronto con riserve» (mancava il registro, aggiunto qui).
+- **Indietro:** `maxRequests: 5` nel nodo «Adzuna - Annunci» (cronologia delle versioni di n8n) e in `build.mjs`.
+
 ## 24/10/2026 — Checklist per date (`docs/00b-checklist-calendario.md`) · documenti
 - **Cosa:** nuova vista della checklist ordinata per tempistiche (oggi, domani, 26–28/10, 30/10, ogni giorno, quando succede
   qualcosa, prima del lancio, dopo la beta, scadenze 2027), con gli stessi numeri e ruoli. Nella checklist principale:
@@ -635,7 +651,7 @@ Come tornare indietro, in generale:
 - **Cosa:** tre figure nuove in `JOB_FAMILIES` (`src/lib/domain/signals.ts`): `production` (operai specializzati,
   produzione), `maintenance` (manutentori, tecnici di impianto e qualità), `logistics` (magazzino); servizio nuovo
   `recruiting_industry` «Selezione di operai e tecnici» (area HR). Campo `adzuna` delle figure: i titoli chiesti ad Adzuna
-  (19 in più, quasi solo italiani: 86 ricerche ogni 2 giorni invece di 67; stima circa 1.800 chiamate al mese su 2.500),
+  (19 in più, quasi solo italiani: 86 ricerche ogni 2 giorni invece di 67; stima circa 1.800 chiamate al mese su 2.500; misurate circa 2.400 il 23/10, ridotte il 24/10 con 3 pagine per ricerca),
   mentre tutti i titoli valgono per riconoscere gli annunci. `02-normalizza-annunci.js`: i mestieri di officina (CNC, PLC,
   CAD, saldatore, tornitore) prima erano fuori tema, ora vanno alla manifattura (mai a programmatori o grafici).
   Nessuna migrazione: le figure sono testo libero in `job_ads.family` e nel target.
