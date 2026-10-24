@@ -99,7 +99,13 @@ export function NewPasswordForm() {
   const [state, action, pending] = useActionState<AuthState, FormData>(updatePassword, {});
   return (
     <form action={action} className="flex flex-col gap-4">
-      {state.error && <Alert tone="brick">{state.error}</Alert>}
+      {state.error && (
+        <Alert tone="brick">
+          {state.error}
+          {/* Dal link scaduto si torna subito alla richiesta (QA, 24/10). */}
+          {state.error.includes("Link scaduto") && <> <Link href="/recupera-password" className="underline">Richiedi un nuovo link</Link>.</>}
+        </Alert>
+      )}
       <Field label="Nuova password" htmlFor="password" hint="Almeno 10 caratteri."><Input id="password" name="password" type="password" required minLength={10} autoComplete="new-password" /></Field>
       <Button type="submit" size="lg" disabled={pending}>Salva la password</Button>
     </form>
