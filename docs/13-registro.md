@@ -85,6 +85,17 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
+## 24/10/2026 — Professionisti con titolo esclusi (migrazione 074, checklist 98) · su branch; migrazione da eseguire
+- **Perché:** query `ditte_individuali.sql` del 24/10 sulle aziende con contatto: 12.448 «altro» (88,2%: ditte individuali o
+  forma non scritta, non separabili dal nome), 1.314 società o enti (9,3%), 214 studi senza forma (1,5%), 132 professionisti
+  con titolo (0,9%). Escludere le ditte individuali non è praticabile: restano con il legittimo interesse e le garanzie. Decisione
+  dell'utente: escludere i professionisti con titolo («Avv.», «Arch.», «Dott.»…), i casi in cui il nome è quello di una persona.
+- **Cosa:** `is_professional_name` (titolo nel nome, nessuna forma societaria; «medico» e «veterinario» non contano: «Centro
+  medico», «Ambulatorio veterinario»); `is_non_target_company` la comprende (import, coda del controllo siti con l'indice
+  ricostruito, disponibilità, avvisi); le aziende già presenti si cancellano. Nel callback del motore `dropProfessionals`
+  (`src/lib/domain/engine.ts`) scarta gli stessi lead. Privacy aggiornata. Test SQL 43 e vitest.
+- **Indietro:** `is_non_target_company` dalla 035 e `reindex index companies_check_queue_idx`; togliere `dropProfessionals`.
+
 ## 24/10/2026 — GDPR: testi del sito, minimizzazione, robots.txt, opposizione sui lead consegnati (checklist 98) · su branch; migrazioni 072 e 073 da eseguire, poi main
 - **Perché:** interventi dell'analisi privacy del 24/10 (documento «Avvisto – analisi privacy» su Claude), per ridurre il
   controllo dell'avvocato ai punti incerti. Decisione dell'utente: nei prossimi giorni solo GDPR e possibilità di utilizzo.

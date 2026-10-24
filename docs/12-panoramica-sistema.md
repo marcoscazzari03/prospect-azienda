@@ -268,7 +268,8 @@ Analisi fatta in proprio il 24/10 (documento «Avvisto – analisi privacy» su 
 
 - **Dati delle aziende:** solo pubblici, con fonte e data; niente persone e niente caselle gratuite. Riverifica
   o cancellazione entro 24 mesi. I dati delle società sono fuori dal GDPR (considerando 14); ditte individuali e
-  studi sono dati personali, trattati con il legittimo interesse e le garanzie della valutazione scritta (LIA).
+  studi sono dati personali, trattati con il legittimo interesse e le garanzie della valutazione scritta (LIA). I professionisti con titolo nel nome
+  («Avv.», «Arch.», «Dott.») sono esclusi (migrazione 074 e callback del motore).
 - **Minimizzazione:** degli annunci di lavoro non si salva la descrizione (dal 24/10, migrazione 072).
 - **robots.txt:** i worker del VPS (controllo siti, contatti, siti OSM, Common Crawl, `worker/robots.mjs`) non aprono
   le pagine escluse; il motore su n8n non lo legge ancora.

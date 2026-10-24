@@ -32,7 +32,7 @@ export default function PrivacyPage() {
       <p>Nome, sito, settore, città, partita IVA ed email generica (come info@) di una società non sono dati personali: il GDPR non si applica ai dati delle persone giuridiche, compresi il nome e i dati di contatto (considerando 14). Ti offriamo comunque l&apos;opposizione descritta più sotto.</p>
 
       <h3>Ditte individuali e professionisti: informativa ai sensi dell&apos;art. 14 GDPR</h3>
-      <p>Quando un&apos;impresa individuale, uno studio o un professionista è identificato dal nome di una persona, o la sua email aziendale arriva di fatto a una persona, quei dati sono personali e li trattiamo come tali.</p>
+      <p>Quando un&apos;impresa individuale, uno studio o un professionista è identificato dal nome di una persona, o la sua email aziendale arriva di fatto a una persona, quei dati sono personali e li trattiamo come tali. Non raccogliamo né consegniamo i professionisti indicati con un titolo nel nome dell&apos;attività (per esempio «Avv.», «Arch.», «Dott.»).</p>
       <ul>
         <li><strong>Dati:</strong> nome dell&apos;attività, sito, settore, città, partita IVA, email aziendale pubblicata sul sito o pagina del modulo di contatto, segnali osservati (caratteristiche tecniche del sito, annunci di lavoro), fonte e data del controllo. Non raccogliamo nomi di dipendenti, ruoli, email nominative, numeri di cellulare né caselle di posta gratuite (Gmail e simili).</li>
         <li><strong>Fonti:</strong> il sito ufficiale dell&apos;attività; OpenStreetMap; l&apos;elenco pubblico dei domini .it di Common Crawl; annunci di lavoro da Adzuna e dalle pagine «Lavora con noi» dei siti.</li>
