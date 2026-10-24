@@ -208,7 +208,7 @@ Il lavoro gira sul VPS (gratis), senza Google Maps, PagineGialle o Registro Impr
     VPS; `avvia-cc` quando il controllo siti non ha più arretrato. ~~Salvare la partita IVA~~ (23/10: migrazione 069
     pronta, anche dal controllo siti per tutte le aziende). **Tu, dopo la seconda revisione:** eseguire la migrazione 069.
 93. **Tu, con il legale** – Albi professionali (commercialisti, avvocati): si possono usare? Contengono dati di persone.
-97. **Tu – eseguire la migrazione 071** (scritta e rivista il 24/10) – Coda del controllo siti più veloce (`pending_site_checks`, oggi circa 8 s perché prepara tutte le aziende da
+97. ~~**Tu – eseguire la migrazione 071**~~ (24/10) – Coda del controllo siti più veloce (`pending_site_checks`, oggi circa 8 s perché prepara tutte le aziende da
     controllare prima del limite; al limite del database: n8n e il worker del VPS passano solo riprovando). Migrazione + revisione.
 96. **Tu, 26–28/10** – `copertura_settori.sql` e `resa_giornaliera.sql` (nuova del 23/10: aziende nuove, lead pronti al
     giorno e campi coperti) per vedere quanto si avvicina la soglia.

@@ -83,7 +83,7 @@ Come tornare indietro, in generale:
   `NEXT_PUBLIC_BRAND` (con la variabile si sovrascrivono quelli del nome vecchio: successo il 23/10, ripristinati subito).
 - **Indietro:** revert del commit. Col nome vecchio nulla cambiava (stessi colori, `ok` = `ledger`).
 
-## 24/10/2026 — Coda del controllo siti veloce (migrazione 071, checklist 97) · rivista, su main; **in attesa di migrazione** (utente)
+## 24/10/2026 — Coda del controllo siti veloce (migrazione 071, checklist 97) · in produzione dal 24/10 (eseguita dall'utente)
 - **Perché:** `pending_site_checks` (064) valutava ogni azienda da controllare contro le ricerche recenti prima di tenerne poche:
   8-9 s in produzione, oltre il tempo massimo delle richieste al database (worker del VPS in errore, n8n solo con i tentativi).
 - **Cosa:** `supabase/migrations/20261215000071_site_checks_fast.sql`. Quattro gruppi piccoli presi con gli indici: aziende da
