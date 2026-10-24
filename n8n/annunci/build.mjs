@@ -92,7 +92,8 @@ const adzuna = node({
       options: {
         // API Adzuna: massimo 25 chiamate al minuto -> una ogni 2,5 secondi (24 al minuto).
         batching: { batch: { batchSize: 1, batchInterval: 2500 } },
-        // Pagina successiva finché la pagina è piena (50), al massimo 5 pagine.
+        // Pagina successiva finché la pagina è piena (50), al massimo 3 pagine (dal 24/10, prima 5: il giro del 23/10 con
+        // la manifattura ha fatto 157 chiamate, ~2.400 al mese contro il tetto di 2.500; con 3 circa 131, ~2.000 al mese).
         // $pageCount vale 0 già alla prima richiesta: la prima è la pagina 1.
         pagination: { pagination: {
           paginationMode: 'responseContainsNextURL',
@@ -100,7 +101,7 @@ const adzuna = node({
           paginationCompleteWhen: 'other',
           completeExpression: expr('{{ !Array.isArray($response.body.results) || $response.body.results.length < 50 }}'),
           limitPagesFetched: true,
-          maxRequests: 5,
+          maxRequests: 3,
           requestInterval: 2500
         } },
         response: { response: { neverError: true } },

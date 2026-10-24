@@ -4,11 +4,13 @@
 // con «sistemista» uscivano anche i corrieri. Si saltano i titoli già coperti da uno
 // più corto («web developer» è dentro «developer»).
 // Ogni 2 giorni bastano gli annunci degli ultimi 3 (uno di sovrapposizione); il primo
-// riempimento, avviato a mano, va indietro di 30. Pagine da 50, al massimo 5 per ricerca.
+// riempimento, avviato a mano, va indietro di 30. Pagine da 50, al massimo 3 per ricerca.
 // Limiti di base dell'API Adzuna: 25 chiamate al minuto, 250 al giorno, 2.500 al mese.
 // Ogni giro fa circa 70 chiamate (67 titoli + qualche pagina in più): ogni giorno erano
 // ~2.100 al mese, troppo vicino al tetto; ogni 2 giorni ~1.100. Dal 22/10 (punto 89, manifattura) circa 25 titoli in
-// più, con annunci numerosi (più pagine): stima ~1.800 al mese, da controllare nel riquadro delle chiamate Adzuna.
+// più, con annunci numerosi (più pagine): misurate 157 chiamate a giro il 23/10 (~2.400 al mese, al tetto). Dal 24/10
+// al massimo 3 pagine per ricerca (prima 5): ~131 a giro, ~2.000 al mese. Le pagine tagliate sono le più vecchie delle
+// ricerche affollate (magazzino, produzione, commerciali), in gran parte agenzie per il lavoro scartate comunque.
 const FAMIGLIE = __FAMIGLIE__;
 
 const parole = (t) => t.split(/\s+/).filter(w => w && !['di', 'de', 'del'].includes(w));
